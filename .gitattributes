@@ -1,0 +1,2 @@
+# end-of-line normalization (https://git-scm.com/docs/gitattributes#_text)
+* text=auto

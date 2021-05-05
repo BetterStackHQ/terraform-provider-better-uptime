@@ -1,0 +1,40 @@
+---
+layout: ""
+page_title: "Provider: betteruptime"
+description: |-
+  The Better Uptime provider.
+---
+
+# betteruptime Provider
+
+The Better Uptime provider provides resources to interact with the [Better Uptime API](https://docs.betteruptime.com/api/getting-started).
+
+## Example Usage
+
+```terraform
+provider "betteruptime" {
+  # `api_token` can be omitted if BETTERUPTIME_API_TOKEN env var is set.
+  api_token = "XXXXXXXXXXXXXXXXXXXXXXXX"
+}
+
+resource "betteruptime_status_page" "this" {
+  company_name = "Example, Inc"
+  company_url  = "https://example.com"
+  timezone     = "UTC"
+  subdomain    = "example"
+}
+
+resource "betteruptime_monitor" "this" {
+  url          = "https://example.com"
+  monitor_type = "status"
+}
+
+resource "betteruptime_status_page_resource" "monitor" {
+  status_page_id = betteruptime_status_page.this.id
+  resource_id    = betteruptime_monitor.this.id
+  resource_type  = "Monitor"
+  public_name    = "example.com site"
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}
