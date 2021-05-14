@@ -1,4 +1,4 @@
-# terraform-provider-betteruptime ![build](https://github.com/Altinity/terraform-provider-betteruptime/actions/workflows/build.yml/badge.svg?branch=master) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/altinity/betteruptime)
+# terraform-provider-betteruptime ![build](https://github.com/altinity/terraform-provider-betteruptime/actions/workflows/build.yml/badge.svg?branch=master) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/altinity/betteruptime)
 
 Terraform (0.13+) provider for [Better Uptime](https://betteruptime.com/).  
 
@@ -14,7 +14,7 @@ terraform {
   required_providers {
     kubectl = {
       source = "altinity/betteruptime"
-      # https://github.com/Altinity/terraform-provider-betteruptime/blob/master/CHANGELOG.md
+      # https://github.com/altinity/terraform-provider-betteruptime/blob/master/CHANGELOG.md
       version = ">= 0.1.0"
     }
   }
