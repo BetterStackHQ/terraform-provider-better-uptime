@@ -174,6 +174,9 @@ var monitorSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		Default:     "GET",
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return strings.EqualFold(old, new)
+		},
 		// TODO: ValidateDiagFunc: validation.StringInSlice
 	},
 	"request_timeout": {
