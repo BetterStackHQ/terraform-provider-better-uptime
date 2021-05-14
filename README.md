@@ -1,4 +1,4 @@
-# terraform-provider-betteruptime ![build](https://github.com/altinity/terraform-provider-betteruptime/actions/workflows/build.yml/badge.svg?branch=master) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/altinity/betteruptime)
+# terraform-provider-betteruptime ![build](https://github.com/altinity/terraform-provider-betteruptime/actions/workflows/build.yml/badge.svg?branch=master) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/altinity/betteruptime/latest/docs)
 
 Terraform (0.13+) provider for [Better Uptime](https://betteruptime.com/).  
 
@@ -53,7 +53,7 @@ resource "betteruptime_status_page_resource" "monitor" {
 
 ## Documentation
 
-See Terraform Registry [docs](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs).
+See Terraform Registry [docs](https://registry.terraform.io/providers/altinity/betteruptime/latest/docs).
 
 ## Development
 
