@@ -100,6 +100,9 @@ install: build
 		mkdir -p "$$PLUGIN_DIR" && \
 		cp terraform-provider-betteruptime "$$PLUGIN_DIR/"
 
+uninstall:
+	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/altinity/betteruptime/0.0.0-0"
+
 debug: build
 # https://github.com/go-delve/delve/blob/master/Documentation/installation/README.md
 	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./terraform-provider-betteruptime -- --debug
