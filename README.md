@@ -1,4 +1,4 @@
-# terraform-provider-betteruptime ![build](https://github.com/altinity/terraform-provider-betteruptime/actions/workflows/build.yml/badge.svg?branch=master) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/altinity/betteruptime/latest/docs)
+# terraform-provider-betteruptime [![build](https://github.com/altinity/terraform-provider-betteruptime/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Altinity/terraform-provider-betteruptime/actions/workflows/build.yml) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/altinity/betteruptime/latest/docs)
 
 Terraform (0.13+) provider for [Better Uptime](https://betteruptime.com/).  
 
