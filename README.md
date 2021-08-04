@@ -1,10 +1,6 @@
-# terraform-provider-betteruptime [![build](https://github.com/altinity/terraform-provider-betteruptime/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Altinity/terraform-provider-betteruptime/actions/workflows/build.yml) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/altinity/betteruptime/latest/docs)
+# terraform-provider-betteruptime [![build](https://github.com/BetterStackHQ/terraform-provider-betteruptime/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BetterStackHQ/terraform-provider-betteruptime/actions/workflows/build.yml) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/BetterStackHQ/betteruptime/latest/docs)
 
-Terraform (0.13+) provider for [Better Uptime](https://betteruptime.com/).  
-
-> `terraform-provider-betteruptime` was brought to you by [Altinity.Cloud](https://altinity.cloud/) - 
-> a [ClickHouse](https://clickhouse.tech/)-as-a-Service provider.  
-> We're [hiring](https://altinity.com/careers/)! 
+Terraform (0.13+) provider for [Better Uptime](https://betteruptime.com/).
 
 ## Installation
 
@@ -13,9 +9,9 @@ terraform {
   required_version = ">= 0.13"
   required_providers {
     betteruptime = {
-      source = "altinity/betteruptime"
-      # https://github.com/altinity/terraform-provider-betteruptime/blob/master/CHANGELOG.md
-      version = ">= 0.1.0"
+      source = "BetterStackHQ/betteruptime"
+      # https://github.com/BetterStackHQ/terraform-provider-betteruptime/blob/master/CHANGELOG.md
+      version = ">= 0.2.0"
     }
   }
 }
@@ -49,24 +45,19 @@ resource "betteruptime_status_page_resource" "monitor" {
 }
 ```
 
-> See [examples/](examples/) for more. 
+> See [examples/](examples/) for more.
 
 ## Documentation
 
-See Terraform Registry [docs](https://registry.terraform.io/providers/altinity/betteruptime/latest/docs).
+See Terraform Registry [docs](https://registry.terraform.io/providers/BetterStackHQ/betteruptime/latest/docs).
 
 ## Development
 
 > PREREQUISITE: [go1.16+](https://golang.org/dl/).
 
 ```shell script
-git clone https://github.com/altinity/terraform-provider-betteruptime && \
+git clone https://github.com/BetterStackHQ/terraform-provider-betteruptime && \
   cd terraform-provider-betteruptime
 
 make help
 ```
-
-## Legal
-
-All code, unless specified otherwise, is licensed under the [Apache-2.0](LICENSE) license.  
-Copyright (c) 2021 Altinity, Inc.

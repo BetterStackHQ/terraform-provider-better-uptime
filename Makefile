@@ -38,7 +38,7 @@ help:
 	@echo "  # terraform {"
 	@echo "  #   required_providers {"
 	@echo "  #     custom = {"
-	@echo "  #       source = \"registry.terraform.io/altinity/betteruptime\""
+	@echo "  #       source = \"registry.terraform.io/BetterStackHQ/betteruptime\""
 	@echo "  #       version = \"0.0.0-0\""
 	@echo "  #     }"
 	@echo "  #   }"
@@ -96,12 +96,12 @@ build:
 	go build -gcflags "all=-N -l" -ldflags "-X main.version=0.0.0-0"
 
 install: build
-	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/altinity/betteruptime/0.0.0-0/$$(go env GOOS)_$$(go env GOARCH)" && \
+	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/betteruptime/0.0.0-0/$$(go env GOOS)_$$(go env GOARCH)" && \
 		mkdir -p "$$PLUGIN_DIR" && \
 		cp terraform-provider-betteruptime "$$PLUGIN_DIR/"
 
 uninstall:
-	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/altinity/betteruptime/0.0.0-0"
+	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/betteruptime/0.0.0-0"
 
 debug: build
 # https://github.com/go-delve/delve/blob/master/Documentation/installation/README.md
@@ -137,15 +137,15 @@ release: go-get-github-release clean gen release-build release-sign
 	test -n "$(GITHUB_TOKEN)" # $$GITHUB_TOKEN must be set
 	git tag -a v${VERSION} -m v${VERSION} && \
 	git push origin v${VERSION} && \
-	github-release release --user altinity --repo terraform-provider-betteruptime --tag "v${VERSION}" \
-		--name "v${VERSION}" --description "[CHANGELOG](https://github.com/altinity/terraform-provider-betteruptime/blob/master/CHANGELOG.md)" && \
+	github-release release --user BetterStackHQ --repo terraform-provider-betteruptime --tag "v${VERSION}" \
+		--name "v${VERSION}" --description "[CHANGELOG](https://github.com/BetterStackHQ/terraform-provider-betteruptime/blob/master/CHANGELOG.md)" && \
 	\
-	github-release upload --user altinity --repo terraform-provider-betteruptime --tag "v${VERSION}" \
+	github-release upload --user BetterStackHQ --repo terraform-provider-betteruptime --tag "v${VERSION}" \
 		--name "terraform-provider-betteruptime_${VERSION}_SHA256SUMS" --file "release/${VERSION}/terraform-provider-betteruptime_${VERSION}_SHA256SUMS" && \
-	github-release upload --user altinity --repo terraform-provider-betteruptime --tag "v${VERSION}" \
+	github-release upload --user BetterStackHQ --repo terraform-provider-betteruptime --tag "v${VERSION}" \
 		--name "terraform-provider-betteruptime_${VERSION}_SHA256SUMS.sig" --file "release/${VERSION}/terraform-provider-betteruptime_${VERSION}_SHA256SUMS.sig" && \
 	\
 	for qualifier in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 windows_amd64; do \
-		github-release upload --user altinity --repo terraform-provider-betteruptime --tag "v${VERSION}" \
+		github-release upload --user BetterStackHQ --repo terraform-provider-betteruptime --tag "v${VERSION}" \
 			--name "terraform-provider-betteruptime_${VERSION}_$$qualifier.zip" --file "release/${VERSION}/terraform-provider-betteruptime_${VERSION}_$$qualifier.zip"; \
 	done
