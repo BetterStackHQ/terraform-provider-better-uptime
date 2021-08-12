@@ -3,8 +3,8 @@ This directory contains a sample Terraform configuration for a status page with 
 ## Usage
 
 ```shell script
-git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
-  cd terraform-provider-better-uptime/examples/basic
+git clone https://github.com/BetterStackHQ/terraform-provider-betteruptime && \
+  cd terraform-provider-betteruptime/examples/basic
 
 echo '# See variables.tf for more.
 betteruptime_api_token             = "XXXXXXXXXXXXXXXXXXXXXXXX"

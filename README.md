@@ -1,4 +1,4 @@
-# terraform-provider-better-uptime [![build](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/build.yml) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs)
+# terraform-provider-betteruptime [![build](https://github.com/BetterStackHQ/terraform-provider-betteruptime/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BetterStackHQ/terraform-provider-betteruptime/actions/workflows/build.yml) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/BetterStackHQ/betteruptime/latest/docs)
 
 Terraform (0.13+) provider for [Better Uptime](https://betteruptime.com/).
 
@@ -9,8 +9,8 @@ terraform {
   required_version = ">= 0.13"
   required_providers {
     betteruptime = {
-      source = "BetterStackHQ/better-uptime"
-      # https://github.com/BetterStackHQ/terraform-provider-better-uptime/blob/master/CHANGELOG.md
+      source = "BetterStackHQ/betteruptime"
+      # https://github.com/BetterStackHQ/terraform-provider-betteruptime/blob/master/CHANGELOG.md
       version = ">= 0.2.0"
     }
   }
@@ -49,15 +49,15 @@ resource "betteruptime_status_page_resource" "monitor" {
 
 ## Documentation
 
-See Terraform Registry [docs](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs).
+See Terraform Registry [docs](https://registry.terraform.io/providers/BetterStackHQ/betteruptime/latest/docs).
 
 ## Development
 
 > PREREQUISITE: [go1.16+](https://golang.org/dl/).
 
 ```shell script
-git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
-  cd terraform-provider-better-uptime
+git clone https://github.com/BetterStackHQ/terraform-provider-betteruptime && \
+  cd terraform-provider-betteruptime
 
 make help
 ```

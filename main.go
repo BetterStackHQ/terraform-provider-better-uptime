@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/BetterStackHQ/terraform-provider-better-uptime/internal/provider"
+	"github.com/BetterStackHQ/terraform-provider-betteruptime/internal/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
@@ -48,7 +48,7 @@ func main() {
 	}}
 
 	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/BetterStackHQ/better-uptime", opts)
+		err := plugin.Debug(context.Background(), "registry.terraform.io/BetterStackHQ/betteruptime", opts)
 		if err != nil {
 			log.Fatal(err.Error())
 		}

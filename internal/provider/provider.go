@@ -59,7 +59,7 @@ func New(opts ...Option) *schema.Provider {
 		ConfigureContextFunc: func(ctx context.Context, r *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			var userAgent string
 			if spec.version != "" {
-				userAgent = "terraform-provider-better-uptime/" + spec.version
+				userAgent = "terraform-provider-betteruptime/" + spec.version
 			}
 			c, err := newClient(spec.url, r.Get("api_token").(string),
 				withHTTPClient(&http.Client{

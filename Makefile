@@ -33,24 +33,24 @@ help:
 	@echo "  # Run in \"Debug\" mode (connect debugger to port 2345)."
 	@echo "  make debug"
 	@echo
-	@echo "  # Install terraform-provider-better-uptime locally."
+	@echo "  # Install terraform-provider-betteruptime locally."
 	@echo "  #"
 	@echo "  # terraform {"
 	@echo "  #   required_providers {"
 	@echo "  #     custom = {"
-	@echo "  #       source = \"registry.terraform.io/BetterStackHQ/better-uptime\""
+	@echo "  #       source = \"registry.terraform.io/BetterStackHQ/betteruptime\""
 	@echo "  #       version = \"0.0.0-0\""
 	@echo "  #     }"
 	@echo "  #   }"
 	@echo "  # }"
 	@echo "  make install"
 	@echo
-	@echo "  # Upload terraform-provider-better-uptime to GitHub."
+	@echo "  # Upload terraform-provider-betteruptime to GitHub."
 	@echo "  make VERSION=0.0.0-0 release"
 	@echo
 
 clean:
-	rm -f cover.out coverage.html terraform-provider-better-uptime
+	rm -f cover.out coverage.html terraform-provider-betteruptime
 	rm -rf release/
 
 lint-init:
@@ -96,13 +96,13 @@ build:
 	go build -gcflags "all=-N -l" -ldflags "-X main.version=0.0.0-0"
 
 install: build
-	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.0.0-0/$$(go env GOOS)_$$(go env GOARCH)" && \
+	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/betteruptime/0.0.0-0/$$(go env GOOS)_$$(go env GOARCH)" && \
 		mkdir -p "$$PLUGIN_DIR" && \
-		cp terraform-provider-better-uptime "$$PLUGIN_DIR/"
+		cp terraform-provider-betteruptime "$$PLUGIN_DIR/"
 
 uninstall:
-	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.0.0-0"
+	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/betteruptime/0.0.0-0"
 
 debug: build
 # https://github.com/go-delve/delve/blob/master/Documentation/installation/README.md
-	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./terraform-provider-better-uptime -- --debug
+	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./terraform-provider-betteruptime -- --debug
