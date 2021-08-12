@@ -2,8 +2,8 @@ terraform {
   required_version = ">= 0.13"
   required_providers {
     betteruptime = {
-      source = "BetterStackHQ/betteruptime"
-      # https://github.com/BetterStackHQ/terraform-provider-betteruptime/blob/master/CHANGELOG.md
+      source = "BetterStackHQ/better-uptime"
+      # https://github.com/BetterStackHQ/terraform-provider-better-uptime/blob/master/CHANGELOG.md
       version = ">= 0.2.0"
     }
   }
