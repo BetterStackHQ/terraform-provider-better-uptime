@@ -7,15 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [0.2.0] - 2021-08-04
+- Initial release (migrated from https://github.com/BetterStackHQ/deprecated-terraform-provider-betteruptime)
 
-## [0.1.1] - 2021-05-14
-
-### Fixed
-- `betteruptime_monitor.http_method` to be case-insensitive.
-
-## [0.1.0] - 2021-05-13
-
-[Unreleased]: https://github.com/BetterStackHQ/betteruptime/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/BetterStackHQ/betteruptime/compare/v0.1.1...v0.2.0
-[0.1.1]: https://github.com/BetterStackHQ/betteruptime/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/BetterStackHQ/betteruptime/releases/tag/v0.1.0
+[Unreleased]: https://github.com/BetterStackHQ/terraform-provider-betteruptime/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/BetterStackHQ/terraform-provider-betteruptime/releases/tag/v0.2.0
