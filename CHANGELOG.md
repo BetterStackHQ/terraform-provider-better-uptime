@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.0] - 2021-08-04
+## [0.2.0] - 2021-08-12
 - Initial release (migrated from https://github.com/BetterStackHQ/deprecated-terraform-provider-betteruptime)
 
 [Unreleased]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.2.0...HEAD
