@@ -1,6 +1,6 @@
 /cover.out
 /coverage.html
-/terraform-provider-betteruptime
+/terraform-provider-better-uptime
 /release/
 terraform.tfstate
 terraform.tfstate.backup
