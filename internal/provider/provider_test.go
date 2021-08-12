@@ -26,7 +26,7 @@ func TestProviderInit(t *testing.T) {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
 		}
 
-		exptectedUA := "terraform-provider-betteruptime/0.0.0-0"
+		exptectedUA := "terraform-provider-better-uptime/0.0.0-0"
 		if r.Header.Get("User-Agent") != exptectedUA {
 			t.Fatalf("User-Agent: got %q, want %q", r.Header.Get("User-Agent"), exptectedUA)
 		}

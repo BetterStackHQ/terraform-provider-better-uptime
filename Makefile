@@ -33,24 +33,24 @@ help:
 	@echo "  # Run in \"Debug\" mode (connect debugger to port 2345)."
 	@echo "  make debug"
 	@echo
-	@echo "  # Install terraform-provider-betteruptime locally."
+	@echo "  # Install terraform-provider-better-uptime locally."
 	@echo "  #"
 	@echo "  # terraform {"
 	@echo "  #   required_providers {"
 	@echo "  #     custom = {"
-	@echo "  #       source = \"registry.terraform.io/BetterStackHQ/betteruptime\""
+	@echo "  #       source = \"registry.terraform.io/BetterStackHQ/better-uptime\""
 	@echo "  #       version = \"0.0.0-0\""
 	@echo "  #     }"
 	@echo "  #   }"
 	@echo "  # }"
 	@echo "  make install"
 	@echo
-	@echo "  # Upload terraform-provider-betteruptime to GitHub."
+	@echo "  # Upload terraform-provider-better-uptime to GitHub."
 	@echo "  make VERSION=0.0.0-0 release"
 	@echo
 
 clean:
-	rm -f cover.out coverage.html terraform-provider-betteruptime
+	rm -f cover.out coverage.html terraform-provider-better-uptime
 	rm -rf release/
 
 lint-init:
@@ -96,16 +96,16 @@ build:
 	go build -gcflags "all=-N -l" -ldflags "-X main.version=0.0.0-0"
 
 install: build
-	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/betteruptime/0.0.0-0/$$(go env GOOS)_$$(go env GOARCH)" && \
+	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.0.0-0/$$(go env GOOS)_$$(go env GOARCH)" && \
 		mkdir -p "$$PLUGIN_DIR" && \
-		cp terraform-provider-betteruptime "$$PLUGIN_DIR/"
+		cp terraform-provider-better-uptime "$$PLUGIN_DIR/"
 
 uninstall:
-	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/betteruptime/0.0.0-0"
+	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.0.0-0"
 
 debug: build
 # https://github.com/go-delve/delve/blob/master/Documentation/installation/README.md
-	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./terraform-provider-betteruptime -- --debug
+	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./terraform-provider-better-uptime -- --debug
 
 go-get-gox:
 	@test -n "$$(which gox)" || (GO111MODULE=off go get github.com/mitchellh/gox)
@@ -115,19 +115,19 @@ release-build: go-get-gox
 	env CGO_ENABLED=0 gox -verbose \
 		-ldflags "-X main.version=${VERSION}" \
 		-osarch="linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64" \
-		-output="release/${VERSION}/{{.OS}}_{{.Arch}}/terraform-provider-betteruptime_v${VERSION}" \
+		-output="release/${VERSION}/{{.OS}}_{{.Arch}}/terraform-provider-better-uptime_v${VERSION}" \
 		.
 	( \
 		cd release/${VERSION} && \
-		for q in $$(ls -d */ | cut -d/ -f1); do (cd $$q; zip "../terraform-provider-betteruptime_${VERSION}_$$q.zip" *); done && \
-		shasum -a 256 *.zip > terraform-provider-betteruptime_${VERSION}_SHA256SUMS \
+		for q in $$(ls -d */ | cut -d/ -f1); do (cd $$q; zip "../terraform-provider-better-uptime_${VERSION}_$$q.zip" *); done && \
+		shasum -a 256 *.zip > terraform-provider-better-uptime_${VERSION}_SHA256SUMS \
 	)
 
 release-sign:
 	test -n "$(VERSION)" # $$VERSION must be set
 	( \
 		cd release/${VERSION} && \
-		gpg --detach-sign terraform-provider-betteruptime_${VERSION}_SHA256SUMS \
+		gpg --detach-sign terraform-provider-better-uptime_${VERSION}_SHA256SUMS \
 	)
 
 go-get-github-release:
@@ -137,15 +137,15 @@ release: go-get-github-release clean gen release-build release-sign
 	test -n "$(GITHUB_TOKEN)" # $$GITHUB_TOKEN must be set
 	git tag -a v${VERSION} -m v${VERSION} && \
 	git push origin v${VERSION} && \
-	github-release release --user BetterStackHQ --repo terraform-provider-betteruptime --tag "v${VERSION}" \
-		--name "v${VERSION}" --description "[CHANGELOG](https://github.com/BetterStackHQ/terraform-provider-betteruptime/blob/master/CHANGELOG.md)" && \
+	github-release release --user BetterStackHQ --repo terraform-provider-better-uptime --tag "v${VERSION}" \
+		--name "v${VERSION}" --description "[CHANGELOG](https://github.com/BetterStackHQ/terraform-provider-better-uptime/blob/master/CHANGELOG.md)" && \
 	\
-	github-release upload --user BetterStackHQ --repo terraform-provider-betteruptime --tag "v${VERSION}" \
-		--name "terraform-provider-betteruptime_${VERSION}_SHA256SUMS" --file "release/${VERSION}/terraform-provider-betteruptime_${VERSION}_SHA256SUMS" && \
-	github-release upload --user BetterStackHQ --repo terraform-provider-betteruptime --tag "v${VERSION}" \
-		--name "terraform-provider-betteruptime_${VERSION}_SHA256SUMS.sig" --file "release/${VERSION}/terraform-provider-betteruptime_${VERSION}_SHA256SUMS.sig" && \
+	github-release upload --user BetterStackHQ --repo terraform-provider-better-uptime --tag "v${VERSION}" \
+		--name "terraform-provider-better-uptime_${VERSION}_SHA256SUMS" --file "release/${VERSION}/terraform-provider-better-uptime_${VERSION}_SHA256SUMS" && \
+	github-release upload --user BetterStackHQ --repo terraform-provider-better-uptime --tag "v${VERSION}" \
+		--name "terraform-provider-better-uptime_${VERSION}_SHA256SUMS.sig" --file "release/${VERSION}/terraform-provider-better-uptime_${VERSION}_SHA256SUMS.sig" && \
 	\
 	for qualifier in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 windows_amd64; do \
-		github-release upload --user BetterStackHQ --repo terraform-provider-betteruptime --tag "v${VERSION}" \
-			--name "terraform-provider-betteruptime_${VERSION}_$$qualifier.zip" --file "release/${VERSION}/terraform-provider-betteruptime_${VERSION}_$$qualifier.zip"; \
+		github-release upload --user BetterStackHQ --repo terraform-provider-better-uptime --tag "v${VERSION}" \
+			--name "terraform-provider-better-uptime_${VERSION}_$$qualifier.zip" --file "release/${VERSION}/terraform-provider-better-uptime_${VERSION}_$$qualifier.zip"; \
 	done

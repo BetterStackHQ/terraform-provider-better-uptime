@@ -1,11 +1,11 @@
 ---
 layout: ""
-page_title: "Provider: betteruptime"
+page_title: "Provider: better-uptime
 description: |-
   The Better Uptime provider.
 ---
 
-# betteruptime Provider
+# better-uptime Provider
 
 The Better Uptime provider provides resources to interact with the [Better Uptime API](https://docs.betteruptime.com/api/getting-started).
 

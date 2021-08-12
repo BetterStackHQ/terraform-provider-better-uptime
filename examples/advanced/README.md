@@ -5,8 +5,8 @@ groups.
 ## Usage
 
 ```shell script
-git clone https://github.com/BetterStackHQ/terraform-provider-betteruptime && \
-  cd terraform-provider-betteruptime/examples/basic
+git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
+  cd terraform-provider-better-uptime/examples/basic
 
 echo '# See variables.tf for more.
 betteruptime_api_token             = "XXXXXXXXXXXXXXXXXXXXXXXX"
