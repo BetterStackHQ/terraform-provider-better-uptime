@@ -1,9 +1,6 @@
 package provider
 
 import (
-	"context"
-	"fmt"
-	"net/url"
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
