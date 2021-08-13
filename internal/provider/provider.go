@@ -47,6 +47,7 @@ func New(opts ...Option) *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"betteruptime_monitor": newMonitorDataSource(),
+			"betteruptime_policy":  newPolicyDataSource(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"betteruptime_heartbeat":            newHeartbeatResource(),
