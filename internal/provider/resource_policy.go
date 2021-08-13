@@ -17,13 +17,6 @@ type policy struct {
 	IncidentToken *string   `json:"incident_token,omitempty"`
 }
 
-type policyHTTPResponse struct {
-	Data struct {
-		ID         string  `json:"id"`
-		Attributes policy `json:"attributes"`
-	} `json:"data"`
-}
-
 var policySchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Policy.",
@@ -66,17 +59,6 @@ func policyRef(in *policy) []struct {
 		{k: "repeat_delay", v: &in.RepeatDelay},
 		{k: "incident_token", v: &in.IncidentToken},
 	}
-}
-
-func policyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var out policyHTTPResponse
-	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/policies/%s", url.PathEscape(d.Id())), &out); err != nil {
-		return err
-	} else if !ok {
-		d.SetId("") // Force "create" on 404.
-		return nil
-	}
-	return policyCopyAttrs(d, &out.Data.Attributes)
 }
 
 func policyCopyAttrs(d *schema.ResourceData, in *policy) diag.Diagnostics {
