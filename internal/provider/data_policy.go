@@ -39,10 +39,10 @@ func newPolicyDataSource() *schema.Resource {
 }
 
 type policy struct {
-	Name          *string   `json:"name,omitempty"`
-	RepeatCount   *int      `json:"repeat_count,omitempty"`
-	RepeatDelay   *int      `json:"repeat_delay,omitempty"`
-	IncidentToken *string   `json:"incident_token,omitempty"`
+	Name          *string `json:"name,omitempty"`
+	RepeatCount   *int    `json:"repeat_count,omitempty"`
+	RepeatDelay   *int    `json:"repeat_delay,omitempty"`
+	IncidentToken *string `json:"incident_token,omitempty"`
 }
 
 var policySchema = map[string]*schema.Schema{
@@ -58,8 +58,8 @@ var policySchema = map[string]*schema.Schema{
 	},
 	"repeat_count": {
 		Description: "", // TODO
-		Type:     schema.TypeInt,
-		Optional: true,
+		Type:        schema.TypeInt,
+		Optional:    true,
 	},
 	"repeat_delay": {
 		Description: "", // TODO
@@ -101,7 +101,7 @@ func policyCopyAttrs(d *schema.ResourceData, in *policy) diag.Diagnostics {
 
 type policyPageHTTPResponse struct {
 	Data []struct {
-		ID         string  `json:"id"`
+		ID         string `json:"id"`
 		Attributes policy `json:"attributes"`
 	} `json:"data"`
 	Pagination struct {
