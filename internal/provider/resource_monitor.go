@@ -89,7 +89,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"expected_status_codes": {
-		Description: "Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.",
+		Description: "Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.",
 		Type:        schema.TypeList,
 		Elem: &schema.Schema{
 			Type: schema.TypeInt,
