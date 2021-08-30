@@ -32,6 +32,14 @@ func load(d *schema.ResourceData, key string, receiver interface{}) {
 			}
 			*x = &t
 		}
+	case **[]int:
+		if v, ok := d.GetOkExists(key); ok {
+			var t []int
+			for _, v := range v.([]interface{}) {
+				t = append(t, v.(int))
+			}
+			*x = &t
+		}
 	default:
 		panic(fmt.Errorf("unexpected type %T", receiver))
 	}

@@ -13,7 +13,7 @@ import (
 )
 
 // TODO: change to map<name, description> and then use to gen monitor_type description
-var monitorTypes = []string{"status", "keyword", "keyword_absence", "ping", "tcp", "udp", "smtp", "pop", "imap"}
+var monitorTypes = []string{"status", "expected_status_code", "keyword", "keyword_absence", "ping", "tcp", "udp", "smtp", "pop", "imap"}
 var monitorSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Monitor.",
@@ -41,6 +41,8 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: strings.ReplaceAll(`Valid values:
 
     **status** We will check your website for 2XX HTTP status code.
+
+	**expected_status_code** We will check if your website returned one of the values in expected_status_codes.
 
     **keyword** We will check if your website contains the required_keyword.
 
@@ -85,6 +87,14 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.",
 		Type:        schema.TypeString,
 		Optional:    true,
+	},
+	"expected_status_codes": {
+		Description: "Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.",
+		Type:        schema.TypeList,
+		Elem: &schema.Schema{
+			Type: schema.TypeInt,
+		},
+		Optional: true,
 	},
 	"call": {
 		Description: "Should we call the on-call person?",
@@ -231,32 +241,33 @@ func newMonitorResource() *schema.Resource {
 }
 
 type monitor struct {
-	SSLExpiration      *int      `json:"ssl_expiration,omitempty"`
-	PolicyID           *string   `json:"policy_id,omitempty"`
-	URL                *string   `json:"url,omitempty"`
-	MonitorType        *string   `json:"monitor_type,omitempty"`
-	RequiredKeyword    *string   `json:"required_keyword,omitempty"`
-	Call               *bool     `json:"call,omitempty"`
-	SMS                *bool     `json:"sms,omitempty"`
-	Email              *bool     `json:"email,omitempty"`
-	Push               *bool     `json:"push,omitempty"`
-	TeamWait           *int      `json:"team_wait,omitempty"`
-	Paused             *bool     `json:"paused,omitempty"`
-	Port               *string   `json:"port,omitempty"`
-	Regions            *[]string `json:"regions,omitempty"`
-	MonitorGroupID     *int      `json:"monitor_group_id,omitempty"`
-	PronounceableName  *string   `json:"pronounceable_name,omitempty"`
-	RecoveryPeriod     *int      `json:"recovery_period,omitempty"`
-	VerifySSL          *bool     `json:"verify_ssl,omitempty"`
-	CheckFrequency     *int      `json:"check_frequency,omitempty"`
-	ConfirmationPeriod *int      `json:"confirmation_period,omitempty"`
-	HTTPMethod         *string   `json:"http_method,omitempty"`
-	RequestTimeout     *int      `json:"request_timeout,omitempty"`
-	RequestBody        *string   `json:"request_body,omitempty"`
-	AuthUsername       *string   `json:"auth_username,omitempty"`
-	AuthPassword       *string   `json:"auth_password,omitempty"`
-	MaintenanceFrom    *string   `json:"maintenance_from,omitempty"`
-	MaintenanceTo      *string   `json:"maintenance_to,omitempty"`
+	SSLExpiration       *int      `json:"ssl_expiration,omitempty"`
+	PolicyID            *string   `json:"policy_id,omitempty"`
+	URL                 *string   `json:"url,omitempty"`
+	MonitorType         *string   `json:"monitor_type,omitempty"`
+	RequiredKeyword     *string   `json:"required_keyword,omitempty"`
+	ExpectedStatusCodes *[]int    `json:"expected_status_codes,omitempty"`
+	Call                *bool     `json:"call,omitempty"`
+	SMS                 *bool     `json:"sms,omitempty"`
+	Email               *bool     `json:"email,omitempty"`
+	Push                *bool     `json:"push,omitempty"`
+	TeamWait            *int      `json:"team_wait,omitempty"`
+	Paused              *bool     `json:"paused,omitempty"`
+	Port                *string   `json:"port,omitempty"`
+	Regions             *[]string `json:"regions,omitempty"`
+	MonitorGroupID      *int      `json:"monitor_group_id,omitempty"`
+	PronounceableName   *string   `json:"pronounceable_name,omitempty"`
+	RecoveryPeriod      *int      `json:"recovery_period,omitempty"`
+	VerifySSL           *bool     `json:"verify_ssl,omitempty"`
+	CheckFrequency      *int      `json:"check_frequency,omitempty"`
+	ConfirmationPeriod  *int      `json:"confirmation_period,omitempty"`
+	HTTPMethod          *string   `json:"http_method,omitempty"`
+	RequestTimeout      *int      `json:"request_timeout,omitempty"`
+	RequestBody         *string   `json:"request_body,omitempty"`
+	AuthUsername        *string   `json:"auth_username,omitempty"`
+	AuthPassword        *string   `json:"auth_password,omitempty"`
+	MaintenanceFrom     *string   `json:"maintenance_from,omitempty"`
+	MaintenanceTo       *string   `json:"maintenance_to,omitempty"`
 }
 
 type monitorHTTPResponse struct {
@@ -280,6 +291,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "url", v: &in.URL},
 		{k: "monitor_type", v: &in.MonitorType},
 		{k: "required_keyword", v: &in.RequiredKeyword},
+		{k: "expected_status_codes", v: &in.ExpectedStatusCodes},
 		{k: "call", v: &in.Call},
 		{k: "sms", v: &in.SMS},
 		{k: "email", v: &in.Email},
