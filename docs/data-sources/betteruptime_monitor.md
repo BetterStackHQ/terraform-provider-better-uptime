@@ -27,6 +27,7 @@ Monitor lookup.
 - **check_frequency** (Number) How often should we check your website? In seconds.
 - **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident?
 - **email** (Boolean) Should we send an email to the on-call person?
+- **expected_status_codes** (List of Number) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
 - **http_method** (String) HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH
 - **id** (String) The ID of this Monitor.
 - **maintenance_from** (String) Start of the maintenance window each day. We won't check your website during this window. In UTC timezone. Example: "01:00:00"
@@ -35,6 +36,8 @@ Monitor lookup.
 - **monitor_type** (String) Valid values:
 
     `status` We will check your website for 2XX HTTP status code.
+
+	`expected_status_code` We will check if your website returned one of the values in expected_status_codes.
 
     `keyword` We will check if your website contains the required_keyword.
 
