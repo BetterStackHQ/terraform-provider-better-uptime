@@ -91,7 +91,7 @@ func newStatusPageResourceResource() *schema.Resource {
 }
 
 type statusPageResource struct {
-	StatusPageSectionID *int    `json:"status_page_section_id,omitempty"`
+	StatusPageSectionID *string `json:"status_page_section_id,omitempty"`
 	ResourceID          *int    `json:"resource_id,omitempty"`
 	ResourceType        *string `json:"resource_type,omitempty"`
 	PublicName          *string `json:"public_name,omitempty"`
