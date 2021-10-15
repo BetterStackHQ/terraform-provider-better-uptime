@@ -11,6 +11,18 @@ resource "betteruptime_status_page" "this" {
   subscribable = true
 }
 
+resource "betteruptime_status_page_section" "monitors" {
+  status_page_id = betteruptime_status_page.this.id
+  name           = "Our monitors"
+  position       = 0
+}
+
+resource "betteruptime_status_page_section" "heartbeats" {
+  status_page_id = betteruptime_status_page.this.id
+  name           = "Our heartbeats"
+  position       = 1
+}
+
 resource "betteruptime_monitor_group" "this" {
   name       = "example"
   sort_index = 0
@@ -23,10 +35,11 @@ resource "betteruptime_monitor" "this" {
 }
 
 resource "betteruptime_status_page_resource" "monitor" {
-  status_page_id = betteruptime_status_page.this.id
-  resource_id    = betteruptime_monitor.this.id
-  resource_type  = "Monitor"
-  public_name    = "example.com site"
+  status_page_id         = betteruptime_status_page.this.id
+  status_page_section_id = betteruptime_status_page_section.monitors.id
+  resource_id            = betteruptime_monitor.this.id
+  resource_type          = "Monitor"
+  public_name            = "example.com site"
 }
 
 resource "betteruptime_heartbeat_group" "this" {
@@ -42,8 +55,9 @@ resource "betteruptime_heartbeat" "this" {
 }
 
 resource "betteruptime_status_page_resource" "heartbeat" {
-  status_page_id = betteruptime_status_page.this.id
-  resource_id    = betteruptime_heartbeat.this.id
-  resource_type  = "Heartbeat"
-  public_name    = "example.com site (heartbeat)"
+  status_page_id         = betteruptime_status_page.this.id
+  status_page_section_id = betteruptime_status_page_section.heartbeats.id
+  resource_id            = betteruptime_heartbeat.this.id
+  resource_type          = "Heartbeat"
+  public_name            = "example.com site (heartbeat)"
 }
