@@ -1,12 +1,12 @@
 This directory contains a sample Terraform configuration for a status page with
 a monitor and a heartbeat. The monitor and the heartbeat are placed into dedicated
-groups.
+groups and two different status page sections.
 
 ## Usage
 
 ```shell script
 git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
-  cd terraform-provider-better-uptime/examples/basic
+  cd terraform-provider-better-uptime/examples/advanced
 
 echo '# See variables.tf for more.
 betteruptime_api_token             = "XXXXXXXXXXXXXXXXXXXXXXXX"

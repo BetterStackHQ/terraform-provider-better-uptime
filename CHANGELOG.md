@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2021-10-15
+- Added Status Page Section resource
+
 ## [0.2.9] - 2021-08-30
 - Added support for the `expected_status_code` monitor type
 
@@ -18,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.4] - 2021-08-12
 - Initial release (migrated from https://github.com/BetterStackHQ/deprecated-terraform-provider-betteruptime)
 
-[Unreleased]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.2.9...HEAD
+[Unreleased]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.0...v0.2.9
 [0.2.9]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.2.6...v0.2.7
