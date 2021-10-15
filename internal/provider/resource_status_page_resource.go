@@ -116,7 +116,7 @@ func statusPageResourceRef(in *statusPageResource) []struct {
 		k string
 		v interface{}
 	}{
-		{k: "status_page_section_id": v: &in.StatusPageSectionID},
+		{k: "status_page_section_id", v: &in.StatusPageSectionID},
 		{k: "resource_id", v: &in.ResourceID},
 		{k: "resource_type", v: &in.ResourceType},
 		{k: "public_name", v: &in.PublicName},
