@@ -44,3 +44,8 @@ func load(d *schema.ResourceData, key string, receiver interface{}) {
 		panic(fmt.Errorf("unexpected type %T", receiver))
 	}
 }
+
+func truePtr() *bool {
+	b := true
+	return &b
+}
