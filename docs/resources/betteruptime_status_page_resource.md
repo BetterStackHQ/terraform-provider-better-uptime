@@ -25,7 +25,6 @@ https://docs.betteruptime.com/api/status-page-resources-api
 ### Optional
 
 - **explanation** (String) A detailed text displayed as a help icon.
-- **fixed_position** (Boolean) (Internal) Treat position as a fixed index. This turns off the default resource re-ordering, leaving the position to be specified by the API user.
 - **history** (Boolean) Do you want to show the 90-day incident history for this item?
 - **position** (Number) The position of this resource on your status page, indexed from zero. If you don't specify a position, we add the resource to the end of the status page. When you specify a position of an existing resource, we add the resource to this position and shift resources below to accommodate.
 - **status_page_section_id** (Number) The ID of the Status Page Section. If you don't specify a status_page_section_id, we add the resource to the first section. If there are no sections in the status page yet, one will be automatically created for you.

@@ -89,7 +89,6 @@ func TestResourceStatusPageSection(t *testing.T) {
 				ImportState:             true,
 				ImportStateId:           "0/1",
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"fixed_position"},
 				PreConfig: func() {
 					t.Log("step 4")
 				},

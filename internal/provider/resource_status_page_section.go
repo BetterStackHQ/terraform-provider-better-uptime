@@ -37,12 +37,6 @@ var statusPageSectionSchema = map[string]*schema.Schema{
 			return !d.HasChange(k)
 		},
 	},
-	"fixed_position": {
-		Description: "(Internal) Treat position as a fixed index. This turns off the default resource re-ordering, leaving the position to be specified by the API user.",
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     true,
-	},
 }
 
 func newStatusPageSectionResource() *schema.Resource {
@@ -102,7 +96,7 @@ func statusPageSectionCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	statusPageID := d.Get("status_page_id").(string)
 	var out statusPageSectionHTTPResponse
-	if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/sections", url.PathEscape(statusPageID)), &in, &out); err != nil {
+	if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/sections?fixed_position=true", url.PathEscape(statusPageID)), &in, &out); err != nil {
 		return err
 	}
 	d.SetId(out.Data.ID)
@@ -139,7 +133,7 @@ func statusPageSectionUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 	statusPageID := d.Get("status_page_id").(string)
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/sections/%s", url.PathEscape(statusPageID), url.PathEscape(d.Id())), &in)
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/sections/%s?fixed_position=true", url.PathEscape(statusPageID), url.PathEscape(d.Id())), &in)
 }
 
 func statusPageSectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

@@ -21,7 +21,6 @@ https://docs.betteruptime.com/api/status-page-sections-api
 
 ### Optional
 
-- **fixed_position** (Boolean) (Internal) Treat position as a fixed index. This turns off the default resource re-ordering, leaving the position to be specified by the API user.
 - **name** (String) The section name displayed publicly on your status page.
 - **position** (Number) The position of this section on your status page, indexed from zero. If you don't specify a position, we add the section to the end of the status page. When you specify a position of an existing section, we add the section to this position and shift sections below to accommodate.
 
