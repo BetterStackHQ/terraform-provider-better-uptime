@@ -98,6 +98,7 @@ type statusPageResource struct {
 	Explanation         *string `json:"explanation,omitempty"`
 	History             *bool   `json:"history,omitempty"`
 	Position            *int    `json:"position,omitempty"`
+	FixedPosition       *bool   `json:fixed_position,omitempty"`
 }
 
 type statusPageResourceHTTPResponse struct {
@@ -131,9 +132,10 @@ func statusPageResourceCreate(ctx context.Context, d *schema.ResourceData, meta 
 	for _, e := range statusPageResourceRef(&in) {
 		load(d, e.k, e.v)
 	}
+	in.FixedPosition = truePtr()
 	statusPageID := d.Get("status_page_id").(string)
 	var out statusPageResourceHTTPResponse
-	if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/resources?fixed_position=true", url.PathEscape(statusPageID)), &in, &out); err != nil {
+	if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/resources", url.PathEscape(statusPageID)), &in, &out); err != nil {
 		return err
 	}
 	d.SetId(out.Data.ID)
@@ -169,8 +171,9 @@ func statusPageResourceUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			load(d, e.k, e.v)
 		}
 	}
+	in.FixedPosition = truePtr()
 	statusPageID := d.Get("status_page_id").(string)
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/resources/%s?fixed_position=true", url.PathEscape(statusPageID), url.PathEscape(d.Id())), &in)
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/resources/%s", url.PathEscape(statusPageID), url.PathEscape(d.Id())), &in)
 }
 
 func statusPageResourceDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
