@@ -85,10 +85,11 @@ func TestResourceStatusPageSection(t *testing.T) {
 			},
 			// Step 4 - destroy.
 			{
-				ResourceName:      "betteruptime_status_page_section.this",
-				ImportState:       true,
-				ImportStateId:     "0/1",
-				ImportStateVerify: true,
+				ResourceName:            "betteruptime_status_page_section.this",
+				ImportState:             true,
+				ImportStateId:           "0/1",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"fixed_position"},
 				PreConfig: func() {
 					t.Log("step 4")
 				},

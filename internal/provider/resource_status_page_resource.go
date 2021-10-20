@@ -64,6 +64,12 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 			return !d.HasChange(k)
 		},
 	},
+	"fixed_position": {
+		Description: "(Internal) Treat position as a fixed index. This turns off the default resource re-ordering, leaving the position to be specified by the API user.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     true,
+	},
 }
 
 func newStatusPageResourceResource() *schema.Resource {
