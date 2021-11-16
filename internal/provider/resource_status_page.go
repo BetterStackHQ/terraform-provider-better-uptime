@@ -61,7 +61,6 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Description: "Do you want to allow users to subscribe to your status page changes?",
-		Default:     true,
 	},
 	"hide_from_search_engines": {
 		Type:        schema.TypeBool,
