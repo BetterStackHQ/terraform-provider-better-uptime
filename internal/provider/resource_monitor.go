@@ -200,6 +200,17 @@ var monitorSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
+	"request_headers": {
+		Description: "An array of request headers, consisting of name and value pairs",
+		Type:        schema.TypeList,
+		Elem: &schema.Schema{
+			Type: schema.TypeMap,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		Optional:    true,
+	},
 	"auth_username": {
 		Description: "Basic HTTP authentication username to include with the request.",
 		Type:        schema.TypeString,
@@ -264,6 +275,7 @@ type monitor struct {
 	HTTPMethod          *string   `json:"http_method,omitempty"`
 	RequestTimeout      *int      `json:"request_timeout,omitempty"`
 	RequestBody         *string   `json:"request_body,omitempty"`
+	RequestHeaders      *[]map[string]string `json:"request_headers,omitempty"`
 	AuthUsername        *string   `json:"auth_username,omitempty"`
 	AuthPassword        *string   `json:"auth_password,omitempty"`
 	MaintenanceFrom     *string   `json:"maintenance_from,omitempty"`
@@ -309,6 +321,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "http_method", v: &in.HTTPMethod},
 		{k: "request_timeout", v: &in.RequestTimeout},
 		{k: "request_body", v: &in.RequestBody},
+		{k: "request_headers", v: &in.RequestHeaders},
 		{k: "auth_username", v: &in.AuthUsername},
 		{k: "auth_password", v: &in.AuthPassword},
 		{k: "maintenance_from", v: &in.MaintenanceFrom},
@@ -354,10 +367,42 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	var in monitor
 	for _, e := range monitorRef(&in) {
 		if d.HasChange(e.k) {
-			load(d, e.k, e.v)
+			if (e.k == "request_headers") {
+				loadRequestHeaders(d, e.v.(**[]map[string]string))
+			} else {
+				load(d, e.k, e.v)
+			}
 		}
 	}
+
 	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/monitors/%s", url.PathEscape(d.Id())), &in)
+}
+
+func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]string) {
+	x := receiver
+	v, _ := d.GetOkExists("request_headers")
+	var t []map[string]string
+	for _, v := range v.([]interface{}) {
+		tempMap := make(map[string]string)
+
+		for key, value := range v.(map[string]interface{}) {
+			tempMap[key] = value.(string)
+		}
+
+		t = append(t, tempMap)
+	}
+
+	// Retrieve old requests and construct "destroy" attributes for them
+	old, _ := d.GetChange("request_headers")
+	for _, header := range old.([]interface{}) {
+		tempMap := make(map[string]string)
+		tempMap["id"] = header.(map[string]interface{})["id"].(string)
+		tempMap["_destroy"] = "true"
+
+		t = append(t, tempMap)
+	}
+
+	*x = &t
 }
 
 func monitorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
