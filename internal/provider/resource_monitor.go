@@ -332,7 +332,11 @@ func monitorRef(in *monitor) []struct {
 func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in monitor
 	for _, e := range monitorRef(&in) {
-		load(d, e.k, e.v)
+		if (e.k == "request_headers") {
+			loadRequestHeaders(d, e.v.(**[]map[string]string))
+		} else {
+			load(d, e.k, e.v)
+		}
 	}
 	var out monitorHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/monitors", &in, &out); err != nil {
