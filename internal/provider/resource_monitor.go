@@ -212,7 +212,8 @@ var monitorSchema = map[string]*schema.Schema{
 		Optional:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			// Ignore ID changes
-			if strings.Split(k, ".")[2] == "id" {
+			attribute := strings.Split(k, ".")
+			if len(attribute) > 2 && attribute[2] == "id" {
 				return true
 			} else {
 				return false
