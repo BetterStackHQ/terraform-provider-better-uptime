@@ -210,6 +210,14 @@ var monitorSchema = map[string]*schema.Schema{
 			},
 		},
 		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			// Ignore ID changes
+			if strings.Split(k, ".")[2] == "id" {
+				return true
+			} else {
+				return false
+			}
+		},
 	},
 	"auth_username": {
 		Description: "Basic HTTP authentication username to include with the request.",
@@ -275,7 +283,7 @@ type monitor struct {
 	HTTPMethod          *string   `json:"http_method,omitempty"`
 	RequestTimeout      *int      `json:"request_timeout,omitempty"`
 	RequestBody         *string   `json:"request_body,omitempty"`
-	RequestHeaders      *[]map[string]string `json:"request_headers,omitempty"`
+	RequestHeaders      *[]map[string]interface{} `json:"request_headers,omitempty"`
 	AuthUsername        *string   `json:"auth_username,omitempty"`
 	AuthPassword        *string   `json:"auth_password,omitempty"`
 	MaintenanceFrom     *string   `json:"maintenance_from,omitempty"`
@@ -333,7 +341,7 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	var in monitor
 	for _, e := range monitorRef(&in) {
 		if (e.k == "request_headers") {
-			loadRequestHeaders(d, e.v.(**[]map[string]string))
+			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -372,7 +380,7 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	for _, e := range monitorRef(&in) {
 		if d.HasChange(e.k) {
 			if (e.k == "request_headers") {
-				loadRequestHeaders(d, e.v.(**[]map[string]string))
+				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
 			} else {
 				load(d, e.k, e.v)
 			}
@@ -382,33 +390,49 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/monitors/%s", url.PathEscape(d.Id())), &in)
 }
 
-func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]string) {
+func monitorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/monitors/%s", url.PathEscape(d.Id())))
+}
+
+func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interface{}) {
 	x := receiver
-	v, _ := d.GetOkExists("request_headers")
-	var t []map[string]string
+	v := d.Get("request_headers")
+	var t []map[string]interface{}
 	for _, v := range v.([]interface{}) {
-		tempMap := make(map[string]string)
-
-		for key, value := range v.(map[string]interface{}) {
-			tempMap[key] = value.(string)
-		}
-
-		t = append(t, tempMap)
+		header := v.(map[string]interface{})
+		newHeader := map[string]interface{} { "name": header["name"], "value": header["value"] }
+		t = append(t, newHeader)
 	}
 
-	// Retrieve old requests and construct "destroy" attributes for them
+	// Retrieve old requests and construct "_destroy" attribute for the ones we no longer want
 	old, _ := d.GetChange("request_headers")
-	for _, header := range old.([]interface{}) {
-		tempMap := make(map[string]string)
-		tempMap["id"] = header.(map[string]interface{})["id"].(string)
-		tempMap["_destroy"] = "true"
+	for _, v := range old.([]interface{}) {
+		header := v.(map[string]interface{})
+		foundHeader := findRequestHeader(&t, &header)
 
-		t = append(t, tempMap)
+		var hasId bool  // Check if the found header already has an ID
+		if foundHeader == nil {
+			hasId = false
+		} else {
+			_, hasId = (*foundHeader)["id"]
+		}
+
+		if foundHeader == nil || hasId {
+			headerToDestroy := map[string]interface{} { "id": header["id"].(string), "_destroy": "true" }
+			t = append(t, headerToDestroy)
+		} else {
+			(*foundHeader)["id"] = header["id"].(string)
+		}
 	}
 
 	*x = &t
 }
 
-func monitorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/monitors/%s", url.PathEscape(d.Id())))
+func findRequestHeader(headers *[]map[string]interface{}, header *map[string]interface{}) *map[string]interface{} {
+	for _, h := range(*headers) {
+		if h["name"] == (*header)["name"] && h["value"] == (*header)["value"] {
+			return &h
+		}
+	}
+	return nil
 }
