@@ -67,6 +67,7 @@ https://docs.betteruptime.com/api/monitors-api
 - **regions** (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.
 - **request_body** (String) Request body for POST, PUT, PATCH requests.
 - **request_timeout** (Number) How long to wait before timing out the request? In seconds.
+- **request_headers** (List of Map of strings) An array of request headers to set. Each header should be an object/map with "name" and "value" attributes.
 - **required_keyword** (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **ssl_expiration** (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
