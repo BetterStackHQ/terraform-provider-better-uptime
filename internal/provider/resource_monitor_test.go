@@ -120,6 +120,108 @@ func TestResourceMonitor(t *testing.T) {
 	})
 }
 
+func TestResourceMonitorWithHeaders(t *testing.T) {
+	var data atomic.Value
+	server := createTestServer(t, &data)
+	defer server.Close()
+
+	var url = "http://example.com"
+	var monitorType = "status"
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					request_headers = [
+						{
+							name  = "X-TEST"
+							value = "test"
+						}
+					]
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "request_headers.0.id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.0.name", "X-TEST"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.0.value", "test"),
+				),
+			},
+			// Step 2 - add another request header.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					request_headers = [
+						{
+							name  = "X-TEST"
+							value = "test"
+						},
+						{
+							name  = "X-TEST-2"
+							value = "test-2"
+						}
+					]
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.0.name", "X-TEST"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.0.value", "test"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.1.name", "X-TEST-2"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.1.value", "test-2"),
+					resource.TestCheckNoResourceAttr("betteruptime_monitor.this", "request_headers.2.name"),
+				),
+			},
+			// Step 2 - remove the first header.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					request_headers = [
+						{
+							name  = "X-TEST-2"
+							value = "test-2"
+						}
+					]
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "request_headers.0.id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.0.name", "X-TEST-2"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.0.value", "test-2"),
+					resource.TestCheckNoResourceAttr("betteruptime_monitor.this", "request_headers.1.name"),
+				),
+			},
+		},
+	})
+}
+
 func TestExpectedStatusCodeMonitor(t *testing.T) {
 	var data atomic.Value
 	server := createTestServer(t, &data)
@@ -192,6 +294,9 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 				t.Fatal(err)
 			}
 			computed["pronounceable_name"] = "computed_by_betteruptime"
+			if _, ok := computed["request_headers"]; ok {
+				computed["request_headers"] = processRequestHeaders(t, computed["request_headers"].([]interface{}))
+			}
 			body, err = json.Marshal(computed)
 			if err != nil {
 				t.Fatal(err)
@@ -211,6 +316,9 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			if err = json.Unmarshal(body, &patch); err != nil {
 				t.Fatal(err)
 			}
+			if _, ok := patch["request_headers"]; ok {
+				patch["request_headers"] = processRequestHeaders(t, patch["request_headers"].([]interface{}))
+			}
 			patched, err := json.Marshal(patch)
 			if err != nil {
 				t.Fatal(err)
@@ -224,4 +332,19 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 		}
 	}))
+}
+
+func processRequestHeaders(t *testing.T, headers []interface{}) []interface{} {
+	var newHeaders []interface{}
+
+	for _, v := range headers {
+		header := v.(map[string]interface{})
+		header["id"] = "1"
+
+		if _, ok := header["_destroy"]; !ok {
+			newHeaders = append(newHeaders, header)
+		}
+	}
+
+	return newHeaders
 }

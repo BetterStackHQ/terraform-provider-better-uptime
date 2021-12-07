@@ -421,7 +421,7 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 		if foundHeader == nil || hasId {
 			headerToDestroy := map[string]interface{}{"id": header["id"].(string), "_destroy": "true"}
 			t = append(t, headerToDestroy)
-		} else {
+		} else if header["id"] != nil {
 			(*foundHeader)["id"] = header["id"].(string)
 		}
 	}
