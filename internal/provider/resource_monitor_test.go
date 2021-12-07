@@ -294,8 +294,8 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 				t.Fatal(err)
 			}
 			computed["pronounceable_name"] = "computed_by_betteruptime"
-			if _, ok := computed["request_headers"]; ok {
-				computed["request_headers"] = processRequestHeaders(t, computed["request_headers"].([]interface{}))
+			if computed["request_headers"] != nil {
+				computed["request_headers"] = processRequestHeaders(computed["request_headers"].([]interface{}))
 			}
 			body, err = json.Marshal(computed)
 			if err != nil {
@@ -316,8 +316,8 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			if err = json.Unmarshal(body, &patch); err != nil {
 				t.Fatal(err)
 			}
-			if _, ok := patch["request_headers"]; ok {
-				patch["request_headers"] = processRequestHeaders(t, patch["request_headers"].([]interface{}))
+			if patch["request_headers"] != nil {
+				patch["request_headers"] = processRequestHeaders(patch["request_headers"].([]interface{}))
 			}
 			patched, err := json.Marshal(patch)
 			if err != nil {
@@ -334,7 +334,7 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 	}))
 }
 
-func processRequestHeaders(t *testing.T, headers []interface{}) []interface{} {
+func processRequestHeaders(headers []interface{}) []interface{} {
 	var newHeaders []interface{}
 
 	for _, v := range headers {
