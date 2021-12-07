@@ -90,10 +90,10 @@ func TestResourceStatusPageResource(t *testing.T) {
 			},
 			// Step 4 - destroy.
 			{
-				ResourceName:             "betteruptime_status_page_resource.this",
-				ImportState:        	  true,
-				ImportStateId:            "0/1",
-				ImportStateVerify:        true,
+				ResourceName:      "betteruptime_status_page_resource.this",
+				ImportState:       true,
+				ImportStateId:     "0/1",
+				ImportStateVerify: true,
 				PreConfig: func() {
 					t.Log("step 4")
 				},

@@ -209,7 +209,7 @@ var monitorSchema = map[string]*schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
-		Optional:    true,
+		Optional: true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			// Ignore ID changes
 			attribute := strings.Split(k, ".")
@@ -261,34 +261,34 @@ func newMonitorResource() *schema.Resource {
 }
 
 type monitor struct {
-	SSLExpiration       *int      `json:"ssl_expiration,omitempty"`
-	PolicyID            *string   `json:"policy_id,omitempty"`
-	URL                 *string   `json:"url,omitempty"`
-	MonitorType         *string   `json:"monitor_type,omitempty"`
-	RequiredKeyword     *string   `json:"required_keyword,omitempty"`
-	ExpectedStatusCodes *[]int    `json:"expected_status_codes,omitempty"`
-	Call                *bool     `json:"call,omitempty"`
-	SMS                 *bool     `json:"sms,omitempty"`
-	Email               *bool     `json:"email,omitempty"`
-	Push                *bool     `json:"push,omitempty"`
-	TeamWait            *int      `json:"team_wait,omitempty"`
-	Paused              *bool     `json:"paused,omitempty"`
-	Port                *string   `json:"port,omitempty"`
-	Regions             *[]string `json:"regions,omitempty"`
-	MonitorGroupID      *int      `json:"monitor_group_id,omitempty"`
-	PronounceableName   *string   `json:"pronounceable_name,omitempty"`
-	RecoveryPeriod      *int      `json:"recovery_period,omitempty"`
-	VerifySSL           *bool     `json:"verify_ssl,omitempty"`
-	CheckFrequency      *int      `json:"check_frequency,omitempty"`
-	ConfirmationPeriod  *int      `json:"confirmation_period,omitempty"`
-	HTTPMethod          *string   `json:"http_method,omitempty"`
-	RequestTimeout      *int      `json:"request_timeout,omitempty"`
-	RequestBody         *string   `json:"request_body,omitempty"`
+	SSLExpiration       *int                      `json:"ssl_expiration,omitempty"`
+	PolicyID            *string                   `json:"policy_id,omitempty"`
+	URL                 *string                   `json:"url,omitempty"`
+	MonitorType         *string                   `json:"monitor_type,omitempty"`
+	RequiredKeyword     *string                   `json:"required_keyword,omitempty"`
+	ExpectedStatusCodes *[]int                    `json:"expected_status_codes,omitempty"`
+	Call                *bool                     `json:"call,omitempty"`
+	SMS                 *bool                     `json:"sms,omitempty"`
+	Email               *bool                     `json:"email,omitempty"`
+	Push                *bool                     `json:"push,omitempty"`
+	TeamWait            *int                      `json:"team_wait,omitempty"`
+	Paused              *bool                     `json:"paused,omitempty"`
+	Port                *string                   `json:"port,omitempty"`
+	Regions             *[]string                 `json:"regions,omitempty"`
+	MonitorGroupID      *int                      `json:"monitor_group_id,omitempty"`
+	PronounceableName   *string                   `json:"pronounceable_name,omitempty"`
+	RecoveryPeriod      *int                      `json:"recovery_period,omitempty"`
+	VerifySSL           *bool                     `json:"verify_ssl,omitempty"`
+	CheckFrequency      *int                      `json:"check_frequency,omitempty"`
+	ConfirmationPeriod  *int                      `json:"confirmation_period,omitempty"`
+	HTTPMethod          *string                   `json:"http_method,omitempty"`
+	RequestTimeout      *int                      `json:"request_timeout,omitempty"`
+	RequestBody         *string                   `json:"request_body,omitempty"`
 	RequestHeaders      *[]map[string]interface{} `json:"request_headers,omitempty"`
-	AuthUsername        *string   `json:"auth_username,omitempty"`
-	AuthPassword        *string   `json:"auth_password,omitempty"`
-	MaintenanceFrom     *string   `json:"maintenance_from,omitempty"`
-	MaintenanceTo       *string   `json:"maintenance_to,omitempty"`
+	AuthUsername        *string                   `json:"auth_username,omitempty"`
+	AuthPassword        *string                   `json:"auth_password,omitempty"`
+	MaintenanceFrom     *string                   `json:"maintenance_from,omitempty"`
+	MaintenanceTo       *string                   `json:"maintenance_to,omitempty"`
 }
 
 type monitorHTTPResponse struct {
@@ -341,7 +341,7 @@ func monitorRef(in *monitor) []struct {
 func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in monitor
 	for _, e := range monitorRef(&in) {
-		if (e.k == "request_headers") {
+		if e.k == "request_headers" {
 			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
 		} else {
 			load(d, e.k, e.v)
@@ -380,7 +380,7 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	var in monitor
 	for _, e := range monitorRef(&in) {
 		if d.HasChange(e.k) {
-			if (e.k == "request_headers") {
+			if e.k == "request_headers" {
 				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
 			} else {
 				load(d, e.k, e.v)
@@ -401,7 +401,7 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 	var t []map[string]interface{}
 	for _, v := range v.([]interface{}) {
 		header := v.(map[string]interface{})
-		newHeader := map[string]interface{} { "name": header["name"], "value": header["value"] }
+		newHeader := map[string]interface{}{"name": header["name"], "value": header["value"]}
 		t = append(t, newHeader)
 	}
 
@@ -411,7 +411,7 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 		header := v.(map[string]interface{})
 		foundHeader := findRequestHeader(&t, &header)
 
-		var hasId bool  // Check if the found header already has an ID
+		var hasId bool // Check if the found header already has an ID
 		if foundHeader == nil {
 			hasId = false
 		} else {
@@ -419,7 +419,7 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 		}
 
 		if foundHeader == nil || hasId {
-			headerToDestroy := map[string]interface{} { "id": header["id"].(string), "_destroy": "true" }
+			headerToDestroy := map[string]interface{}{"id": header["id"].(string), "_destroy": "true"}
 			t = append(t, headerToDestroy)
 		} else {
 			(*foundHeader)["id"] = header["id"].(string)
@@ -430,7 +430,7 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 }
 
 func findRequestHeader(headers *[]map[string]interface{}, header *map[string]interface{}) *map[string]interface{} {
-	for _, h := range(*headers) {
+	for _, h := range *headers {
 		if h["name"] == (*header)["name"] && h["value"] == (*header)["value"] {
 			return &h
 		}
