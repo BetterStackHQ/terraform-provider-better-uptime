@@ -190,7 +190,7 @@ func TestResourceMonitorWithHeaders(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.0.value", "test"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.1.name", "X-TEST-2"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.1.value", "test-2"),
-					resource.TestCheckNoResourceAttr("betteruptime_monitor.this", "request_headers.2.name"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.#", "2"),
 				),
 			},
 			// Step 2 - remove the first header.
