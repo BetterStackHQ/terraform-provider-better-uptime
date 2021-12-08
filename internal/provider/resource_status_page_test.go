@@ -89,6 +89,8 @@ func TestResourceStatusPage(t *testing.T) {
 				ResourceName:      "betteruptime_status_page.this",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Password can't be imported and must be ignored when verifying imported state
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
 	})
