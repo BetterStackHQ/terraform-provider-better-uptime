@@ -106,6 +106,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Description: "Set a password of your status page (we won't store it as plaintext, promise). Required when password_enabled: true. We will set password_enabled: false automatically when you send us an empty password.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Sensitive:   true,
 	},
 }
 
