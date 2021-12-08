@@ -10,7 +10,7 @@ import (
 )
 
 func TestResourceStatusPage(t *testing.T) {
-	server := newResourceServer(t, "/api/v2/status-pages", "1")
+	server := newResourceServer(t, "/api/v2/status-pages", "1", "password")
 	defer server.Close()
 
 	var subdomain = "example"
