@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [0.3.6] - 2021-12-08
-- Added request_headers attribute to the Monitor resource
+- Added request_headers attribute to the Monitor resource (#13)
+- Removed default subscribable=true value on the Status Page resource (#12)
 
 ## [0.3.2] - 2021-10-15
 - Added Status Page Section resource
