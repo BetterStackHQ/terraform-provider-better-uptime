@@ -35,12 +35,14 @@ func TestResourceStatusPage(t *testing.T) {
 				    company_url  = "https://example.com"
 				    timezone     = "UTC"
 				    subdomain    = "%s"
+				    password     = "secret123"
 				}
 				`, subdomain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_status_page.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "timezone", "UTC"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "password", "secret123"),
 				),
 			},
 			// Step 2 - update.
@@ -55,12 +57,14 @@ func TestResourceStatusPage(t *testing.T) {
 				    company_url  = "https://example.com"
 				    timezone     = "America/Los_Angeles"
 				    subdomain    = "%s"
+				    password     = "secret1234"
 				}
 				`, subdomain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_status_page.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "timezone", "America/Los_Angeles"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "password", "secret1234"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty.
@@ -75,6 +79,7 @@ func TestResourceStatusPage(t *testing.T) {
 				    company_url  = "https://example.com"
 				    timezone     = "America/Los_Angeles"
 				    subdomain    = "%s"
+				    password     = "secret1234"
 				}
 				`, subdomain),
 				PlanOnly: true,
