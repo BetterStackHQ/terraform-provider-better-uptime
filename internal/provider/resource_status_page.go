@@ -192,8 +192,11 @@ func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 	d.SetId(out.Data.ID)
 	// Set password from user input since it's not included in the API response
-	d.Set("password", in.Password)
-	return statusPageCopyAttrs(d, &out.Data.Attributes)
+	var derr diag.Diagnostics
+	if err := d.Set("password", in.Password); err != nil {
+		derr = append(derr, diag.FromErr(err)[0])
+	}
+	return statusPageCopyAttrs(d, &out.Data.Attributes, derr)
 }
 
 func statusPageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -204,11 +207,10 @@ func statusPageRead(ctx context.Context, d *schema.ResourceData, meta interface{
 		d.SetId("") // Force "create" on 404.
 		return nil
 	}
-	return statusPageCopyAttrs(d, &out.Data.Attributes)
+	return statusPageCopyAttrs(d, &out.Data.Attributes, nil)
 }
 
-func statusPageCopyAttrs(d *schema.ResourceData, in *statusPage) diag.Diagnostics {
-	var derr diag.Diagnostics
+func statusPageCopyAttrs(d *schema.ResourceData, in *statusPage, derr diag.Diagnostics) diag.Diagnostics {
 	for _, e := range statusPageRef(in) {
 		if e.k == "password" {
 			// Skip copying password as it's never returned from the API
