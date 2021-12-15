@@ -138,6 +138,7 @@ var monitorSchema = map[string]*schema.Schema{
 	"follow_redirects": {
 		Description: "Set to true for the monitor to follow redirects.",
 		Type:        schema.TypeBool,
+		Default:     true,
 		Optional:    true,
 	},
 	"port": {
