@@ -106,6 +106,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Description: "Set a password of your status page (we won't store it as plaintext, promise). Required when password_enabled: true. We will set password_enabled: false automatically when you send us an empty password.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Sensitive:   true,
 	},
 }
 
@@ -190,7 +191,12 @@ func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 		return err
 	}
 	d.SetId(out.Data.ID)
-	return statusPageCopyAttrs(d, &out.Data.Attributes)
+	// Set password from user input since it's not included in the API response
+	var derr diag.Diagnostics
+	if err := d.Set("password", in.Password); err != nil {
+		derr = append(derr, diag.FromErr(err)[0])
+	}
+	return statusPageCopyAttrs(d, &out.Data.Attributes, derr)
 }
 
 func statusPageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -201,12 +207,15 @@ func statusPageRead(ctx context.Context, d *schema.ResourceData, meta interface{
 		d.SetId("") // Force "create" on 404.
 		return nil
 	}
-	return statusPageCopyAttrs(d, &out.Data.Attributes)
+	return statusPageCopyAttrs(d, &out.Data.Attributes, nil)
 }
 
-func statusPageCopyAttrs(d *schema.ResourceData, in *statusPage) diag.Diagnostics {
-	var derr diag.Diagnostics
+func statusPageCopyAttrs(d *schema.ResourceData, in *statusPage, derr diag.Diagnostics) diag.Diagnostics {
 	for _, e := range statusPageRef(in) {
+		if e.k == "password" {
+			// Skip copying password as it's never returned from the API
+			continue
+		}
 		if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
