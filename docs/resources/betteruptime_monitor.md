@@ -52,8 +52,10 @@ https://docs.betteruptime.com/api/monitors-api
 - **call** (Boolean) Should we call the on-call person?
 - **check_frequency** (Number) How often should we check your website? In seconds.
 - **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident?
+- **domain_expiration** (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **email** (Boolean) Should we send an email to the on-call person?
 - **expected_status_codes** (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.
+- **follow_redirects** (Boolean) Set to true for the monitor to follow redirects.
 - **http_method** (String) HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH
 - **maintenance_from** (String) Start of the maintenance window each day. We won't check your website during this window. In UTC timezone. Example: "01:00:00"
 - **maintenance_to** (String) End of the maintenance window each day. In UTC timezone. Example: "03:00:00"
