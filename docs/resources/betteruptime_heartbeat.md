@@ -34,6 +34,7 @@ https://docs.betteruptime.com/api/heartbeats-api
 
 ### Read-Only
 
-- **id** (String) The ID of this Monitor.
+- **id** (String) The ID of this heartbeat.
+- **url** (String) The url of this heartbeat.
 
 

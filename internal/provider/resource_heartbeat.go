@@ -12,7 +12,7 @@ import (
 
 var heartbeatSchema = map[string]*schema.Schema{
 	"id": {
-		Description: "The ID of this Monitor.",
+		Description: "The ID of this heartbeat.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
@@ -20,6 +20,11 @@ var heartbeatSchema = map[string]*schema.Schema{
 		Description: "A name of the service for this heartbeat.",
 		Type:        schema.TypeString,
 		Required:    true,
+	},
+	"url": {
+		Description: "The url of this heartbeat.",
+		Type:        schema.TypeString,
+		Computed:    true,
 	},
 	"period": {
 		Description: "How often should we expect this heartbeat? In seconds. Minimum value: 30 seconds",
@@ -96,6 +101,7 @@ func newHeartbeatResource() *schema.Resource {
 
 type heartbeat struct {
 	Name             *string `json:"name,omitempty"`
+	Url              *string `json:"url,omitempty"`
 	Period           *int    `json:"period,omitempty"`
 	Grace            *int    `json:"grace,omitempty"`
 	Call             *bool   `json:"call,omitempty"`
@@ -125,6 +131,7 @@ func heartbeatRef(in *heartbeat) []struct {
 		v interface{}
 	}{
 		{k: "name", v: &in.Name},
+		{k: "url", v: &in.Url},
 		{k: "period", v: &in.Period},
 		{k: "grace", v: &in.Grace},
 		{k: "call", v: &in.Call},
