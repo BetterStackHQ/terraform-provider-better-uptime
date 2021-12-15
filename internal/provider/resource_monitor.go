@@ -27,6 +27,13 @@ var monitorSchema = map[string]*schema.Schema{
 		Optional: true,
 		// TODO: ValidateDiagFunc: validation.IntInSlice
 	},
+	"domain_expiration": {
+		Description: "How many days before the domain expires do you want to be alerted?" +
+			" Valid values are 1, 2, 3, 7, 14, 30, and 60.",
+		Type:     schema.TypeInt,
+		Optional: true,
+		// TODO: ValidateDiagFunc: validation.IntInSlice
+	},
 	"policy_id": {
 		Description: "Set the escalation policy for the monitor.",
 		Type:        schema.TypeString,
@@ -126,6 +133,12 @@ var monitorSchema = map[string]*schema.Schema{
 	"paused": {
 		Description: "Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.",
 		Type:        schema.TypeBool,
+		Optional:    true,
+	},
+	"follow_redirects": {
+		Description: "Set to true for the monitor to follow redirects.",
+		Type:        schema.TypeBool,
+		Default:     true,
 		Optional:    true,
 	},
 	"port": {
@@ -262,6 +275,7 @@ func newMonitorResource() *schema.Resource {
 
 type monitor struct {
 	SSLExpiration       *int                      `json:"ssl_expiration,omitempty"`
+	DomainExpiration    *int                      `json:"domain_expiration,omitempty"`
 	PolicyID            *string                   `json:"policy_id,omitempty"`
 	URL                 *string                   `json:"url,omitempty"`
 	MonitorType         *string                   `json:"monitor_type,omitempty"`
@@ -273,6 +287,7 @@ type monitor struct {
 	Push                *bool                     `json:"push,omitempty"`
 	TeamWait            *int                      `json:"team_wait,omitempty"`
 	Paused              *bool                     `json:"paused,omitempty"`
+	FollowRedirects     *bool                     `json:"follow_redirects,omitempty"`
 	Port                *string                   `json:"port,omitempty"`
 	Regions             *[]string                 `json:"regions,omitempty"`
 	MonitorGroupID      *int                      `json:"monitor_group_id,omitempty"`
@@ -308,6 +323,7 @@ func monitorRef(in *monitor) []struct {
 		v interface{}
 	}{
 		{k: "ssl_expiration", v: &in.SSLExpiration},
+		{k: "domain_expiration", v: &in.DomainExpiration},
 		{k: "policy_id", v: &in.PolicyID},
 		{k: "url", v: &in.URL},
 		{k: "monitor_type", v: &in.MonitorType},
@@ -319,6 +335,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "push", v: &in.Push},
 		{k: "team_wait", v: &in.TeamWait},
 		{k: "paused", v: &in.Paused},
+		{k: "follow_redirects", v: &in.FollowRedirects},
 		{k: "port", v: &in.Port},
 		{k: "regions", v: &in.Regions},
 		{k: "monitor_group_id", v: &in.MonitorGroupID},
