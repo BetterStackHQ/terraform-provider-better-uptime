@@ -67,6 +67,7 @@ Monitor lookup.
 - **recovery_period** (Number) How long the monitor must be up to automatically mark an incident as resolved after being down.
 - **regions** (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.
 - **request_body** (String) Request body for POST, PUT, PATCH requests.
+- **request_headers** (List of Map of String) An array of request headers, consisting of name and value pairs
 - **request_timeout** (Number) How long to wait before timing out the request? In seconds.
 - **required_keyword** (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
