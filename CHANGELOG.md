@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.8] - 2022-02-28
+- Add support for the `history` attribute to the Status page resource (#22)   
+
 ## [0.3.7] - 2021-12-15
 - Fix password behaviour on the Status page resource (#14)
 - Add a computed url attributed for the Heartbeat resource (#17)
@@ -30,7 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.4] - 2021-08-12
 - Initial release (migrated from https://github.com/BetterStackHQ/deprecated-terraform-provider-betteruptime)
 
-[Unreleased]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.8...HEAD
+[0.3.8]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.7...v0.3.8
 [0.3.7]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.2...v0.3.6
 [0.3.2]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.2.9...v0.3.2
