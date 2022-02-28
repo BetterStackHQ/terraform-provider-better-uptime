@@ -33,6 +33,7 @@ https://docs.betteruptime.com/api/status-pages-api
 - **custom_domain** (String) Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com`
 - **google_analytics_id** (String) Specify your own Google Analytics ID if you want to receive hits on your status page.
 - **hide_from_search_engines** (Boolean) Hide your status page from search engines.
+- **history** (Number) Number of days to display on the status page. Minimum 90 days.
 - **logo_url** (String) A direct link to your company's logo. The image should be under 20MB in size.
 - **min_incident_length** (Number) If you don't want to display short incidents on your status page, this attribute is for you.
 - **password** (String) Set a password of your status page (we won't store it as plaintext, promise). Required when password_enabled: true. We will set password_enabled: false automatically when you send us an empty password.
