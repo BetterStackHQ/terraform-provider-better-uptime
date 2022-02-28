@@ -17,6 +17,18 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
+	"history": {
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Description: "Number of days to display on the status page. Minimum 90 days.",
+		ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+			history := val.(int)
+			if history < 90 {
+				errs = append(errs, fmt.Errorf("%q must be at least 90, got: %d", key, history))
+			}
+			return
+		},
+	},
 	"company_name": {
 		Description: "Name of your company.",
 		Type:        schema.TypeString,
@@ -125,6 +137,7 @@ func newStatusPageResource() *schema.Resource {
 }
 
 type statusPage struct {
+	History                  *int    `json:"history,omitempty"`
 	CompanyName              *string `json:"company_name,omitempty"`
 	CompanyURL               *string `json:"company_url,omitempty"`
 	ContactURL               *string `json:"contact_url,omitempty"`
@@ -161,6 +174,7 @@ func statusPageRef(in *statusPage) []struct {
 		k string
 		v interface{}
 	}{
+		{k: "history", v: &in.History},
 		{k: "company_name", v: &in.CompanyName},
 		{k: "company_url", v: &in.CompanyURL},
 		{k: "contact_url", v: &in.ContactURL},
