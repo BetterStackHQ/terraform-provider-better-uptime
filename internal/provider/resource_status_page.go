@@ -28,7 +28,7 @@ var statusPageSchema = map[string]*schema.Schema{
 			}
 			return
 		},
-		Computed:    true,
+		Computed: true,
 	},
 	"company_name": {
 		Description: "Name of your company.",
