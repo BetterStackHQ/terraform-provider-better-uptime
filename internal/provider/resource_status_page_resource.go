@@ -26,6 +26,7 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 	"status_page_section_id": {
 		Description: "The ID of the Status Page Section. If you don't specify a status_page_section_id, we add the resource to the first section. If there are no sections in the status page yet, one will be automatically created for you.",
 		Type:        schema.TypeInt,
+		Computed:    true,
 		Optional:    true,
 	},
 	"resource_id": {
