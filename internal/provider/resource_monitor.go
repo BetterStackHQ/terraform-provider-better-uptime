@@ -246,16 +246,21 @@ var monitorSchema = map[string]*schema.Schema{
 		Sensitive:   true,
 	},
 	"maintenance_from": {
-		Description: "Start of the maintenance window each day. We won't check your website during this window. In UTC timezone. Example: \"01:00:00\"",
+		Description: "Start of the maintenance window each day. We won't check your website during this window. Example: \"01:00:00\"",
 		Type:        schema.TypeString,
 		Optional:    true,
 		// TODO: ValidateDiagFunc
 	},
 	"maintenance_to": {
-		Description: "End of the maintenance window each day. In UTC timezone. Example: \"03:00:00\"",
+		Description: "End of the maintenance window each day. Example: \"03:00:00\"",
 		Type:        schema.TypeString,
 		Optional:    true,
 		// TODO: ValidateDiagFunc
+	},
+	"maintenance_timezone": {
+		Description: "The timezone to use for the maintenance window each dat. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
+		Type:        schema.TypeString,
+		Optional:    true,
 	},
 }
 
@@ -304,6 +309,7 @@ type monitor struct {
 	AuthPassword        *string                   `json:"auth_password,omitempty"`
 	MaintenanceFrom     *string                   `json:"maintenance_from,omitempty"`
 	MaintenanceTo       *string                   `json:"maintenance_to,omitempty"`
+	MaintenanceTimezone *string                   `json:"maintenance_timezone,omitempty"`
 }
 
 type monitorHTTPResponse struct {
@@ -352,6 +358,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "auth_password", v: &in.AuthPassword},
 		{k: "maintenance_from", v: &in.MaintenanceFrom},
 		{k: "maintenance_to", v: &in.MaintenanceTo},
+		{k: "maintenance_timezone", v: &in.MaintenanceTimezone},
 	}
 }
 
