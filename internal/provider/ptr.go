@@ -26,7 +26,7 @@ func load(d *schema.ResourceData, key string, receiver interface{}) {
 		}
 	case **[]string:
 		if v, ok := d.GetOkExists(key); ok {
-			var t []string
+			var t = make([]string, 0)
 			for _, v := range v.([]interface{}) {
 				t = append(t, v.(string))
 			}
@@ -34,7 +34,7 @@ func load(d *schema.ResourceData, key string, receiver interface{}) {
 		}
 	case **[]int:
 		if v, ok := d.GetOkExists(key); ok {
-			var t []int
+			var t = make([]int, 0)
 			for _, v := range v.([]interface{}) {
 				t = append(t, v.(int))
 			}
