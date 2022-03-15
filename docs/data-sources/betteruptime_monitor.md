@@ -34,7 +34,7 @@ Monitor lookup.
 - **id** (String) The ID of this Monitor.
 - **maintenance_from** (String) Start of the maintenance window each day. We won't check your website during this window. Example: "01:00:00"
 - **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
-- **maintenance_timezone** (String) The timezone to use for the maintenance window each dat. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+- **maintenance_timezone** (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
 - **monitor_group_id** (Number) Set this attribute if you want to add this monitor to a monitor group.
 - **monitor_type** (String) Valid values:
 

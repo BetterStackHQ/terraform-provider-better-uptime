@@ -258,7 +258,7 @@ var monitorSchema = map[string]*schema.Schema{
 		// TODO: ValidateDiagFunc
 	},
 	"maintenance_timezone": {
-		Description: "The timezone to use for the maintenance window each dat. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
+		Description: "The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
