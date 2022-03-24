@@ -31,6 +31,7 @@ https://docs.betteruptime.com/api/heartbeats-api
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **sort_index** (Number) An index controlling the position of a heartbeat in the heartbeat group.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
+**policy_id** (String) Set the escalation policy for the heartbeat.
 
 ### Read-Only
 

@@ -83,6 +83,11 @@ var heartbeatSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 	},
+	"policy_id": {
+		Description: "Set the escalation policy for the heartbeat.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
 }
 
 func newHeartbeatResource() *schema.Resource {
@@ -112,6 +117,7 @@ type heartbeat struct {
 	HeartbeatGroupID *int    `json:"heartbeat_group_id,omitempty"`
 	SortIndex        *int    `json:"sort_index,omitempty"`
 	Paused           *bool   `json:"paused,omitempty"`
+	PolicyID         *string `json:"policy_id"`
 }
 
 type heartbeatHTTPResponse struct {
@@ -142,6 +148,7 @@ func heartbeatRef(in *heartbeat) []struct {
 		{k: "heartbeat_group_id", v: &in.HeartbeatGroupID},
 		{k: "sort_index", v: &in.SortIndex},
 		{k: "paused", v: &in.Paused},
+		{k: "policy_id", v: &in.PolicyID},
 	}
 }
 
