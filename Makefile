@@ -54,7 +54,7 @@ clean:
 	rm -rf release/
 
 lint-init:
-	@test -n "$$(which golangci-lint)" || (curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.27.0)
+	@test -n "$$(which golangci-lint)" || (curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v3.1.0)
 
 lint: lint-init
 	$(GOLANGCI_LINT)
