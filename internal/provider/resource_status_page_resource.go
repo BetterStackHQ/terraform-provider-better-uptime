@@ -51,10 +51,9 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"history": {
-		Description: "Do you want to show the 90-day incident history for this item?",
+		Description: "(Deprecated) Do you want to show the 90-day incident history for this item?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
 	},
 	// TODO: add 'effective_position' computed property?
 	"position": {
@@ -64,6 +63,12 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return !d.HasChange(k)
 		},
+	},
+	"widget_type": {
+		Description: "What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type. This takes preference over history when both parameters are present.",
+        Type:        schema.TypeString,
+        Optional:    true,
+        Default:     "history",
 	},
 }
 
@@ -100,6 +105,7 @@ type statusPageResource struct {
 	History             *bool   `json:"history,omitempty"`
 	Position            *int    `json:"position,omitempty"`
 	FixedPosition       *bool   `json:"fixed_position,omitempty"`
+	WidgetType          *string `json:"widget_type,omitempty"`
 }
 
 type statusPageResourceHTTPResponse struct {
@@ -125,6 +131,7 @@ func statusPageResourceRef(in *statusPageResource) []struct {
 		{k: "explanation", v: &in.Explanation},
 		{k: "history", v: &in.History},
 		{k: "position", v: &in.Position},
+		{k: "widget_type", v: &in.WidgetType},
 	}
 }
 
