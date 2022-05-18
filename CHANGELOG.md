@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.12]
+- Add widget_type attribute for status page resources
+
 ## [0.3.11]
 - Add policy_id attribute to the Heartbeat resource
 
@@ -42,7 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.4] - 2021-08-12
 - Initial release (migrated from https://github.com/BetterStackHQ/deprecated-terraform-provider-betteruptime)
 
-[Unreleased]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.11...HEAD
+[Unreleased]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.12...HEAD
+[0.3.12]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.11...v0.3.12
 [0.3.11]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.10...v0.3.11
 [0.3.10]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.9...v0.3.10
 [0.3.9]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.8...v0.3.9
