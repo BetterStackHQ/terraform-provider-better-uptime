@@ -70,6 +70,11 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Default:     "history",
 	},
+	"availability": {
+		Description: "The availability of this resource (from 0.0 to 1.0).",
+		Type:        schema.TypeFloat,
+		Computed:    true,
+	},
 }
 
 func newStatusPageResourceResource() *schema.Resource {
@@ -97,15 +102,16 @@ func newStatusPageResourceResource() *schema.Resource {
 }
 
 type statusPageResource struct {
-	StatusPageSectionID *int    `json:"status_page_section_id,omitempty"`
-	ResourceID          *int    `json:"resource_id,omitempty"`
-	ResourceType        *string `json:"resource_type,omitempty"`
-	PublicName          *string `json:"public_name,omitempty"`
-	Explanation         *string `json:"explanation,omitempty"`
-	History             *bool   `json:"history,omitempty"`
-	Position            *int    `json:"position,omitempty"`
-	FixedPosition       *bool   `json:"fixed_position,omitempty"`
-	WidgetType          *string `json:"widget_type,omitempty"`
+	StatusPageSectionID *int     `json:"status_page_section_id,omitempty"`
+	ResourceID          *int     `json:"resource_id,omitempty"`
+	ResourceType        *string  `json:"resource_type,omitempty"`
+	PublicName          *string  `json:"public_name,omitempty"`
+	Explanation         *string  `json:"explanation,omitempty"`
+	History             *bool    `json:"history,omitempty"`
+	Position            *int     `json:"position,omitempty"`
+	FixedPosition       *bool    `json:"fixed_position,omitempty"`
+	WidgetType          *string  `json:"widget_type,omitempty"`
+	Availability        *float32 `json:"availability,omitempty"`
 }
 
 type statusPageResourceHTTPResponse struct {
@@ -132,6 +138,7 @@ func statusPageResourceRef(in *statusPageResource) []struct {
 		{k: "history", v: &in.History},
 		{k: "position", v: &in.Position},
 		{k: "widget_type", v: &in.WidgetType},
+		{k: "availability", v: &in.Availability},
 	}
 }
 

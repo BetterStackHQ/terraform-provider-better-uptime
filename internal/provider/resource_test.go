@@ -3,7 +3,7 @@ package provider
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
@@ -21,7 +21,7 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 
 		switch {
 		case r.Method == http.MethodPost && r.RequestURI == baseRequestURI:
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -44,7 +44,7 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 		case r.Method == http.MethodGet && r.RequestURI == baseRequestURI+"/"+id:
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, data.Load().([]byte))))
 		case r.Method == http.MethodPatch && r.RequestURI == baseRequestURI+"/"+id:
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				t.Fatal(err)
 			}
