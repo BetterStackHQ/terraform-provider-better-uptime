@@ -141,6 +141,21 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
+  "design": {
+		Description: "Choose between classic and modern status page design. Possible values: 'v1', 'v2'.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"theme": {
+		Description: "Choose theme of your status page. Only applicable when design: v2. Possible values: 'light', 'dark'.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"layout": {
+		Description: "Choose usual vertical layout or space-saving horizontal layout. Only applicable when design: v2. Possible values: 'vertical', 'horizontal'.",
+		Type:        schema.TypeString,
+		Optional:    true,
+  },
 }
 
 func newStatusPageResource() *schema.Resource {
@@ -181,6 +196,9 @@ type statusPage struct {
 	AggregateState           *string `json:"aggregate_state,omitempty"`
 	CreatedAt                *string `json:"created_at,omitempty"`
 	UpdatedAt                *string `json:"updated_at,omitempty"`
+	Design	                 *string `json:"design,omitempty"`
+	Theme	                   *string `json:"theme,omitempty"`
+	Layout	                 *string `json:"layout,omitempty"`
 }
 
 type statusPageHTTPResponse struct {
@@ -222,6 +240,9 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "aggregate_state", v: &in.AggregateState},
 		{k: "created_at", v: &in.CreatedAt},
 		{k: "updated_at", v: &in.UpdatedAt},
+		{k: "design", v: &in.Design},
+		{k: "theme", v: &in.Theme},
+		{k: "layout", v: &in.Layout},
 	}
 }
 func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
