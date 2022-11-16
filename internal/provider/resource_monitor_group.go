@@ -34,6 +34,16 @@ var monitorGroupSchema = map[string]*schema.Schema{
 			return !d.HasChange(k)
 		},
 	},
+	"created_at": {
+		Description: "The time when this monitor group was created.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
+	"updated_at": {
+		Description: "The time when this monitor group was updated.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
 }
 
 func newMonitorGroupResource() *schema.Resource {
@@ -54,6 +64,8 @@ type monitorGroup struct {
 	Paused    *bool   `json:"paused,omitempty"`
 	Name      *string `json:"name,omitempty"`
 	SortIndex *int    `json:"sort_index,omitempty"`
+	CreatedAt *string `json:"created_at,omitempty"`
+	UpdatedAt *string `json:"updated_at,omitempty"`
 }
 
 type monitorGroupHTTPResponse struct {
@@ -75,6 +87,8 @@ func monitorGroupRef(in *monitorGroup) []struct {
 		{k: "paused", v: &in.Paused},
 		{k: "name", v: &in.Name},
 		{k: "sort_index", v: &in.SortIndex},
+		{k: "created_at", v: &in.CreatedAt},
+		{k: "updated_at", v: &in.UpdatedAt},
 	}
 }
 

@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -24,10 +23,10 @@ func resourceCreate(ctx context.Context, meta interface{}, url string, in, out i
 	}
 	defer func() {
 		// Keep-Alive.
-		_, _ = io.Copy(ioutil.Discard, res.Body)
+		_, _ = io.Copy(io.Discard, res.Body)
 		_ = res.Body.Close()
 	}()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if res.StatusCode != http.StatusCreated {
 		return diag.Errorf("POST %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
 	}
@@ -49,13 +48,13 @@ func resourceRead(ctx context.Context, meta interface{}, url string, out interfa
 	}
 	defer func() {
 		// Keep-Alive.
-		_, _ = io.Copy(ioutil.Discard, res.Body)
+		_, _ = io.Copy(io.Discard, res.Body)
 		_ = res.Body.Close()
 	}()
 	if res.StatusCode == http.StatusNotFound {
 		return nil, false
 	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return diag.Errorf("GET %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body)), false
 	}
@@ -82,10 +81,10 @@ func resourceUpdate(ctx context.Context, meta interface{}, url string, req inter
 	}
 	defer func() {
 		// Keep-Alive.
-		_, _ = io.Copy(ioutil.Discard, res.Body)
+		_, _ = io.Copy(io.Discard, res.Body)
 		_ = res.Body.Close()
 	}()
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return diag.Errorf("PATCH %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
 	}
@@ -100,10 +99,10 @@ func resourceDelete(ctx context.Context, meta interface{}, url string) diag.Diag
 	}
 	defer func() {
 		// Keep-Alive.
-		_, _ = io.Copy(ioutil.Discard, res.Body)
+		_, _ = io.Copy(io.Discard, res.Body)
 		_ = res.Body.Close()
 	}()
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	if res.StatusCode != http.StatusNoContent && res.StatusCode != http.StatusNotFound {
 		return diag.Errorf("DELETE %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
 	}

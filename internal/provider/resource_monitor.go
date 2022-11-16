@@ -135,6 +135,11 @@ var monitorSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 	},
+	"paused_at": {
+		Description: "The time when this monitor was paused.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
 	"follow_redirects": {
 		Description: "Set to true for the monitor to follow redirects.",
 		Type:        schema.TypeBool,
@@ -262,6 +267,32 @@ var monitorSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
+	"remember_cookies": {
+		Description: "Set to true to keep cookies when redirecting.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     true,
+	},
+	"last_checked_at": {
+		Description: "When the website was last checked.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
+	"status": {
+		Description: "The status of this website check.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
+	"created_at": {
+		Description: "The time when this monitor was created.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
+	"updated_at": {
+		Description: "The time when this monitor was updated.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
 }
 
 func newMonitorResource() *schema.Resource {
@@ -292,6 +323,7 @@ type monitor struct {
 	Push                *bool                     `json:"push,omitempty"`
 	TeamWait            *int                      `json:"team_wait,omitempty"`
 	Paused              *bool                     `json:"paused,omitempty"`
+	PausedAt            *string                   `json:"paused_at,omitempty"`
 	FollowRedirects     *bool                     `json:"follow_redirects,omitempty"`
 	Port                *string                   `json:"port,omitempty"`
 	Regions             *[]string                 `json:"regions,omitempty"`
@@ -310,6 +342,11 @@ type monitor struct {
 	MaintenanceFrom     *string                   `json:"maintenance_from,omitempty"`
 	MaintenanceTo       *string                   `json:"maintenance_to,omitempty"`
 	MaintenanceTimezone *string                   `json:"maintenance_timezone,omitempty"`
+	RememberCookies     *bool                     `json:"remember_cookies,omitempty"`
+	LastCheckedAt       *string                   `json:"last_checked_at,omitempty"`
+	Status              *string                   `json:"status,omitempty"`
+	CreatedAt           *string                   `json:"created_at,omitempty"`
+	UpdatedAt           *string                   `json:"updated_at,omitempty"`
 }
 
 type monitorHTTPResponse struct {
@@ -341,6 +378,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "push", v: &in.Push},
 		{k: "team_wait", v: &in.TeamWait},
 		{k: "paused", v: &in.Paused},
+		{k: "paused_at", v: &in.PausedAt},
 		{k: "follow_redirects", v: &in.FollowRedirects},
 		{k: "port", v: &in.Port},
 		{k: "regions", v: &in.Regions},
@@ -359,6 +397,11 @@ func monitorRef(in *monitor) []struct {
 		{k: "maintenance_from", v: &in.MaintenanceFrom},
 		{k: "maintenance_to", v: &in.MaintenanceTo},
 		{k: "maintenance_timezone", v: &in.MaintenanceTimezone},
+		{k: "remember_cookies", v: &in.RememberCookies},
+		{k: "last_checked_at", v: &in.LastCheckedAt},
+		{k: "status", v: &in.Status},
+		{k: "created_at", v: &in.CreatedAt},
+		{k: "updated_at", v: &in.UpdatedAt},
 	}
 }
 

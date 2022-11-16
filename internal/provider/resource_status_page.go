@@ -110,7 +110,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
-	"announcement_embed_custom_css": {
+	"announcement_embed_css": {
 		Description: "Modify the design of the announcement embed.",
 		Type:        schema.TypeString,
 		Optional:    true,
@@ -125,6 +125,21 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		Sensitive:   true,
+	},
+	"aggregate_state": {
+		Description: "The overall status of this status page.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
+	"created_at": {
+		Description: "The time when this status page was created.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
+	"updated_at": {
+		Description: "The time when this status page was updated.",
+		Type:        schema.TypeString,
+		Computed:    true,
 	},
 }
 
@@ -160,9 +175,12 @@ type statusPage struct {
 	Announcement             *string `json:"announcement,omitempty"`
 	AnnouncementEmbedVisible *bool   `json:"announcement_embed_visible,omitempty"`
 	AnnouncementEmbedLink    *string `json:"announcement_embed_link,omitempty"`
-	AnnouncementCustomCSS    *string `json:"announcement_embed_custom_css,omitempty"`
+	AnnouncementEmbedCSS     *string `json:"announcement_embed_css,omitempty"`
 	PasswordEnabled          *bool   `json:"password_enabled,omitempty"`
 	Password                 *string `json:"password,omitempty"`
+	AggregateState           *string `json:"aggregate_state,omitempty"`
+	CreatedAt                *string `json:"created_at,omitempty"`
+	UpdatedAt                *string `json:"updated_at,omitempty"`
 }
 
 type statusPageHTTPResponse struct {
@@ -198,9 +216,12 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "announcement", v: &in.Announcement},
 		{k: "announcement_embed_visible", v: &in.AnnouncementEmbedVisible},
 		{k: "announcement_embed_link", v: &in.AnnouncementEmbedLink},
-		{k: "announcement_embed_custom_css", v: &in.AnnouncementCustomCSS},
+		{k: "announcement_embed_css", v: &in.AnnouncementEmbedCSS},
 		{k: "password_enabled", v: &in.PasswordEnabled},
 		{k: "password", v: &in.Password},
+		{k: "aggregate_state", v: &in.AggregateState},
+		{k: "created_at", v: &in.CreatedAt},
+		{k: "updated_at", v: &in.UpdatedAt},
 	}
 }
 func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
