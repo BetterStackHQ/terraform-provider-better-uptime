@@ -23,6 +23,8 @@ https://docs.betteruptime.com/api/monitor-groups-api
 
 ### Read-Only
 
+- **created_at** (String) The time when this monitor group was created.
 - **id** (String) The ID of this Monitor.
+- **updated_at** (String) The time when this monitor group was updated.
 
 

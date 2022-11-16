@@ -23,6 +23,8 @@ https://docs.betteruptime.com/api/heartbeat-groups-api
 
 ### Read-Only
 
+- **created_at** (String) The time when this heartbeat group was created.
 - **id** (String) The ID of this Monitor.
+- **updated_at** (String) The time when this heartbeat group was updated.
 
 

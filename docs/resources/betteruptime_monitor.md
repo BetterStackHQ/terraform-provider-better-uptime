@@ -58,8 +58,8 @@ https://docs.betteruptime.com/api/monitors-api
 - **follow_redirects** (Boolean) Set to true for the monitor to follow redirects.
 - **http_method** (String) HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH
 - **maintenance_from** (String) Start of the maintenance window each day. We won't check your website during this window. Example: "01:00:00"
-- **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
 - **maintenance_timezone** (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+- **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
 - **monitor_group_id** (Number) Set this attribute if you want to add this monitor to a monitor group.
 - **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
 - **policy_id** (String) Set the escalation policy for the monitor.
@@ -68,8 +68,9 @@ https://docs.betteruptime.com/api/monitors-api
 - **push** (Boolean) Should we send a push notification to the on-call person?
 - **recovery_period** (Number) How long the monitor must be up to automatically mark an incident as resolved after being down.
 - **regions** (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.
+- **remember_cookies** (Boolean) Set to true to keep cookies when redirecting.
 - **request_body** (String) Request body for POST, PUT, PATCH requests.
-- **request_headers** (List of Map of String) An array of request headers, consisting of name and value pairs. For example `[{name = "Content-Type", value = "application/json", {name = "Authorization", value = "bearer TOKEN"}]`.
+- **request_headers** (List of Map of String) An array of request headers, consisting of name and value pairs
 - **request_timeout** (Number) How long to wait before timing out the request? In seconds.
 - **required_keyword** (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
@@ -79,6 +80,11 @@ https://docs.betteruptime.com/api/monitors-api
 
 ### Read-Only
 
+- **created_at** (String) The time when this monitor was created.
 - **id** (String) The ID of this Monitor.
+- **last_checked_at** (String) When the website was last checked.
+- **paused_at** (String) The time when this monitor was paused.
+- **status** (String) The status of this website check.
+- **updated_at** (String) The time when this monitor was updated.
 
 

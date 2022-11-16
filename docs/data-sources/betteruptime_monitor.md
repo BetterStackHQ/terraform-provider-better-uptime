@@ -26,21 +26,23 @@ Monitor lookup.
 - **call** (Boolean) Should we call the on-call person?
 - **check_frequency** (Number) How often should we check your website? In seconds.
 - **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident?
+- **created_at** (String) The time when this monitor was created.
 - **domain_expiration** (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **email** (Boolean) Should we send an email to the on-call person?
 - **expected_status_codes** (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.
 - **follow_redirects** (Boolean) Set to true for the monitor to follow redirects.
 - **http_method** (String) HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH
 - **id** (String) The ID of this Monitor.
+- **last_checked_at** (String) When the website was last checked.
 - **maintenance_from** (String) Start of the maintenance window each day. We won't check your website during this window. Example: "01:00:00"
-- **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
 - **maintenance_timezone** (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+- **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
 - **monitor_group_id** (Number) Set this attribute if you want to add this monitor to a monitor group.
 - **monitor_type** (String) Valid values:
 
     `status` We will check your website for 2XX HTTP status code.
 
-  `expected_status_code` We will check if your website returned one of the values in expected_status_codes.
+	`expected_status_code` We will check if your website returned one of the values in expected_status_codes.
 
     `keyword` We will check if your website contains the required_keyword.
 
@@ -63,19 +65,23 @@ Monitor lookup.
     `imap` We will check for an IMAP server at the host specified in the url parameter
 (port is required, and can be 143, 993, or both).
 - **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
+- **paused_at** (String) The time when this monitor was paused.
 - **policy_id** (String) Set the escalation policy for the monitor.
 - **port** (String) Required if monitor_type is set to tcp, udp, smtp, pop, or imap. tcp and udp monitors accept any ports, while smtp, pop, and imap accept only the specified ports corresponding with their servers (e.g. "25,465,587" for smtp).
 - **pronounceable_name** (String) Pronounceable name of the monitor. We will use this when we call you. Try to make it tongue-friendly, please?
 - **push** (Boolean) Should we send a push notification to the on-call person?
 - **recovery_period** (Number) How long the monitor must be up to automatically mark an incident as resolved after being down.
 - **regions** (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.
+- **remember_cookies** (Boolean) Set to true to keep cookies when redirecting.
 - **request_body** (String) Request body for POST, PUT, PATCH requests.
 - **request_headers** (List of Map of String) An array of request headers, consisting of name and value pairs
 - **request_timeout** (Number) How long to wait before timing out the request? In seconds.
 - **required_keyword** (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **ssl_expiration** (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
+- **status** (String) The status of this website check.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
+- **updated_at** (String) The time when this monitor was updated.
 - **verify_ssl** (Boolean) Should we verify SSL certificate validity?
 
 

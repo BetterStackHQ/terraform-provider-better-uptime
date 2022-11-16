@@ -27,15 +27,19 @@ https://docs.betteruptime.com/api/heartbeats-api
 - **email** (Boolean) Should we send an email to the on-call person?
 - **heartbeat_group_id** (Number) Set this attribute if you want to add this heartbeat to a heartbeat group..
 - **paused** (Boolean) Set to true to pause monitoring — we won't notify you about downtime. Set to false to resume monitoring.
+- **policy_id** (String) Set the escalation policy for the heartbeat.
 - **push** (Boolean) Should we send a push notification to the on-call person?
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **sort_index** (Number) An index controlling the position of a heartbeat in the heartbeat group.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
-**policy_id** (String) Set the escalation policy for the heartbeat.
 
 ### Read-Only
 
+- **created_at** (String) The time when this heartbeat was created.
 - **id** (String) The ID of this heartbeat.
+- **paused_at** (String) The time when this heartbeat was paused.
+- **status** (String) The status of this heartbeat.
+- **updated_at** (String) The time when this heartbeat was updated.
 - **url** (String) The url of this heartbeat.
 
 
