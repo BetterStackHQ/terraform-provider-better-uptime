@@ -121,6 +121,21 @@ var statusPageSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Sensitive:   true,
 	},
+	"design": {
+		Description: "Choose between classic and modern status page design. Possible values: 'v1', 'v2'.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"theme": {
+		Description: "Choose theme of your status page. Only applicable when design: v2. Possible values: 'light', 'dark'.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"layout": {
+		Description: "Choose usual vertical layout or space-saving horizontal layout. Only applicable when design: v2. Possible values: 'vertical', 'horizontal'.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
 }
 
 func newStatusPageResource() *schema.Resource {
