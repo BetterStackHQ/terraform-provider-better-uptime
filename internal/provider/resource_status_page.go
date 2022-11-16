@@ -85,6 +85,11 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
+	"custom_javascript": {
+		Description: "Add custom behavior to your status page. It is only allowed for status pages with a custom domain name.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
 	"google_analytics_id": {
 		Description: "Specify your own Google Analytics ID if you want to receive hits on your status page.",
 		Type:        schema.TypeString,
@@ -165,6 +170,7 @@ type statusPage struct {
 	Subscribable             *bool   `json:"subscribable,omitempty"`
 	HideFromSearchEngines    *bool   `json:"hide_from_search_engines,omitempty"`
 	CustomCSS                *string `json:"custom_css,omitempty"`
+	CustomJavaScript         *string `json:"custom_javascript,omitempty"`
 	GoogleAnalyticsID        *string `json:"google_analytics_id,omitempty"`
 	Announcement             *string `json:"announcement,omitempty"`
 	AnnouncementEmbedVisible *bool   `json:"announcement_embed_visible,omitempty"`
@@ -205,6 +211,7 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "subscribable", v: &in.Subscribable},
 		{k: "hide_from_search_engines", v: &in.HideFromSearchEngines},
 		{k: "custom_css", v: &in.CustomCSS},
+		{k: "custom_javascript", v: &in.CustomJavaScript},
 		{k: "google_analytics_id", v: &in.GoogleAnalyticsID},
 		{k: "announcement", v: &in.Announcement},
 		{k: "announcement_embed_visible", v: &in.AnnouncementEmbedVisible},

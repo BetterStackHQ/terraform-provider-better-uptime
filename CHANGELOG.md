@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Add more missing attributes
+- Add custom_javascript attribute for status page resources
 
 ## [0.3.12]
 - Add widget_type attribute for status page resources
