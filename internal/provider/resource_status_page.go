@@ -172,6 +172,9 @@ type statusPage struct {
 	AnnouncementCustomCSS    *string `json:"announcement_embed_custom_css,omitempty"`
 	PasswordEnabled          *bool   `json:"password_enabled,omitempty"`
 	Password                 *string `json:"password,omitempty"`
+	Design	                 *string `json:"design,omitempty"`
+	Theme	                 *string `json:"theme,omitempty"`
+	Layout	                 *string `json:"layout,omitempty"`
 }
 
 type statusPageHTTPResponse struct {
@@ -209,6 +212,9 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "announcement_embed_custom_css", v: &in.AnnouncementCustomCSS},
 		{k: "password_enabled", v: &in.PasswordEnabled},
 		{k: "password", v: &in.Password},
+		{k: "design", v: &in.Design},
+		{k: "theme", v: &in.Theme},
+		{k: "layout", v: &in.Layout},
 	}
 }
 func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
