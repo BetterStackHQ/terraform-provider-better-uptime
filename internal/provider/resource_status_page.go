@@ -85,6 +85,11 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
+	"custom_javascript": {
+		Description: "Add custom behavior to your status page. It is only allowed for status pages with a custom domain name.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
 	"google_analytics_id": {
 		Description: "Specify your own Google Analytics ID if you want to receive hits on your status page.",
 		Type:        schema.TypeString,
@@ -105,7 +110,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
-	"announcement_embed_custom_css": {
+	"announcement_embed_css": {
 		Description: "Modify the design of the announcement embed.",
 		Type:        schema.TypeString,
 		Optional:    true,
@@ -121,7 +126,22 @@ var statusPageSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Sensitive:   true,
 	},
-	"design": {
+	"aggregate_state": {
+		Description: "The overall status of this status page.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
+	"created_at": {
+		Description: "The time when this status page was created.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
+	"updated_at": {
+		Description: "The time when this status page was updated.",
+		Type:        schema.TypeString,
+		Computed:    true,
+	},
+  "design": {
 		Description: "Choose between classic and modern status page design. Possible values: 'v1', 'v2'.",
 		Type:        schema.TypeString,
 		Optional:    true,
@@ -135,7 +155,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Description: "Choose usual vertical layout or space-saving horizontal layout. Only applicable when design: v2. Possible values: 'vertical', 'horizontal'.",
 		Type:        schema.TypeString,
 		Optional:    true,
-	},
+  },
 }
 
 func newStatusPageResource() *schema.Resource {
@@ -165,15 +185,19 @@ type statusPage struct {
 	Subscribable             *bool   `json:"subscribable,omitempty"`
 	HideFromSearchEngines    *bool   `json:"hide_from_search_engines,omitempty"`
 	CustomCSS                *string `json:"custom_css,omitempty"`
+	CustomJavaScript         *string `json:"custom_javascript,omitempty"`
 	GoogleAnalyticsID        *string `json:"google_analytics_id,omitempty"`
 	Announcement             *string `json:"announcement,omitempty"`
 	AnnouncementEmbedVisible *bool   `json:"announcement_embed_visible,omitempty"`
 	AnnouncementEmbedLink    *string `json:"announcement_embed_link,omitempty"`
-	AnnouncementCustomCSS    *string `json:"announcement_embed_custom_css,omitempty"`
+	AnnouncementEmbedCSS     *string `json:"announcement_embed_css,omitempty"`
 	PasswordEnabled          *bool   `json:"password_enabled,omitempty"`
 	Password                 *string `json:"password,omitempty"`
+	AggregateState           *string `json:"aggregate_state,omitempty"`
+	CreatedAt                *string `json:"created_at,omitempty"`
+	UpdatedAt                *string `json:"updated_at,omitempty"`
 	Design	                 *string `json:"design,omitempty"`
-	Theme	                 *string `json:"theme,omitempty"`
+	Theme	                   *string `json:"theme,omitempty"`
 	Layout	                 *string `json:"layout,omitempty"`
 }
 
@@ -205,13 +229,17 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "subscribable", v: &in.Subscribable},
 		{k: "hide_from_search_engines", v: &in.HideFromSearchEngines},
 		{k: "custom_css", v: &in.CustomCSS},
+		{k: "custom_javascript", v: &in.CustomJavaScript},
 		{k: "google_analytics_id", v: &in.GoogleAnalyticsID},
 		{k: "announcement", v: &in.Announcement},
 		{k: "announcement_embed_visible", v: &in.AnnouncementEmbedVisible},
 		{k: "announcement_embed_link", v: &in.AnnouncementEmbedLink},
-		{k: "announcement_embed_custom_css", v: &in.AnnouncementCustomCSS},
+		{k: "announcement_embed_css", v: &in.AnnouncementEmbedCSS},
 		{k: "password_enabled", v: &in.PasswordEnabled},
 		{k: "password", v: &in.Password},
+		{k: "aggregate_state", v: &in.AggregateState},
+		{k: "created_at", v: &in.CreatedAt},
+		{k: "updated_at", v: &in.UpdatedAt},
 		{k: "design", v: &in.Design},
 		{k: "theme", v: &in.Theme},
 		{k: "layout", v: &in.Layout},

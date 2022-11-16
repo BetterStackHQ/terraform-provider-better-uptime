@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 
@@ -120,10 +119,10 @@ func policyLookup(ctx context.Context, d *schema.ResourceData, meta interface{})
 		}
 		defer func() {
 			// Keep-Alive.
-			_, _ = io.Copy(ioutil.Discard, res.Body)
+			_, _ = io.Copy(io.Discard, res.Body)
 			_ = res.Body.Close()
 		}()
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		if res.StatusCode != http.StatusOK {
 			return nil, fmt.Errorf("GET %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
 		}
