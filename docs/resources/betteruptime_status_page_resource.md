@@ -27,6 +27,7 @@ https://docs.betteruptime.com/api/status-page-resources-api
 - **explanation** (String) A detailed text displayed as a help icon.
 - **history** (Boolean) (Deprecated) Do you want to show the 90-day incident history for this item?
 - **position** (Number) The position of this resource on your status page, indexed from zero. If you don't specify a position, we add the resource to the end of the status page. When you specify a position of an existing resource, we add the resource to this position and shift resources below to accommodate.
+- **status_history** (Block List) Single status page resource history (see [below for nested schema](#nestedblock--status_history))
 - **status_page_section_id** (Number) The ID of the Status Page Section. If you don't specify a status_page_section_id, we add the resource to the first section. If there are no sections in the status page yet, one will be automatically created for you.
 - **widget_type** (String) What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type. This takes preference over history when both parameters are present.
 
@@ -34,5 +35,14 @@ https://docs.betteruptime.com/api/status-page-resources-api
 
 - **availability** (Number) The availability of this resource (from 0.0 to 1.0).
 - **id** (String) The ID of this Status Page Resource.
+
+<a id="nestedblock--status_history"></a>
+### Nested Schema for `status_history`
+
+Optional:
+
+- **day** (String) Status date
+- **downtime_duration** (Number) Status duration
+- **status** (String) Status
 
 

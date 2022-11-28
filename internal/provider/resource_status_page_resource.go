@@ -75,6 +75,30 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Type:        schema.TypeFloat,
 		Computed:    true,
 	},
+	"status_history": {
+		Description: "Single status page resource history",
+		Type:        schema.TypeList,
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"day": {
+					Description: "Status date",
+					Type:        schema.TypeString,
+					Optional:    true,
+				},
+				"status": {
+					Description: "Status",
+					Type:        schema.TypeString,
+					Optional:    true,
+				},
+				"downtime_duration": {
+					Description: "Status duration",
+					Type:        schema.TypeInt,
+					Optional:    true,
+				},
+			},
+		},
+	},
 }
 
 func newStatusPageResourceResource() *schema.Resource {
@@ -102,16 +126,17 @@ func newStatusPageResourceResource() *schema.Resource {
 }
 
 type statusPageResource struct {
-	StatusPageSectionID *int     `json:"status_page_section_id,omitempty"`
-	ResourceID          *int     `json:"resource_id,omitempty"`
-	ResourceType        *string  `json:"resource_type,omitempty"`
-	PublicName          *string  `json:"public_name,omitempty"`
-	Explanation         *string  `json:"explanation,omitempty"`
-	History             *bool    `json:"history,omitempty"`
-	Position            *int     `json:"position,omitempty"`
-	FixedPosition       *bool    `json:"fixed_position,omitempty"`
-	WidgetType          *string  `json:"widget_type,omitempty"`
-	Availability        *float32 `json:"availability,omitempty"`
+	StatusPageSectionID *int           `json:"status_page_section_id,omitempty"`
+	ResourceID          *int           `json:"resource_id,omitempty"`
+	ResourceType        *string        `json:"resource_type,omitempty"`
+	PublicName          *string        `json:"public_name,omitempty"`
+	Explanation         *string        `json:"explanation,omitempty"`
+	History             *bool          `json:"history,omitempty"`
+	Position            *int           `json:"position,omitempty"`
+	FixedPosition       *bool          `json:"fixed_position,omitempty"`
+	WidgetType          *string        `json:"widget_type,omitempty"`
+	Availability        *float32       `json:"availability,omitempty"`
+	StatusHistory       *statusHistory `json:"status_history,omitempty"`
 }
 
 type statusPageResourceHTTPResponse struct {
@@ -139,6 +164,7 @@ func statusPageResourceRef(in *statusPageResource) []struct {
 		{k: "position", v: &in.Position},
 		{k: "widget_type", v: &in.WidgetType},
 		{k: "availability", v: &in.Availability},
+		{k: "status_history", v: &in.StatusHistory},
 	}
 }
 

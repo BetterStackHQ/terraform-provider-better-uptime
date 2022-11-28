@@ -45,6 +45,11 @@ func load(d *schema.ResourceData, key string, receiver interface{}) {
 			}
 			*x = &t
 		}
+	case **statusHistory:
+		if v, ok := d.GetOkExists(key); ok {
+			t := v.(statusHistory)
+			*x = &t
+		}
 	default:
 		panic(fmt.Errorf("unexpected type %T", receiver))
 	}

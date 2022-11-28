@@ -26,8 +26,10 @@ https://docs.betteruptime.com/api/status-pages-api
 
 - **announcement** (String) Add an announcement to your status page.
 - **announcement_embed_css** (String) Modify the design of the announcement embed.
+- **announcement_embed_enabled** (Boolean) Display the embedded announcement
 - **announcement_embed_link** (String) Point your embedded announcement to a specified URL.
 - **announcement_embed_visible** (Boolean) Toggle this field if you want to show an announcement in your embed. You can embed the announcement using this snippet: `<script src="https://betteruptime.com/widgets/announcement.js" data-id="<SET STATUS_PAGE_ID>" async="async" type="text/javascript"></script>`
+- **automatic_reports** (Boolean) Generate automatic reports when your services go down
 - **contact_url** (String) URL that should be used for contacting you in case of an emergency.
 - **custom_css** (String) Unleash your inner designer and tweak our status page design to fit your branding.
 - **custom_domain** (String) Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com`
