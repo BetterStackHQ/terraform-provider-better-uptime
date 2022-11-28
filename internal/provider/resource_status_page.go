@@ -156,6 +156,12 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
+	"automatic_reports": {
+		Description: "Generate automatic reports when your services go down",
+		Type:        schema.TypeBool,
+		Default:     false,
+		Optional:    true,
+	},
 }
 
 func newStatusPageResource() *schema.Resource {
@@ -199,6 +205,7 @@ type statusPage struct {
 	Design                   *string `json:"design,omitempty"`
 	Theme                    *string `json:"theme,omitempty"`
 	Layout                   *string `json:"layout,omitempty"`
+	AutomaticReports         *bool   `json:"automatic_reports,omitempty"`
 }
 
 type statusPageHTTPResponse struct {
@@ -243,6 +250,7 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "design", v: &in.Design},
 		{k: "theme", v: &in.Theme},
 		{k: "layout", v: &in.Layout},
+		{k: "automatic_reports", v: &in.AutomaticReports},
 	}
 }
 func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

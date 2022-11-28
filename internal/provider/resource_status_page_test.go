@@ -43,6 +43,7 @@ func TestResourceStatusPage(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "timezone", "UTC"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "password", "secret123"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "automatic_reports", "false"),
 				),
 			},
 			// Step 2 - update.
@@ -58,6 +59,7 @@ func TestResourceStatusPage(t *testing.T) {
 				    timezone     = "America/Los_Angeles"
 				    subdomain    = "%s"
 				    password     = "secret1234"
+					automatic_reports = true
 				}
 				`, subdomain),
 				Check: resource.ComposeTestCheckFunc(
@@ -65,6 +67,7 @@ func TestResourceStatusPage(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "timezone", "America/Los_Angeles"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "password", "secret1234"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "automatic_reports", "true"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty.
