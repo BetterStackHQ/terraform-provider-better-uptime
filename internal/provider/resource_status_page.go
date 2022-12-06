@@ -164,7 +164,6 @@ var statusPageSchema = map[string]*schema.Schema{
 	"automatic_reports": {
 		Description: "Generate automatic reports when your services go down",
 		Type:        schema.TypeBool,
-		Default:     false,
 		Optional:    true,
 	},
 }

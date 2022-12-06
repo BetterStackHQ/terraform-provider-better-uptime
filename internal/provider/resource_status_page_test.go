@@ -31,11 +31,12 @@ func TestResourceStatusPage(t *testing.T) {
 				}
 
 				resource "betteruptime_status_page" "this" {
-				    company_name = "Example, Inc"
-				    company_url  = "https://example.com"
-				    timezone     = "UTC"
-				    subdomain    = "%s"
-				    password     = "secret123"
+					company_name      = "Example, Inc"
+					company_url       = "https://example.com"
+					timezone          = "UTC"
+					subdomain         = "%s"
+					password          = "secret123"
+					automatic_reports = true
 				}
 				`, subdomain),
 				Check: resource.ComposeTestCheckFunc(
@@ -43,7 +44,7 @@ func TestResourceStatusPage(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "timezone", "UTC"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "password", "secret123"),
-					resource.TestCheckResourceAttr("betteruptime_status_page.this", "automatic_reports", "false"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "automatic_reports", "true"),
 				),
 			},
 			// Step 2 - update.
@@ -54,11 +55,11 @@ func TestResourceStatusPage(t *testing.T) {
 				}
 
 				resource "betteruptime_status_page" "this" {
-				    company_name = "Example, Inc"
-				    company_url  = "https://example.com"
-				    timezone     = "America/Los_Angeles"
-				    subdomain    = "%s"
-				    password     = "secret1234"
+					company_name = "Example, Inc"
+					company_url  = "https://example.com"
+					timezone     = "America/Los_Angeles"
+					subdomain    = "%s"
+					password     = "secret1234"
 				}
 				`, subdomain),
 				Check: resource.ComposeTestCheckFunc(
@@ -76,11 +77,11 @@ func TestResourceStatusPage(t *testing.T) {
 				}
 
 				resource "betteruptime_status_page" "this" {
-				    company_name = "Example, Inc"
-				    company_url  = "https://example.com"
-				    timezone     = "America/Los_Angeles"
-				    subdomain    = "%s"
-				    password     = "secret1234"
+					company_name = "Example, Inc"
+					company_url  = "https://example.com"
+					timezone     = "America/Los_Angeles"
+					subdomain    = "%s"
+					password     = "secret1234"
 				}
 				`, subdomain),
 				PlanOnly: true,
