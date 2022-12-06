@@ -34,5 +34,15 @@ https://docs.betteruptime.com/api/status-page-resources-api
 
 - **availability** (Number) The availability of this resource (from 0.0 to 1.0).
 - **id** (String) The ID of this Status Page Resource.
+- **status_history** (List of Object) History of a single status page resource history (see [below for nested schema](#nestedatt--status_history))
+
+<a id="nestedatt--status_history"></a>
+### Nested Schema for `status_history`
+
+Read-Only:
+
+- **day** (String)
+- **downtime_duration** (Number)
+- **status** (String)
 
 
