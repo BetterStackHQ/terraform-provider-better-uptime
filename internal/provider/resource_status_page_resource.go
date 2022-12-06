@@ -80,24 +80,26 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"day": {
-					Description: "Status date",
-					Type:        schema.TypeString,
-					Optional:    true,
-				},
-				"status": {
-					Description: "Status",
-					Type:        schema.TypeString,
-					Optional:    true,
-				},
-				"downtime_duration": {
-					Description: "Status duration",
-					Type:        schema.TypeInt,
-					Optional:    true,
-				},
-			},
+			Schema: statusPageStatusHistorySchema,
 		},
+	},
+}
+
+var statusPageStatusHistorySchema = map[string]*schema.Schema{
+	"day": {
+		Description: "Status date",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"status": {
+		Description: "Status",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"downtime_duration": {
+		Description: "Status duration",
+		Type:        schema.TypeInt,
+		Optional:    true,
 	},
 }
 
@@ -137,6 +139,12 @@ type statusPageResource struct {
 	WidgetType          *string        `json:"widget_type,omitempty"`
 	Availability        *float32       `json:"availability,omitempty"`
 	StatusHistory       *statusHistory `json:"status_history,omitempty"`
+}
+
+type statusHistory []struct {
+	Day              *string `json:"day,omitempty"`
+	Status           *string `json:"status,omitempty"`
+	DowntimeDuration *int    `json:"downtime_duration,omitempty"`
 }
 
 type statusPageResourceHTTPResponse struct {
