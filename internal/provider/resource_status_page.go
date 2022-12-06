@@ -115,11 +115,6 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
-	"announcement_embed_enabled": {
-		Description: "Display the embedded announcement",
-		Type:        schema.TypeBool,
-		Optional:    true,
-	},
 	"password_enabled": {
 		Description: "Do you want to enable password protection on your status page?",
 		Type:        schema.TypeBool,
@@ -201,7 +196,6 @@ type statusPage struct {
 	AnnouncementEmbedVisible *bool   `json:"announcement_embed_visible,omitempty"`
 	AnnouncementEmbedLink    *string `json:"announcement_embed_link,omitempty"`
 	AnnouncementEmbedCSS     *string `json:"announcement_embed_css,omitempty"`
-	AnnouncementEmbedEnabled *bool   `json:"announcement_embed_enabled,omitempty"`
 	PasswordEnabled          *bool   `json:"password_enabled,omitempty"`
 	Password                 *string `json:"password,omitempty"`
 	AggregateState           *string `json:"aggregate_state,omitempty"`
@@ -247,7 +241,6 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "announcement_embed_visible", v: &in.AnnouncementEmbedVisible},
 		{k: "announcement_embed_link", v: &in.AnnouncementEmbedLink},
 		{k: "announcement_embed_css", v: &in.AnnouncementEmbedCSS},
-		{k: "announcement_embed_enabled", v: &in.AnnouncementEmbedVisible},
 		{k: "password_enabled", v: &in.PasswordEnabled},
 		{k: "password", v: &in.Password},
 		{k: "aggregate_state", v: &in.AggregateState},
