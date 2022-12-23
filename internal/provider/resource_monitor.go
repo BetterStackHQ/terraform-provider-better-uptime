@@ -126,7 +126,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Default:     true,
 	},
 	"team_wait": {
-		Description: "How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.",
+		Description: "How long to wait, in seconds, before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
@@ -175,7 +175,7 @@ var monitorSchema = map[string]*schema.Schema{
 		},
 	},
 	"recovery_period": {
-		Description: "How long the monitor must be up to automatically mark an incident as resolved after being down.",
+		Description: "How long, in seconds, the monitor must be up to automatically mark an incident as resolved after being down.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Default:     180,
@@ -193,7 +193,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Default:     180,
 	},
 	"confirmation_period": {
-		Description: "How long should we wait after observing a failure before we start a new incident?",
+		Description: "How long should we wait after observing a failure before we start a new incident? In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
