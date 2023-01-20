@@ -22,7 +22,7 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
-	"team": {
+	"team_id": {
 		Description: "", // TODO
 		Type:        schema.TypeInt,
 		Optional:    true,
