@@ -13,17 +13,17 @@ import (
 
 var policyStepMemberSchema = map[string]*schema.Schema{
 	"type": {
-		Description: "", // TODO
+		Description: "Type type of the member to notify during an incident. Can be one of current_on_call, entire_team, all_slack_integrations, all_microsoft_teams_integrations, all_zapier_integrations, all_webhook_integrations, all_splunk_on_call_integrations, user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook.",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"id": {
-		Description: "", // TODO
+		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
 	"team_id": {
-		Description: "", // TODO
+		Description: "The ID of the team to notify when member team is entire_team. When left empty, the team associated with the resource is assumed.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
@@ -31,48 +31,48 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 
 var policyStepSchema = map[string]*schema.Schema{
 	"type": {
-		Description: "", // TODO
+		Description: "The type of the step. Can be either escalation or branching",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"wait_before": {
-		Description: "", // TODO
+		Description: "How long to wait before executing this step since previous step.",
 		Type:        schema.TypeInt,
 		Required:    true,
 	},
 	"urgency_id": {
-		Description: "", // TODO
+		Description: "Which urgency to use for this step",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
 	"timezone": {
-		Description: "", // TODO
+		Description: "What timezone to use when evaluating time based branching rules. Used when step type is branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"days": {
-		Description: "", // TODO
+		Description: "An array of days during which the branching rule will be executed. Valid values are [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"]. Used when step type is branching.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
 	},
 	"time_from": {
-		Description: "", // TODO
+		Description: "A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"time_to": {
-		Description: "", // TODO
+		Description: "A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"policy_id": {
-		Description: "", // TODO
+		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is branching.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
 	"step_members": {
-		Description: "An array of escalation policy steps members", // TODO expand
+		Description: "An array of escalation policy steps members.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: policyStepMemberSchema},
 		Optional:    true,
@@ -91,24 +91,24 @@ var policySchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"repeat_count": {
-		Description: "", // TODO
+		Description: "How many times should the entire policy be repeated if no one acknowledges the incident.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Default:     0,
 	},
 	"repeat_delay": {
-		Description: "", // TODO
+		Description: "How long in seconds to wait before each repetition.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Default:     0,
 	},
 	"incident_token": {
-		Description: "", // TODO
+		Description: "Incident token that can be used for manually reporting incidents.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
 	"steps": {
-		Description: "An array of escalation policy steps", // TODO expand
+		Description: "An array of escalation policy steps",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: policyStepSchema},
 		Required:    true,
