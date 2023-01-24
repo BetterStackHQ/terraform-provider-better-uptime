@@ -23,7 +23,7 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"team_id": {
-		Description: "The ID of the team to notify when member team is entire_team. When left empty, the team associated with the resource is assumed.",
+		Description: "The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
@@ -31,7 +31,7 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 
 var policyStepSchema = map[string]*schema.Schema{
 	"type": {
-		Description: "The type of the step. Can be either escalation or branching",
+		Description: "The type of the step. Can be either escalation or branching.",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
@@ -41,12 +41,12 @@ var policyStepSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"urgency_id": {
-		Description: "Which urgency to use for this step",
+		Description: "Which urgency to use for this step.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
 	"timezone": {
-		Description: "What timezone to use when evaluating time based branching rules. Used when step type is branching.",
+		Description: "What timezone to use when evaluating time based branching rules. Used when step type is branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},

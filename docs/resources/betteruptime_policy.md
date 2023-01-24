@@ -35,7 +35,7 @@ https://docs.betteruptime.com/api/policies-api
 
 Required:
 
-- **type** (String) The type of the step. Can be either escalation or branching
+- **type** (String) The type of the step. Can be either escalation or branching.
 - **wait_before** (Number) How long to wait before executing this step since previous step.
 
 Optional:
@@ -46,7 +46,7 @@ Optional:
 - **time_from** (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.
 - **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.
 - **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is branching.
-- **urgency_id** (Number) Which urgency to use for this step
+- **urgency_id** (Number) Which urgency to use for this step.
 
 <a id="nestedblock--steps--step_members"></a>
 ### Nested Schema for `steps.step_members`
@@ -58,6 +58,6 @@ Required:
 Optional:
 
 - **id** (Number) The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user.
-- **team_id** (Number) The ID of the team to notify when member team is entire_team. When left empty, the team associated with the resource is assumed.
+- **team_id** (Number) The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used.
 
 
