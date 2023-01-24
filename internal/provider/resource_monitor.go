@@ -445,6 +445,7 @@ func monitorCopyAttrs(d *schema.ResourceData, in *monitor) diag.Diagnostics {
 
 func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in monitor
+	var out policyHTTPResponse
 	for _, e := range monitorRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
@@ -455,7 +456,7 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 		}
 	}
 
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/monitors/%s", url.PathEscape(d.Id())), &in)
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/monitors/%s", url.PathEscape(d.Id())), &in, &out)
 }
 
 func monitorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

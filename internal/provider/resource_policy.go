@@ -220,6 +220,7 @@ func policyCopyAttrs(d *schema.ResourceData, in *policy) diag.Diagnostics {
 
 func policyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in policy
+	var out policyHTTPResponse
 	for _, e := range policyRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "steps" {
@@ -230,7 +231,11 @@ func policyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/policies/%s", url.PathEscape(d.Id())), &in)
+	if err := resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/policies/%s", url.PathEscape(d.Id())), &in, &out); err != nil {
+		return err
+	}
+	d.SetId(out.Data.ID)
+	return policyCopyAttrs(d, &out.Data.Attributes)
 }
 
 func policyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -245,6 +250,27 @@ func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) {
 
 	for _, stepValues := range stepsValues.([]interface{}) {
 		stepValuesObject := stepValues.(map[string]interface{})
+
+		// Remove default values ("" or 0) from step
+		for k, v := range stepValuesObject {
+			if v == "" || v == 0 {
+				stepValuesObject[k] = nil
+			}
+		}
+
+		// Remove default values ("" or 0) from step members
+		stepMembers, ok := stepValuesObject["step_members"].([]interface{})
+		if ok {
+			for _, member := range stepMembers {
+				memberObject := member.(map[string]interface{})
+				for k, v := range memberObject {
+					if v == "" || v == 0 {
+						memberObject[k] = nil
+					}
+				}
+			}
+		}
+
 		var policyStep policyStep
 		err := mapstructure.Decode(stepValuesObject, &policyStep)
 		if err != nil {

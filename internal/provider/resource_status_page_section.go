@@ -129,6 +129,7 @@ func statusPageSectionCopyAttrs(d *schema.ResourceData, in *statusPageSection) d
 
 func statusPageSectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in statusPageSection
+	var out policyHTTPResponse
 	for _, e := range statusPageSectionRef(&in) {
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
@@ -136,7 +137,7 @@ func statusPageSectionUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	in.FixedPosition = truePtr()
 	statusPageID := d.Get("status_page_id").(string)
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/sections/%s", url.PathEscape(statusPageID), url.PathEscape(d.Id())), &in)
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/sections/%s", url.PathEscape(statusPageID), url.PathEscape(d.Id())), &in, &out)
 }
 
 func statusPageSectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

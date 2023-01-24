@@ -128,12 +128,13 @@ func heartbeatGroupCopyAttrs(d *schema.ResourceData, in *heartbeatGroup) diag.Di
 
 func heartbeatGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in heartbeatGroup
+	var out policyHTTPResponse
 	for _, e := range heartbeatGroupRef(&in) {
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
 		}
 	}
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/heartbeat-groups/%s", url.PathEscape(d.Id())), &in)
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/heartbeat-groups/%s", url.PathEscape(d.Id())), &in, &out)
 }
 
 func heartbeatGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
