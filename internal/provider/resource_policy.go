@@ -124,7 +124,7 @@ func newPolicyResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/policies-api",
+		Description: "https://betterstack.com/docs/uptime/api/list-all-escalation-policies/",
 		Schema:      policySchema,
 	}
 }

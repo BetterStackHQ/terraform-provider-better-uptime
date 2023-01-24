@@ -3,12 +3,12 @@
 page_title: "betteruptime_policy Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/policies-api
+https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
 ---
 
 # betteruptime_policy (Resource)
 
-https://docs.betteruptime.com/api/policies-api
+https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
 
 
 
