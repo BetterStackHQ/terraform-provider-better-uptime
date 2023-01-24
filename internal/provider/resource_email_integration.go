@@ -22,7 +22,7 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"policy_id": {
-		Description: "", // TODO
+		Description: "ID of the escalation policy associated with the email integration.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
@@ -65,81 +65,81 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"email_address": {
-		Description: "", // TODO
+		Description: "The email address we expect emails to receive at.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
 	"started_rule_type": {
-		Description: "", // TODO
+		Description: "Should an incident be started for all emails, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"acknowledged_rule_type": {
-		Description: "", // TODO
+		Description: "Should an incident be acknowledged for all emails, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"resolved_rule_type": {
-		Description: "", // TODO
+		Description: "Should an incident be resolved for all emails, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"started_rules": {
-		Description: "An array of rules to match to start a new incident. Required when 'started_rule_type' is 'any' or 'all'", // TODO expand
+		Description: "An array of rules to match to start a new incident.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationRuleSchema},
 		Optional:    true,
 	},
 	"acknowledged_rules": {
-		Description: "An array of rules to match to acknowledge an incident. Required when 'acknowledged_rule_type' is 'any' or 'all'", // TODO expand
+		Description: "An array of rules to match to acknowledge an incident.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationRuleSchema},
 		Optional:    true,
 	},
 	"resolved_rules": {
-		Description: "An array of rules to match to resolved an incident. Required when 'resolved_rule_type' is 'any' or 'all'", // TODO expand
+		Description: "An array of rules to match to resolved an incident.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationRuleSchema},
 		Optional:    true,
 	},
 	"cause_field": {
-		Description: "A field describing how to extract an incident cause, used as a short description shared with the team member on-call", // TODO expand
+		Description: "A field describing how to extract an incident cause, used as a short description shared with the team member on-call.",
 		Type:        schema.TypeSet,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 	},
 	"started_alert_id_field": {
-		Description: "A field describing how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents", // TODO expand
+		Description: "A field describing how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeSet,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 	},
 	"acknowledged_alert_id_field": {
-		Description: "A field describing how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents", // TODO expand
+		Description: "A field describing how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeSet,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 	},
 	"resolved_alert_id_field": {
-		Description: "A field describing how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents", // TODO expand
+		Description: "A field describing how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeSet,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 	},
 	"other_started_fields": {
-		Description: "An array of additional fields, which will be extracted from the incoming webhook starting an incident", // TODO expand
+		Description: "An array of additional fields, which will be extracted from the incoming webhook starting an incident.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 	},
 	"other_acknowledged_fields": {
-		Description: "An array of additional fields, which will be extracted from the incoming webhook acknowledging an incident", // TODO expand
+		Description: "An array of additional fields, which will be extracted from the incoming webhook acknowledging an incident.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 	},
 	"other_resolved_fields": {
-		Description: "An array of additional fields, which will be extracted from the incoming webhook resolving an incident", // TODO expand
+		Description: "An array of additional fields, which will be extracted from the incoming webhook resolving an incident.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
