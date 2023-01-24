@@ -23,23 +23,23 @@ https://docs.betteruptime.com/api/email-integrations-api
 
 ### Optional
 
-- **acknowledged_alert_id_field** (Block Set) A field describing how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for field schema](#nestedblock--field))
+- **acknowledged_alert_id_field** (Block Set) When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for field schema](#nestedblock--field))
 - **acknowledged_rules** (Block List) An array of rules to match to acknowledge an incident. (see [below for rule schema](#nestedblock--rule))
 - **call** (Boolean) Should we call the on-call person?
 - **cause_field** (Block Set) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for field schema](#nestedblock--field))
 - **email** (Boolean) Should we send an email to the on-call person?
 - **name** (String) The name of this Email integration.
-- **other_acknowledged_fields** (Block List) An array of additional fields, which will be extracted from the incoming webhook acknowledging an incident. (see [below for field schema](#nestedblock--field))
-- **other_resolved_fields** (Block List) An array of additional fields, which will be extracted from the incoming webhook resolving an incident. (see [below for field schema](#nestedblock--field))
-- **other_started_fields** (Block List) An array of additional fields, which will be extracted from the incoming webhook starting an incident. (see [below for field schema](#nestedblock--field))
+- **other_acknowledged_fields** (Block List) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for field schema](#nestedblock--field))
+- **other_resolved_fields** (Block List) An array of additional fields, which will be extracted when resolving an incident. (see [below for field schema](#nestedblock--field))
+- **other_started_fields** (Block List) An array of additional fields, which will be extracted when starting an incident. (see [below for field schema](#nestedblock--field))
 - **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
 - **policy_id** (Number) ID of the escalation policy associated with the email integration.
 - **push** (Boolean) Should we send a push notification to the on-call person?
 - **recovery_period** (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
-- **resolved_alert_id_field** (Block Set) A field describing how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for field schema](#nestedblock--field))
+- **resolved_alert_id_field** (Block Set) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for field schema](#nestedblock--field))
 - **resolved_rules** (Block List) An array of rules to match to resolved an incident. (see [below for rule schema](#nestedblock--rule))
 - **sms** (Boolean) Should we send an SMS to the on-call person?
-- **started_alert_id_field** (Block Set) A field describing how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for field schema](#nestedblock--field))
+- **started_alert_id_field** (Block Set) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for field schema](#nestedblock--field))
 - **started_rules** (Block List) An array of rules to match to start a new incident. (see [below for rule schema](#nestedblock--rule))
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
 
@@ -53,13 +53,13 @@ https://docs.betteruptime.com/api/email-integrations-api
 
 Optional:
 
-- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex
-- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after
-- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before
+- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
 - **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body.
 - **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
-- **name** (String) The name of the field
-- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field
+- **name** (String) The name of the field.
+- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
 
 
 <a id="nestedblock--rule"></a>
@@ -67,7 +67,7 @@ Optional:
 
 Optional:
 
-- **content** (String) The content we should match to satisfy the rule.
+- **content** (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
 - **match_type** (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
-- **rule_target** (String) The target of the rule. Can be any of the following: from_email, subject, or body for Email integrations.
+- **rule_target** (String) The target of the rule. Can be any of the following: from_email, subject or body.
 

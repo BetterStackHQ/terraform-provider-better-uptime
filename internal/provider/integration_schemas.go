@@ -7,12 +7,12 @@ import (
 
 var integrationFieldSchema = map[string]*schema.Schema{
 	"name": {
-		Description: "The name of the field",
+		Description: "The name of the field.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"special_type": {
-		Description: "A special type of the field. Can be alert_id or cause or otherwise null for a custom field",
+		Description: "A special type of the field. Can be alert_id or cause or otherwise null for a custom field.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
@@ -32,17 +32,17 @@ var integrationFieldSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"content": {
-		Description: "How should we extract content the field. Should be a valid Regex when match_type is match_regex",
+		Description: "How should we extract content the field. Should be a valid Regex when match_type is match_regex.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"content_before": {
-		Description: "When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before",
+		Description: "When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"content_after": {
-		Description: "When should we start extracting content for the field. Should be present when match_type is either match_between or match_after",
+		Description: "When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
@@ -65,7 +65,7 @@ var integrationRuleSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"content": {
-		Description: "The content we should match to satisfy the rule.",
+		Description: "The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
