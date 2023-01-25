@@ -17,7 +17,7 @@ var integrationFieldSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"field_target": {
-		Description: "The target of the field. Can be any of the following: from_email, subject, or body.",
+		Description: "The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
@@ -50,7 +50,7 @@ var integrationFieldSchema = map[string]*schema.Schema{
 
 var integrationRuleSchema = map[string]*schema.Schema{
 	"rule_target": {
-		Description: "The target of the rule. Can be any of the following: from_email, subject, or body for Email integrations.",
+		Description: "The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
