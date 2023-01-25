@@ -62,6 +62,74 @@ resource "betteruptime_status_page_resource" "heartbeat" {
   public_name            = "example.com site (heartbeat)"
 }
 
+resource "betteruptime_email_integration" "this" {
+  name                   = "Terraform Email integration"
+  call                   = false
+  sms                    = false
+  email                  = true
+  push                   = true
+  team_wait              = 180
+  recovery_period        = 0
+  paused                 = false
+  started_rule_type      = "any"
+  acknowledged_rule_type = "unused"
+  resolved_rule_type     = "all"
+
+  started_rules {
+    rule_target = "subject"
+    match_type  = "contains"
+    content     = "[Alert]"
+  }
+  started_rules {
+    rule_target = "subject"
+    match_type  = "contains"
+    content     = "[Alert Reminder]"
+  }
+  resolved_rules {
+    rule_target = "subject"
+    match_type  = "contains"
+    content     = "[Resolved Alert]"
+  }
+
+  cause_field {
+    name         = "Cause"
+    special_type = "cause"
+    field_target = "subject"
+    match_type   = "match_everything"
+  }
+  started_alert_id_field {
+    name           = "Alert ID"
+    special_type   = "alert_id"
+    field_target   = "subject"
+    match_type     = "match_between"
+    content_before = "]"
+    content_after  = ")"
+  }
+  resolved_alert_id_field {
+    name           = "Alert ID"
+    special_type   = "alert_id"
+    field_target   = "subject"
+    match_type     = "match_between"
+    content_before = "]"
+    content_after  = ")"
+  }
+
+  other_started_fields {
+    name           = "Caused by"
+    field_target   = "body"
+    match_type     = "match_between"
+    content_before = "by:"
+    content_after  = "\n"
+  }
+  other_started_fields {
+    name           = "Description"
+    field_target   = "body"
+    match_type     = "match_between"
+    content_before = "Description:"
+    content_after  = "\n"
+  }
+}
+
 resource "betteruptime_policy" "this" {
   name         = "Standard Escalation Policy"
   repeat_count = 3

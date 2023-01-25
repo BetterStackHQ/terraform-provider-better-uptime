@@ -50,6 +50,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_policy":  newPolicyDataSource(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
+			"betteruptime_email_integration":    newEmailIntegrationResource(),
 			"betteruptime_heartbeat":            newHeartbeatResource(),
 			"betteruptime_heartbeat_group":      newHeartbeatGroupResource(),
 			"betteruptime_monitor":              newMonitorResource(),
