@@ -296,12 +296,13 @@ func statusPageCopyAttrs(d *schema.ResourceData, in *statusPage, derr diag.Diagn
 
 func statusPageUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in statusPage
+	var out policyHTTPResponse
 	for _, e := range statusPageRef(&in) {
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
 		}
 	}
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s", url.PathEscape(d.Id())), &in)
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s", url.PathEscape(d.Id())), &in, &out)
 }
 
 func statusPageDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

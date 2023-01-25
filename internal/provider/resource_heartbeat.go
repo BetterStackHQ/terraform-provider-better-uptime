@@ -216,12 +216,13 @@ func heartbeatCopyAttrs(d *schema.ResourceData, in *heartbeat) diag.Diagnostics 
 
 func heartbeatUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in heartbeat
+	var out policyHTTPResponse
 	for _, e := range heartbeatRef(&in) {
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
 		}
 	}
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/heartbeats/%s", url.PathEscape(d.Id())), &in)
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/heartbeats/%s", url.PathEscape(d.Id())), &in, &out)
 }
 
 func heartbeatDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
