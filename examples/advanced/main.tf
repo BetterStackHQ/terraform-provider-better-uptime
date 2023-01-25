@@ -144,64 +144,64 @@ resource "betteruptime_incoming_webhook" "this" {
   resolved_rule_type     = "all"
 
   started_rules {
-    rule_target = "json"
+    rule_target  = "json"
     target_field = "incident.status"
-    match_type = "contains"
-    content = "alert"
+    match_type   = "contains"
+    content      = "alert"
   }
   started_rules {
-    rule_target = "json"
+    rule_target  = "json"
     target_field = "incident.status"
-    match_type = "contains"
-    content = "reminder"
+    match_type   = "contains"
+    content      = "reminder"
   }
   resolved_rules {
-    rule_target = "json"
+    rule_target  = "json"
     target_field = "incident.status"
-    match_type = "contains"
-    content = "resolved"
+    match_type   = "contains"
+    content      = "resolved"
   }
 
   cause_field {
     field_target = "json"
     target_field = "incident.status"
-    match_type = "match_everything"
-    content = "title"
+    match_type   = "match_everything"
+    content      = "title"
   }
   started_alert_id_field {
-    name = "Alert ID"
-    special_type = "alert_id"
-    field_target = "json"
-    target_field = "incident.id"
-    match_type = "match_between"
+    name           = "Alert ID"
+    special_type   = "alert_id"
+    field_target   = "json"
+    target_field   = "incident.id"
+    match_type     = "match_between"
     content_before = "<"
-    content_after = "-"
+    content_after  = "-"
   }
   resolved_alert_id_field {
-    name = "Alert ID"
-    special_type = "alert_id"
-    field_target = "json"
-    target_field = "incident.id"
-    match_type = "match_between"
+    name           = "Alert ID"
+    special_type   = "alert_id"
+    field_target   = "json"
+    target_field   = "incident.id"
+    match_type     = "match_between"
     content_before = "<"
-    content_after = "-"
+    content_after  = "-"
   }
 
   other_started_fields {
-    name = "Caused by"
-    field_target = "json"
-    target_field = "incident.description"
-    match_type = "match_between"
+    name           = "Caused by"
+    field_target   = "json"
+    target_field   = "incident.description"
+    match_type     = "match_between"
     content_before = "by:"
-    content_after = ","
+    content_after  = ","
   }
   other_started_fields {
-    name = "Description"
-    field_target = "json"
-    target_field = "incident.description"
-    match_type = "match_between"
+    name           = "Description"
+    field_target   = "json"
+    target_field   = "incident.description"
+    match_type     = "match_between"
     content_before = "description:"
-    content_after = ","
+    content_after  = ","
   }
 }
 
