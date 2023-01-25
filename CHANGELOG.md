@@ -4,23 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.14]
+## [0.3.15] - 2023-01-25
+- Add escalation policies (#41)
+- Add email integrations (#42)
+- Add incoming webhooks (#43)
+
+## [0.3.14] - 2022-12-06
 - Add automatic_reports, announcement_embed_visible, and read-only status_history to status page resources
 
-## [0.3.13]
+## [0.3.13] - 2022-11-16
 - Add more missing attributes
 - Add custom_javascript attribute for status page resources
 
-## [0.3.12]
+## [0.3.12] - 2022-05-18
 - Add widget_type attribute for status page resources
 
-## [0.3.11]
+## [0.3.11] - 2022-03-24
 - Add policy_id attribute to the Heartbeat resource
 
-## [0.3.10]
+## [0.3.10] - 2022-03-09
 - Fix marshalling of empty array attributes in JSON (#24)
 
-## [0.3.9]
+## [0.3.9] - 2022-03-04
 - Add support for the `maintenance_timezone` attribute to the Monitor resource (#23)
 
 ## [0.3.8] - 2022-02-28
@@ -50,7 +55,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.4] - 2021-08-12
 - Initial release (migrated from https://github.com/BetterStackHQ/deprecated-terraform-provider-betteruptime)
 
-[Unreleased]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.13...HEAD
+[Unreleased]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.15...HEAD
+[0.3.15]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.14...v0.3.15
+[0.3.14]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.13...v0.3.14
 [0.3.13]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.12...v0.3.13
 [0.3.12]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.11...v0.3.12
 [0.3.11]: https://github.com/BetterStackHQ/terraform-provider-better-uptime/compare/v0.3.10...v0.3.11
