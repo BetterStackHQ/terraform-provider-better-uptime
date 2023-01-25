@@ -3,7 +3,7 @@
 page_title: "betteruptime_policy Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
+  https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
 ---
 
 # betteruptime_policy (Resource)
@@ -45,7 +45,7 @@ Optional:
 - **step_members** (Block List) An array of escalation policy steps members. (see [below for nested schema](#nestedblock--steps--step_members))
 - **time_from** (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.
 - **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.
-- **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is branching.
+- **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
 - **urgency_id** (Number) Which urgency to use for this step.
 
 <a id="nestedblock--steps--step_members"></a>

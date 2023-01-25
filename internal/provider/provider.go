@@ -53,6 +53,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_email_integration":    newEmailIntegrationResource(),
 			"betteruptime_heartbeat":            newHeartbeatResource(),
 			"betteruptime_heartbeat_group":      newHeartbeatGroupResource(),
+			"betteruptime_incoming_webhook":     newIncomingWebhookResource(),
 			"betteruptime_monitor":              newMonitorResource(),
 			"betteruptime_monitor_group":        newMonitorGroupResource(),
 			"betteruptime_policy":               newPolicyResource(),

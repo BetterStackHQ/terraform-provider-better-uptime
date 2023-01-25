@@ -130,6 +130,81 @@ resource "betteruptime_email_integration" "this" {
   }
 }
 
+resource "betteruptime_incoming_webhook" "this" {
+  name                   = "Terraform Incoming Webhook"
+  call                   = false
+  sms                    = false
+  email                  = true
+  push                   = true
+  team_wait              = 180
+  recovery_period        = 0
+  paused                 = false
+  started_rule_type      = "any"
+  acknowledged_rule_type = "unused"
+  resolved_rule_type     = "all"
+
+  started_rules {
+    rule_target = "json"
+    target_field = "incident.status"
+    match_type = "contains"
+    content = "alert"
+  }
+  started_rules {
+    rule_target = "json"
+    target_field = "incident.status"
+    match_type = "contains"
+    content = "reminder"
+  }
+  resolved_rules {
+    rule_target = "json"
+    target_field = "incident.status"
+    match_type = "contains"
+    content = "resolved"
+  }
+
+  cause_field {
+    field_target = "json"
+    target_field = "incident.status"
+    match_type = "match_everything"
+    content = "title"
+  }
+  started_alert_id_field {
+    name = "Alert ID"
+    special_type = "alert_id"
+    field_target = "json"
+    target_field = "incident.id"
+    match_type = "match_between"
+    content_before = "<"
+    content_after = "-"
+  }
+  resolved_alert_id_field {
+    name = "Alert ID"
+    special_type = "alert_id"
+    field_target = "json"
+    target_field = "incident.id"
+    match_type = "match_between"
+    content_before = "<"
+    content_after = "-"
+  }
+
+  other_started_fields {
+    name = "Caused by"
+    field_target = "json"
+    target_field = "incident.description"
+    match_type = "match_between"
+    content_before = "by:"
+    content_after = ","
+  }
+  other_started_fields {
+    name = "Description"
+    field_target = "json"
+    target_field = "incident.description"
+    match_type = "match_between"
+    content_before = "description:"
+    content_after = ","
+  }
+}
+
 resource "betteruptime_policy" "this" {
   name         = "Standard Escalation Policy"
   repeat_count = 3

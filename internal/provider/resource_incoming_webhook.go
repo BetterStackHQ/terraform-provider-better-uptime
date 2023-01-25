@@ -10,19 +10,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var emailIntegrationSchema = map[string]*schema.Schema{
+var incomingWebhookSchema = map[string]*schema.Schema{
 	"id": {
-		Description: "The ID of this Email integration.",
+		Description: "The ID of this incoming webhook.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
 	"name": {
-		Description: "The name of this Email integration.",
+		Description: "The name of this incoming webhook.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"policy_id": {
-		Description: "ID of the escalation policy associated with the email integration.",
+		Description: "ID of the escalation policy associated with the incoming webhook.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
@@ -64,23 +64,23 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 	},
-	"email_address": {
-		Description: "The email address we expect emails to receive at.",
+	"url": {
+		Description: "The url at which we expect to receive the webhook.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
 	"started_rule_type": {
-		Description: "Should an incident be started for all emails, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any",
+		Description: "Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"acknowledged_rule_type": {
-		Description: "Should an incident be acknowledged for all emails, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any",
+		Description: "Should an incident be acknowledged for all webhooks, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"resolved_rule_type": {
-		Description: "Should an incident be resolved for all emails, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any",
+		Description: "Should an incident be resolved for all webhooks, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
@@ -146,21 +146,21 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	},
 }
 
-func newEmailIntegrationResource() *schema.Resource {
+func newIncomingWebhookResource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: emailIntegrationCreate,
-		ReadContext:   emailIntegrationRead,
-		UpdateContext: emailIntegrationUpdate,
-		DeleteContext: emailIntegrationDelete,
+		CreateContext: incomingWebhookCreate,
+		ReadContext:   incomingWebhookRead,
+		UpdateContext: incomingWebhookUpdate,
+		DeleteContext: incomingWebhookDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/email-integrations-api",
-		Schema:      emailIntegrationSchema,
+		Description: "https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/",
+		Schema:      incomingWebhookSchema,
 	}
 }
 
-type emailIntegration struct {
+type incomingWebhook struct {
 	Id                       *int                `json:"id,omitempty"`
 	Name                     *string             `json:"name,omitempty"`
 	PolicyId                 *int                `json:"policy_id,omitempty"`
@@ -171,7 +171,7 @@ type emailIntegration struct {
 	TeamWait                 *int                `json:"team_wait,omitempty"`
 	RecoveryPeriod           *int                `json:"recovery_period,omitempty"`
 	Paused                   *bool               `json:"paused,omitempty"`
-	EmailAddress             *string             `json:"email_address,omitempty"`
+	Url                      *string             `json:"url,omitempty"`
 	StartedRuleType          *string             `json:"started_rule_type,omitempty"`
 	AcknowledgedRuleType     *string             `json:"acknowledged_rule_type,omitempty"`
 	ResolvedRuleType         *string             `json:"resolved_rule_type,omitempty"`
@@ -187,14 +187,14 @@ type emailIntegration struct {
 	OtherResolvedFields      *[]integrationField `json:"other_resolved_fields,omitempty"`
 }
 
-type emailIntegrationHTTPResponse struct {
+type incomingWebhookHTTPResponse struct {
 	Data struct {
-		ID         string           `json:"id"`
-		Attributes emailIntegration `json:"attributes"`
+		ID         string          `json:"id"`
+		Attributes incomingWebhook `json:"attributes"`
 	} `json:"data"`
 }
 
-func emailIntegrationRef(in *emailIntegration) []struct {
+func incomingWebhookRef(in *incomingWebhook) []struct {
 	k string
 	v interface{}
 } {
@@ -212,7 +212,7 @@ func emailIntegrationRef(in *emailIntegration) []struct {
 		{k: "team_wait", v: &in.TeamWait},
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},
-		{k: "email_address", v: &in.EmailAddress},
+		{k: "url", v: &in.Url},
 		{k: "started_rule_type", v: &in.StartedRuleType},
 		{k: "acknowledged_rule_type", v: &in.AcknowledgedRuleType},
 		{k: "resolved_rule_type", v: &in.ResolvedRuleType},
@@ -229,10 +229,10 @@ func emailIntegrationRef(in *emailIntegration) []struct {
 	}
 }
 
-func emailIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var in emailIntegration
+func incomingWebhookCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var in incomingWebhook
 
-	for _, e := range emailIntegrationRef(&in) {
+	for _, e := range incomingWebhookRef(&in) {
 		if isRulesAttribute(e.k) {
 			loadIntegrationRules(d, e.k, e.v.(**[]integrationRule))
 		} else if isFieldAttribute(e.k) {
@@ -243,28 +243,28 @@ func emailIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta in
 			load(d, e.k, e.v)
 		}
 	}
-	var out emailIntegrationHTTPResponse
-	if err := resourceCreate(ctx, meta, "/api/v2/email-integrations", &in, &out); err != nil {
+	var out incomingWebhookHTTPResponse
+	if err := resourceCreate(ctx, meta, "/api/v2/incoming-webhooks", &in, &out); err != nil {
 		return err
 	}
 	d.SetId(out.Data.ID)
-	return emailIntegrationCopyAttrs(d, &out.Data.Attributes)
+	return incomingWebhookCopyAttrs(d, &out.Data.Attributes)
 }
 
-func emailIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var out emailIntegrationHTTPResponse
-	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/email-integrations/%s", url.PathEscape(d.Id())), &out); err != nil {
+func incomingWebhookRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var out incomingWebhookHTTPResponse
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/incoming-webhooks/%s", url.PathEscape(d.Id())), &out); err != nil {
 		return err
 	} else if !ok {
 		d.SetId("") // Force "create" on 404.
 		return nil
 	}
-	return emailIntegrationCopyAttrs(d, &out.Data.Attributes)
+	return incomingWebhookCopyAttrs(d, &out.Data.Attributes)
 }
 
-func emailIntegrationCopyAttrs(d *schema.ResourceData, in *emailIntegration) diag.Diagnostics {
+func incomingWebhookCopyAttrs(d *schema.ResourceData, in *incomingWebhook) diag.Diagnostics {
 	var derr diag.Diagnostics
-	for _, e := range emailIntegrationRef(in) {
+	for _, e := range incomingWebhookRef(in) {
 		if !isFieldAttribute(e.k) {
 			value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
 			if err := d.Set(e.k, value); err != nil {
@@ -275,10 +275,10 @@ func emailIntegrationCopyAttrs(d *schema.ResourceData, in *emailIntegration) dia
 	return derr
 }
 
-func emailIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var in emailIntegration
+func incomingWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var in incomingWebhook
 	var out policyHTTPResponse
-	for _, e := range emailIntegrationRef(&in) {
+	for _, e := range incomingWebhookRef(&in) {
 		if d.HasChange(e.k) {
 			if isRulesAttribute(e.k) {
 				loadIntegrationRules(d, e.k, e.v.(**[]integrationRule))
@@ -292,9 +292,9 @@ func emailIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/email-integrations/%s", url.PathEscape(d.Id())), &in, &out)
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/incoming-webhooks/%s", url.PathEscape(d.Id())), &in, &out)
 }
 
-func emailIntegrationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/email-integrations/%s", url.PathEscape(d.Id())))
+func incomingWebhookDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/incoming-webhooks/%s", url.PathEscape(d.Id())))
 }
