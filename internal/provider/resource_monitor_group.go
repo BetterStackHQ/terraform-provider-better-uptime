@@ -128,12 +128,13 @@ func monitorGroupCopyAttrs(d *schema.ResourceData, in *monitorGroup) diag.Diagno
 
 func monitorGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in monitorGroup
+	var out policyHTTPResponse
 	for _, e := range monitorGroupRef(&in) {
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
 		}
 	}
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/monitor-groups/%s", url.PathEscape(d.Id())), &in)
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/monitor-groups/%s", url.PathEscape(d.Id())), &in, &out)
 }
 
 func monitorGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

@@ -42,7 +42,7 @@ Monitor lookup.
 
     `status` We will check your website for 2XX HTTP status code.
 
-	`expected_status_code` We will check if your website returned one of the values in expected_status_codes.
+    `expected_status_code` We will check if your website returned one of the values in expected_status_codes.
 
     `keyword` We will check if your website contains the required_keyword.
 

@@ -69,7 +69,7 @@ func resourceRead(ctx context.Context, meta interface{}, url string, out interfa
 	return nil, true
 }
 
-func resourceUpdate(ctx context.Context, meta interface{}, url string, req interface{}) diag.Diagnostics {
+func resourceUpdate(ctx context.Context, meta interface{}, url string, req interface{}, out interface{}) diag.Diagnostics {
 	reqBody, err := json.Marshal(&req)
 	if err != nil {
 		return diag.FromErr(err)
@@ -89,6 +89,9 @@ func resourceUpdate(ctx context.Context, meta interface{}, url string, req inter
 		return diag.Errorf("PATCH %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
 	}
 	log.Printf("PATCH %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
+	if err := json.Unmarshal(body, &out); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 func resourceDelete(ctx context.Context, meta interface{}, url string) diag.Diagnostics {

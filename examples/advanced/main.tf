@@ -130,3 +130,23 @@ resource "betteruptime_email_integration" "this" {
   }
 }
 
+resource "betteruptime_policy" "this" {
+  name         = "Standard Escalation Policy"
+  repeat_count = 3
+  repeat_delay = 60
+
+  steps {
+    type        = "escalation"
+    wait_before = 0
+    urgency_id  = var.urgency_id
+    step_members { type = "all_slack_integrations" }
+    step_members { type = "all_webhook_integrations" }
+    step_members { type = "current_on_call" }
+  }
+  steps {
+    type        = "escalation"
+    wait_before = 180
+    urgency_id  = var.urgency_id
+    step_members { type = "entire_team" }
+  }
+}
