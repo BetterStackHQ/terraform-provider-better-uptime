@@ -35,7 +35,7 @@ https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
 
 Required:
 
-- **type** (String) The type of the step. Can be either escalation or branching.
+- **type** (String) The type of the step. Can be either escalation or time_branching.
 - **wait_before** (Number) How long to wait before executing this step since previous step.
 
 Optional:
