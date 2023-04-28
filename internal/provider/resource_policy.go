@@ -31,7 +31,7 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 
 var policyStepSchema = map[string]*schema.Schema{
 	"type": {
-		Description: "The type of the step. Can be either escalation or branching.",
+		Description: "The type of the step. Can be either escalation or time_branching.",
 		Type:        schema.TypeString,
 		Required:    true,
 	},

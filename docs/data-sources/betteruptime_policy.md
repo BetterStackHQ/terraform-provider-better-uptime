@@ -35,7 +35,7 @@ Policy lookup.
 - **step_members** (Block List) An array of escalation policy steps members. (see [below for nested schema](#nestedblock--steps--step_members))
 - **time_from** (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.
 - **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.
-- **type** (String) The type of the step. Can be either escalation or branching
+- **type** (String) The type of the step. Can be either escalation or time_branching
 - **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is branching.
 - **urgency_id** (Number) Which urgency to use for this step
 - **wait_before** (Number) How long to wait before executing this step since previous step.
