@@ -90,15 +90,15 @@ terraform: install
 
 build:
 # -gcflags "all=-N -l" is here for delve (`go tool compile -help` for more)
-	go build -gcflags "all=-N -l" -ldflags "-X main.version=0.3.16"
+	go build -gcflags "all=-N -l" -ldflags "-X main.version=0.3.17"
 
 install: build
-	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.3.16/$$(go env GOOS)_$$(go env GOARCH)" && \
+	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.3.17/$$(go env GOOS)_$$(go env GOARCH)" && \
 		mkdir -p "$$PLUGIN_DIR" && \
 		cp terraform-provider-better-uptime "$$PLUGIN_DIR/"
 
 uninstall:
-	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.3.16"
+	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.3.17"
 
 debug: build
 # https://github.com/go-delve/delve/blob/master/Documentation/installation/README.md
