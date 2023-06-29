@@ -33,7 +33,7 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 - **other_resolved_fields** (Block List) An array of additional fields, which will be extracted when resolving an incident. (see [below for field schema](#nestedblock--field))
 - **other_started_fields** (Block List) An array of additional fields, which will be extracted when starting an incident. (see [below for field schema](#nestedblock--field))
 - **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
-- **policy_id** (Number) ID of the escalation policy associated with the incoming webhook.
+- **policy_id** (String) ID of the escalation policy associated with the incoming webhook.
 - **push** (Boolean) Should we send a push notification to the on-call person?
 - **recovery_period** (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
 - **resolved_alert_id_field** (Block Set) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for field schema](#nestedblock--field))
