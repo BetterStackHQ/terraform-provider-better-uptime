@@ -101,6 +101,11 @@ var statusPageStatusHistorySchema = map[string]*schema.Schema{
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},
+	"maintenance_duration": {
+		Description: "Status duration",
+		Type:        schema.TypeInt,
+		Optional:    true,
+	},
 }
 
 func newStatusPageResourceResource() *schema.Resource {
