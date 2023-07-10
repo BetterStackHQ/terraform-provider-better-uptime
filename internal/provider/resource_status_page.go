@@ -182,7 +182,7 @@ type statusPage struct {
 	CompanyName              *string `json:"company_name,omitempty"`
 	CompanyURL               *string `json:"company_url,omitempty"`
 	ContactURL               *string `json:"contact_url,omitempty"`
-	LogoURL                  *string `json:"logo_url,omitempty"`
+	LogoURL                  *string `json:"logo_remote_url,omitempty"`
 	Timezone                 *string `json:"timezone,omitempty"`
 	Subdomain                *string `json:"subdomain,omitempty"`
 	CustomDomain             *string `json:"custom_domain,omitempty"`
