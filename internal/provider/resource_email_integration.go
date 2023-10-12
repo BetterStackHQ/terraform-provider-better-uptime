@@ -23,7 +23,7 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	},
 	"policy_id": {
 		Description: "ID of the escalation policy associated with the email integration.",
-		Type:        schema.TypeInt,
+		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"call": {
@@ -163,7 +163,7 @@ func newEmailIntegrationResource() *schema.Resource {
 type emailIntegration struct {
 	Id                       *int                `json:"id,omitempty"`
 	Name                     *string             `json:"name,omitempty"`
-	PolicyId                 *int                `json:"policy_id,omitempty"`
+	PolicyId                 *string             `json:"policy_id,omitempty"`
 	Call                     *bool               `json:"call,omitempty"`
 	SMS                      *bool               `json:"sms,omitempty"`
 	Email                    *bool               `json:"email,omitempty"`
