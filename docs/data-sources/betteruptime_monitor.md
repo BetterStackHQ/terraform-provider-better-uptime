@@ -25,7 +25,7 @@ Monitor lookup.
 - **auth_username** (String, Sensitive) Basic HTTP authentication username to include with the request.
 - **call** (Boolean) Should we call the on-call person?
 - **check_frequency** (Number) How often should we check your website? In seconds.
-- **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident?
+- **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident? In seconds.
 - **created_at** (String) The time when this monitor was created.
 - **domain_expiration** (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **email** (Boolean) Should we send an email to the on-call person?
@@ -42,7 +42,7 @@ Monitor lookup.
 
     `status` We will check your website for 2XX HTTP status code.
 
-    `expected_status_code` We will check if your website returned one of the values in expected_status_codes.
+	`expected_status_code` We will check if your website returned one of the values in expected_status_codes.
 
     `keyword` We will check if your website contains the required_keyword.
 
@@ -70,7 +70,7 @@ Monitor lookup.
 - **port** (String) Required if monitor_type is set to tcp, udp, smtp, pop, or imap. tcp and udp monitors accept any ports, while smtp, pop, and imap accept only the specified ports corresponding with their servers (e.g. "25,465,587" for smtp).
 - **pronounceable_name** (String) Pronounceable name of the monitor. We will use this when we call you. Try to make it tongue-friendly, please?
 - **push** (Boolean) Should we send a push notification to the on-call person?
-- **recovery_period** (Number) How long the monitor must be up to automatically mark an incident as resolved after being down.
+- **recovery_period** (Number) How long the monitor must be up to automatically mark an incident as resolved after being down. In seconds.
 - **regions** (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.
 - **remember_cookies** (Boolean) Set to true to keep cookies when redirecting.
 - **request_body** (String) Request body for POST, PUT, PATCH requests.
@@ -80,7 +80,7 @@ Monitor lookup.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **ssl_expiration** (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **status** (String) The status of this website check.
-- **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
+- **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.
 - **updated_at** (String) The time when this monitor was updated.
 - **verify_ssl** (Boolean) Should we verify SSL certificate validity?
 

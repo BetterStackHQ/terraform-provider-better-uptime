@@ -43,6 +43,7 @@ Read-Only:
 
 - **day** (String)
 - **downtime_duration** (Number)
+- **maintenance_duration** (Number)
 - **status** (String)
 
 
