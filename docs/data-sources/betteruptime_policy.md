@@ -27,23 +27,28 @@ Policy lookup.
 - **repeat_delay** (Number) How long in seconds to wait before each repetition.
 - **steps** (List of Object) An array of escalation policy steps (see [below for nested schema](#nestedatt--steps))
 
-<a id="nestedblock--steps"></a>
+<a id="nestedatt--steps"></a>
 ### Nested Schema for `steps`
 
-- **days** (List of String) An array of days during which the branching rule will be executed. Valid values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]. Used when step type is branching.
-- **policy_id** (Number) A policy to executed if the branching rule matches the time of an incident. Used when step type is branching.
-- **step_members** (Block List) An array of escalation policy steps members. (see [below for nested schema](#nestedblock--steps--step_members))
-- **time_from** (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.
-- **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.
-- **type** (String) The type of the step. Can be either escalation or time_branching
-- **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is branching.
-- **urgency_id** (Number) Which urgency to use for this step
-- **wait_before** (Number) How long to wait before executing this step since previous step.
+Read-Only:
 
-<a id="nestedblock--steps--step_members"></a>
+- **days** (List of String)
+- **policy_id** (Number)
+- **step_members** (List of Object) (see [below for nested schema](#nestedobjatt--steps--step_members))
+- **time_from** (String)
+- **time_to** (String)
+- **timezone** (String)
+- **type** (String)
+- **urgency_id** (Number)
+- **wait_before** (Number)
+
+<a id="nestedobjatt--steps--step_members"></a>
 ### Nested Schema for `steps.step_members`
 
-- **id** (Number) The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user.
-- **team_id** (Number) The ID of the team to notify when member team is entire_team. When left empty, the team associated with the resource is assumed.
-- **type** (String) Type type of the member to notify during an incident. Can be one of current_on_call, entire_team, all_slack_integrations, all_microsoft_teams_integrations, all_zapier_integrations, all_webhook_integrations, all_splunk_on_call_integrations, user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook.
+Read-Only:
+
+- **id** (Number)
+- **team_id** (Number)
+- **type** (String)
+
 
