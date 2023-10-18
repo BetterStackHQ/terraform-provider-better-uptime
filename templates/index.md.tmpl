@@ -30,8 +30,8 @@ resource "betteruptime_monitor" "this" {
 }
 
 resource "betteruptime_status_page_resource" "monitor" {
-  status_page_id = betteruptime_status_page.this.id
-  resource_id    = betteruptime_monitor.this.id
+  status_page_id = better_uptime_status_page.this.id
+  resource_id    = better_uptime_monitor.this.id
   resource_type  = "Monitor"
   public_name    = "example.com site"
 }
