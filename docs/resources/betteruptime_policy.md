@@ -57,7 +57,6 @@ Required:
 
 Optional:
 
-- **id** (Number) The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user.
-- **team_id** (Number) The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used.
+- **id** (Number) The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user. Can be used for entire_team member type to specify the ID of the team to notify (current team if not provided).
 
 
