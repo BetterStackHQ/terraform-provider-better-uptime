@@ -26,6 +26,7 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 		Description: "The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Deprecated:  "Use id instead.",
 	},
 }
 
