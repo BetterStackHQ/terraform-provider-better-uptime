@@ -6,7 +6,7 @@ description: |-
   https://docs.betteruptime.com/api/metadata-api
 ---
 
-# betteruptime_monitor (Resource)
+# betteruptime_metadata (Resource)
 
 https://docs.betteruptime.com/api/metadata-api
 
