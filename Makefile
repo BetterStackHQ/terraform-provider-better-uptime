@@ -9,6 +9,7 @@ GOLANGCI_LINT := golangci-lint run --disable-all \
 	-E staticcheck \
 	-E typecheck \
 	-E unused
+VERSION := 0.5.0
 .PHONY: test build
 
 help:
@@ -90,15 +91,15 @@ terraform: install
 
 build:
 # -gcflags "all=-N -l" is here for delve (`go tool compile -help` for more)
-	go build -gcflags "all=-N -l" -ldflags "-X main.version=0.4.0"
+	go build -gcflags "all=-N -l" -ldflags "-X main.version=$(VERSION)"
 
 install: build
-	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.4.0/$$(go env GOOS)_$$(go env GOARCH)" && \
+	PLUGIN_DIR="$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/$(VERSION)/$$(go env GOOS)_$$(go env GOARCH)" && \
 		mkdir -p "$$PLUGIN_DIR" && \
 		cp terraform-provider-better-uptime "$$PLUGIN_DIR/"
 
 uninstall:
-	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/0.4.0"
+	rm -rf "$$HOME/.terraform.d/plugins/registry.terraform.io/BetterStackHQ/better-uptime/$(VERSION)"
 
 debug: build
 # https://github.com/go-delve/delve/blob/master/Documentation/installation/README.md

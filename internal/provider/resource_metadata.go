@@ -138,7 +138,7 @@ func metadataCopyAttrs(d *schema.ResourceData, in *metadata) diag.Diagnostics {
 
 func metadataUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in metadata
-	var out policyHTTPResponse
+	var out metadataHTTPResponse
 	for _, e := range metadataRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
