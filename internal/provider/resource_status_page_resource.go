@@ -127,7 +127,7 @@ func newStatusPageResourceResource() *schema.Resource {
 				return []*schema.ResourceData{d}, nil
 			},
 		},
-		Description: "https://docs.betteruptime.com/api/status-page-resources-api",
+		Description: "https://betterstack.com/docs/uptime/api/status-page-resources",
 		Schema:      statusPageResourceSchema,
 	}
 }

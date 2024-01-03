@@ -49,7 +49,7 @@ resource "betteruptime_status_page_resource" "monitor" {
 
 ## Documentation
 
-See Better Uptime [API docs](https://docs.betteruptime.com/api/getting-started) to obtain API Token and get the complete list of parameter options. Or explore the Terraform Registry [docs](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs).
+See Better Uptime [API docs](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/) to obtain API Token and get the complete list of parameter options. Or explore the Terraform Registry [docs](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs).
 
 ## Development
 

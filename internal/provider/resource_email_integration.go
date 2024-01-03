@@ -155,7 +155,7 @@ func newEmailIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/email-integrations-api",
+		Description: "https://betterstack.com/docs/uptime/api/email-integrations/",
 		Schema:      emailIntegrationSchema,
 	}
 }

@@ -7,7 +7,7 @@ description: |-
 
 # betteruptime Provider
 
-The Better Uptime provider provides resources to interact with the [Better Uptime API](https://docs.betteruptime.com/api/getting-started).
+The Better Uptime provider provides resources to interact with the [Better Uptime API](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/).
 
 ## Example Usage
 
@@ -42,4 +42,4 @@ resource "betteruptime_status_page_resource" "monitor" {
 
 ### Required
 
-- **api_token** (String, Sensitive) Better Uptime API Token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://docs.betteruptime.com/api/getting-started#obtaining-an-api-token on how to obtain the API token for your team.
+- **api_token** (String, Sensitive) Better Uptime API Token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token on how to obtain the API token for your team.

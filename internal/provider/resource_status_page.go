@@ -172,7 +172,7 @@ func newStatusPageResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/status-pages-api",
+		Description: "https://betterstack.com/docs/uptime/api/status-pages/",
 		Schema:      statusPageSchema,
 	}
 }

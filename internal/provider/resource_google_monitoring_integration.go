@@ -81,7 +81,7 @@ func newGoogleMonitoringIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/google-monitoring-integrations",
+		Description: "https://betterstack.com/docs/uptime/api/google-monitoring-integrations/",
 		Schema:      googleMonitoringIntegrationSchema,
 	}
 }

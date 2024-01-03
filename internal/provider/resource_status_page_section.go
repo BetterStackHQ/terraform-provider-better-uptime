@@ -58,7 +58,7 @@ func newStatusPageSectionResource() *schema.Resource {
 				return []*schema.ResourceData{d}, nil
 			},
 		},
-		Description: "https://docs.betteruptime.com/api/status-page-sections-api",
+		Description: "https://betterstack.com/docs/uptime/api/status-page-sections",
 		Schema:      statusPageSectionSchema,
 	}
 }

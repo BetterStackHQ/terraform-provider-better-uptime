@@ -3,12 +3,12 @@
 page_title: "betteruptime_email_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/email-integrations-api
+  https://betterstack.com/docs/uptime/api/email-integrations/
 ---
 
 # betteruptime_email_integration (Resource)
 
-https://docs.betteruptime.com/api/email-integrations-api
+https://betterstack.com/docs/uptime/api/email-integrations/
 
 
 

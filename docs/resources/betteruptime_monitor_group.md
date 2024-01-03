@@ -3,12 +3,12 @@
 page_title: "betteruptime_monitor_group Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/monitor-groups-api
+  https://betterstack.com/docs/uptime/api/monitor-groups/
 ---
 
 # betteruptime_monitor_group (Resource)
 
-https://docs.betteruptime.com/api/monitor-groups-api
+https://betterstack.com/docs/uptime/api/monitor-groups/
 
 
 

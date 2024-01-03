@@ -3,12 +3,12 @@
 page_title: "betteruptime_grafana_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/grafana-integrations
+  https://betterstack.com/docs/uptime/api/grafana-integrations/
 ---
 
 # betteruptime_grafana_integration (Resource)
 
-https://docs.betteruptime.com/api/grafana-integrations
+https://betterstack.com/docs/uptime/api/grafana-integrations/
 
 
 

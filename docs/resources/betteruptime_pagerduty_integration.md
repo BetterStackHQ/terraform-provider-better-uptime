@@ -3,12 +3,12 @@
 page_title: "betteruptime_pagerduty_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/pager-duty-integrations
+  https://betterstack.com/docs/uptime/api/pagerduty-integrations/
 ---
 
 # betteruptime_pagerduty_integration (Resource)
 
-https://docs.betteruptime.com/api/pager-duty-integrations
+https://betterstack.com/docs/uptime/api/pagerduty-integrations/
 
 
 

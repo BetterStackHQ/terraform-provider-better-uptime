@@ -3,12 +3,12 @@
 page_title: "betteruptime_aws_cloudwatch_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/aws-cloudwatch-integrations
+  https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/
 ---
 
 # betteruptime_aws_cloudwatch_integration (Resource)
 
-https://docs.betteruptime.com/api/aws-cloudwatch-integrations
+https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/
 
 
 

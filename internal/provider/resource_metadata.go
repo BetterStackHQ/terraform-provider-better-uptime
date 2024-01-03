@@ -57,7 +57,7 @@ func newMetadataResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/metadata-api",
+		Description: "https://betterstack.com/docs/uptime/api/metadata/",
 		Schema:      metadataSchema,
 	}
 }

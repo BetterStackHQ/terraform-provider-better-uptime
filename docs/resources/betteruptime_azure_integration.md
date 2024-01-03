@@ -3,12 +3,12 @@
 page_title: "betteruptime_azure_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/azure-integrations
+  https://betterstack.com/docs/uptime/api/azure-integrations/
 ---
 
 # betteruptime_azure_integration (Resource)
 
-https://docs.betteruptime.com/api/azure-integrations
+https://betterstack.com/docs/uptime/api/azure-integrations/
 
 
 

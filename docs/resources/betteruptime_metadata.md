@@ -3,12 +3,12 @@
 page_title: "betteruptime_metadata Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/metadata-api
+  https://betterstack.com/docs/uptime/api/metadata/
 ---
 
 # betteruptime_metadata (Resource)
 
-https://docs.betteruptime.com/api/metadata-api
+https://betterstack.com/docs/uptime/api/metadata/
 
 
 

@@ -3,12 +3,12 @@
 page_title: "betteruptime_prometheus_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/prometheus-integrations
+  https://betterstack.com/docs/uptime/api/prometheus-integrations/
 ---
 
 # betteruptime_prometheus_integration (Resource)
 
-https://docs.betteruptime.com/api/prometheus-integrations
+https://betterstack.com/docs/uptime/api/prometheus-integrations/
 
 
 

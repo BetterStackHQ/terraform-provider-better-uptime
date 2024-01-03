@@ -81,7 +81,7 @@ func newAwsCloudWatchIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/aws-cloudwatch-integrations",
+		Description: "https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/",
 		Schema:      awsCloudWatchIntegrationSchema,
 	}
 }

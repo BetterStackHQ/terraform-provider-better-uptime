@@ -3,12 +3,12 @@
 page_title: "betteruptime_monitor Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/monitors-api
+  https://betterstack.com/docs/uptime/api/monitors/
 ---
 
 # betteruptime_monitor (Resource)
 
-https://docs.betteruptime.com/api/monitors-api
+https://betterstack.com/docs/uptime/api/monitors/
 
 
 
