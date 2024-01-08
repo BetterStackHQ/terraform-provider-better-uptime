@@ -3,12 +3,12 @@
 page_title: "betteruptime_status_page Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/status-pages-api
+  https://betterstack.com/docs/uptime/api/status-pages/
 ---
 
 # betteruptime_status_page (Resource)
 
-https://docs.betteruptime.com/api/status-pages-api
+https://betterstack.com/docs/uptime/api/status-pages/
 
 
 

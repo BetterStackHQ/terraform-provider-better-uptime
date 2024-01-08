@@ -81,7 +81,7 @@ func newGrafanaIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/grafana-integrations",
+		Description: "https://betterstack.com/docs/uptime/api/grafana-integrations/",
 		Schema:      grafanaIntegrationSchema,
 	}
 }

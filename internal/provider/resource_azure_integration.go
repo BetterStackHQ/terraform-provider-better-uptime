@@ -81,7 +81,7 @@ func newAzureIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/azure-integrations",
+		Description: "https://betterstack.com/docs/uptime/api/azure-integrations/",
 		Schema:      azureIntegrationSchema,
 	}
 }

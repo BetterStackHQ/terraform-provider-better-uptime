@@ -3,12 +3,12 @@
 page_title: "betteruptime_heartbeat_group Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/heartbeat-groups-api
+  https://betterstack.com/docs/uptime/api/heartbeat-groups/
 ---
 
 # betteruptime_heartbeat_group (Resource)
 
-https://docs.betteruptime.com/api/heartbeat-groups-api
+https://betterstack.com/docs/uptime/api/heartbeat-groups/
 
 
 

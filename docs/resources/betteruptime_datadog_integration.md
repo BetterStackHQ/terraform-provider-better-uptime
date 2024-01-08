@@ -3,12 +3,12 @@
 page_title: "betteruptime_datadog_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/datadog-integrations
+  https://betterstack.com/docs/uptime/api/datadog-integrations/
 ---
 
 # betteruptime_datadog_integration (Resource)
 
-https://docs.betteruptime.com/api/datadog-integrations
+https://betterstack.com/docs/uptime/api/datadog-integrations/
 
 
 

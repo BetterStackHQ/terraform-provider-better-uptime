@@ -3,12 +3,12 @@
 page_title: "betteruptime_new_relic_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/new-relic-integrations
+  https://betterstack.com/docs/uptime/api/new-relic-integrations/
 ---
 
 # betteruptime_new_relic_integration (Resource)
 
-https://docs.betteruptime.com/api/new-relic-integrations
+https://betterstack.com/docs/uptime/api/new-relic-integrations/
 
 
 

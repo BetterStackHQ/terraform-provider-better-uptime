@@ -55,7 +55,7 @@ func newHeartbeatGroupResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/heartbeat-groups-api",
+		Description: "https://betterstack.com/docs/uptime/api/heartbeat-groups/",
 		Schema:      heartbeatGroupSchema,
 	}
 }

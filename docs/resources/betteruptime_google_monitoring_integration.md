@@ -3,12 +3,12 @@
 page_title: "betteruptime_google_monitoring_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/google-monitoring-integrations
+  https://betterstack.com/docs/uptime/api/google-monitoring-integrations/
 ---
 
 # betteruptime_google_monitoring_integration (Resource)
 
-https://docs.betteruptime.com/api/google-monitoring-integrations
+https://betterstack.com/docs/uptime/api/google-monitoring-integrations/
 
 
 

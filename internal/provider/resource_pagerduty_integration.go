@@ -37,7 +37,7 @@ func newPagerdutyIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://docs.betteruptime.com/api/pager-duty-webhooks",
+		Description: "https://betterstack.com/docs/uptime/api/pagerduty-integrations/",
 		Schema:      pagerdutyIntegrationSchema,
 	}
 }

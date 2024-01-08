@@ -3,12 +3,12 @@
 page_title: "resource_splunk_on_call_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://docs.betteruptime.com/api/splunk-on-call-integrations
+  https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/
 ---
 
 # resource_splunk_on_call_integration (Resource)
 
-https://docs.betteruptime.com/api/splunk-on-call-integrations
+https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/
 
 
 
