@@ -13,7 +13,7 @@ import (
 )
 
 // TODO: change to map<name, description> and then use to gen monitor_type description
-var monitorTypes = []string{"status", "expected_status_code", "keyword", "keyword_absence", "ping", "tcp", "udp", "smtp", "pop", "imap"}
+var monitorTypes = []string{"status", "expected_status_code", "keyword", "keyword_absence", "ping", "tcp", "udp", "smtp", "pop", "imap", "playwright"}
 var monitorSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Monitor.",
@@ -70,7 +70,9 @@ var monitorSchema = map[string]*schema.Schema{
 (port is required, and can be 110, 995, or both).
 
     **imap** We will check for an IMAP server at the host specified in the url parameter
-(port is required, and can be 143, 993, or both).`, "**", "`"),
+(port is required, and can be 143, 993, or both).
+
+    **playwright** We will run the scenario defined by playwright_script, identified in the UI by scenario_name`, "**", "`"),
 		Type:     schema.TypeString,
 		Required: true,
 		ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
@@ -293,6 +295,16 @@ var monitorSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
+	"playwright_script": {
+		Description: "For Playwright monitors, the JavaScript source code of the scenario.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"scenario_name": {
+		Description: "For Playwright monitors, the scenario name identifying the monitor in the UI.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
 }
 
 func newMonitorResource() *schema.Resource {
@@ -347,6 +359,8 @@ type monitor struct {
 	Status              *string                   `json:"status,omitempty"`
 	CreatedAt           *string                   `json:"created_at,omitempty"`
 	UpdatedAt           *string                   `json:"updated_at,omitempty"`
+	PlaywrightScript    *string                   `json:"playwright_script,omitempty"`
+	ScenarioName        *string                   `json:"scenario_name,omitempty"`
 }
 
 type monitorHTTPResponse struct {
@@ -402,6 +416,8 @@ func monitorRef(in *monitor) []struct {
 		{k: "status", v: &in.Status},
 		{k: "created_at", v: &in.CreatedAt},
 		{k: "updated_at", v: &in.UpdatedAt},
+		{k: "playwright_script", v: &in.PlaywrightScript},
+		{k: "scenario_name", v: &in.ScenarioName},
 	}
 }
 
