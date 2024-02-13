@@ -17,19 +17,19 @@ https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/
 
 ### Optional
 
-- **call** (Boolean) Should we call the on-call person?
-- **email** (Boolean) Should we send an email to the on-call person?
-- **name** (String) The name of this AWS CloudWatch integration.
-- **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
+- **call** (Boolean) Do we call the on-call person?
+- **email** (Boolean) Do we send an email to the on-call person?
+- **id** (String) The ID of the AWS CloudWatch Integration.
+- **name** (String) The name of the AWS CloudWatch Integration.
+- **paused** (Boolean) Is the AWS CloudWatch integration paused.
 - **policy_id** (Number) ID of the escalation policy associated with the AWS CloudWatch integration.
-- **push** (Boolean) Should we send a push notification to the on-call person?
-- **recovery_period** (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
-- **sms** (Boolean) Should we send an SMS to the on-call person?
-- **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
+- **push** (Boolean) Do we send a push notification to the on-call person?
+- **recovery_period** (Number) How long the alert must be up to automatically mark an incident as resolved. In seconds.
+- **sms** (Boolean) Do we send an SMS to the on-call person?
+- **team_wait** (Number) How long we wait before escalating the incident alert to the team. In seconds.
 
 ### Read-Only
 
-- **id** (String) The ID of this AWS CloudWatch integration.
-- **webhook_url** (String) The URL to which to point the AWS CloudWatch webhook to.
+- **webhook_url** (String) The webhook URL for the AWS CloudWatch integration.
 
 

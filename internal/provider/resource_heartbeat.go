@@ -119,7 +119,7 @@ func newHeartbeatResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/hearbeats/",
+		Description: "https://betterstack.com/docs/uptime/api/heartbeats/",
 		Schema:      heartbeatSchema,
 	}
 }
