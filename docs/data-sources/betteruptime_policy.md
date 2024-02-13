@@ -48,6 +48,7 @@ Read-Only:
 Read-Only:
 
 - **id** (Number)
+- **team_id** (Number)
 - **type** (String)
 
 

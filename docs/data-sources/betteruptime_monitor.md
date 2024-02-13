@@ -64,8 +64,11 @@ Monitor lookup.
 
     `imap` We will check for an IMAP server at the host specified in the url parameter
 (port is required, and can be 143, 993, or both).
+
+    `playwright` We will run the scenario defined by playwright_script, identified in the UI by scenario_name
 - **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
 - **paused_at** (String) The time when this monitor was paused.
+- **playwright_script** (String) For Playwright monitors, the JavaScript source code of the scenario.
 - **policy_id** (String) Set the escalation policy for the monitor.
 - **port** (String) Required if monitor_type is set to tcp, udp, smtp, pop, or imap. tcp and udp monitors accept any ports, while smtp, pop, and imap accept only the specified ports corresponding with their servers (e.g. "25,465,587" for smtp).
 - **pronounceable_name** (String) Pronounceable name of the monitor. We will use this when we call you. Try to make it tongue-friendly, please?
@@ -77,6 +80,7 @@ Monitor lookup.
 - **request_headers** (List of Map of String) An array of request headers, consisting of name and value pairs
 - **request_timeout** (Number) How long to wait before timing out the request? In seconds.
 - **required_keyword** (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
+- **scenario_name** (String) For Playwright monitors, the scenario name identifying the monitor in the UI.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **ssl_expiration** (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **status** (String) The status of this website check.
