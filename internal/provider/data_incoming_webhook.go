@@ -11,13 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func newPolicyDataSource() *schema.Resource {
+func newIncomingWebhookDataSource() *schema.Resource {
 	s := make(map[string]*schema.Schema)
-	for k, v := range policySchema {
+	for k, v := range incomingWebhookSchema {
 		cp := *v
 		switch k {
 		case "name":
-			// keep required
+			cp.Required = true
+			cp.Optional = false
 		default:
 			cp.Computed = true
 			cp.Optional = false
@@ -30,16 +31,16 @@ func newPolicyDataSource() *schema.Resource {
 		s[k] = &cp
 	}
 	return &schema.Resource{
-		ReadContext: policyLookup,
-		Description: "Policy lookup.",
+		ReadContext: incomingWebhookLookup,
+		Description: "Incoming Webhook lookup.",
 		Schema:      s,
 	}
 }
 
-type policiesPageHTTPResponse struct {
+type incomingWebhooksPageHTTPResponse struct {
 	Data []struct {
-		ID         string `json:"id"`
-		Attributes policy `json:"attributes"`
+		ID         string          `json:"id"`
+		Attributes incomingWebhook `json:"attributes"`
 	} `json:"data"`
 	Pagination struct {
 		First string `json:"first"`
@@ -49,9 +50,9 @@ type policiesPageHTTPResponse struct {
 	} `json:"pagination"`
 }
 
-func policyLookup(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	fetch := func(page int) (*policiesPageHTTPResponse, error) {
-		res, err := meta.(*client).Get(ctx, fmt.Sprintf("/api/v2/policies?page=%d", page))
+func incomingWebhookLookup(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	fetch := func(page int) (*incomingWebhooksPageHTTPResponse, error) {
+		res, err := meta.(*client).Get(ctx, fmt.Sprintf("/api/v2/incoming-webhooks?page=%d", page))
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +68,7 @@ func policyLookup(ctx context.Context, d *schema.ResourceData, meta interface{})
 		if err != nil {
 			return nil, err
 		}
-		var tr policiesPageHTTPResponse
+		var tr incomingWebhooksPageHTTPResponse
 		return &tr, json.Unmarshal(body, &tr)
 	}
 	name := d.Get("name").(string)
@@ -80,10 +81,10 @@ func policyLookup(ctx context.Context, d *schema.ResourceData, meta interface{})
 		for _, e := range res.Data {
 			if *e.Attributes.Name == name {
 				if d.Id() != "" {
-					return diag.Errorf("There are multiple policies with the same name: %s", name)
+					return diag.Errorf("There are multiple incoming webhooks with the same name: %s", name)
 				}
 				d.SetId(e.ID)
-				if derr := policyCopyAttrs(d, &e.Attributes); derr != nil {
+				if derr := incomingWebhookCopyAttrs(d, &e.Attributes); derr != nil {
 					return derr
 				}
 			}
