@@ -26,6 +26,10 @@ https://betterstack.com/docs/uptime/api/heartbeats/
 - **call** (Boolean) Should we call the on-call person?
 - **email** (Boolean) Should we send an email to the on-call person?
 - **heartbeat_group_id** (Number) Set this attribute if you want to add this heartbeat to a heartbeat group..
+- **maintenance_days** (List of String) An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] or any subset of these days.
+- **maintenance_from** (String) Start of the maintenance window each day. We won't create incidents during this window. Example: "01:00:00"
+- **maintenance_timezone** (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+- **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
 - **paused** (Boolean) Set to true to pause monitoring — we won't notify you about downtime. Set to false to resume monitoring.
 - **policy_id** (String) Set the escalation policy for the heartbeat.
 - **push** (Boolean) Should we send a push notification to the on-call person?
