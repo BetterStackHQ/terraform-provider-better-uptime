@@ -34,6 +34,7 @@ Monitor lookup.
 - **http_method** (String) HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH
 - **id** (String) The ID of this Monitor.
 - **last_checked_at** (String) When the website was last checked.
+- **maintenance_days** (List of String) An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] or any subset of these days.
 - **maintenance_from** (String) Start of the maintenance window each day. We won't check your website during this window. Example: "01:00:00"
 - **maintenance_timezone** (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
 - **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
