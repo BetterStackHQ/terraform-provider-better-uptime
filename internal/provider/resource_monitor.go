@@ -269,6 +269,14 @@ var monitorSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
+	"maintenance_days": {
+		Description: "An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"] or any subset of these days.",
+		Type:        schema.TypeList,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+		Optional: true,
+	},
 	"remember_cookies": {
 		Description: "Set to true to keep cookies when redirecting.",
 		Type:        schema.TypeBool,
@@ -354,6 +362,7 @@ type monitor struct {
 	MaintenanceFrom     *string                   `json:"maintenance_from,omitempty"`
 	MaintenanceTo       *string                   `json:"maintenance_to,omitempty"`
 	MaintenanceTimezone *string                   `json:"maintenance_timezone,omitempty"`
+	MaintenanceDays     *[]string                 `json:"maintenance_days,omitempty"`
 	RememberCookies     *bool                     `json:"remember_cookies,omitempty"`
 	LastCheckedAt       *string                   `json:"last_checked_at,omitempty"`
 	Status              *string                   `json:"status,omitempty"`
@@ -411,6 +420,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "maintenance_from", v: &in.MaintenanceFrom},
 		{k: "maintenance_to", v: &in.MaintenanceTo},
 		{k: "maintenance_timezone", v: &in.MaintenanceTimezone},
+		{k: "maintenance_days", v: &in.MaintenanceDays},
 		{k: "remember_cookies", v: &in.RememberCookies},
 		{k: "last_checked_at", v: &in.LastCheckedAt},
 		{k: "status", v: &in.Status},
