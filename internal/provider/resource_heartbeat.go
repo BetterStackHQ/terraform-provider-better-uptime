@@ -78,6 +78,31 @@ var heartbeatSchema = map[string]*schema.Schema{
 			return !d.HasChange(k)
 		},
 	},
+	"maintenance_from": {
+		Description: "Start of the maintenance window each day. We won't create incidents during this window. Example: \"01:00:00\"",
+		Type:        schema.TypeString,
+		Optional:    true,
+		// TODO: ValidateDiagFunc
+	},
+	"maintenance_to": {
+		Description: "End of the maintenance window each day. Example: \"03:00:00\"",
+		Type:        schema.TypeString,
+		Optional:    true,
+		// TODO: ValidateDiagFunc
+	},
+	"maintenance_timezone": {
+		Description: "The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"maintenance_days": {
+		Description: "An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"] or any subset of these days.",
+		Type:        schema.TypeList,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+		Optional: true,
+	},
 	"paused": {
 		Description: "Set to true to pause monitoring — we won't notify you about downtime. Set to false to resume monitoring.",
 		Type:        schema.TypeBool,
@@ -125,23 +150,27 @@ func newHeartbeatResource() *schema.Resource {
 }
 
 type heartbeat struct {
-	Name             *string `json:"name,omitempty"`
-	Url              *string `json:"url,omitempty"`
-	Period           *int    `json:"period,omitempty"`
-	Grace            *int    `json:"grace,omitempty"`
-	Call             *bool   `json:"call,omitempty"`
-	SMS              *bool   `json:"sms,omitempty"`
-	Email            *bool   `json:"email,omitempty"`
-	Push             *bool   `json:"push,omitempty"`
-	TeamWait         *int    `json:"team_wait,omitempty"`
-	HeartbeatGroupID *int    `json:"heartbeat_group_id,omitempty"`
-	SortIndex        *int    `json:"sort_index,omitempty"`
-	Paused           *bool   `json:"paused,omitempty"`
-	PausedAt         *string `json:"paused_at,omitempty"`
-	PolicyID         *string `json:"policy_id"`
-	Status           *string `json:"status,omitempty"`
-	CreatedAt        *string `json:"created_at,omitempty"`
-	UpdatedAt        *string `json:"updated_at,omitempty"`
+	Name                *string   `json:"name,omitempty"`
+	Url                 *string   `json:"url,omitempty"`
+	Period              *int      `json:"period,omitempty"`
+	Grace               *int      `json:"grace,omitempty"`
+	Call                *bool     `json:"call,omitempty"`
+	SMS                 *bool     `json:"sms,omitempty"`
+	Email               *bool     `json:"email,omitempty"`
+	Push                *bool     `json:"push,omitempty"`
+	TeamWait            *int      `json:"team_wait,omitempty"`
+	HeartbeatGroupID    *int      `json:"heartbeat_group_id,omitempty"`
+	SortIndex           *int      `json:"sort_index,omitempty"`
+	MaintenanceFrom     *string   `json:"maintenance_from,omitempty"`
+	MaintenanceTo       *string   `json:"maintenance_to,omitempty"`
+	MaintenanceTimezone *string   `json:"maintenance_timezone,omitempty"`
+	MaintenanceDays     *[]string `json:"maintenance_days,omitempty"`
+	Paused              *bool     `json:"paused,omitempty"`
+	PausedAt            *string   `json:"paused_at,omitempty"`
+	PolicyID            *string   `json:"policy_id"`
+	Status              *string   `json:"status,omitempty"`
+	CreatedAt           *string   `json:"created_at,omitempty"`
+	UpdatedAt           *string   `json:"updated_at,omitempty"`
 }
 
 type heartbeatHTTPResponse struct {
@@ -171,6 +200,10 @@ func heartbeatRef(in *heartbeat) []struct {
 		{k: "team_wait", v: &in.TeamWait},
 		{k: "heartbeat_group_id", v: &in.HeartbeatGroupID},
 		{k: "sort_index", v: &in.SortIndex},
+		{k: "maintenance_from", v: &in.MaintenanceFrom},
+		{k: "maintenance_to", v: &in.MaintenanceTo},
+		{k: "maintenance_timezone", v: &in.MaintenanceTimezone},
+		{k: "maintenance_days", v: &in.MaintenanceDays},
 		{k: "paused", v: &in.Paused},
 		{k: "paused_at", v: &in.PausedAt},
 		{k: "policy_id", v: &in.PolicyID},
