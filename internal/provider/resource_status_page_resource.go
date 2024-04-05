@@ -35,7 +35,7 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"resource_type": {
-		Description: "The type of the resource you are adding. Available values: Monitor, Heartbeat, WebhookIntegration, EmailIntegration.",
+		Description: "The type of the resource you are adding. Available values: Monitor, Heartbeat, WebhookIntegration, EmailIntegration, IncomingWebhook.",
 		Type:        schema.TypeString,
 		Required:    true,
 		// TODO: ValidateDiagFunc: validation.StringInSlice
