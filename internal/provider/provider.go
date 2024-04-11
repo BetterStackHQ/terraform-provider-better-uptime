@@ -48,6 +48,7 @@ func New(opts ...Option) *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"betteruptime_monitor":          newMonitorDataSource(),
 			"betteruptime_policy":           newPolicyDataSource(),
+			"betteruptime_severity":         newSeverityDataSource(),
 			"betteruptime_incoming_webhook": newIncomingWebhookDataSource(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -59,6 +60,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_monitor":                       newMonitorResource(),
 			"betteruptime_monitor_group":                 newMonitorGroupResource(),
 			"betteruptime_policy":                        newPolicyResource(),
+			"betteruptime_severity":                      newSeverityResource(),
 			"betteruptime_status_page":                   newStatusPageResource(),
 			"betteruptime_status_page_section":           newStatusPageSectionResource(),
 			"betteruptime_status_page_resource":          newStatusPageResourceResource(),
