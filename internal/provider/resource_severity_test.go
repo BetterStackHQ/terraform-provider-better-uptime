@@ -37,10 +37,10 @@ func TestResourceSeverity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_severity.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_severity.this", "name", "Terraform - Test"),
-					resource.TestCheckResourceAttr("betteruptime_severity.this", "sms", true),
-					resource.TestCheckResourceAttr("betteruptime_severity.this", "call", false),
-					resource.TestCheckResourceAttr("betteruptime_severity.this", "email", false),
-					resource.TestCheckResourceAttr("betteruptime_severity.this", "sms", true),
+					resource.TestCheckResourceAttr("betteruptime_severity.this", "sms", "true"),
+					resource.TestCheckResourceAttr("betteruptime_severity.this", "call", "false"),
+					resource.TestCheckResourceAttr("betteruptime_severity.this", "email", "false"),
+					resource.TestCheckResourceAttr("betteruptime_severity.this", "sms", "true"),
 				),
 				PreConfig: func() {
 					t.Log("step 1")
@@ -63,10 +63,10 @@ func TestResourceSeverity(t *testing.T) {
 				`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("betteruptime_severity.this", "name", "Terraform - Call only"),
-					resource.TestCheckResourceAttr("betteruptime_severity.this", "sms", false),
-					resource.TestCheckResourceAttr("betteruptime_severity.this", "call", true),
-					resource.TestCheckResourceAttr("betteruptime_severity.this", "email", false),
-					resource.TestCheckResourceAttr("betteruptime_severity.this", "sms", false),
+					resource.TestCheckResourceAttr("betteruptime_severity.this", "sms", "false"),
+					resource.TestCheckResourceAttr("betteruptime_severity.this", "call", "true"),
+					resource.TestCheckResourceAttr("betteruptime_severity.this", "email", "false"),
+					resource.TestCheckResourceAttr("betteruptime_severity.this", "sms", "false"),
 				),
 				PreConfig: func() {
 					t.Log("step 2")
