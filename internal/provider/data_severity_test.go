@@ -54,9 +54,9 @@ func TestDataSeverity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.betteruptime_severity.this", "id"),
 					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "name", name),
-					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "sms", "true"),
+					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "sms", "false"),
 					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "call", "false"),
-					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "email", "false"),
+					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "email", "true"),
 					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "push", "true"),
 				),
 			},
