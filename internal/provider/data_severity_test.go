@@ -22,16 +22,16 @@ func TestDataSeverity(t *testing.T) {
 
 		switch {
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=1":
-			_, _ = w.Write([]byte(`{"data":[{"id":"1","attributes":{"name": "Severity A", "incident_token":"abc","repeat_count":3, "repeat_delay":60}}],"pagination":{"next":"..."}}`))
+			_, _ = w.Write([]byte(`{"data":[{"id":"1","type": "urgency", attributes":{"name": "High Severity", "sms": false, "call": true, "email": true, "push": true}}],"pagination":{"next":"..."}}`))
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=2":
-			_, _ = w.Write([]byte(`{"data":[{"id":"2","attributes":{"name": "Severity B", "incident_token":"def","repeat_count":4, "repeat_delay":120}}],"pagination":{"next":null}}`))
+			_, _ = w.Write([]byte(`{"data":[{"id":"2","type": "urgency", "attributes":{"name": "Low Severity", "sms": false, "call": false, "email": true, "push": true}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 		}
 	}))
 	defer server.Close()
 
-	var name = "Severity B"
+	var name = "Low Severity"
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest: true,
@@ -54,9 +54,10 @@ func TestDataSeverity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.betteruptime_severity.this", "id"),
 					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "name", name),
-					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "repeat_count", "4"),
-					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "repeat_delay", "120"),
-					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "incident_token", "def"),
+					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "sms", "true"),
+					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "call", "false"),
+					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "email", "false"),
+					resource.TestCheckResourceAttr("data.betteruptime_severity.this", "push", "true"),
 				),
 			},
 		},

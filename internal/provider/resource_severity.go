@@ -90,6 +90,7 @@ func severityRef(in *severity) []struct {
 		{k: "sms", v: &in.SMS},
 		{k: "call", v: &in.Call},
 		{k: "email", v: &in.Email},
+		{k: "push", v: &in.Push},
 	}
 }
 
