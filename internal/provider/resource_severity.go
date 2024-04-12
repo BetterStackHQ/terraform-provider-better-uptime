@@ -62,17 +62,17 @@ func newSeverityResource() *schema.Resource {
 }
 
 type severity struct {
-	Id            *int          `json:"id,omitempty"`
-	Name          *string       `json:"name,omitempty"`
-	SMS           *bool         `json:"sms,omitempty"`
-	Call          *bool         `json:"call,omitempty"`
-	Email         *bool         `json:"email,omitempty"`
-	Push          *bool         `json:"push,omitempty"`
+	Id    *int    `json:"id,omitempty"`
+	Name  *string `json:"name,omitempty"`
+	SMS   *bool   `json:"sms,omitempty"`
+	Call  *bool   `json:"call,omitempty"`
+	Email *bool   `json:"email,omitempty"`
+	Push  *bool   `json:"push,omitempty"`
 }
 
 type severityHTTPResponse struct {
 	Data struct {
-		ID         string `json:"id"`
+		ID         string   `json:"id"`
 		Attributes severity `json:"attributes"`
 	} `json:"data"`
 }

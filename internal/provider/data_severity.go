@@ -38,7 +38,7 @@ func newSeverityDataSource() *schema.Resource {
 
 type severitiesPageHTTPResponse struct {
 	Data []struct {
-		ID         string `json:"id"`
+		ID         string   `json:"id"`
 		Attributes severity `json:"attributes"`
 	} `json:"data"`
 	Pagination struct {
