@@ -97,7 +97,7 @@ func severityRef(in *severity) []struct {
 func severityCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in severity
 	for _, e := range severityRef(&in) {
-	    load(d, e.k, e.v)
+		load(d, e.k, e.v)
 	}
 	var out severityHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/urgencies", &in, &out); err != nil {
