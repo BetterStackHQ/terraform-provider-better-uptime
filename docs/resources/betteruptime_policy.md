@@ -46,7 +46,7 @@ Optional:
 - **time_from** (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.
 - **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.
 - **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
-- **urgency_id** (Number) Which urgency to use for this step.
+- **urgency_id** (Number) Which severity to use for this step.
 
 <a id="nestedblock--steps--step_members"></a>
 ### Nested Schema for `steps.step_members`
