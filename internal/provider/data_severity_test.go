@@ -22,9 +22,9 @@ func TestDataSeverity(t *testing.T) {
 
 		switch {
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=1":
-			_, _ = w.Write([]byte(`{"data":[{"id":"1","type": "urgency", attributes":{"name": "High Severity", "sms": false, "call": true, "email": true, "push": true}}],"pagination":{"next":"..."}}`))
+			_, _ = w.Write([]byte(`{"data":[{"id": "1", "type": "urgency", "attributes":{"name": "High Severity", "sms": false, "call": true, "email": true, "push": true}}],"pagination":{"next":"..."}}`))
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=2":
-			_, _ = w.Write([]byte(`{"data":[{"id":"2","type": "urgency", "attributes":{"name": "Low Severity", "sms": false, "call": false, "email": true, "push": true}}],"pagination":{"next":null}}`))
+			_, _ = w.Write([]byte(`{"data":[{"id": "2", "type": "urgency", "attributes":{"name": "Low Severity", "sms": false, "call": false, "email": true, "push": true}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 		}
