@@ -42,7 +42,7 @@ var policyStepSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"urgency_id": {
-		Description: "Which urgency to use for this step.",
+		Description: "Which severity to use for this step.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 	},

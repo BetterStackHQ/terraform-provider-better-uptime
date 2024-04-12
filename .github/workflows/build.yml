@@ -15,4 +15,14 @@ jobs:
         with:
           go-version: '1.16.x'
       - run: make lint
-      - run: make test
+  check_docs:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.16.x'
+      - name: Generate docs automatically
+        run: make gen
+      - name: Check no versioned file has been updated
+        uses: numtide/clean-git-action@v1
