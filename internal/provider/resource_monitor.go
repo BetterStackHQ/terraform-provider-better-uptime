@@ -14,6 +14,8 @@ import (
 
 // TODO: change to map<name, description> and then use to gen monitor_type description
 var monitorTypes = []string{"status", "expected_status_code", "keyword", "keyword_absence", "ping", "tcp", "udp", "smtp", "pop", "imap", "playwright"}
+var checksVersions = []string{"v1", "v2"}
+var ipVersions = []string{"ipv4", "ipv6"}
 var monitorSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Monitor.",
@@ -252,6 +254,67 @@ var monitorSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Sensitive:   true,
 	},
+	"checks_version": {
+		Description: strings.ReplaceAll(`Valid values:
+
+    **v1** Proxy-based infrastructure. We use proxies around the world to make regional checks.
+
+    **v2** Edge-based infrastructure. More advanced infrastructure, allows running low level checks in regions.
+
+	When not set, we use proxy-based infrastructure.`, "**", "`"),
+		Type:     schema.TypeString,
+		Optional: true,
+		ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
+			if v == nil {
+				return nil
+			}
+			s := v.(string)
+			for _, checksVersion := range checksVersions {
+				if s == checksVersion {
+					return nil
+				}
+			}
+			return diag.Diagnostics{
+				diag.Diagnostic{
+					AttributePath: path,
+					Severity:      diag.Error,
+					Summary:       `Invalid "checks_version"`,
+					Detail:        fmt.Sprintf("Expected one of %v or nil", checksVersions),
+				},
+			}
+		},
+	},
+	"ip_version": {
+		Description: strings.ReplaceAll(`Valid values:
+
+    **ipv4** Use IPv4 only,
+
+    **ipv6** Use IPv6 only
+
+    When not set, we use both IPv4 and IPv6 for our checks.
+    Note: ip_version is used only if "checks_version" is set to "v2".`, "**", "`"),
+		Type:     schema.TypeString,
+		Optional: true,
+		ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
+			if v == nil {
+				return nil
+			}
+			s := v.(string)
+			for _, checksVersion := range ipVersions {
+				if s == checksVersion {
+					return nil
+				}
+			}
+			return diag.Diagnostics{
+				diag.Diagnostic{
+					AttributePath: path,
+					Severity:      diag.Error,
+					Summary:       `Invalid "ip_version"`,
+					Detail:        fmt.Sprintf("Expected one of %v or nil", ipVersions),
+				},
+			}
+		},
+	},
 	"maintenance_from": {
 		Description: "Start of the maintenance window each day. We won't check your website during this window. Example: \"01:00:00\"",
 		Type:        schema.TypeString,
@@ -359,6 +422,8 @@ type monitor struct {
 	RequestHeaders      *[]map[string]interface{} `json:"request_headers,omitempty"`
 	AuthUsername        *string                   `json:"auth_username,omitempty"`
 	AuthPassword        *string                   `json:"auth_password,omitempty"`
+	ChecksVersion       *string                   `json:"checks_version,omitempty"`
+	IpVersion           *string                   `json:"ip_version,omitempty"`
 	MaintenanceFrom     *string                   `json:"maintenance_from,omitempty"`
 	MaintenanceTo       *string                   `json:"maintenance_to,omitempty"`
 	MaintenanceTimezone *string                   `json:"maintenance_timezone,omitempty"`
@@ -417,6 +482,8 @@ func monitorRef(in *monitor) []struct {
 		{k: "request_headers", v: &in.RequestHeaders},
 		{k: "auth_username", v: &in.AuthUsername},
 		{k: "auth_password", v: &in.AuthPassword},
+		{k: "checks_version", v: &in.ChecksVersion},
+		{k: "ip_version", v: &in.IpVersion},
 		{k: "maintenance_from", v: &in.MaintenanceFrom},
 		{k: "maintenance_to", v: &in.MaintenanceTo},
 		{k: "maintenance_timezone", v: &in.MaintenanceTimezone},
