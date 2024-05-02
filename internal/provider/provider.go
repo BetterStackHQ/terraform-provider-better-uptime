@@ -46,10 +46,11 @@ func New(opts ...Option) *schema.Provider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"betteruptime_monitor":          newMonitorDataSource(),
-			"betteruptime_policy":           newPolicyDataSource(),
-			"betteruptime_severity":         newSeverityDataSource(),
-			"betteruptime_incoming_webhook": newIncomingWebhookDataSource(),
+			"betteruptime_monitor":           newMonitorDataSource(),
+			"betteruptime_policy":            newPolicyDataSource(),
+			"betteruptime_severity":          newSeverityDataSource(),
+			"betteruptime_slack_integration": newSlackIntegrationDataSource(),
+			"betteruptime_incoming_webhook":  newIncomingWebhookDataSource(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"betteruptime_email_integration":             newEmailIntegrationResource(),
