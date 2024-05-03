@@ -39,10 +39,10 @@ func newOnCallCalendarDataSource() *schema.Resource {
 }
 
 func onCallCalendarDefaultOrLookup(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-    if name, ok := d.Get("name").(string); ok && name != "" {
-        return onCallCalendarLookup(ctx, d, meta)
-    }
-    return onCallDefaultCalendar(ctx, d, meta)
+	if name, ok := d.Get("name").(string); ok && name != "" {
+		return onCallCalendarLookup(ctx, d, meta)
+	}
+	return onCallDefaultCalendar(ctx, d, meta)
 }
 
 type onCallDefaultCalendarHTTPResponse struct {
@@ -92,7 +92,7 @@ type onCallCalendarsPageHTTPResponse struct {
 		Attributes    onCallCalendar      `json:"attributes"`
 		Relationships onCallRelationships `json:"relationships"`
 	} `json:"data"`
-	Included []onCallIncluded `json:"included"`
+	Included   []onCallIncluded `json:"included"`
 	Pagination struct {
 		First string `json:"first"`
 		Last  string `json:"last"`

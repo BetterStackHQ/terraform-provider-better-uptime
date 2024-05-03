@@ -62,7 +62,6 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 	},
 }
 
-
 type onCallCalendar struct {
 	ID              *string `json:"id,omitempty"`
 	Name            *string `json:"name,omitempty"`
@@ -82,8 +81,8 @@ type onCallRelationships struct {
 }
 
 type onCallIncluded struct {
-	ID *string `json:"id,omitempty"`
-	Type *string `json:"type,omitempty"`
+	ID         *string `json:"id,omitempty"`
+	Type       *string `json:"type,omitempty"`
 	Attributes struct {
 		FirstName    *string   `json:"first_name,omitempty"`
 		LastName     *string   `json:"last_name,omitempty"`
@@ -91,7 +90,6 @@ type onCallIncluded struct {
 		PhoneNumbers []*string `json:"phone_numbers,omitempty"`
 	} `json:"attributes,omitempty"`
 }
-
 
 func onCallCalendarRef(cal *onCallCalendar) []struct {
 	k string
