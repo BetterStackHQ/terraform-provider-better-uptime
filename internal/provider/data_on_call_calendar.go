@@ -11,12 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func newSlackIntegrationDataSource() *schema.Resource {
+func newOnCallCalendarDataSource() *schema.Resource {
 	s := make(map[string]*schema.Schema)
-	for k, v := range slackIntegrationSchema {
+	for k, v := range onCallCalendarSchema {
 		cp := *v
 		switch k {
-		case "slack_channel_name":
+		case "name":
 			cp.Required = true
 			cp.Optional = false
 			cp.Computed = false
@@ -32,16 +32,17 @@ func newSlackIntegrationDataSource() *schema.Resource {
 		s[k] = &cp
 	}
 	return &schema.Resource{
-		ReadContext: slackIntegrationLookup,
-		Description: "Slack integration lookup.",
+		ReadContext: onCallCalendarLookup,
+		Description: "On-call calendar lookup.",
 		Schema:      s,
 	}
 }
 
-type slackIntegrationsPageHTTPResponse struct {
+type onCallCalendarsPageHTTPResponse struct {
 	Data []struct {
-		ID         string           `json:"id"`
-		Attributes slackIntegration `json:"attributes"`
+		ID         string         `json:"id"`
+		Attributes onCallCalendar `json:"attributes"`
+		Relationships onCallRelationships `json:"relationships"`
 	} `json:"data"`
 	Pagination struct {
 		First string `json:"first"`
@@ -51,9 +52,9 @@ type slackIntegrationsPageHTTPResponse struct {
 	} `json:"pagination"`
 }
 
-func slackIntegrationLookup(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	fetch := func(page int) (*slackIntegrationsPageHTTPResponse, error) {
-		res, err := meta.(*client).Get(ctx, fmt.Sprintf("/api/v2/slack-integrations?page=%d", page))
+func onCallCalendarLookup(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	fetch := func(page int) (*onCallCalendarsPageHTTPResponse, error) {
+		res, err := meta.(*client).Get(ctx, fmt.Sprintf("/api/v2/on-calls?page=%d", page))
 		if err != nil {
 			return nil, err
 		}
@@ -69,10 +70,10 @@ func slackIntegrationLookup(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return nil, err
 		}
-		var tr slackIntegrationsPageHTTPResponse
+		var tr onCallCalendarsPageHTTPResponse
 		return &tr, json.Unmarshal(body, &tr)
 	}
-	slackChannelName := d.Get("slack_channel_name").(string)
+	calendarName := d.Get("name").(string)
 	page := 1
 	for {
 		res, err := fetch(page)
@@ -80,12 +81,12 @@ func slackIntegrationLookup(ctx context.Context, d *schema.ResourceData, meta in
 			return diag.FromErr(err)
 		}
 		for _, e := range res.Data {
-			if *e.Attributes.SlackChannelName == slackChannelName {
+			if *e.Attributes.Name == calendarName {
 				if d.Id() != "" {
-					return diag.Errorf("There are multiple Slack integrations with the same slack_channel_name: %s", slackChannelName)
+					return diag.Errorf("There are multiple on-call calendars with the same name: %s", calendarName)
 				}
 				d.SetId(e.ID)
-				if derr := slackIntegrationCopyAttrs(d, &e.Attributes); derr != nil {
+				if derr := onCallCalendarCopyAttrs(d, &e.Attributes, &e.Relationships); derr != nil {
 					return derr
 				}
 			}

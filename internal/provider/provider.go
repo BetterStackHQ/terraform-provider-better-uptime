@@ -47,6 +47,7 @@ func New(opts ...Option) *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"betteruptime_monitor":           newMonitorDataSource(),
+			"betteruptime_on_call_calendar":  newOnCallCalendarDataSource(),
 			"betteruptime_policy":            newPolicyDataSource(),
 			"betteruptime_severity":          newSeverityDataSource(),
 			"betteruptime_slack_integration": newSlackIntegrationDataSource(),

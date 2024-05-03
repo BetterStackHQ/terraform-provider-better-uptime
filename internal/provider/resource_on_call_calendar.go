@@ -7,61 +7,53 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var slackIntegrationSchema = map[string]*schema.Schema{
+var onCallCalendarSchema = map[string]*schema.Schema{
 	"id": {
-		Description: "The ID of this Slack integration.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
-	"slack_team_id": {
-		Description: "Slack ID of the connected team.",
+	"name": {
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
-	"slack_team_name": {
-		Description: "Name of the connected Slack team.",
-		Type:        schema.TypeString,
-		Computed:    true,
-	},
-	"slack_channel_id": {
-		Description: "Slack ID of the connected channel.",
-		Type:        schema.TypeString,
-		Computed:    true,
-	},
-	"slack_channel_name": {
-		Description: "Name of the connected Slack channel.",
-		Type:        schema.TypeString,
-		Computed:    true,
-	},
-	"slack_status": {
-		Description: "Status of the connected Slack account. Possible values: active, account_inactive",
-		Type:        schema.TypeString,
-		Computed:    true,
-	},
-	"integration_type": {
-		Description: "Type of the Slack integration. Possible values: legacy, verbose, thread, channel",
-		Type:        schema.TypeString,
-		Optional:    true,
-	},
-	"on_call_notifications": {
-		Description: "Whether to post a notification when the current on-call person changes.",
+	"default_calendar": {
 		Type:        schema.TypeBool,
-		Optional:    true,
+		Computed:    true,
+	},
+	"on_call_users": {
+		Type:        schema.TypeList,
+		Computed:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"id": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+			},
+		},
 	},
 }
 
-type slackIntegration struct {
-	Id                  *string `json:"id,omitempty"`
-	SlackTeamId         *string `json:"slack_team_id,omitempty"`
-	SlackTeamName       *string `json:"slack_team_name,omitempty"`
-	SlackChannelId      *string `json:"slack_channel_id,omitempty"`
-	SlackChannelName    *string `json:"slack_channel_name,omitempty"`
-	SlackStatus         *string `json:"slack_status,omitempty"`
-	IntegrationTyp      *string `json:"integration_type,omitempty"`
-	OnCallNotifications *bool   `json:"on_call_notifications,omitempty"`
+
+type onCallCalendar struct {
+	ID              *string      `json:"id,omitempty"`
+	Name            *string      `json:"name,omitempty"`
+	DefaultCalendar *bool        `json:"default_calendar,omitempty"`
+	OnCallUsers     []onCallUser `json:"on_call_users,omitempty"`
 }
 
-func slackIntegrationRef(in *slackIntegration) []struct {
+type onCallRelationships struct {
+	OnCallUsers struct {
+		Data []onCallUser  `json:"data,omitempty"`
+	} `json:"on_call_users,omitempty"`
+}
+
+type onCallUser struct {
+	ID *string `mapstructure:"id,omitempty" json:"id,omitempty"`
+}
+
+
+func onCallCalendarRef(cal *onCallCalendar) []struct {
 	k string
 	v interface{}
 } {
@@ -70,24 +62,25 @@ func slackIntegrationRef(in *slackIntegration) []struct {
 		k string
 		v interface{}
 	}{
-		{k: "slack_team_id", v: &in.SlackTeamId},
-		{k: "slack_team_name", v: &in.SlackTeamName},
-		{k: "slack_channel_id", v: &in.SlackChannelId},
-		{k: "slack_channel_name", v: &in.SlackChannelName},
-		{k: "slack_status", v: &in.SlackStatus},
-		{k: "integration_type", v: &in.IntegrationTyp},
-		{k: "on_call_notifications", v: &in.OnCallNotifications},
+		{"name", &cal.Name},
+		{"default_calendar", &cal.DefaultCalendar},
 	}
 }
 
-func slackIntegrationCopyAttrs(d *schema.ResourceData, in *slackIntegration) diag.Diagnostics {
+func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel *onCallRelationships) diag.Diagnostics {
 	var derr diag.Diagnostics
-	for _, e := range slackIntegrationRef(in) {
+	for _, e := range onCallCalendarRef(cal) {
 		if !isFieldAttribute(e.k) {
 			value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
 			if err := d.Set(e.k, value); err != nil {
 				derr = append(derr, diag.FromErr(err)[0])
 			}
+		}
+	}
+	if !isFieldAttribute("on_call_users") {
+		value := reflect.Indirect(reflect.ValueOf(&rel.OnCallUsers.Data)).Interface()
+		if err := d.Set("on_call_users", value); err != nil {
+			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}
 	return derr
