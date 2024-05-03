@@ -22,9 +22,9 @@ func TestOnCallCalendarData(t *testing.T) {
 
 		switch {
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=1":
-			_, _ = w.Write([]byte(`{"data":[{"id":"123","attributes":{"name":"Primary","default_calendar":true},"relationships":{"on_call_users":{"data":[{"id":"123456","type":"user"}]}}}],"pagination":{"next":"..."}}`))
+			_, _ = w.Write([]byte(`{"data":[{"id":"123","attributes":{"name":"Primary","default_calendar":true},"relationships":{"on_call_users":{"data":[{"id":"123456","type":"user"}]}}}],"included":[{"id":"123456","type":"user","attributes":{"first_name":"John","last_name":"Smith","email":"john@example.com","phone_numbers":[]}}],"pagination":{"next":"..."}}`))
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=2":
-			_, _ = w.Write([]byte(`{"data":[{"id":"456","attributes":{"name":"Secondary","default_calendar":false},"relationships":{"on_call_users":{"data":[{"id":"456789","type":"user"}]}}}],"pagination":{"next":null}}`))
+			_, _ = w.Write([]byte(`{"data":[{"id":"456","attributes":{"name":"Secondary","default_calendar":false},"relationships":{"on_call_users":{"data":[{"id":"456789","type":"user"}]}}}],"included":[{"id":"456789","type":"user","attributes":{"first_name":"Jane","last_name":"Doe","email":"jane@example.com","phone_numbers":["+44 808 157 0192"]}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 		}
@@ -56,6 +56,10 @@ func TestOnCallCalendarData(t *testing.T) {
 					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "name", "Secondary"),
 					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "default_calendar", "false"),
 					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.id", "456789"),
+					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.first_name", "Jane"),
+					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.last_name", "Doe"),
+					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.email", "jane@example.com"),
+					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.phone_numbers.0", "+44 808 157 0192"),
 				),
 			},
 		},

@@ -31,8 +31,31 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 			Schema: map[string]*schema.Schema{
 				"id": {
 					Description: "ID of the on-call person.",
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+				},
+				"first_name": {
+					Description: "First name of the on-call person.",
+					Type:        schema.TypeString,
+					Computed:    true,
+				},
+				"last_name": {
+					Description: "Last name of the on-call person.",
+					Type:        schema.TypeString,
+					Computed:    true,
+				},
+				"email": {
+					Description: "Email of the on-call person.",
+					Type:        schema.TypeString,
+					Computed:    true,
+				},
+				"phone_numbers": {
+					Description: "Array of phone numbers.",
+					Type:        schema.TypeList,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+					Computed:    true,
 				},
 			},
 		},
@@ -41,20 +64,32 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 
 
 type onCallCalendar struct {
-	ID              *string      `json:"id,omitempty"`
-	Name            *string      `json:"name,omitempty"`
-	DefaultCalendar *bool        `json:"default_calendar,omitempty"`
-	OnCallUsers     []onCallUser `json:"on_call_users,omitempty"`
+	ID              *string `json:"id,omitempty"`
+	Name            *string `json:"name,omitempty"`
+	DefaultCalendar *bool   `json:"default_calendar,omitempty"`
 }
 
 type onCallRelationships struct {
 	OnCallUsers struct {
-		Data []onCallUser  `json:"data,omitempty"`
+		Data []struct {
+			ID           *string   `mapstructure:"id,omitempty" json:"id,omitempty"`
+			FirstName    *string   `mapstructure:"first_name,omitempty"`
+			LastName     *string   `mapstructure:"last_name,omitempty"`
+			Email        *string   `mapstructure:"email,omitempty"`
+			PhoneNumbers []*string `mapstructure:"phone_numbers,omitempty"`
+		} `json:"data,omitempty"`
 	} `json:"on_call_users,omitempty"`
 }
 
-type onCallUser struct {
-	ID *string `mapstructure:"id,omitempty" json:"id,omitempty"`
+type onCallIncluded struct {
+	ID *string `json:"id,omitempty"`
+	Type *string `json:"type,omitempty"`
+	Attributes struct {
+		FirstName    *string   `json:"first_name,omitempty"`
+		LastName     *string   `json:"last_name,omitempty"`
+		Email        *string   `json:"email,omitempty"`
+		PhoneNumbers []*string `json:"phone_numbers,omitempty"`
+	} `json:"attributes,omitempty"`
 }
 
 
@@ -72,7 +107,7 @@ func onCallCalendarRef(cal *onCallCalendar) []struct {
 	}
 }
 
-func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel *onCallRelationships) diag.Diagnostics {
+func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel onCallRelationships, inc []onCallIncluded) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range onCallCalendarRef(cal) {
 		if !isFieldAttribute(e.k) {
@@ -82,9 +117,19 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel *o
 			}
 		}
 	}
+	// Enrich relationships data from included values
+	for i, _ := range rel.OnCallUsers.Data {
+		for _, e := range inc {
+			if *rel.OnCallUsers.Data[i].ID == *e.ID && *e.Type == "user" {
+				rel.OnCallUsers.Data[i].FirstName = e.Attributes.FirstName
+				rel.OnCallUsers.Data[i].LastName = e.Attributes.LastName
+				rel.OnCallUsers.Data[i].Email = e.Attributes.Email
+				rel.OnCallUsers.Data[i].PhoneNumbers = e.Attributes.PhoneNumbers
+			}
+		}
+	}
 	if !isFieldAttribute("on_call_users") {
-		value := reflect.Indirect(reflect.ValueOf(&rel.OnCallUsers.Data)).Interface()
-		if err := d.Set("on_call_users", value); err != nil {
+		if err := d.Set("on_call_users", rel.OnCallUsers.Data); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}

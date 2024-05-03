@@ -30,6 +30,10 @@ On-call calendar lookup.
 
 Read-Only:
 
+- **email** (String)
+- **first_name** (String)
 - **id** (String)
+- **last_name** (String)
+- **phone_numbers** (List of String)
 
 

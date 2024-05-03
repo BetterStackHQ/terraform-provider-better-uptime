@@ -44,6 +44,7 @@ type onCallCalendarsPageHTTPResponse struct {
 		Attributes    onCallCalendar      `json:"attributes"`
 		Relationships onCallRelationships `json:"relationships"`
 	} `json:"data"`
+	Included []onCallIncluded `json:"included"`
 	Pagination struct {
 		First string `json:"first"`
 		Last  string `json:"last"`
@@ -86,7 +87,7 @@ func onCallCalendarLookup(ctx context.Context, d *schema.ResourceData, meta inte
 					return diag.Errorf("There are multiple on-call calendars with the same name: %s", calendarName)
 				}
 				d.SetId(e.ID)
-				if derr := onCallCalendarCopyAttrs(d, &e.Attributes, &e.Relationships); derr != nil {
+				if derr := onCallCalendarCopyAttrs(d, &e.Attributes, e.Relationships, res.Included); derr != nil {
 					return derr
 				}
 			}
