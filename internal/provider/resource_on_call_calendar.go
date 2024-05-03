@@ -52,10 +52,10 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 				"phone_numbers": {
 					Description: "Array of phone numbers.",
 					Type:        schema.TypeList,
+					Computed:    true,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
 					},
-					Computed:    true,
 				},
 			},
 		},
@@ -118,7 +118,7 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 		}
 	}
 	// Enrich relationships data from included values
-	for i, _ := range rel.OnCallUsers.Data {
+	for i := range rel.OnCallUsers.Data {
 		for _, e := range inc {
 			if *rel.OnCallUsers.Data[i].ID == *e.ID && *e.Type == "user" {
 				rel.OnCallUsers.Data[i].FirstName = e.Attributes.FirstName
