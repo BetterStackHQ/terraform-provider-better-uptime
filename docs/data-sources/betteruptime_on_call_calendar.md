@@ -17,13 +17,13 @@ On-call calendar lookup.
 
 ### Required
 
-- **name** (String)
+- **name** (String) Name of the on-call calendar.
 
 ### Read-Only
 
-- **default_calendar** (Boolean)
-- **id** (String) The ID of this resource.
-- **on_call_users** (List of Object) (see [below for nested schema](#nestedatt--on_call_users))
+- **default_calendar** (Boolean) Whether the on-call calendar is the default on-call calendar.
+- **id** (String) The ID of the on-call calendar.
+- **on_call_users** (List of Object) Array of on-call persons. (see [below for nested schema](#nestedatt--on_call_users))
 
 <a id="nestedatt--on_call_users"></a>
 ### Nested Schema for `on_call_users`

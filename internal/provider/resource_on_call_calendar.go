@@ -9,23 +9,28 @@ import (
 
 var onCallCalendarSchema = map[string]*schema.Schema{
 	"id": {
+		Description: "The ID of the on-call calendar.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
 	"name": {
+		Description: "Name of the on-call calendar.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
 	"default_calendar": {
+		Description: "Whether the on-call calendar is the default on-call calendar.",
 		Type:        schema.TypeBool,
 		Computed:    true,
 	},
 	"on_call_users": {
+		Description: "Array of on-call persons.",
 		Type:        schema.TypeList,
 		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"id": {
+					Description: "ID of the on-call person.",
 					Type:     schema.TypeString,
 					Computed: true,
 				},

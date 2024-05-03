@@ -40,8 +40,8 @@ func newOnCallCalendarDataSource() *schema.Resource {
 
 type onCallCalendarsPageHTTPResponse struct {
 	Data []struct {
-		ID         string         `json:"id"`
-		Attributes onCallCalendar `json:"attributes"`
+		ID            string              `json:"id"`
+		Attributes    onCallCalendar      `json:"attributes"`
 		Relationships onCallRelationships `json:"relationships"`
 	} `json:"data"`
 	Pagination struct {
