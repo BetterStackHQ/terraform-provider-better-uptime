@@ -36,7 +36,7 @@ https://betterstack.com/docs/uptime/api/status-pages/
 - **design** (String) Choose between classic and modern status page design. Possible values: 'v1', 'v2'.
 - **google_analytics_id** (String) Specify your own Google Analytics ID if you want to receive hits on your status page.
 - **hide_from_search_engines** (Boolean) Hide your status page from search engines.
-- **history** (Number) Number of days to display on the status page. Minimum 90 days.
+- **history** (Number) Number of days to display on the status page. Minimum 30 days.
 - **layout** (String) Choose usual vertical layout or space-saving horizontal layout. Only applicable when design: v2. Possible values: 'vertical', 'horizontal'.
 - **logo_url** (String) A direct link to your company's logo. The image should be under 20MB in size.
 - **min_incident_length** (Number) If you don't want to display short incidents on your status page, this attribute is for you.
