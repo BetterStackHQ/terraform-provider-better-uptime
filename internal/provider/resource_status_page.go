@@ -23,8 +23,8 @@ var statusPageSchema = map[string]*schema.Schema{
 		Description: "Number of days to display on the status page. Minimum 90 days.",
 		ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 			history := val.(int)
-			if history < 90 {
-				errs = append(errs, fmt.Errorf("%q must be at least 90, got: %d", key, history))
+			if history < 30 {
+				errs = append(errs, fmt.Errorf("%q must be at least 30, got: %d", key, history))
 			}
 			return
 		},
