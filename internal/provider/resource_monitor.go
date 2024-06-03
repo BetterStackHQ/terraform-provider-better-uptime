@@ -22,10 +22,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			if d.Id() == "" {
-				return false
-			}
-			return true
+			return d.Id() != ""
 		},
 	},
 	"id": {
