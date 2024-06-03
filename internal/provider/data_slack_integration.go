@@ -31,6 +31,7 @@ func newSlackIntegrationDataSource() *schema.Resource {
 		}
 		s[k] = &cp
 	}
+	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: slackIntegrationLookup,
 		Description: "Slack integration lookup.",

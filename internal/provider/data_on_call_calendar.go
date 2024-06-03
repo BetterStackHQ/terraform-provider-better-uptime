@@ -31,6 +31,7 @@ func newOnCallCalendarDataSource() *schema.Resource {
 		}
 		s[k] = &cp
 	}
+	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: onCallCalendarDefaultOrLookup,
 		Description: "On-call calendar lookup.",

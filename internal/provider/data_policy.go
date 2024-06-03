@@ -29,6 +29,7 @@ func newPolicyDataSource() *schema.Resource {
 		}
 		s[k] = &cp
 	}
+	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: policyLookup,
 		Description: "Policy lookup.",

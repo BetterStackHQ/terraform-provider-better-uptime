@@ -29,6 +29,7 @@ func newMonitorDataSource() *schema.Resource {
 		}
 		s[k] = &cp
 	}
+	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: monitorLookup,
 		Description: "Monitor lookup.",

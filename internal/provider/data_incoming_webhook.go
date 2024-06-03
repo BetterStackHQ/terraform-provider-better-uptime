@@ -30,6 +30,7 @@ func newIncomingWebhookDataSource() *schema.Resource {
 		}
 		s[k] = &cp
 	}
+	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: incomingWebhookLookup,
 		Description: "Incoming Webhook lookup.",

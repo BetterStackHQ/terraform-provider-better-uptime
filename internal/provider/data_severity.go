@@ -29,6 +29,7 @@ func newSeverityDataSource() *schema.Resource {
 		}
 		s[k] = &cp
 	}
+	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: severityLookup,
 		Description: "Severity lookup.",
