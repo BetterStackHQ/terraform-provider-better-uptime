@@ -24,6 +24,7 @@ https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
 
 - **repeat_count** (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
 - **repeat_delay** (Number) How long in seconds to wait before each repetition.
+- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 

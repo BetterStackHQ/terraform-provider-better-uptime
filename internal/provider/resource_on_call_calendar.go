@@ -8,6 +8,17 @@ import (
 )
 
 var onCallCalendarSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if d.Id() == "" {
+				return false
+			}
+			return true
+		},
+	},
 	"id": {
 		Description: "The ID of the on-call calendar.",
 		Type:        schema.TypeString,
@@ -66,6 +77,7 @@ type onCallCalendar struct {
 	ID              *string `json:"id,omitempty"`
 	Name            *string `json:"name,omitempty"`
 	DefaultCalendar *bool   `json:"default_calendar,omitempty"`
+	TeamName        *string `json:"team_name,omitempty"`
 }
 
 type onCallRelationships struct {
@@ -102,6 +114,7 @@ func onCallCalendarRef(cal *onCallCalendar) []struct {
 	}{
 		{"name", &cal.Name},
 		{"default_calendar", &cal.DefaultCalendar},
+		{"team_name", &cal.TeamName},
 	}
 }
 

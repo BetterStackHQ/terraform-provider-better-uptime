@@ -17,6 +17,17 @@ var monitorTypes = []string{"status", "expected_status_code", "keyword", "keywor
 var checksVersions = []string{"v1", "v2"}
 var ipVersions = []string{"ipv4", "ipv6"}
 var monitorSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if d.Id() == "" {
+				return false
+			}
+			return true
+		},
+	},
 	"id": {
 		Description: "The ID of this Monitor.",
 		Type:        schema.TypeString,
@@ -283,6 +294,7 @@ var monitorSchema = map[string]*schema.Schema{
 				},
 			}
 		},
+		Default: "v1",
 	},
 	"ip_version": {
 		Description: strings.ReplaceAll(`Valid values:
@@ -435,6 +447,7 @@ type monitor struct {
 	UpdatedAt           *string                   `json:"updated_at,omitempty"`
 	PlaywrightScript    *string                   `json:"playwright_script,omitempty"`
 	ScenarioName        *string                   `json:"scenario_name,omitempty"`
+	TeamName            *string                   `json:"team_name,omitempty"`
 }
 
 type monitorHTTPResponse struct {
@@ -495,6 +508,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "updated_at", v: &in.UpdatedAt},
 		{k: "playwright_script", v: &in.PlaywrightScript},
 		{k: "scenario_name", v: &in.ScenarioName},
+		{k: "team_name", v: &in.TeamName},
 	}
 }
 

@@ -11,6 +11,17 @@ import (
 )
 
 var pagerdutyIntegrationSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if d.Id() == "" {
+				return false
+			}
+			return true
+		},
+	},
 	"id": {
 		Description: "The ID of the PagerDuty Integration.",
 		Type:        schema.TypeString,
@@ -43,9 +54,10 @@ func newPagerdutyIntegrationResource() *schema.Resource {
 }
 
 type pagerdutyIntegration struct {
-	ID   *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
-	Key  *string `json:"key,omitempty"`
+	ID       *string `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Key      *string `json:"key,omitempty"`
+	TeamName *string `json:"team_name,omitempty"`
 }
 
 type pagerdutyIntegrationHTTPResponse struct {
@@ -67,6 +79,7 @@ func pagerdutyIntegrationRef(in *pagerdutyIntegration) []struct {
 		{k: "id", v: &in.ID},
 		{k: "name", v: &in.Name},
 		{k: "key", v: &in.Key},
+		{k: "team_name", v: &in.TeamName},
 	}
 }
 

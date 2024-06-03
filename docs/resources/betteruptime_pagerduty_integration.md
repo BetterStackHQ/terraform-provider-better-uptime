@@ -22,6 +22,7 @@ https://betterstack.com/docs/uptime/api/pagerduty-integrations/
 ### Optional
 
 - **name** (String) The name of the PagerDuty Integration.
+- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 

@@ -81,6 +81,17 @@ var policyStepSchema = map[string]*schema.Schema{
 }
 
 var policySchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if d.Id() == "" {
+				return false
+			}
+			return true
+		},
+	},
 	"id": {
 		Description: "The ID of this Policy.",
 		Type:        schema.TypeString,
@@ -155,6 +166,7 @@ type policy struct {
 	RepeatDelay   *int          `json:"repeat_delay,omitempty"`
 	IncidentToken *string       `json:"incident_token,omitempty"`
 	Steps         *[]policyStep `json:"steps"`
+	TeamName      *string       `json:"team_name,omitempty"`
 }
 
 type policyHTTPResponse struct {
@@ -178,6 +190,7 @@ func policyRef(in *policy) []struct {
 		{k: "repeat_delay", v: &in.RepeatDelay},
 		{k: "incident_token", v: &in.IncidentToken},
 		{k: "steps", v: &in.Steps},
+		{k: "team_name", v: &in.TeamName},
 	}
 }
 

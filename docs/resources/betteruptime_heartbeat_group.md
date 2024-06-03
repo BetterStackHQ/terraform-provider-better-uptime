@@ -20,6 +20,7 @@ https://betterstack.com/docs/uptime/api/heartbeat-groups/
 - **name** (String) A name of the group that you can see in the dashboard.
 - **paused** (Boolean) Set to true to pause monitoring for any existing heartbeats in the group - we won't notify you about downtime. Set to false to resume monitoring for any existing heartbeats in the group.
 - **sort_index** (Number) Set sort_index to specify how to sort your heartbeat groups.
+- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 

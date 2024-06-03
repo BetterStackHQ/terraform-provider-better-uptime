@@ -25,6 +25,7 @@ https://betterstack.com/docs/uptime/api/list-all-severities/
 - **email** (Boolean) Whether to send email when a new incident is created.
 - **push** (Boolean) Whether to send push notification when a new incident is created.
 - **sms** (Boolean) Whether to send SMS when a new incident is created.
+- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 

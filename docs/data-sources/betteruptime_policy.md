@@ -26,6 +26,7 @@ Policy lookup.
 - **repeat_count** (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
 - **repeat_delay** (Number) How long in seconds to wait before each repetition.
 - **steps** (List of Object) An array of escalation policy steps (see [below for nested schema](#nestedatt--steps))
+- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 
 <a id="nestedatt--steps"></a>
 ### Nested Schema for `steps`

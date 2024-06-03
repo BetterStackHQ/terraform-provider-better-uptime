@@ -11,6 +11,17 @@ import (
 )
 
 var newRelicIntegrationSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if d.Id() == "" {
+				return false
+			}
+			return true
+		},
+	},
 	"id": {
 		Description: "The ID of the AWS CloudWatch Integration.",
 		Type:        schema.TypeString,
@@ -104,6 +115,7 @@ type newRelicIntegration struct {
 	AlertingRule   *string `json:"alerting_rule,omitempty"`
 	Paused         *bool   `json:"paused,omitempty"`
 	WebhookURL     *string `json:"webhook_url,omitempty"`
+	TeamName       *string `json:"team_name,omitempty"`
 }
 
 type newRelicIntegrationHTTPResponse struct {
@@ -134,6 +146,7 @@ func newRelicIntegrationRef(in *newRelicIntegration) []struct {
 		{k: "alerting_rule", v: &in.AlertingRule},
 		{k: "paused", v: &in.Paused},
 		{k: "webhook_url", v: &in.WebhookURL},
+		{k: "team_name", v: &in.TeamName},
 	}
 }
 

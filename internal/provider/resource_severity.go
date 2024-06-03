@@ -11,6 +11,17 @@ import (
 )
 
 var severitySchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if d.Id() == "" {
+				return false
+			}
+			return true
+		},
+	},
 	"id": {
 		Description: "The ID of this Severity.",
 		Type:        schema.TypeString,
@@ -62,12 +73,13 @@ func newSeverityResource() *schema.Resource {
 }
 
 type severity struct {
-	Id    *int    `json:"id,omitempty"`
-	Name  *string `json:"name,omitempty"`
-	SMS   *bool   `json:"sms,omitempty"`
-	Call  *bool   `json:"call,omitempty"`
-	Email *bool   `json:"email,omitempty"`
-	Push  *bool   `json:"push,omitempty"`
+	Id       *int    `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	SMS      *bool   `json:"sms,omitempty"`
+	Call     *bool   `json:"call,omitempty"`
+	Email    *bool   `json:"email,omitempty"`
+	Push     *bool   `json:"push,omitempty"`
+	TeamName *string `json:"team_name,omitempty"`
 }
 
 type severityHTTPResponse struct {
@@ -91,6 +103,7 @@ func severityRef(in *severity) []struct {
 		{k: "call", v: &in.Call},
 		{k: "email", v: &in.Email},
 		{k: "push", v: &in.Push},
+		{k: "team_name", v: &in.TeamName},
 	}
 }
 

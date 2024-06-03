@@ -11,6 +11,17 @@ import (
 )
 
 var monitorGroupSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if d.Id() == "" {
+				return false
+			}
+			return true
+		},
+	},
 	"id": {
 		Description: "The ID of this Monitor.",
 		Type:        schema.TypeString,
@@ -66,6 +77,7 @@ type monitorGroup struct {
 	SortIndex *int    `json:"sort_index,omitempty"`
 	CreatedAt *string `json:"created_at,omitempty"`
 	UpdatedAt *string `json:"updated_at,omitempty"`
+	TeamName  *string `json:"team_name,omitempty"`
 }
 
 type monitorGroupHTTPResponse struct {
@@ -89,6 +101,7 @@ func monitorGroupRef(in *monitorGroup) []struct {
 		{k: "sort_index", v: &in.SortIndex},
 		{k: "created_at", v: &in.CreatedAt},
 		{k: "updated_at", v: &in.UpdatedAt},
+		{k: "team_name", v: &in.TeamName},
 	}
 }
 

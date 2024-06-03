@@ -11,6 +11,17 @@ import (
 )
 
 var awsCloudWatchIntegrationSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if d.Id() == "" {
+				return false
+			}
+			return true
+		},
+	},
 	"id": {
 		Description: "The ID of the AWS CloudWatch Integration.",
 		Type:        schema.TypeString,
@@ -98,6 +109,7 @@ type awsCloudWatchIntegration struct {
 	RecoveryPeriod *int    `json:"recovery_period,omitempty"`
 	Paused         *bool   `json:"paused,omitempty"`
 	WebhookURL     *string `json:"webhook_url,omitempty"`
+	TeamName       *string `json:"team_name,omitempty"`
 }
 
 type awsCloudWatchIntegrationHTTPResponse struct {
@@ -127,6 +139,7 @@ func awsCloudWatchIntegrationRef(in *awsCloudWatchIntegration) []struct {
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},
 		{k: "webhook_url", v: &in.WebhookURL},
+		{k: "team_name", v: &in.TeamName},
 	}
 }
 
