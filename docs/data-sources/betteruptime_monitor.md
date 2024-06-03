@@ -100,7 +100,6 @@ Monitor lookup.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **ssl_expiration** (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **status** (String) The status of this website check.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.
 - **updated_at** (String) The time when this monitor was updated.
 - **verify_ssl** (Boolean) Should we verify SSL certificate validity?

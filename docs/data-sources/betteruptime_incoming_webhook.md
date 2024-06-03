@@ -42,7 +42,6 @@ Incoming Webhook lookup.
 - **started_alert_id_field** (Set of Object) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--started_alert_id_field))
 - **started_rule_type** (String) Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
 - **started_rules** (List of Object) An array of rules to match to start a new incident. (see [below for nested schema](#nestedatt--started_rules))
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
 - **url** (String) The url at which we expect to receive the webhook.
 

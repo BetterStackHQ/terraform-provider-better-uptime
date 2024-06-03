@@ -28,6 +28,5 @@ Slack integration lookup.
 - **slack_status** (String) Status of the connected Slack account. Possible values: active, account_inactive
 - **slack_team_id** (String) Slack ID of the connected team.
 - **slack_team_name** (String) Name of the connected Slack team.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 
 

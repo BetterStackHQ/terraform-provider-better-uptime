@@ -26,6 +26,5 @@ Severity lookup.
 - **id** (String) The ID of this Severity.
 - **push** (Boolean) Whether to send push notification when a new incident is created.
 - **sms** (Boolean) Whether to send SMS when a new incident is created.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 
 
