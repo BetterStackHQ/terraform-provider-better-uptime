@@ -235,7 +235,6 @@ func incomingWebhookRef(in *incomingWebhook) []struct {
 		{k: "other_started_fields", v: &in.OtherStartedFields},
 		{k: "other_acknowledged_fields", v: &in.OtherAcknowledgedFields},
 		{k: "other_resolved_fields", v: &in.OtherResolvedFields},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -253,6 +252,7 @@ func incomingWebhookCreate(ctx context.Context, d *schema.ResourceData, meta int
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out incomingWebhookHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/incoming-webhooks", &in, &out); err != nil {
 		return err

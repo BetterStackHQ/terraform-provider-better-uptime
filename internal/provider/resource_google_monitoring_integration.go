@@ -136,7 +136,6 @@ func googleMonitoringIntegrationRef(in *googleMonitoringIntegration) []struct {
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},
 		{k: "webhook_url", v: &in.WebhookURL},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -149,6 +148,7 @@ func googleMonitoringIntegrationCreate(ctx context.Context, d *schema.ResourceDa
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out googleMonitoringIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/google-monitoring-integrations", &in, &out); err != nil {
 		return err

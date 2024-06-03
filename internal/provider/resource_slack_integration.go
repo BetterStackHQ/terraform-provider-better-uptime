@@ -86,7 +86,6 @@ func slackIntegrationRef(in *slackIntegration) []struct {
 		{k: "slack_status", v: &in.SlackStatus},
 		{k: "integration_type", v: &in.IntegrationTyp},
 		{k: "on_call_notifications", v: &in.OnCallNotifications},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 

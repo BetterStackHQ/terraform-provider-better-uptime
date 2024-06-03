@@ -136,7 +136,6 @@ func awsCloudWatchIntegrationRef(in *awsCloudWatchIntegration) []struct {
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},
 		{k: "webhook_url", v: &in.WebhookURL},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -149,6 +148,7 @@ func awsCloudWatchIntegrationCreate(ctx context.Context, d *schema.ResourceData,
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out awsCloudWatchIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/aws-cloudwatch-integrations", &in, &out); err != nil {
 		return err

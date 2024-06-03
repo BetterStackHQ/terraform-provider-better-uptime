@@ -136,7 +136,6 @@ func azureIntegrationRef(in *azureIntegration) []struct {
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},
 		{k: "webhook_url", v: &in.WebhookURL},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -149,6 +148,7 @@ func azureIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta in
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out azureIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/azure-integrations", &in, &out); err != nil {
 		return err

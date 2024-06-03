@@ -111,7 +111,6 @@ func onCallCalendarRef(cal *onCallCalendar) []struct {
 	}{
 		{"name", &cal.Name},
 		{"default_calendar", &cal.DefaultCalendar},
-		{"team_name", &cal.TeamName},
 	}
 }
 

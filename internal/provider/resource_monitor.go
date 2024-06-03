@@ -505,7 +505,6 @@ func monitorRef(in *monitor) []struct {
 		{k: "updated_at", v: &in.UpdatedAt},
 		{k: "playwright_script", v: &in.PlaywrightScript},
 		{k: "scenario_name", v: &in.ScenarioName},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -518,6 +517,7 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out monitorHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/monitors", &in, &out); err != nil {
 		return err

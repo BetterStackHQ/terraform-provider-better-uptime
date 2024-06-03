@@ -235,7 +235,6 @@ func emailIntegrationRef(in *emailIntegration) []struct {
 		{k: "other_started_fields", v: &in.OtherStartedFields},
 		{k: "other_acknowledged_fields", v: &in.OtherAcknowledgedFields},
 		{k: "other_resolved_fields", v: &in.OtherResolvedFields},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -253,6 +252,7 @@ func emailIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta in
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out emailIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/email-integrations", &in, &out); err != nil {
 		return err

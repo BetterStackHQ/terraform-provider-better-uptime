@@ -143,7 +143,6 @@ func newRelicIntegrationRef(in *newRelicIntegration) []struct {
 		{k: "alerting_rule", v: &in.AlertingRule},
 		{k: "paused", v: &in.Paused},
 		{k: "webhook_url", v: &in.WebhookURL},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -156,6 +155,7 @@ func newRelicIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out newRelicIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/new-relic-integrations", &in, &out); err != nil {
 		return err

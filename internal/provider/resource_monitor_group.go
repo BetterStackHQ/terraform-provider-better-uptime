@@ -98,7 +98,6 @@ func monitorGroupRef(in *monitorGroup) []struct {
 		{k: "sort_index", v: &in.SortIndex},
 		{k: "created_at", v: &in.CreatedAt},
 		{k: "updated_at", v: &in.UpdatedAt},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -107,6 +106,7 @@ func monitorGroupCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	for _, e := range monitorGroupRef(&in) {
 		load(d, e.k, e.v)
 	}
+	load(d, "team_name", &in.TeamName)
 	var out monitorGroupHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/monitor-groups", &in, &out); err != nil {
 		return err

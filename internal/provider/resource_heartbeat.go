@@ -219,7 +219,6 @@ func heartbeatRef(in *heartbeat) []struct {
 		{k: "status", v: &in.Status},
 		{k: "created_at", v: &in.CreatedAt},
 		{k: "updated_at", v: &in.UpdatedAt},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -228,6 +227,7 @@ func heartbeatCreate(ctx context.Context, d *schema.ResourceData, meta interface
 	for _, e := range heartbeatRef(&in) {
 		load(d, e.k, e.v)
 	}
+	load(d, "team_name", &in.TeamName)
 	var out heartbeatHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/heartbeats", &in, &out); err != nil {
 		return err

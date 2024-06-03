@@ -100,7 +100,6 @@ func severityRef(in *severity) []struct {
 		{k: "call", v: &in.Call},
 		{k: "email", v: &in.Email},
 		{k: "push", v: &in.Push},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -109,6 +108,7 @@ func severityCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	for _, e := range severityRef(&in) {
 		load(d, e.k, e.v)
 	}
+	load(d, "team_name", &in.TeamName)
 	var out severityHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/urgencies", &in, &out); err != nil {
 		return err

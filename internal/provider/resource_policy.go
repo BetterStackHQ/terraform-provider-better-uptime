@@ -187,7 +187,6 @@ func policyRef(in *policy) []struct {
 		{k: "repeat_delay", v: &in.RepeatDelay},
 		{k: "incident_token", v: &in.IncidentToken},
 		{k: "steps", v: &in.Steps},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -200,6 +199,7 @@ func policyCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out policyHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/policies", &in, &out); err != nil {
 		return err

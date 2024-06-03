@@ -76,7 +76,6 @@ func pagerdutyIntegrationRef(in *pagerdutyIntegration) []struct {
 		{k: "id", v: &in.ID},
 		{k: "name", v: &in.Name},
 		{k: "key", v: &in.Key},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -89,6 +88,7 @@ func pagerdutyIntegrationCreate(ctx context.Context, d *schema.ResourceData, met
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out pagerdutyIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/pager-duty-webhooks", &in, &out); err != nil {
 		return err

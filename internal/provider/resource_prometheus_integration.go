@@ -136,7 +136,6 @@ func prometheusIntegrationRef(in *prometheusIntegration) []struct {
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},
 		{k: "webhook_url", v: &in.WebhookURL},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -149,6 +148,7 @@ func prometheusIntegrationCreate(ctx context.Context, d *schema.ResourceData, me
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out prometheusIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/prometheus-integrations", &in, &out); err != nil {
 		return err

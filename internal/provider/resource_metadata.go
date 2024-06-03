@@ -104,7 +104,6 @@ func metadataRef(in *metadata) []struct {
 		{k: "value", v: &in.Value},
 		{k: "created_at", v: &in.CreatedAt},
 		{k: "updated_at", v: &in.UpdatedAt},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -117,6 +116,7 @@ func metadataCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out metadataHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/metadata", &in, &out); err != nil {
 		return err

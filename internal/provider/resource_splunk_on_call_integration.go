@@ -76,7 +76,6 @@ func splunkOnCallIntegrationRef(in *splunkOnCallIntegration) []struct {
 		{k: "id", v: &in.ID},
 		{k: "name", v: &in.Name},
 		{k: "url", v: &in.URL},
-		{k: "team_name", v: &in.TeamName},
 	}
 }
 
@@ -89,6 +88,7 @@ func splunkOnCallIntegrationCreate(ctx context.Context, d *schema.ResourceData, 
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out splunkOnCallIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/splunk-on-calls", &in, &out); err != nil {
 		return err
