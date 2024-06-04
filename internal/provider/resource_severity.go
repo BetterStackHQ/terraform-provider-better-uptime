@@ -11,6 +11,14 @@ import (
 )
 
 var severitySchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return d.Id() != ""
+		},
+	},
 	"id": {
 		Description: "The ID of this Severity.",
 		Type:        schema.TypeString,
@@ -62,12 +70,13 @@ func newSeverityResource() *schema.Resource {
 }
 
 type severity struct {
-	Id    *int    `json:"id,omitempty"`
-	Name  *string `json:"name,omitempty"`
-	SMS   *bool   `json:"sms,omitempty"`
-	Call  *bool   `json:"call,omitempty"`
-	Email *bool   `json:"email,omitempty"`
-	Push  *bool   `json:"push,omitempty"`
+	Id       *int    `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	SMS      *bool   `json:"sms,omitempty"`
+	Call     *bool   `json:"call,omitempty"`
+	Email    *bool   `json:"email,omitempty"`
+	Push     *bool   `json:"push,omitempty"`
+	TeamName *string `json:"team_name,omitempty"`
 }
 
 type severityHTTPResponse struct {
@@ -99,6 +108,7 @@ func severityCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	for _, e := range severityRef(&in) {
 		load(d, e.k, e.v)
 	}
+	load(d, "team_name", &in.TeamName)
 	var out severityHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/urgencies", &in, &out); err != nil {
 		return err

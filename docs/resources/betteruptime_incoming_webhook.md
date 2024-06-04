@@ -41,6 +41,7 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **started_alert_id_field** (Block Set) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--started_alert_id_field))
 - **started_rules** (Block List) An array of rules to match to start a new incident. (see [below for nested schema](#nestedblock--started_rules))
+- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
 
 ### Read-Only

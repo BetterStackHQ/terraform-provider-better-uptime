@@ -11,6 +11,14 @@ import (
 )
 
 var incomingWebhookSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return d.Id() != ""
+		},
+	},
 	"id": {
 		Description: "The ID of this incoming webhook.",
 		Type:        schema.TypeString,
@@ -185,6 +193,7 @@ type incomingWebhook struct {
 	OtherStartedFields       *[]integrationField `json:"other_started_fields,omitempty"`
 	OtherAcknowledgedFields  *[]integrationField `json:"other_acknowledged_fields,omitempty"`
 	OtherResolvedFields      *[]integrationField `json:"other_resolved_fields,omitempty"`
+	TeamName                 *string             `json:"team_name,omitempty"`
 }
 
 type incomingWebhookHTTPResponse struct {
@@ -243,6 +252,7 @@ func incomingWebhookCreate(ctx context.Context, d *schema.ResourceData, meta int
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out incomingWebhookHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/incoming-webhooks", &in, &out); err != nil {
 		return err

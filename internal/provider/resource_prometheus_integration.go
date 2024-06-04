@@ -11,6 +11,14 @@ import (
 )
 
 var prometheusIntegrationSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return d.Id() != ""
+		},
+	},
 	"id": {
 		Description: "The ID of the AWS CloudWatch Integration.",
 		Type:        schema.TypeString,
@@ -98,6 +106,7 @@ type prometheusIntegration struct {
 	RecoveryPeriod *int    `json:"recovery_period,omitempty"`
 	Paused         *bool   `json:"paused,omitempty"`
 	WebhookURL     *string `json:"webhook_url,omitempty"`
+	TeamName       *string `json:"team_name,omitempty"`
 }
 
 type prometheusIntegrationHTTPResponse struct {
@@ -139,6 +148,7 @@ func prometheusIntegrationCreate(ctx context.Context, d *schema.ResourceData, me
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out prometheusIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/prometheus-integrations", &in, &out); err != nil {
 		return err

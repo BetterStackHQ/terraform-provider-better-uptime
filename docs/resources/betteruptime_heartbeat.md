@@ -35,6 +35,7 @@ https://betterstack.com/docs/uptime/api/heartbeats/
 - **push** (Boolean) Should we send a push notification to the on-call person?
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **sort_index** (Number) An index controlling the position of a heartbeat in the heartbeat group.
+- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
 
 ### Read-Only

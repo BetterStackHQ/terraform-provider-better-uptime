@@ -11,6 +11,14 @@ import (
 )
 
 var metadataSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return d.Id() != ""
+		},
+	},
 	"id": {
 		Description: "The ID of this Metadata.",
 		Type:        schema.TypeString,
@@ -70,6 +78,7 @@ type metadata struct {
 	Value     *string `json:"value,omitempty"`
 	CreatedAt *string `json:"created_at,omitempty"`
 	UpdatedAt *string `json:"updated_at,omitempty"`
+	TeamName  *string `json:"team_name,omitempty"`
 }
 
 type metadataHTTPResponse struct {
@@ -107,6 +116,7 @@ func metadataCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out metadataHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/metadata", &in, &out); err != nil {
 		return err

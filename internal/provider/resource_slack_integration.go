@@ -8,6 +8,14 @@ import (
 )
 
 var slackIntegrationSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return d.Id() != ""
+		},
+	},
 	"id": {
 		Description: "The ID of this Slack integration.",
 		Type:        schema.TypeString,
@@ -59,6 +67,7 @@ type slackIntegration struct {
 	SlackStatus         *string `json:"slack_status,omitempty"`
 	IntegrationTyp      *string `json:"integration_type,omitempty"`
 	OnCallNotifications *bool   `json:"on_call_notifications,omitempty"`
+	TeamName            *string `json:"team_name,omitempty"`
 }
 
 func slackIntegrationRef(in *slackIntegration) []struct {

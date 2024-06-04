@@ -11,6 +11,14 @@ import (
 )
 
 var pagerdutyIntegrationSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return d.Id() != ""
+		},
+	},
 	"id": {
 		Description: "The ID of the PagerDuty Integration.",
 		Type:        schema.TypeString,
@@ -43,9 +51,10 @@ func newPagerdutyIntegrationResource() *schema.Resource {
 }
 
 type pagerdutyIntegration struct {
-	ID   *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
-	Key  *string `json:"key,omitempty"`
+	ID       *string `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Key      *string `json:"key,omitempty"`
+	TeamName *string `json:"team_name,omitempty"`
 }
 
 type pagerdutyIntegrationHTTPResponse struct {
@@ -79,6 +88,7 @@ func pagerdutyIntegrationCreate(ctx context.Context, d *schema.ResourceData, met
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out pagerdutyIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/pager-duty-webhooks", &in, &out); err != nil {
 		return err

@@ -11,6 +11,14 @@ import (
 )
 
 var heartbeatGroupSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return d.Id() != ""
+		},
+	},
 	"id": {
 		Description: "The ID of this Monitor.",
 		Type:        schema.TypeString,
@@ -66,6 +74,7 @@ type heartbeatGroup struct {
 	SortIndex *int    `json:"sort_index,omitempty"`
 	CreatedAt *string `json:"created_at,omitempty"`
 	UpdatedAt *string `json:"updated_at,omitempty"`
+	TeamName  *string `json:"team_name,omitempty"`
 }
 
 type heartbeatGroupHTTPResponse struct {
@@ -97,6 +106,7 @@ func heartbeatGroupCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	for _, e := range heartbeatGroupRef(&in) {
 		load(d, e.k, e.v)
 	}
+	load(d, "team_name", &in.TeamName)
 	var out heartbeatGroupHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/heartbeat-groups", &in, &out); err != nil {
 		return err

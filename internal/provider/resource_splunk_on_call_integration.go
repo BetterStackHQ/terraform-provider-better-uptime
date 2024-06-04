@@ -11,6 +11,14 @@ import (
 )
 
 var splunkOnCallIntegrationSchema = map[string]*schema.Schema{
+	"team_name": {
+		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return d.Id() != ""
+		},
+	},
 	"id": {
 		Description: "The ID of the Splunk On-Call Integration.",
 		Type:        schema.TypeString,
@@ -43,9 +51,10 @@ func newSplunkOnCallIntegrationResource() *schema.Resource {
 }
 
 type splunkOnCallIntegration struct {
-	ID   *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
-	URL  *string `json:"url,omitempty"`
+	ID       *string `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	URL      *string `json:"url,omitempty"`
+	TeamName *string `json:"team_name,omitempty"`
 }
 
 type splunkOnCallIntegrationHTTPResponse struct {
@@ -79,6 +88,7 @@ func splunkOnCallIntegrationCreate(ctx context.Context, d *schema.ResourceData, 
 			load(d, e.k, e.v)
 		}
 	}
+	load(d, "team_name", &in.TeamName)
 	var out splunkOnCallIntegrationHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/splunk-on-calls", &in, &out); err != nil {
 		return err

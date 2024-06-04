@@ -26,6 +26,7 @@ https://betterstack.com/docs/uptime/api/google-monitoring-integrations/
 - **push** (Boolean) Do we send a push notification to the on-call person?
 - **recovery_period** (Number) How long the alert must be up to automatically mark an incident as resolved. In seconds.
 - **sms** (Boolean) Do we send an SMS to the on-call person?
+- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 - **team_wait** (Number) How long we wait before escalating the incident alert to the team. In seconds.
 
 ### Read-Only
