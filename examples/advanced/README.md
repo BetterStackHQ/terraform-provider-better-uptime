@@ -11,6 +11,7 @@ git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
 echo '# See variables.tf for more.
 betteruptime_api_token             = "XXXXXXXXXXXXXXXXXXXXXXXX"
 betteruptime_status_page_subdomain = "example"
+betteruptime_severity_name         = "Low Severity"
 ' > terraform.tfvars
 
 terraform init
