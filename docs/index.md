@@ -9,6 +9,20 @@ description: |-
 
 The Better Uptime provider provides resources to interact with the [Better Uptime API](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/).
 
+## Installation
+
+```terraform
+terraform {
+  required_version = ">= 0.13"
+  required_providers {
+    betteruptime = {
+      source  = "BetterStackHQ/better-uptime"
+      version = ">= 0.9.3"
+    }
+  }
+}
+```
+
 ## Example Usage
 
 ```terraform
