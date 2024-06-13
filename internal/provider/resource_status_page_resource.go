@@ -57,7 +57,7 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
-		Deprecated: "Use widget_type instead.",
+		Deprecated:  "Use widget_type instead.",
 	},
 	// TODO: add 'effective_position' computed property?
 	"position": {
