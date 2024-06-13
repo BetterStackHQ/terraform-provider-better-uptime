@@ -246,7 +246,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Request body for POST, PUT, PATCH requests.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     nil,
+		Computed:    true,
 	},
 	"request_headers": {
 		Description: "An array of request headers, consisting of name and value pairs",
@@ -273,14 +273,14 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Basic HTTP authentication username to include with the request.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     nil,
+		Computed:    true,
 		Sensitive:   true,
 	},
 	"auth_password": {
 		Description: "Basic HTTP authentication password to include with the request.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     nil,
+		Computed:    true,
 		Sensitive:   true,
 	},
 	"checks_version": {
