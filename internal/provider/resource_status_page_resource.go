@@ -72,7 +72,7 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Description: "What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type). This takes preference over history when both parameters are present.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     "history",
+		Computed:    true,
 	},
 	"availability": {
 		Description: "The availability of this resource (from 0.0 to 1.0).",

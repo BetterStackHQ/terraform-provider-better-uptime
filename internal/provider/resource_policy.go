@@ -112,13 +112,13 @@ var policySchema = map[string]*schema.Schema{
 		Description: "How many times should the entire policy be repeated if no one acknowledges the incident.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     0,
+		Computed:    true,
 	},
 	"repeat_delay": {
 		Description: "How long in seconds to wait before each repetition.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     0,
+		Computed:    true,
 	},
 	"incident_token": {
 		Description: "Incident token that can be used for manually reporting incidents.",

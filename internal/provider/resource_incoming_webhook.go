@@ -42,25 +42,25 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 		Description: "Should we call the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"sms": {
 		Description: "Should we send an SMS to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"email": {
 		Description: "Should we send an email to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"push": {
 		Description: "Should we send a push notification to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"team_wait": {
 		Description: "How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.",
@@ -72,7 +72,7 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 		Description: "How long the integration must be up to automatically mark an incident as resolved after being down.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     0,
+		Computed:    true,
 	},
 	"paused": {
 		Description: "Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.",

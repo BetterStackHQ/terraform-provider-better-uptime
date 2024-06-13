@@ -42,25 +42,25 @@ var datadogIntegrationSchema = map[string]*schema.Schema{
 		Description: "Do we call the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"sms": {
 		Description: "Do we send an SMS to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"email": {
 		Description: "Do we send an email to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"push": {
 		Description: "Do we send a push notification to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"team_wait": {
 		Description: "How long we wait before escalating the incident alert to the team. In seconds.",
@@ -72,7 +72,7 @@ var datadogIntegrationSchema = map[string]*schema.Schema{
 		Description: "How long the alert must be up to automatically mark an incident as resolved. In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     0,
+		Computed:    true,
 	},
 	"alerting_rule": {
 		Description: "Should we alert only on alarms, or on both alarms and warnings. Possible values: alert, alert_and_warn.",

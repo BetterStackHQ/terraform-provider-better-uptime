@@ -35,25 +35,25 @@ var severitySchema = map[string]*schema.Schema{
 		Description: "Whether to send SMS when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"call": {
 		Description: "Whether to call when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"email": {
 		Description: "Whether to send email when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"push": {
 		Description: "Whether to send push notification when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 }
 

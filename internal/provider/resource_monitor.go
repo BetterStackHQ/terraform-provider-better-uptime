@@ -126,25 +126,25 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Should we call the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"sms": {
 		Description: "Should we send an SMS to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"email": {
 		Description: "Should we send an email to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"push": {
 		Description: "Should we send a push notification to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"team_wait": {
 		Description: "How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.",
@@ -168,7 +168,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Set to true for the monitor to follow redirects.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"port": {
 		Description: "Required if monitor_type is set to tcp, udp, smtp, pop, or imap." +
@@ -206,19 +206,19 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "How long the monitor must be up to automatically mark an incident as resolved after being down. In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     180,
+		Computed:    true,
 	},
 	"verify_ssl": {
 		Description: "Should we verify SSL certificate validity?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"check_frequency": {
 		Description: "How often should we check your website? In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     180,
+		Computed:    true,
 	},
 	"confirmation_period": {
 		Description: "How long should we wait after observing a failure before we start a new incident? In seconds.",
@@ -230,7 +230,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     "GET",
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return strings.EqualFold(old, new)
 		},
@@ -240,7 +240,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "How long to wait before timing out the request? In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     30,
+		Computed:    true,
 	},
 	"request_body": {
 		Description: "Request body for POST, PUT, PATCH requests.",
@@ -376,7 +376,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Set to true to keep cookies when redirecting.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"last_checked_at": {
 		Description: "When the website was last checked.",
