@@ -25,7 +25,7 @@ https://betterstack.com/docs/uptime/api/monitor-groups/
 ### Read-Only
 
 - **created_at** (String) The time when this monitor group was created.
-- **id** (String) The ID of this Monitor.
+- **id** (String) The ID of this Monitor group.
 - **updated_at** (String) The time when this monitor group was updated.
 
 

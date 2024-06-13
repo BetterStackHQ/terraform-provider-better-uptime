@@ -25,10 +25,10 @@ https://betterstack.com/docs/uptime/api/status-page-resources/
 ### Optional
 
 - **explanation** (String) A detailed text displayed as a help icon.
-- **history** (Boolean) (Deprecated) Do you want to show the 90-day incident history for this item?
+- **history** (Boolean) (Deprecated, see widget_type) Do you want to display detailed historical status for this item?
 - **position** (Number) The position of this resource on your status page, indexed from zero. If you don't specify a position, we add the resource to the end of the status page. When you specify a position of an existing resource, we add the resource to this position and shift resources below to accommodate.
 - **status_page_section_id** (Number) The ID of the Status Page Section. If you don't specify a status_page_section_id, we add the resource to the first section. If there are no sections in the status page yet, one will be automatically created for you.
-- **widget_type** (String) What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type. This takes preference over history when both parameters are present.
+- **widget_type** (String) What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type). This takes preference over history when both parameters are present.
 
 ### Read-Only
 

@@ -15,11 +15,13 @@ var statusPageSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Status Page.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"history": {
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 		Description: "Number of days to display on the status page. Between 7 and 365 days.",
 		ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 			history := val.(int)
@@ -28,7 +30,6 @@ var statusPageSchema = map[string]*schema.Schema{
 			}
 			return
 		},
-		Computed: true,
 	},
 	"company_name": {
 		Description: "Name of your company.",
@@ -44,11 +45,13 @@ var statusPageSchema = map[string]*schema.Schema{
 		Description: "URL that should be used for contacting you in case of an emergency.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"logo_url": {
 		Description: "A direct link to your company's logo. The image should be under 20MB in size.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"timezone": {
 		Description: "What timezone should we display your status page in? The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
@@ -64,102 +67,122 @@ var statusPageSchema = map[string]*schema.Schema{
 		Description: "Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com`",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"min_incident_length": {
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 		Description: "If you don't want to display short incidents on your status page, this attribute is for you.",
 	},
 	"subscribable": {
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 		Description: "Do you want to allow users to subscribe to your status page changes?",
 	},
 	"hide_from_search_engines": {
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 		Description: "Hide your status page from search engines.",
 	},
 	"custom_css": {
 		Description: "Unleash your inner designer and tweak our status page design to fit your branding.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"custom_javascript": {
 		Description: "Add custom behavior to your status page. It is only allowed for status pages with a custom domain name.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"google_analytics_id": {
 		Description: "Specify your own Google Analytics ID if you want to receive hits on your status page.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"announcement": {
 		Description: "Add an announcement to your status page.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"announcement_embed_visible": {
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 		Description: strings.ReplaceAll(`Toggle this field if you want to show an announcement in your embed. You can embed the announcement using this snippet: **<script src="https://betteruptime.com/widgets/announcement.js" data-id="<SET STATUS_PAGE_ID>" async="async" type="text/javascript"></script>**`, "**", "`"),
 	},
 	"announcement_embed_link": {
 		Description: "Point your embedded announcement to a specified URL.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"announcement_embed_css": {
 		Description: "Modify the design of the announcement embed.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"password_enabled": {
 		Description: "Do you want to enable password protection on your status page?",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"password": {
 		Description: "Set a password of your status page (we won't store it as plaintext, promise). Required when password_enabled: true. We will set password_enabled: false automatically when you send us an empty password.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		Sensitive:   true,
 	},
 	"aggregate_state": {
 		Description: "The overall status of this status page.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"created_at": {
 		Description: "The time when this status page was created.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"updated_at": {
 		Description: "The time when this status page was updated.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"design": {
 		Description: "Choose between classic and modern status page design. Possible values: 'v1', 'v2'.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"theme": {
 		Description: "Choose theme of your status page. Only applicable when design: v2. Possible values: 'light', 'dark'.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"layout": {
 		Description: "Choose usual vertical layout or space-saving horizontal layout. Only applicable when design: v2. Possible values: 'vertical', 'horizontal'.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"automatic_reports": {
 		Description: "Generate automatic reports when your services go down",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 }
 

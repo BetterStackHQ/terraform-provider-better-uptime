@@ -15,6 +15,7 @@ var heartbeatSchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -22,6 +23,7 @@ var heartbeatSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this heartbeat.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"name": {
@@ -32,6 +34,7 @@ var heartbeatSchema = map[string]*schema.Schema{
 	"url": {
 		Description: "The url of this heartbeat.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"period": {
@@ -50,11 +53,13 @@ var heartbeatSchema = map[string]*schema.Schema{
 		Description: "Should we call the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Default:     false,
 	},
 	"sms": {
 		Description: "Should we send an SMS to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Default:     false,
 	},
 	"email": {
 		Description: "Should we send an email to the on-call person?",
@@ -72,16 +77,19 @@ var heartbeatSchema = map[string]*schema.Schema{
 		Description: "How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"heartbeat_group_id": {
 		Description: "Set this attribute if you want to add this heartbeat to a heartbeat group..",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"sort_index": {
 		Description: "An index controlling the position of a heartbeat in the heartbeat group.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return !d.HasChange(k)
 		},
@@ -90,18 +98,21 @@ var heartbeatSchema = map[string]*schema.Schema{
 		Description: "Start of the maintenance window each day. We won't create incidents during this window. Example: \"01:00:00\"",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		// TODO: ValidateDiagFunc
 	},
 	"maintenance_to": {
 		Description: "End of the maintenance window each day. Example: \"03:00:00\"",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		// TODO: ValidateDiagFunc
 	},
 	"maintenance_timezone": {
 		Description: "The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"maintenance_days": {
 		Description: "An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"] or any subset of these days.",
@@ -110,35 +121,42 @@ var heartbeatSchema = map[string]*schema.Schema{
 			Type: schema.TypeString,
 		},
 		Optional: true,
+		Computed: true,
 	},
 	"paused": {
 		Description: "Set to true to pause monitoring — we won't notify you about downtime. Set to false to resume monitoring.",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"paused_at": {
 		Description: "The time when this heartbeat was paused.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"policy_id": {
 		Description: "Set the escalation policy for the heartbeat.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"status": {
 		Description: "The status of this heartbeat.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"created_at": {
 		Description: "The time when this heartbeat was created.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"updated_at": {
 		Description: "The time when this heartbeat was updated.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 }

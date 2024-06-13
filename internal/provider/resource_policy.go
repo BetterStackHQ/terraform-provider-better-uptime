@@ -45,38 +45,45 @@ var policyStepSchema = map[string]*schema.Schema{
 		Description: "Which severity to use for this step.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"timezone": {
 		Description: "What timezone to use when evaluating time based branching rules. Used when step type is branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"days": {
 		Description: "An array of days during which the branching rule will be executed. Valid values are [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"]. Used when step type is branching.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
+		Computed:    true,
 	},
 	"time_from": {
 		Description: "A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"time_to": {
 		Description: "A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"policy_id": {
 		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is branching.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"step_members": {
 		Description: "An array of escalation policy steps members.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: policyStepMemberSchema},
 		Optional:    true,
+		Computed:    true,
 	},
 }
 
@@ -85,6 +92,7 @@ var policySchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -92,6 +100,7 @@ var policySchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Policy.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"name": {

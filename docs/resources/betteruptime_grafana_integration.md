@@ -19,7 +19,6 @@ https://betterstack.com/docs/uptime/api/grafana-integrations/
 
 - **call** (Boolean) Do we call the on-call person?
 - **email** (Boolean) Do we send an email to the on-call person?
-- **id** (String) The ID of the Grafana Integration.
 - **name** (String) The name of the Grafana Integration.
 - **paused** (Boolean) Is the Grafana integration paused.
 - **policy_id** (Number) ID of the escalation policy associated with the Grafana integration.
@@ -31,6 +30,7 @@ https://betterstack.com/docs/uptime/api/grafana-integrations/
 
 ### Read-Only
 
+- **id** (String) The ID of the Grafana Integration.
 - **webhook_url** (String) The webhook URL for the Grafana integration.
 
 

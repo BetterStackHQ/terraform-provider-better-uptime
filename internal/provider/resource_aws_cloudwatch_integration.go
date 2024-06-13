@@ -15,6 +15,7 @@ var awsCloudWatchIntegrationSchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -22,28 +23,32 @@ var awsCloudWatchIntegrationSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of the AWS CloudWatch Integration.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
-		Optional:    true,
 	},
 	"name": {
 		Description: "The name of the AWS CloudWatch Integration.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"policy_id": {
 		Description: "ID of the escalation policy associated with the AWS CloudWatch integration.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"call": {
 		Description: "Do we call the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Default:     false,
 	},
 	"sms": {
 		Description: "Do we send an SMS to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Default:     false,
 	},
 	"email": {
 		Description: "Do we send an email to the on-call person?",
@@ -61,6 +66,7 @@ var awsCloudWatchIntegrationSchema = map[string]*schema.Schema{
 		Description: "How long we wait before escalating the incident alert to the team. In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"recovery_period": {
 		Description: "How long the alert must be up to automatically mark an incident as resolved. In seconds.",
@@ -72,10 +78,12 @@ var awsCloudWatchIntegrationSchema = map[string]*schema.Schema{
 		Description: "Is the AWS CloudWatch integration paused.",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"webhook_url": {
 		Description: "The webhook URL for the AWS CloudWatch integration.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 }

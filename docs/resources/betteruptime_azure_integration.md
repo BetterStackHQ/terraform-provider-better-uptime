@@ -19,7 +19,6 @@ https://betterstack.com/docs/uptime/api/azure-integrations/
 
 - **call** (Boolean) Do we call the on-call person?
 - **email** (Boolean) Do we send an email to the on-call person?
-- **id** (String) The ID of the Azure Integration.
 - **name** (String) The name of the Azure Integration.
 - **paused** (Boolean) Is the Azure integration paused.
 - **policy_id** (Number) ID of the escalation policy associated with the Azure integration.
@@ -31,6 +30,7 @@ https://betterstack.com/docs/uptime/api/azure-integrations/
 
 ### Read-Only
 
+- **id** (String) The ID of the Azure Integration.
 - **webhook_url** (String) The webhook URL for the Azure integration.
 
 

@@ -16,6 +16,7 @@ var statusPageSectionSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Status Page Section.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"status_page_id": {
@@ -27,12 +28,14 @@ var statusPageSectionSchema = map[string]*schema.Schema{
 		Description: "The section name displayed publicly on your status page.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	// TODO: add 'effective_position' computed property?
 	"position": {
 		Description: "The position of this section on your status page, indexed from zero. If you don't specify a position, we add the section to the end of the status page. When you specify a position of an existing section, we add the section to this position and shift sections below to accommodate.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return !d.HasChange(k)
 		},
