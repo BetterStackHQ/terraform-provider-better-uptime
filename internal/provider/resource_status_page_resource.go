@@ -53,10 +53,11 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"history": {
-		Description: "(Deprecated, see widget_type) Do you want to display detailed historical status for this item?",
+		Description: "Do you want to display detailed historical status for this item? This field is deprecated, use widget_type instead.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
+		Deprecated: "Use widget_type instead.",
 	},
 	// TODO: add 'effective_position' computed property?
 	"position": {
