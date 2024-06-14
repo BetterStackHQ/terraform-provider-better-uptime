@@ -17,6 +17,7 @@ func TestDataMonitor(t *testing.T) {
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		prefix := "/api/v2/monitors"
@@ -28,6 +29,7 @@ func TestDataMonitor(t *testing.T) {
 			_, _ = w.Write([]byte(`{"data":[{"id":"2","attributes":{"url":"http://example.com","monitor_type":"status"}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+			t.Fail()
 		}
 	}))
 	defer server.Close()

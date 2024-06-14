@@ -16,6 +16,7 @@ func TestDataIncomingWebhook(t *testing.T) {
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		prefix := "/api/v2/incoming-webhooks"
@@ -27,6 +28,7 @@ func TestDataIncomingWebhook(t *testing.T) {
 			_, _ = w.Write([]byte(`{"data":[{"id":"2","attributes":{"name": "Incoming Webhook 2", "url":"https://uptime.betterstack.com/api/v1/incoming-webhook/def","recovery_period":4, "team_wait":120}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+			t.Fail()
 		}
 	}))
 	defer server.Close()

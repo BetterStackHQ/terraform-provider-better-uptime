@@ -16,6 +16,7 @@ func TestOnCallCalendarData(t *testing.T) {
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		prefix := "/api/v2/on-calls"
@@ -27,6 +28,7 @@ func TestOnCallCalendarData(t *testing.T) {
 			_, _ = w.Write([]byte(`{"data":[{"id":"456","attributes":{"name":"Secondary","default_calendar":false},"relationships":{"on_call_users":{"data":[{"id":"456789","type":"user"}]}}}],"included":[{"id":"456789","type":"user","attributes":{"first_name":"Jane","last_name":"Doe","email":"jane@example.com","phone_numbers":["+44 808 157 0192"]}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+			t.Fail()
 		}
 	}))
 	defer server.Close()
@@ -72,6 +74,7 @@ func TestDefaultOnCallCalendarData(t *testing.T) {
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		switch {
@@ -79,6 +82,7 @@ func TestDefaultOnCallCalendarData(t *testing.T) {
 			_, _ = w.Write([]byte(`{"data":{"id":"123","attributes":{"name":"Primary","default_calendar":true},"relationships":{"on_call_users":{"data":[{"id":"123456","type":"user"}]}}},"included":[{"id":"123456","type":"user","attributes":{"first_name":"John","last_name":"Smith","email":"john@example.com","phone_numbers":[]}}]}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+			t.Fail()
 		}
 	}))
 	defer server.Close()

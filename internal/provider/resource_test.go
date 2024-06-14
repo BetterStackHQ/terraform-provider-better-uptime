@@ -34,6 +34,7 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Fatal(err)
+			t.Fail()
 		}
 		ts.mu.Lock()
 		ts.CalledRequests = append(ts.CalledRequests, CalledRequest{Method: r.Method, URL: r.RequestURI, Body: string(body)})
@@ -43,6 +44,7 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		switch {
@@ -50,6 +52,7 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 			parsedBody := make(map[string]interface{})
 			if err := json.Unmarshal(body, &parsedBody); err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			for _, field := range fieldsNotReturnedFromApi {
 				delete(parsedBody, field)
@@ -57,6 +60,7 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 			body, err = json.Marshal(parsedBody)
 			if err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 
 			data.Store(body)
@@ -68,13 +72,16 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 			patch := make(map[string]interface{})
 			if err = json.Unmarshal(data.Load().([]byte), &patch); err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			if err = json.Unmarshal(body, &patch); err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			patched, err := json.Marshal(patch)
 			if err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			data.Store(patched)
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, patched)))
@@ -83,6 +90,7 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 			data.Store([]byte(nil))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+			t.Fail()
 		}
 	}))
 
