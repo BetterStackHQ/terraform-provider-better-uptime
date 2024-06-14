@@ -232,6 +232,13 @@ func statusPageResourceUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	for _, e := range statusPageResourceRef(&in) {
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
+			// When updating resource ID, we need to update resource type as well (and vice-versa)
+			if e.k == "resource_id" {
+				load(d, "resource_type", &in.ResourceType)
+			}
+			if e.k == "resource_type" {
+				load(d, "resource_id", &in.ResourceID)
+			}
 		}
 	}
 	in.FixedPosition = truePtr()
