@@ -2,9 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"io"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -13,38 +10,7 @@ import (
 )
 
 func TestResourceStatusPageResource(t *testing.T) {
-	current_resource_id := -1
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		request_body := ""
-		if body, err := io.ReadAll(r.Body); err == nil {
-			request_body = string(body)
-		}
-		t.Log("Received " + r.Method + " " + r.RequestURI + " " + request_body)
-
-		if r.Header.Get("Authorization") != "Bearer foo" {
-			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
-			t.Fail()
-		}
-
-		switch {
-		case r.Method == http.MethodPost && r.RequestURI == "/api/v2/status-pages/0/resources" && request_body == `{"resource_id":2,"resource_type":"Monitor","public_name":"example","fixed_position":true}`:
-			w.WriteHeader(http.StatusCreated)
-			current_resource_id = 2
-			_, _ = w.Write([]byte(`{"data":{"id":"123","type":"resource","attributes":{"resource_id":2,"resource_type":"Monitor","public_name":"example","explanation":"","history":true,"widget_type":"history","position":0,"availability":1.0,"status_history": []}}}`))
-		case r.Method == http.MethodPatch && r.RequestURI == "/api/v2/status-pages/0/resources/123" && request_body == `{"resource_id":3,"resource_type":"Monitor","fixed_position":true}`:
-			w.WriteHeader(http.StatusOK)
-			current_resource_id = 3
-			_, _ = w.Write([]byte(`{"data":{"id":"123","type":"resource","attributes":{"resource_id":3,"resource_type":"Monitor","public_name":"example","explanation":"","history":true,"widget_type":"history","position":0,"availability":1.0,"status_history": []}}}`))
-		case r.Method == http.MethodDelete && r.RequestURI == "/api/v2/status-pages/0/resources/123" && request_body == ``:
-			w.WriteHeader(http.StatusNoContent)
-			current_resource_id = -1
-		case r.Method == http.MethodGet && r.RequestURI == "/api/v2/status-pages/0/resources/123" && request_body == ``:
-			_, _ = w.Write([]byte(`{"data":{"id":"123","type":"resource","attributes":{"resource_id":` + fmt.Sprint(current_resource_id) + `,"resource_type":"Monitor","public_name":"example","explanation":"","history":true,"widget_type":"history","position":0,"availability":1.0,"status_history": []}}}`))
-		default:
-			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI + " " + request_body)
-			t.Fail()
-		}
-	}))
+	server := newResourceServer(t, "/api/v2/status-pages/0/resources", "1")
 	defer server.Close()
 
 	var name = "example"
@@ -98,6 +64,7 @@ func TestResourceStatusPageResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_status_page_resource.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "public_name", name),
 					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "resource_id", "3"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/status-pages/0/resources/1", `{"resource_id":3,"resource_type":"Monitor","fixed_position":true}`),
 				),
 				PreConfig: func() {
 					t.Log("step 2")
@@ -124,10 +91,10 @@ func TestResourceStatusPageResource(t *testing.T) {
 			},
 			// Step 4 - destroy.
 			{
-				Config: `
-				provider "betteruptime" {
-					api_token = "foo"x
-				}`,
+				ResourceName:      "betteruptime_status_page_resource.this",
+				ImportState:       true,
+				ImportStateId:     "0/1",
+				ImportStateVerify: true,
 				PreConfig: func() {
 					t.Log("step 4")
 				},
