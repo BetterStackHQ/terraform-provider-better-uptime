@@ -23,7 +23,7 @@ type CalledRequest struct {
 type TestServer struct {
 	*httptest.Server
 	CalledRequests []CalledRequest
-	mu   sync.Mutex
+	mu             sync.Mutex
 }
 
 func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturnedFromApi ...string) *TestServer {
