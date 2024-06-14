@@ -115,7 +115,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
-		Description: strings.ReplaceAll(`Toggle this field if you want to show an announcement in your embed. You can embed the announcement using this snippet: **<script src="https://betteruptime.com/widgets/announcement.js" data-id="<SET STATUS_PAGE_ID>" async="async" type="text/javascript"></script>**`, "**", "`"),
+		Description: strings.ReplaceAll(`Toggle this field if you want to show an announcement in your embed. You can embed the announcement using this snippet: **<script src="https://uptime.betterstack.com/widgets/announcement.js" data-id="<SET STATUS_PAGE_ID>" async="async" type="text/javascript"></script>**`, "**", "`"),
 	},
 	"announcement_embed_link": {
 		Description: "Point your embedded announcement to a specified URL.",

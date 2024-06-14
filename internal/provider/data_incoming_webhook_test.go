@@ -22,9 +22,9 @@ func TestDataIncomingWebhook(t *testing.T) {
 
 		switch {
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=1":
-			_, _ = w.Write([]byte(`{"data":[{"id":"1","attributes":{"name": "Incoming Webhook 1", "url":"https://betteruptime.com/api/v1/incoming-webhook/abc","recovery_period":3, "team_wait":60}}],"pagination":{"next":"..."}}`))
+			_, _ = w.Write([]byte(`{"data":[{"id":"1","attributes":{"name": "Incoming Webhook 1", "url":"https://uptime.betterstack.com/api/v1/incoming-webhook/abc","recovery_period":3, "team_wait":60}}],"pagination":{"next":"..."}}`))
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=2":
-			_, _ = w.Write([]byte(`{"data":[{"id":"2","attributes":{"name": "Incoming Webhook 2", "url":"https://betteruptime.com/api/v1/incoming-webhook/def","recovery_period":4, "team_wait":120}}],"pagination":{"next":null}}`))
+			_, _ = w.Write([]byte(`{"data":[{"id":"2","attributes":{"name": "Incoming Webhook 2", "url":"https://uptime.betterstack.com/api/v1/incoming-webhook/def","recovery_period":4, "team_wait":120}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 		}
@@ -56,7 +56,7 @@ func TestDataIncomingWebhook(t *testing.T) {
 					resource.TestCheckResourceAttr("data.betteruptime_incoming_webhook.this", "name", name),
 					resource.TestCheckResourceAttr("data.betteruptime_incoming_webhook.this", "recovery_period", "4"),
 					resource.TestCheckResourceAttr("data.betteruptime_incoming_webhook.this", "team_wait", "120"),
-					resource.TestCheckResourceAttr("data.betteruptime_incoming_webhook.this", "url", "https://betteruptime.com/api/v1/incoming-webhook/def"),
+					resource.TestCheckResourceAttr("data.betteruptime_incoming_webhook.this", "url", "https://uptime.betterstack.com/api/v1/incoming-webhook/def"),
 				),
 			},
 		},
