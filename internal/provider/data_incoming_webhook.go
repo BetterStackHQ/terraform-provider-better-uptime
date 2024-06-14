@@ -19,6 +19,7 @@ func newIncomingWebhookDataSource() *schema.Resource {
 		case "name":
 			cp.Required = true
 			cp.Optional = false
+			cp.Computed = false
 		default:
 			cp.Computed = true
 			cp.Optional = false

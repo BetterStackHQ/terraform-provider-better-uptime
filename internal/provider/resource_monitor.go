@@ -21,6 +21,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     nil,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -28,6 +29,7 @@ var monitorSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Monitor.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"ssl_expiration": {
@@ -35,6 +37,7 @@ var monitorSchema = map[string]*schema.Schema{
 			" Valid values are 1, 2, 3, 7, 14, 30, and 60.",
 		Type:     schema.TypeInt,
 		Optional: true,
+		Computed: true,
 		// TODO: ValidateDiagFunc: validation.IntInSlice
 	},
 	"domain_expiration": {
@@ -42,12 +45,14 @@ var monitorSchema = map[string]*schema.Schema{
 			" Valid values are 1, 2, 3, 7, 14, 30, and 60.",
 		Type:     schema.TypeInt,
 		Optional: true,
+		Computed: true,
 		// TODO: ValidateDiagFunc: validation.IntInSlice
 	},
 	"policy_id": {
 		Description: "Set the escalation policy for the monitor.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"url": {
 		Description: "URL of your website or the host you want to ping (see monitor_type below).",
@@ -106,6 +111,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"expected_status_codes": {
 		Description: "Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.",
@@ -114,55 +120,62 @@ var monitorSchema = map[string]*schema.Schema{
 			Type: schema.TypeInt,
 		},
 		Optional: true,
+		Computed: true,
 	},
 	"call": {
 		Description: "Should we call the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"sms": {
 		Description: "Should we send an SMS to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"email": {
 		Description: "Should we send an email to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"push": {
 		Description: "Should we send a push notification to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"team_wait": {
 		Description: "How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"paused": {
 		Description: "Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"paused_at": {
 		Description: "The time when this monitor was paused.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"follow_redirects": {
 		Description: "Set to true for the monitor to follow redirects.",
 		Type:        schema.TypeBool,
-		Default:     true,
 		Optional:    true,
+		Computed:    true,
 	},
 	"port": {
 		Description: "Required if monitor_type is set to tcp, udp, smtp, pop, or imap." +
 			" tcp and udp monitors accept any ports, while smtp, pop, and imap accept only the specified ports corresponding with their servers (e.g. \"25,465,587\" for smtp).",
 		Type:     schema.TypeString,
 		Optional: true,
+		Computed: true,
 	},
 	"regions": {
 		Description: "An array of regions to set. Allowed values are [\"us\", \"eu\", \"as\", \"au\"] or any subset of these regions.",
@@ -171,17 +184,20 @@ var monitorSchema = map[string]*schema.Schema{
 			Type: schema.TypeString,
 		},
 		Optional: true,
+		Computed: true,
 		// TODO: ValidateDiagFunc
 	},
 	"monitor_group_id": {
 		Description: "Set this attribute if you want to add this monitor to a monitor group.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"pronounceable_name": {
 		Description: "Pronounceable name of the monitor. We will use this when we call you. Try to make it tongue-friendly, please?",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return new == "" || old == new
 		},
@@ -190,30 +206,31 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "How long the monitor must be up to automatically mark an incident as resolved after being down. In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     180,
+		Computed:    true,
 	},
 	"verify_ssl": {
 		Description: "Should we verify SSL certificate validity?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"check_frequency": {
 		Description: "How often should we check your website? In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     180,
+		Computed:    true,
 	},
 	"confirmation_period": {
 		Description: "How long should we wait after observing a failure before we start a new incident? In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"http_method": {
 		Description: "HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     "GET",
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return strings.EqualFold(old, new)
 		},
@@ -223,12 +240,13 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "How long to wait before timing out the request? In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     30,
+		Computed:    true,
 	},
 	"request_body": {
 		Description: "Request body for POST, PUT, PATCH requests.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"request_headers": {
 		Description: "An array of request headers, consisting of name and value pairs",
@@ -240,6 +258,7 @@ var monitorSchema = map[string]*schema.Schema{
 			},
 		},
 		Optional: true,
+		Computed: true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			// Ignore ID changes
 			attribute := strings.Split(k, ".")
@@ -254,12 +273,14 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Basic HTTP authentication username to include with the request.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		Sensitive:   true,
 	},
 	"auth_password": {
 		Description: "Basic HTTP authentication password to include with the request.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		Sensitive:   true,
 	},
 	"checks_version": {
@@ -267,11 +288,10 @@ var monitorSchema = map[string]*schema.Schema{
 
     **v1** Proxy-based infrastructure. We use proxies around the world to make regional checks.
 
-    **v2** Edge-based infrastructure. More advanced infrastructure, allows running low level checks in regions.
-
-	When not set, we use proxy-based infrastructure.`, "**", "`"),
+    **v2** Edge-based infrastructure. More advanced infrastructure, allows running low level checks in regions.`, "**", "`"),
 		Type:     schema.TypeString,
 		Optional: true,
+		Computed: true,
 		ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
 			if v == nil {
 				return nil
@@ -291,7 +311,6 @@ var monitorSchema = map[string]*schema.Schema{
 				},
 			}
 		},
-		Default: "v1",
 	},
 	"ip_version": {
 		Description: strings.ReplaceAll(`Valid values:
@@ -300,10 +319,10 @@ var monitorSchema = map[string]*schema.Schema{
 
     **ipv6** Use IPv6 only
 
-    When not set, we use both IPv4 and IPv6 for our checks.
     Note: ip_version is used only if "checks_version" is set to "v2".`, "**", "`"),
 		Type:     schema.TypeString,
 		Optional: true,
+		Computed: true,
 		ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
 			if v == nil {
 				return nil
@@ -328,18 +347,21 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Start of the maintenance window each day. We won't check your website during this window. Example: \"01:00:00\"",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		// TODO: ValidateDiagFunc
 	},
 	"maintenance_to": {
 		Description: "End of the maintenance window each day. Example: \"03:00:00\"",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		// TODO: ValidateDiagFunc
 	},
 	"maintenance_timezone": {
 		Description: "The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"maintenance_days": {
 		Description: "An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"] or any subset of these days.",
@@ -348,42 +370,49 @@ var monitorSchema = map[string]*schema.Schema{
 			Type: schema.TypeString,
 		},
 		Optional: true,
+		Computed: true,
 	},
 	"remember_cookies": {
 		Description: "Set to true to keep cookies when redirecting.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"last_checked_at": {
 		Description: "When the website was last checked.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"status": {
 		Description: "The status of this website check.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"created_at": {
 		Description: "The time when this monitor was created.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"updated_at": {
 		Description: "The time when this monitor was updated.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"playwright_script": {
 		Description: "For Playwright monitors, the JavaScript source code of the scenario.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"scenario_name": {
 		Description: "For Playwright monitors, the scenario name identifying the monitor in the UI.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 }
 

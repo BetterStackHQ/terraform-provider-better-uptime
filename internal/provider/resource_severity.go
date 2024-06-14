@@ -15,6 +15,7 @@ var severitySchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     nil,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -22,6 +23,7 @@ var severitySchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Severity.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"name": {
@@ -33,25 +35,25 @@ var severitySchema = map[string]*schema.Schema{
 		Description: "Whether to send SMS when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"call": {
 		Description: "Whether to call when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     false,
+		Computed:    true,
 	},
 	"email": {
 		Description: "Whether to send email when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"push": {
 		Description: "Whether to send push notification when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 }
 

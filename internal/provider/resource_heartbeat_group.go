@@ -15,6 +15,7 @@ var heartbeatGroupSchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     nil,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -22,22 +23,26 @@ var heartbeatGroupSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Monitor.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"paused": {
 		Description: "Set to true to pause monitoring for any existing heartbeats in the group - we won't notify you about downtime. Set to false to resume monitoring for any existing heartbeats in the group.",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"name": {
 		Description: "A name of the group that you can see in the dashboard.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"sort_index": {
 		Description: "Set sort_index to specify how to sort your heartbeat groups.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return !d.HasChange(k)
 		},
@@ -45,11 +50,13 @@ var heartbeatGroupSchema = map[string]*schema.Schema{
 	"created_at": {
 		Description: "The time when this heartbeat group was created.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"updated_at": {
 		Description: "The time when this heartbeat group was updated.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 }

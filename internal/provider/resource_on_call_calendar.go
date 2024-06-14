@@ -12,6 +12,7 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     nil,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -19,47 +20,56 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of the on-call calendar.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"name": {
 		Description: "Name of the on-call calendar.",
 		Type:        schema.TypeString,
+		Optional:    true,
 		Computed:    true,
 	},
 	"default_calendar": {
 		Description: "Whether the on-call calendar is the default on-call calendar.",
 		Type:        schema.TypeBool,
+		Optional:    false,
 		Computed:    true,
 	},
 	"on_call_users": {
 		Description: "Array of on-call persons.",
 		Type:        schema.TypeList,
+		Optional:    false,
 		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"id": {
 					Description: "ID of the on-call person.",
 					Type:        schema.TypeString,
+					Optional:    false,
 					Computed:    true,
 				},
 				"first_name": {
 					Description: "First name of the on-call person.",
 					Type:        schema.TypeString,
+					Optional:    false,
 					Computed:    true,
 				},
 				"last_name": {
 					Description: "Last name of the on-call person.",
 					Type:        schema.TypeString,
+					Optional:    false,
 					Computed:    true,
 				},
 				"email": {
 					Description: "Email of the on-call person.",
 					Type:        schema.TypeString,
+					Optional:    false,
 					Computed:    true,
 				},
 				"phone_numbers": {
 					Description: "Array of phone numbers.",
 					Type:        schema.TypeList,
+					Optional:    false,
 					Computed:    true,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,

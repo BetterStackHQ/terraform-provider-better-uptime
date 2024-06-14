@@ -18,14 +18,16 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"id": {
-		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user.",
+		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user, or team ID of when member type is current_on_call.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"team_id": {
-		Description: "The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used.",
+		Description: "The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used. This field is deprecated, use id instead.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 		Deprecated:  "Use id instead.",
 	},
 }
@@ -45,38 +47,45 @@ var policyStepSchema = map[string]*schema.Schema{
 		Description: "Which severity to use for this step.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"timezone": {
 		Description: "What timezone to use when evaluating time based branching rules. Used when step type is branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"days": {
 		Description: "An array of days during which the branching rule will be executed. Valid values are [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"]. Used when step type is branching.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
+		Computed:    true,
 	},
 	"time_from": {
 		Description: "A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"time_to": {
 		Description: "A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"policy_id": {
 		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is branching.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"step_members": {
 		Description: "An array of escalation policy steps members.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: policyStepMemberSchema},
 		Optional:    true,
+		Computed:    true,
 	},
 }
 
@@ -85,6 +94,7 @@ var policySchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     nil,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -92,6 +102,7 @@ var policySchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Policy.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"name": {
@@ -103,17 +114,18 @@ var policySchema = map[string]*schema.Schema{
 		Description: "How many times should the entire policy be repeated if no one acknowledges the incident.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     0,
+		Computed:    true,
 	},
 	"repeat_delay": {
 		Description: "How long in seconds to wait before each repetition.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     0,
+		Computed:    true,
 	},
 	"incident_token": {
 		Description: "Incident token that can be used for manually reporting incidents.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"steps": {

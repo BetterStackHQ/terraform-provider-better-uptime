@@ -10,41 +10,49 @@ var integrationFieldSchema = map[string]*schema.Schema{
 		Description: "The name of the field.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"special_type": {
 		Description: "A special type of the field. Can be alert_id or cause or otherwise null for a custom field.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"field_target": {
 		Description: "The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"target_field": {
 		Description: "The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"match_type": {
 		Description: "The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"content": {
 		Description: "How should we extract content the field. Should be a valid Regex when match_type is match_regex.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"content_before": {
 		Description: "When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"content_after": {
 		Description: "When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 }
 
@@ -53,21 +61,25 @@ var integrationRuleSchema = map[string]*schema.Schema{
 		Description: "The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"target_field": {
 		Description: "The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"match_type": {
 		Description: "The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"content": {
 		Description: "The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 }
 

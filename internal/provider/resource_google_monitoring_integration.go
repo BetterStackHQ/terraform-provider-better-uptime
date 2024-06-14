@@ -15,6 +15,7 @@ var googleMonitoringIntegrationSchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     nil,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -22,60 +23,67 @@ var googleMonitoringIntegrationSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of the Google Monitoring Integration.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
-		Optional:    true,
 	},
 	"name": {
 		Description: "The name of the Google Monitoring Integration.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"policy_id": {
 		Description: "ID of the escalation policy associated with the Google Monitoring integration.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"call": {
 		Description: "Do we call the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"sms": {
 		Description: "Do we send an SMS to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"email": {
 		Description: "Do we send an email to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"push": {
 		Description: "Do we send a push notification to the on-call person?",
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Default:     true,
+		Computed:    true,
 	},
 	"team_wait": {
 		Description: "How long we wait before escalating the incident alert to the team. In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"recovery_period": {
 		Description: "How long the alert must be up to automatically mark an incident as resolved. In seconds.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     0,
+		Computed:    true,
 	},
 	"paused": {
 		Description: "Is the Google Monitoring integration paused.",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"webhook_url": {
 		Description: "The webhook URL for the Google Monitoring integration.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 }

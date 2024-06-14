@@ -12,6 +12,7 @@ var slackIntegrationSchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     nil,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -19,42 +20,50 @@ var slackIntegrationSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Slack integration.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"slack_team_id": {
 		Description: "Slack ID of the connected team.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"slack_team_name": {
 		Description: "Name of the connected Slack team.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"slack_channel_id": {
 		Description: "Slack ID of the connected channel.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"slack_channel_name": {
 		Description: "Name of the connected Slack channel.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"slack_status": {
 		Description: "Status of the connected Slack account. Possible values: active, account_inactive",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"integration_type": {
 		Description: "Type of the Slack integration. Possible values: legacy, verbose, thread, channel",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"on_call_notifications": {
 		Description: "Whether to post a notification when the current on-call person changes.",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 }
 

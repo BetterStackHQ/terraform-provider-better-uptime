@@ -20,7 +20,6 @@ https://betterstack.com/docs/uptime/api/datadog-integrations/
 - **alerting_rule** (String) Should we alert only on alarms, or on both alarms and warnings. Possible values: alert, alert_and_warn.
 - **call** (Boolean) Do we call the on-call person?
 - **email** (Boolean) Do we send an email to the on-call person?
-- **id** (String) The ID of the Datadog Integration.
 - **name** (String) The name of the Datadog Integration.
 - **paused** (Boolean) Is the Datadog integration paused.
 - **policy_id** (Number) ID of the escalation policy associated with the Datadog integration.
@@ -32,6 +31,7 @@ https://betterstack.com/docs/uptime/api/datadog-integrations/
 
 ### Read-Only
 
+- **id** (String) The ID of the Datadog Integration.
 - **webhook_url** (String) The webhook URL for the Datadog integration.
 
 

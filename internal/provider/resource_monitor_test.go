@@ -70,7 +70,7 @@ func TestResourceMonitor(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
-					resource.TestCheckResourceAttr("betteruptime_monitor.this", "paused", "false"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "paused", "true"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "pronounceable_name", "override"),
 				),
 			},

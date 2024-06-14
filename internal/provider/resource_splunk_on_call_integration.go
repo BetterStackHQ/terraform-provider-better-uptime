@@ -15,6 +15,7 @@ var splunkOnCallIntegrationSchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     nil,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -22,12 +23,14 @@ var splunkOnCallIntegrationSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of the Splunk On-Call Integration.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"name": {
 		Description: "The name of the Splunk On-Call Integration.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"url": {
 		Description: "The Splunk On-Call URL to post webhooks to.",

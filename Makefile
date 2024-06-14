@@ -5,11 +5,10 @@ GOLANGCI_LINT := golangci-lint run --disable-all \
 	-E gosimple \
 	-E govet \
 	-E ineffassign \
-	-E maligned \
 	-E staticcheck \
 	-E typecheck \
 	-E unused
-VERSION := 0.9.2
+VERSION := 0.10.0
 .PHONY: test build
 
 help:
@@ -63,7 +62,6 @@ fmt: lint-init
 	terraform fmt -recursive
 
 gen:
-	terraform fmt -check -diff -recursive
 	go generate ./...
 	@echo
 	@echo "docs/ can be previewed at https://registry.terraform.io/tools/doc-preview"

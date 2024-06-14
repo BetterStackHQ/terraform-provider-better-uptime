@@ -16,6 +16,7 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Status Page Resource.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"status_page_id": {
@@ -26,8 +27,8 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 	"status_page_section_id": {
 		Description: "The ID of the Status Page Section. If you don't specify a status_page_section_id, we add the resource to the first section. If there are no sections in the status page yet, one will be automatically created for you.",
 		Type:        schema.TypeInt,
-		Computed:    true,
 		Optional:    true,
+		Computed:    true,
 	},
 	"resource_id": {
 		Description: "The ID of the resource you are adding.",
@@ -49,35 +50,41 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Description: "A detailed text displayed as a help icon.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"history": {
-		Description: "(Deprecated) Do you want to show the 90-day incident history for this item?",
+		Description: "Do you want to display detailed historical status for this item? This field is deprecated, use widget_type instead.",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
+		Deprecated:  "Use widget_type instead.",
 	},
 	// TODO: add 'effective_position' computed property?
 	"position": {
 		Description: "The position of this resource on your status page, indexed from zero. If you don't specify a position, we add the resource to the end of the status page. When you specify a position of an existing resource, we add the resource to this position and shift resources below to accommodate.",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return !d.HasChange(k)
 		},
 	},
 	"widget_type": {
-		Description: "What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type. This takes preference over history when both parameters are present.",
+		Description: "What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type). This takes preference over history when both parameters are present.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     "history",
+		Computed:    true,
 	},
 	"availability": {
 		Description: "The availability of this resource (from 0.0 to 1.0).",
 		Type:        schema.TypeFloat,
+		Optional:    false,
 		Computed:    true,
 	},
 	"status_history": {
 		Description: "History of a single status page resource history",
 		Type:        schema.TypeList,
+		Optional:    false,
 		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: statusPageStatusHistorySchema,
@@ -90,21 +97,25 @@ var statusPageStatusHistorySchema = map[string]*schema.Schema{
 		Description: "Status date",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"status": {
 		Description: "Status",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"downtime_duration": {
 		Description: "Status duration",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 	"maintenance_duration": {
 		Description: "Status duration",
 		Type:        schema.TypeInt,
 		Optional:    true,
+		Computed:    true,
 	},
 }
 

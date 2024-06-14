@@ -19,7 +19,6 @@ https://betterstack.com/docs/uptime/api/google-monitoring-integrations/
 
 - **call** (Boolean) Do we call the on-call person?
 - **email** (Boolean) Do we send an email to the on-call person?
-- **id** (String) The ID of the Google Monitoring Integration.
 - **name** (String) The name of the Google Monitoring Integration.
 - **paused** (Boolean) Is the Google Monitoring integration paused.
 - **policy_id** (Number) ID of the escalation policy associated with the Google Monitoring integration.
@@ -31,6 +30,7 @@ https://betterstack.com/docs/uptime/api/google-monitoring-integrations/
 
 ### Read-Only
 
+- **id** (String) The ID of the Google Monitoring Integration.
 - **webhook_url** (String) The webhook URL for the Google Monitoring integration.
 
 

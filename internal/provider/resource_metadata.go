@@ -15,6 +15,7 @@ var metadataSchema = map[string]*schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     nil,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
@@ -22,6 +23,7 @@ var metadataSchema = map[string]*schema.Schema{
 	"id": {
 		Description: "The ID of this Metadata.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"owner_type": {
@@ -47,11 +49,13 @@ var metadataSchema = map[string]*schema.Schema{
 	"created_at": {
 		Description: "The time when this metadata was created.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 	"updated_at": {
 		Description: "The time when this metadata was updated.",
 		Type:        schema.TypeString,
+		Optional:    false,
 		Computed:    true,
 	},
 }
