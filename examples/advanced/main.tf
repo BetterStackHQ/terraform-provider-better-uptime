@@ -205,6 +205,10 @@ resource "betteruptime_incoming_webhook" "this" {
   }
 }
 
+data "betteruptime_severity" "this" {
+  name = var.betteruptime_severity_name
+}
+
 resource "betteruptime_policy" "this" {
   name         = "Standard Escalation Policy"
   repeat_count = 3
@@ -213,7 +217,7 @@ resource "betteruptime_policy" "this" {
   steps {
     type        = "escalation"
     wait_before = 0
-    urgency_id  = var.urgency_id
+    urgency_id  = data.betteruptime_severity.this.id
     step_members { type = "all_slack_integrations" }
     step_members { type = "all_webhook_integrations" }
     step_members { type = "current_on_call" }
@@ -221,7 +225,7 @@ resource "betteruptime_policy" "this" {
   steps {
     type        = "escalation"
     wait_before = 180
-    urgency_id  = var.urgency_id
+    urgency_id  = data.betteruptime_severity.this.id
     step_members { type = "entire_team" }
   }
 }

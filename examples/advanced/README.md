@@ -11,10 +11,12 @@ git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
 echo '# See variables.tf for more.
 betteruptime_api_token             = "XXXXXXXXXXXXXXXXXXXXXXXX"
 betteruptime_status_page_subdomain = "example"
+betteruptime_severity_name         = "Low Severity"
 ' > terraform.tfvars
 
+terraform init
 terraform apply
 
-# open https://${betteruptime_status_page_subdomain}.betteruptime.com
+# open https://example.betteruptime.com (or different, based on variable above)
 open $(terraform output -raw betteruptime_status_page_url)
 ```
