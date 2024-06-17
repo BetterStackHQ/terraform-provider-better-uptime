@@ -16,6 +16,7 @@ func TestDataSlackIntegration(t *testing.T) {
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		prefix := "/api/v2/slack-integrations"
@@ -27,6 +28,7 @@ func TestDataSlackIntegration(t *testing.T) {
 			_, _ = w.Write([]byte(`{"data":[{"id":"2","attributes":{"slack_team_id":"T456789","slack_team_name":"Team2","slack_channel_id":"C456789","slack_channel_name":"#channel2","slack_status":"active","integration_type":"verbose","on_call_notifications":true}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+			t.Fail()
 		}
 	}))
 	defer server.Close()

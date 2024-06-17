@@ -16,6 +16,7 @@ func TestDataSeverity(t *testing.T) {
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		prefix := "/api/v2/urgencies"
@@ -27,6 +28,7 @@ func TestDataSeverity(t *testing.T) {
 			_, _ = w.Write([]byte(`{"data":[{"id": "2", "type": "urgency", "attributes":{"name": "Low Severity", "sms": false, "call": false, "email": true, "push": true}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+			t.Fail()
 		}
 	}))
 	defer server.Close()

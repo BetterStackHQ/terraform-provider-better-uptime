@@ -13,6 +13,7 @@ import (
 func TestProvider(t *testing.T) {
 	if err := New().InternalValidate(); err != nil {
 		t.Fatal(err)
+		t.Fail()
 	}
 }
 
@@ -24,6 +25,7 @@ func TestProviderInit(t *testing.T) {
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		exptectedUA := "terraform-provider-better-uptime/0.0.0-0"

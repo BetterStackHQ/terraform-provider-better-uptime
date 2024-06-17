@@ -275,6 +275,7 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		prefix := "/api/v2/monitors"
@@ -285,6 +286,7 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			data.Store(body)
 			w.WriteHeader(http.StatusCreated)
@@ -292,6 +294,7 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			computed := make(map[string]interface{})
 			if err := json.Unmarshal(body, &computed); err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			computed["pronounceable_name"] = "computed_by_betteruptime"
 			if computed["request_headers"] != nil {
@@ -300,6 +303,7 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			body, err = json.Marshal(computed)
 			if err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, body)))
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"/"+id:
@@ -308,13 +312,16 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			patch := make(map[string]interface{})
 			if err = json.Unmarshal(data.Load().([]byte), &patch); err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			if err = json.Unmarshal(body, &patch); err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			if patch["request_headers"] != nil {
 				patch["request_headers"] = processRequestHeaders(patch["request_headers"].([]interface{}))
@@ -322,6 +329,7 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			patched, err := json.Marshal(patch)
 			if err != nil {
 				t.Fatal(err)
+				t.Fail()
 			}
 			data.Store(patched)
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, patched)))
@@ -330,6 +338,7 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			data.Store([]byte(nil))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+			t.Fail()
 		}
 	}))
 }

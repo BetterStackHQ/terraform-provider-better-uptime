@@ -16,6 +16,7 @@ func TestDataPolicy(t *testing.T) {
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+			t.Fail()
 		}
 
 		prefix := "/api/v2/policies"
@@ -27,6 +28,7 @@ func TestDataPolicy(t *testing.T) {
 			_, _ = w.Write([]byte(`{"data":[{"id":"2","attributes":{"name": "Policy B", "incident_token":"def","repeat_count":4, "repeat_delay":120}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+			t.Fail()
 		}
 	}))
 	defer server.Close()
