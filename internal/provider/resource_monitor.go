@@ -14,7 +14,6 @@ import (
 
 // TODO: change to map<name, description> and then use to gen monitor_type description
 var monitorTypes = []string{"status", "expected_status_code", "keyword", "keyword_absence", "ping", "tcp", "udp", "smtp", "pop", "imap", "playwright"}
-var checksVersions = []string{"v1", "v2"}
 var ipVersions = []string{"ipv4", "ipv6"}
 var monitorSchema = map[string]*schema.Schema{
 	"team_name": {
@@ -283,43 +282,13 @@ var monitorSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Sensitive:   true,
 	},
-	"checks_version": {
-		Description: strings.ReplaceAll(`Valid values:
 
-    **v1** Proxy-based infrastructure. We use proxies around the world to make regional checks.
-
-    **v2** Edge-based infrastructure. More advanced infrastructure, allows running low level checks in regions.`, "**", "`"),
-		Type:     schema.TypeString,
-		Optional: true,
-		Computed: true,
-		ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
-			if v == nil {
-				return nil
-			}
-			s := v.(string)
-			for _, checksVersion := range checksVersions {
-				if s == checksVersion {
-					return nil
-				}
-			}
-			return diag.Diagnostics{
-				diag.Diagnostic{
-					AttributePath: path,
-					Severity:      diag.Error,
-					Summary:       `Invalid "checks_version"`,
-					Detail:        fmt.Sprintf("Expected one of %v or nil", checksVersions),
-				},
-			}
-		},
-	},
 	"ip_version": {
 		Description: strings.ReplaceAll(`Valid values:
 
     **ipv4** Use IPv4 only,
 
-    **ipv6** Use IPv6 only
-
-    Note: ip_version is used only if "checks_version" is set to "v2".`, "**", "`"),
+    **ipv6** Use IPv6 only.`, "**", "`"),
 		Type:     schema.TypeString,
 		Optional: true,
 		Computed: true,
@@ -328,8 +297,8 @@ var monitorSchema = map[string]*schema.Schema{
 				return nil
 			}
 			s := v.(string)
-			for _, checksVersion := range ipVersions {
-				if s == checksVersion {
+			for _, ipVersion := range ipVersions {
+				if s == ipVersion {
 					return nil
 				}
 			}
@@ -460,7 +429,6 @@ type monitor struct {
 	RequestHeaders      *[]map[string]interface{} `json:"request_headers,omitempty"`
 	AuthUsername        *string                   `json:"auth_username,omitempty"`
 	AuthPassword        *string                   `json:"auth_password,omitempty"`
-	ChecksVersion       *string                   `json:"checks_version,omitempty"`
 	IpVersion           *string                   `json:"ip_version,omitempty"`
 	MaintenanceFrom     *string                   `json:"maintenance_from,omitempty"`
 	MaintenanceTo       *string                   `json:"maintenance_to,omitempty"`
@@ -521,7 +489,6 @@ func monitorRef(in *monitor) []struct {
 		{k: "request_headers", v: &in.RequestHeaders},
 		{k: "auth_username", v: &in.AuthUsername},
 		{k: "auth_password", v: &in.AuthPassword},
-		{k: "checks_version", v: &in.ChecksVersion},
 		{k: "ip_version", v: &in.IpVersion},
 		{k: "maintenance_from", v: &in.MaintenanceFrom},
 		{k: "maintenance_to", v: &in.MaintenanceTo},

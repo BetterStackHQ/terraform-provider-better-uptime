@@ -53,11 +53,6 @@ https://betterstack.com/docs/uptime/api/monitors/
 - **auth_username** (String, Sensitive) Basic HTTP authentication username to include with the request.
 - **call** (Boolean) Should we call the on-call person?
 - **check_frequency** (Number) How often should we check your website? In seconds.
-- **checks_version** (String) Valid values:
-
-    `v1` Proxy-based infrastructure. We use proxies around the world to make regional checks.
-
-    `v2` Edge-based infrastructure. More advanced infrastructure, allows running low level checks in regions.
 - **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident? In seconds.
 - **domain_expiration** (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **email** (Boolean) Should we send an email to the on-call person?
@@ -68,9 +63,7 @@ https://betterstack.com/docs/uptime/api/monitors/
 
     `ipv4` Use IPv4 only,
 
-    `ipv6` Use IPv6 only
-
-    Note: ip_version is used only if "checks_version" is set to "v2".
+    `ipv6` Use IPv6 only.
 - **maintenance_days** (List of String) An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] or any subset of these days.
 - **maintenance_from** (String) Start of the maintenance window each day. We won't check your website during this window. Example: "01:00:00"
 - **maintenance_timezone** (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
