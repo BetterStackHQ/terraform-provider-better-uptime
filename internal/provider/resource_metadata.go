@@ -33,7 +33,7 @@ var metadataSchema = map[string]*schema.Schema{
 	},
 	"owner_id": {
 		Description: "The ID of the owner of this Metadata.",
-		Type:        schema.TypeInt,
+		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"key": {
@@ -75,9 +75,9 @@ func newMetadataResource() *schema.Resource {
 }
 
 type metadata struct {
-	ID        *int    `json:"id,omitempty"`
+	ID        *string `json:"id,omitempty"`
 	OwnerType *string `json:"owner_type,omitempty"`
-	OwnerID   *int    `json:"owner_id,omitempty"`
+	OwnerID   *string `json:"owner_id,omitempty"`
 	Key       *string `json:"key,omitempty"`
 	Value     *string `json:"value,omitempty"`
 	CreatedAt *string `json:"created_at,omitempty"`
