@@ -14,6 +14,7 @@ import (
 
 // TODO: change to map<name, description> and then use to gen monitor_type description
 var monitorTypes = []string{"status", "expected_status_code", "keyword", "keyword_absence", "ping", "tcp", "udp", "smtp", "pop", "imap", "playwright"}
+var ipVersions = []string{"ipv4", "ipv6"}
 var monitorSchema = map[string]*schema.Schema{
 	"team_name": {
 		Description: "Used to specify the team the resource should be created in when using global tokens.",
@@ -287,10 +288,29 @@ var monitorSchema = map[string]*schema.Schema{
 
     **ipv4** Use IPv4 only,
 
-    **ipv6** Use IPv6 only`, "**", "`"),
+    **ipv6** Use IPv6 only.`, "**", "`"),
 		Type:     schema.TypeString,
 		Optional: true,
 		Computed: true,
+		ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
+			if v == nil {
+				return nil
+			}
+			s := v.(string)
+			for _, ipVersion := range ipVersions {
+				if s == ipVersion {
+					return nil
+				}
+			}
+			return diag.Diagnostics{
+				diag.Diagnostic{
+					AttributePath: path,
+					Severity:      diag.Error,
+					Summary:       `Invalid "ip_version"`,
+					Detail:        fmt.Sprintf("Expected one of %v or nil", ipVersions),
+				},
+			}
+		},
 	},
 	"maintenance_from": {
 		Description: "Start of the maintenance window each day. We won't check your website during this window. Example: \"01:00:00\"",
