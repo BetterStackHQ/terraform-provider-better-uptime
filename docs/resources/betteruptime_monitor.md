@@ -44,6 +44,9 @@ https://betterstack.com/docs/uptime/api/monitors/
     `imap` We will check for an IMAP server at the host specified in the url parameter
 (port is required, and can be 143, 993, or both).
 
+    `dns` We will check for an DNS server at the host specified in the url parameter
+(request_body is required, and should contain the domain to query the DNS server with).
+
     `playwright` We will run the scenario defined by playwright_script, identified in the UI by scenario_name
 - **url** (String) URL of your website or the host you want to ping (see monitor_type below).
 
@@ -78,7 +81,7 @@ https://betterstack.com/docs/uptime/api/monitors/
 - **recovery_period** (Number) How long the monitor must be up to automatically mark an incident as resolved after being down. In seconds.
 - **regions** (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.
 - **remember_cookies** (Boolean) Set to true to keep cookies when redirecting.
-- **request_body** (String) Request body for POST, PUT, PATCH requests.
+- **request_body** (String) Request body for POST, PUT, PATCH requests. Required if monitor_type is set to dns (domain to query the DNS server with).
 - **request_headers** (List of Map of String) An array of request headers, consisting of name and value pairs
 - **request_timeout** (Number) How long to wait before timing out the request? In seconds.
 - **required_keyword** (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.

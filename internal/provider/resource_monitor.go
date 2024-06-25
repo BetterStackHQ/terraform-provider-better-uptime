@@ -13,7 +13,7 @@ import (
 )
 
 // TODO: change to map<name, description> and then use to gen monitor_type description
-var monitorTypes = []string{"status", "expected_status_code", "keyword", "keyword_absence", "ping", "tcp", "udp", "smtp", "pop", "imap", "playwright"}
+var monitorTypes = []string{"status", "expected_status_code", "keyword", "keyword_absence", "ping", "tcp", "udp", "smtp", "pop", "imap", "dns", "playwright"}
 var ipVersions = []string{"ipv4", "ipv6"}
 var monitorSchema = map[string]*schema.Schema{
 	"team_name": {
@@ -85,6 +85,9 @@ var monitorSchema = map[string]*schema.Schema{
 
     **imap** We will check for an IMAP server at the host specified in the url parameter
 (port is required, and can be 143, 993, or both).
+
+    **dns** We will check for an DNS server at the host specified in the url parameter
+(request_body is required, and should contain the domain to query the DNS server with).
 
     **playwright** We will run the scenario defined by playwright_script, identified in the UI by scenario_name`, "**", "`"),
 		Type:     schema.TypeString,
@@ -242,7 +245,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"request_body": {
-		Description: "Request body for POST, PUT, PATCH requests.",
+		Description: "Request body for POST, PUT, PATCH requests. Required if monitor_type is set to dns (domain to query the DNS server with).",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
