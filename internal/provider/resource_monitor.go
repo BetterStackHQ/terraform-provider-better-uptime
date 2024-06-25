@@ -86,7 +86,7 @@ var monitorSchema = map[string]*schema.Schema{
     **imap** We will check for an IMAP server at the host specified in the url parameter
 (port is required, and can be 143, 993, or both).
 
-    **dns** We will check for an DNS server at the host specified in the url parameter
+    **dns** We will check for a DNS server at the host specified in the url parameter
 (request_body is required, and should contain the domain to query the DNS server with).
 
     **playwright** We will run the scenario defined by playwright_script, identified in the UI by scenario_name`, "**", "`"),
