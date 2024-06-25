@@ -35,9 +35,9 @@ resource "betteruptime_monitor" "status" {
 }
 
 resource "betteruptime_monitor" "dns" {
-  url          = "1.1.1.1"
-  monitor_type = "dns"
-  request_body = "example.com"
+  url              = "1.1.1.1"
+  monitor_type     = "dns"
+  request_body     = "example.com"
   monitor_group_id = betteruptime_monitor_group.this.id
 }
 
