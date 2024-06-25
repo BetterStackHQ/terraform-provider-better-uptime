@@ -28,18 +28,33 @@ resource "betteruptime_monitor_group" "this" {
   sort_index = 0
 }
 
-resource "betteruptime_monitor" "this" {
+resource "betteruptime_monitor" "status" {
   url              = "https://example.com"
   monitor_type     = "status"
   monitor_group_id = betteruptime_monitor_group.this.id
 }
 
-resource "betteruptime_status_page_resource" "monitor" {
+resource "betteruptime_monitor" "dns" {
+  url          = "1.1.1.1"
+  monitor_type = "dns"
+  request_body = "example.com"
+  monitor_group_id = betteruptime_monitor_group.this.id
+}
+
+resource "betteruptime_status_page_resource" "monitor_status" {
   status_page_id         = betteruptime_status_page.this.id
   status_page_section_id = betteruptime_status_page_section.monitors.id
-  resource_id            = betteruptime_monitor.this.id
+  resource_id            = betteruptime_monitor.status.id
   resource_type          = "Monitor"
   public_name            = "example.com site"
+}
+
+resource "betteruptime_status_page_resource" "monitor_dns" {
+  status_page_id         = betteruptime_status_page.this.id
+  status_page_section_id = betteruptime_status_page_section.monitors.id
+  resource_id            = betteruptime_monitor.dns.id
+  resource_type          = "Monitor"
+  public_name            = "example.com domain"
 }
 
 resource "betteruptime_heartbeat_group" "this" {
