@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -177,6 +178,95 @@ func TestResourcePolicy(t *testing.T) {
 				ImportStateVerify: true,
 				PreConfig: func() {
 					t.Log("step 4")
+				},
+			},
+		},
+	})
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Test time_branching days validation.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+                  steps {
+                    type        = "time_branching"
+					wait_before = 0
+                    timezone    = "Prague"
+                    days        = ["sat", "sun", "invalid"]
+                    time_from   = "08:00"
+                    time_to     = "22:00"
+                  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`expected steps\.0\.days\.2 to be one of \[mon tue wed thu fri sat sun], got invalid`),
+				PreConfig: func() {
+					t.Log("test validation: days")
+				},
+			},
+			// Test time_branching time_from validation.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+                  steps {
+                    type        = "time_branching"
+					wait_before = 0
+                    timezone    = "Prague"
+                    days        = ["sat", "sun"]
+                    time_from   = "8 AM"
+                    time_to     = "22:00"
+                  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`invalid value for steps\.0\.time_from \(use HH:MM format\)`),
+				PreConfig: func() {
+					t.Log("test validation: time_from")
+				},
+			},
+			// Test time_branching time_to validation.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+                  steps {
+                    type        = "time_branching"
+					wait_before = 0
+                    timezone    = "Prague"
+                    days        = ["sat", "sun"]
+                    time_from   = "08:00"
+                    time_to     = "10 PM"
+                  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`invalid value for steps\.0\.time_to \(use HH:MM format\)`),
+				PreConfig: func() {
+					t.Log("test validation: time_to")
 				},
 			},
 		},

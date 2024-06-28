@@ -3,12 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"net/url"
-	"reflect"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
+	"net/url"
+	"reflect"
+	"regexp"
 )
 
 var policyStepMemberSchema = map[string]*schema.Schema{
@@ -65,21 +66,23 @@ var policyStepSchema = map[string]*schema.Schema{
 	"days": {
 		Description: "An array of days during which the branching rule will be executed. Valid values are [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"]. Used when step type is branching.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Schema{Type: schema.TypeString},
+		Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validation.StringInSlice([]string{"mon", "tue", "wed", "thu", "fri", "sat", "sun"}, false)},
 		Optional:    true,
 		Computed:    true,
 	},
 	"time_from": {
-		Description: "A time from which the branching rule will be executed. Use HH:MM format. Used when step type is time_branching.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Description:  "A time from which the branching rule will be executed. Use HH:MM format. Used when step type is time_branching.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(2[0-3]|[01][0-9]):[0-5][0-9]$`), "use HH:MM format"),
 	},
 	"time_to": {
-		Description: "A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Description:  "A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(2[0-3]|[01][0-9]):[0-5][0-9]$`), "use HH:MM format"),
 	},
 	"metadata_key": {
 		Description: "A metadata field key to check. Used when step type is metadata_branching.",
