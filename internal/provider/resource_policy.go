@@ -34,7 +34,7 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 
 var policyStepSchema = map[string]*schema.Schema{
 	"type": {
-		Description: "The type of the step. Can be either escalation or time_branching.",
+		Description: "The type of the step. Can be either escalation, time_branching, or metadata_branching.",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
@@ -44,13 +44,20 @@ var policyStepSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"urgency_id": {
-		Description: "Which severity to use for this step.",
+		Description: "Which severity to use for this step. Used when step type is escalation.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Computed:    true,
 	},
+	"step_members": {
+		Description: "An array of escalation policy steps members. Used when step type is escalation.",
+		Type:        schema.TypeList,
+		Elem:        &schema.Resource{Schema: policyStepMemberSchema},
+		Optional:    true,
+		Computed:    true,
+	},
 	"timezone": {
-		Description: "What timezone to use when evaluating time based branching rules. Used when step type is branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
+		Description: "What timezone to use when evaluating time based branching rules. Used when step type is time_branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
@@ -63,27 +70,33 @@ var policyStepSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"time_from": {
-		Description: "A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.",
+		Description: "A time from which the branching rule will be executed. Use HH:MM format. Used when step type is time_branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
 	},
 	"time_to": {
-		Description: "A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.",
+		Description: "A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
 	},
-	"policy_id": {
-		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is branching.",
-		Type:        schema.TypeInt,
+	"metadata_key": {
+		Description: "A metadata field key to check. Used when step type is metadata_branching.",
+		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
 	},
-	"step_members": {
-		Description: "An array of escalation policy steps members.",
+	"metadata_values": {
+		Description: "An array of metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: policyStepMemberSchema},
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Computed:    true,
+	},
+	"policy_id": {
+		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.",
+		Type:        schema.TypeInt,
 		Optional:    true,
 		Computed:    true,
 	},
@@ -157,15 +170,17 @@ type policyStepMember struct {
 }
 
 type policyStep struct {
-	Type       *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
-	WaitBefore *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
-	UrgencyId  *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
-	Timezone   *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
-	Days       *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
-	TimeFrom   *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
-	TimeTo     *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
-	PolicyId   *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
-	Steps      *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
+	Type           *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
+	WaitBefore     *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
+	UrgencyId      *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
+	Steps          *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
+	Timezone       *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
+	Days           *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
+	TimeFrom       *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
+	TimeTo         *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
+	MetadataKey    *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
+	MetadataValues *[]string           `mapstructure:"metadata_values,omitempty" json:"metadata_values,omitempty"`
+	PolicyId       *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
 }
 
 type policy struct {

@@ -33,6 +33,8 @@ Policy lookup.
 Read-Only:
 
 - **days** (List of String)
+- **metadata_key** (String)
+- **metadata_values** (List of String)
 - **policy_id** (Number)
 - **step_members** (List of Object) (see [below for nested schema](#nestedobjatt--steps--step_members))
 - **time_from** (String)

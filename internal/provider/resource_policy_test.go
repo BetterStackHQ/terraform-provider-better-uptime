@@ -94,18 +94,36 @@ func TestResourcePolicy(t *testing.T) {
                     time_to     = "22:00"
                     policy_id   = 456
                   }
+                  steps {
+                    type            = "metadata_branching"
+                    wait_before     = 0
+                    metadata_key    = "severity"
+                    metadata_values = ["critical", "error"]
+                    policy_id       = 456
+                  }
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "name", "Terraform - Branching"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.type", "time_branching"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.wait_before", "0"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.timezone", "Prague"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.timezone", "Prague"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.days.0", "mon"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.days.0", "sat"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.time_from", "08:00"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.time_to", "22:00"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.time_to", "22:00"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.policy_id", "456"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.type", "time_branching"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.wait_before", "0"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.timezone", "Prague"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.days.0", "sat"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.time_to", "22:00"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.policy_id", "456"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.type", "metadata_branching"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.wait_before", "0"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_key", "severity"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_values.0", "critical"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_values.1", "error"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.policy_id", "456"),
 				),
 				PreConfig: func() {
 					t.Log("step 2")
@@ -137,6 +155,13 @@ func TestResourcePolicy(t *testing.T) {
                     time_from   = "08:00"
                     time_to     = "22:00"
                     policy_id   = 456
+                  }
+                  steps {
+                    type            = "metadata_branching"
+                    wait_before     = 0
+                    metadata_key    = "severity"
+                    metadata_values = ["critical", "error"]
+                    policy_id       = 456
                   }
 				}`,
 				PlanOnly: true,

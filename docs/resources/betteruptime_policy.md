@@ -36,18 +36,20 @@ https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
 
 Required:
 
-- **type** (String) The type of the step. Can be either escalation or time_branching.
+- **type** (String) The type of the step. Can be either escalation, time_branching, or metadata_branching.
 - **wait_before** (Number) How long to wait before executing this step since previous step.
 
 Optional:
 
 - **days** (List of String) An array of days during which the branching rule will be executed. Valid values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]. Used when step type is branching.
-- **policy_id** (Number) A policy to executed if the branching rule matches the time of an incident. Used when step type is branching.
-- **step_members** (Block List) An array of escalation policy steps members. (see [below for nested schema](#nestedblock--steps--step_members))
-- **time_from** (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.
-- **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.
-- **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
-- **urgency_id** (Number) Which severity to use for this step.
+- **metadata_key** (String) A metadata field key to check. Used when step type is metadata_branching.
+- **metadata_values** (List of String) An array of metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching.
+- **policy_id** (Number) A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.
+- **step_members** (Block List) An array of escalation policy steps members. Used when step type is escalation. (see [below for nested schema](#nestedblock--steps--step_members))
+- **time_from** (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is time_branching.
+- **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.
+- **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is time_branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+- **urgency_id** (Number) Which severity to use for this step. Used when step type is escalation.
 
 <a id="nestedblock--steps--step_members"></a>
 ### Nested Schema for `steps.step_members`
