@@ -225,7 +225,9 @@ func policyCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	var in policy
 	for _, e := range policyRef(&in) {
 		if e.k == "steps" {
-			loadPolicySteps(d, e.v.(**[]policyStep))
+			if err := loadPolicySteps(d, e.v.(**[]policyStep)); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -266,7 +268,9 @@ func policyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	for _, e := range policyRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "steps" {
-				loadPolicySteps(d, e.v.(**[]policyStep))
+				if err := loadPolicySteps(d, e.v.(**[]policyStep)); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}
@@ -284,7 +288,7 @@ func policyDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/policies/%s", url.PathEscape(d.Id())))
 }
 
-func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) {
+func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) error {
 	x := receiver
 	stepsValues := d.Get("steps")
 
@@ -314,13 +318,14 @@ func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) {
 		}
 
 		var policyStep policyStep
-		err := mapstructure.Decode(stepValuesObject, &policyStep)
-		if err != nil {
-			panic(err)
+		if err := mapstructure.Decode(stepValuesObject, &policyStep); err != nil {
+			return err
 		}
 
 		steps = append(steps, policyStep)
 	}
 
 	*x = &steps
+
+	return nil
 }
