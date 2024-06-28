@@ -2,13 +2,15 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"net/url"
+	"reflect"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
-	"net/url"
-	"reflect"
-	"regexp"
 )
 
 var policyStepMemberSchema = map[string]*schema.Schema{
