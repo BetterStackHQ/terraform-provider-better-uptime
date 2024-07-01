@@ -6,7 +6,7 @@ resource "betteruptime_status_page" "this" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   contact_url  = "mailto:support@example.com"
-  timezone     = "UTC"
+  timezone     = "Eastern Time (US & Canada)"
   subdomain    = var.betteruptime_status_page_subdomain
   subscribable = true
 }
@@ -236,6 +236,22 @@ resource "betteruptime_policy" "this" {
     step_members { type = "all_slack_integrations" }
     step_members { type = "all_webhook_integrations" }
     step_members { type = "current_on_call" }
+  }
+  steps {
+    type        = "time_branching"
+    wait_before = 0
+    time_from   = "00:00"
+    time_to     = "00:00"
+    days        = ["sat", "sun"]
+    timezone    = "Eastern Time (US & Canada)"
+    policy_id   = null
+  }
+  steps {
+    type            = "metadata_branching"
+    wait_before     = 0
+    metadata_key    = "Description"
+    metadata_values = ["Low priority issue", "FYI", "Notice"]
+    policy_id       = null
   }
   steps {
     type        = "escalation"

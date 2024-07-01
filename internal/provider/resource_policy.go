@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -18,23 +20,23 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"id": {
-		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user, or team ID of when member type is current_on_call.",
+		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user, or on-call calendar ID of when member type is current_on_call.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Computed:    true,
+		Default:     nil,
 	},
 	"team_id": {
 		Description: "The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used. This field is deprecated, use id instead.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Computed:    true,
+		Default:     nil,
 		Deprecated:  "Use id instead.",
 	},
 }
 
 var policyStepSchema = map[string]*schema.Schema{
 	"type": {
-		Description: "The type of the step. Can be either escalation or time_branching.",
+		Description: "The type of the step. Can be either escalation, time_branching, or metadata_branching.",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
@@ -44,48 +46,63 @@ var policyStepSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"urgency_id": {
-		Description: "Which severity to use for this step.",
+		Description: "Which severity to use for this step. Used when step type is escalation.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Computed:    true,
+		Default:     nil,
+	},
+	"step_members": {
+		Description: "An array of escalation policy steps members. Used when step type is escalation.",
+		Type:        schema.TypeList,
+		Elem:        &schema.Resource{Schema: policyStepMemberSchema},
+		Optional:    true,
+		Default:     nil,
 	},
 	"timezone": {
-		Description: "What timezone to use when evaluating time based branching rules. Used when step type is branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
+		Description: "What timezone to use when evaluating time based branching rules. Used when step type is time_branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
+		Default:     nil,
 	},
 	"days": {
 		Description: "An array of days during which the branching rule will be executed. Valid values are [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"]. Used when step type is branching.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Schema{Type: schema.TypeString},
+		Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validation.StringInSlice([]string{"mon", "tue", "wed", "thu", "fri", "sat", "sun"}, false)},
 		Optional:    true,
-		Computed:    true,
+		Default:     nil,
 	},
 	"time_from": {
-		Description: "A time from which the branching rule will be executed. Use HH:MM format. Used when step type is branching.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Description:  "A time from which the branching rule will be executed. Use HH:MM format. Used when step type is time_branching.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      nil,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(2[0-3]|[01][0-9]):[0-5][0-9]$`), "use HH:MM format"),
 	},
 	"time_to": {
-		Description: "A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is branching.",
+		Description:  "A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      nil,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(2[0-3]|[01][0-9]):[0-5][0-9]$`), "use HH:MM format"),
+	},
+	"metadata_key": {
+		Description: "A metadata field key to check. Used when step type is metadata_branching.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
+		Default:     nil,
+	},
+	"metadata_values": {
+		Description: "An array of metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching.",
+		Type:        schema.TypeList,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Default:     nil,
 	},
 	"policy_id": {
-		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is branching.",
+		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Computed:    true,
-	},
-	"step_members": {
-		Description: "An array of escalation policy steps members.",
-		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: policyStepMemberSchema},
-		Optional:    true,
-		Computed:    true,
+		Default:     nil,
 	},
 }
 
@@ -157,15 +174,17 @@ type policyStepMember struct {
 }
 
 type policyStep struct {
-	Type       *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
-	WaitBefore *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
-	UrgencyId  *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
-	Timezone   *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
-	Days       *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
-	TimeFrom   *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
-	TimeTo     *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
-	PolicyId   *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
-	Steps      *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
+	Type           *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
+	WaitBefore     *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
+	UrgencyId      *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
+	Steps          *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
+	Timezone       *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
+	Days           *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
+	TimeFrom       *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
+	TimeTo         *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
+	MetadataKey    *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
+	MetadataValues *[]string           `mapstructure:"metadata_values,omitempty" json:"metadata_values,omitempty"`
+	PolicyId       *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
 }
 
 type policy struct {
@@ -206,7 +225,9 @@ func policyCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	var in policy
 	for _, e := range policyRef(&in) {
 		if e.k == "steps" {
-			loadPolicySteps(d, e.v.(**[]policyStep))
+			if err := loadPolicySteps(d, e.v.(**[]policyStep)); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -247,7 +268,9 @@ func policyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	for _, e := range policyRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "steps" {
-				loadPolicySteps(d, e.v.(**[]policyStep))
+				if err := loadPolicySteps(d, e.v.(**[]policyStep)); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}
@@ -265,7 +288,7 @@ func policyDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/policies/%s", url.PathEscape(d.Id())))
 }
 
-func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) {
+func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) error {
 	x := receiver
 	stepsValues := d.Get("steps")
 
@@ -295,13 +318,14 @@ func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) {
 		}
 
 		var policyStep policyStep
-		err := mapstructure.Decode(stepValuesObject, &policyStep)
-		if err != nil {
-			panic(err)
+		if err := mapstructure.Decode(stepValuesObject, &policyStep); err != nil {
+			return err
 		}
 
 		steps = append(steps, policyStep)
 	}
 
 	*x = &steps
+
+	return nil
 }

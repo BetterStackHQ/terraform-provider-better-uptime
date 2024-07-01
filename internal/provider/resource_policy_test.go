@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -94,18 +95,36 @@ func TestResourcePolicy(t *testing.T) {
                     time_to     = "22:00"
                     policy_id   = 456
                   }
+                  steps {
+                    type            = "metadata_branching"
+                    wait_before     = 0
+                    metadata_key    = "severity"
+                    metadata_values = ["critical", "error"]
+                    policy_id       = 456
+                  }
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "name", "Terraform - Branching"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.type", "time_branching"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.wait_before", "0"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.timezone", "Prague"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.timezone", "Prague"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.days.0", "mon"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.days.0", "sat"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.time_from", "08:00"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.time_to", "22:00"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.time_to", "22:00"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.policy_id", "456"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.type", "time_branching"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.wait_before", "0"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.timezone", "Prague"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.days.0", "sat"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.time_to", "22:00"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.policy_id", "456"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.type", "metadata_branching"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.wait_before", "0"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_key", "severity"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_values.0", "critical"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_values.1", "error"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.policy_id", "456"),
 				),
 				PreConfig: func() {
 					t.Log("step 2")
@@ -138,6 +157,13 @@ func TestResourcePolicy(t *testing.T) {
                     time_to     = "22:00"
                     policy_id   = 456
                   }
+                  steps {
+                    type            = "metadata_branching"
+                    wait_before     = 0
+                    metadata_key    = "severity"
+                    metadata_values = ["critical", "error"]
+                    policy_id       = 456
+                  }
 				}`,
 				PlanOnly: true,
 				PreConfig: func() {
@@ -152,6 +178,95 @@ func TestResourcePolicy(t *testing.T) {
 				ImportStateVerify: true,
 				PreConfig: func() {
 					t.Log("step 4")
+				},
+			},
+		},
+	})
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Test time_branching days validation.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+                  steps {
+                    type        = "time_branching"
+					wait_before = 0
+                    timezone    = "Prague"
+                    days        = ["sat", "sun", "invalid"]
+                    time_from   = "08:00"
+                    time_to     = "22:00"
+                  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`expected steps\.0\.days\.2 to be one of \[mon tue wed thu fri sat sun], got invalid`),
+				PreConfig: func() {
+					t.Log("test validation: days")
+				},
+			},
+			// Test time_branching time_from validation.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+                  steps {
+                    type        = "time_branching"
+					wait_before = 0
+                    timezone    = "Prague"
+                    days        = ["sat", "sun"]
+                    time_from   = "8 AM"
+                    time_to     = "22:00"
+                  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`invalid value for steps\.0\.time_from \(use HH:MM format\)`),
+				PreConfig: func() {
+					t.Log("test validation: time_from")
+				},
+			},
+			// Test time_branching time_to validation.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+                  steps {
+                    type        = "time_branching"
+					wait_before = 0
+                    timezone    = "Prague"
+                    days        = ["sat", "sun"]
+                    time_from   = "08:00"
+                    time_to     = "10 PM"
+                  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`invalid value for steps\.0\.time_to \(use HH:MM format\)`),
+				PreConfig: func() {
+					t.Log("test validation: time_to")
 				},
 			},
 		},
