@@ -23,21 +23,17 @@ jobs:
       run: go test ./...
 
   e2e_test:
-    concurrency:
-      group: e2e
     strategy:
       matrix:
-        go-version: [1.16.x]
         terraform-version: [0.13, 1.8.5]
         config: [examples/basic, examples/advanced, examples/on_call_calendars]
-        os: [ubuntu-latest]
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: 1.16.x
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
