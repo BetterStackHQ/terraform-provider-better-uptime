@@ -28,7 +28,7 @@ jobs:
   e2e_test:
     strategy:
       matrix:
-        terraform-version: [0.14, 1.0, 1.8, latest]
+        terraform-version: ["0.14", "1.0", "1.8", "latest"]
         config: [examples/basic, examples/advanced, examples/on_call_calendars]
       fail-fast: false
     runs-on: ubuntu-latest
@@ -50,7 +50,8 @@ jobs:
       - name: Plan resources via Terraform - must be empty
         run: |
           make terraform CONFIGURATION="${{ matrix.config }}" ARGS="plan --input=false --out=tfplan"
-          CHANGES="$(terraform -chdir="examples/advanced" show --json tfplan | jq '.resource_changes | length')"
+          make terraform CONFIGURATION="${{ matrix.config }}" ARGS="show --json tfplan > tfplan.json"
+          CHANGES="$(jq ".resource_changes | length" "${{ matrix.config }}/tfplan.json")"
           if [ "$CHANGES" == "0" ]; then
             echo "No planned changes detected after first apply. Success!"
           else
