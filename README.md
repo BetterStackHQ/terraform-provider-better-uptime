@@ -1,12 +1,12 @@
 # terraform-provider-better-uptime [![build](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/build.yml) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs)
 
-Terraform (0.13+) provider for [Better Uptime](https://uptime.betterstack.com/).
+Terraform (0.14+) provider for [Better Uptime](https://uptime.betterstack.com/).
 
 ## Installation
 
 ```terraform
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 0.14"
   required_providers {
     betteruptime = {
       source  = "BetterStackHQ/better-uptime"
