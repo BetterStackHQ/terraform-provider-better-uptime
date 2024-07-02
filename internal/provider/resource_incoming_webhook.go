@@ -86,6 +86,24 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 		Optional:    false,
 		Computed:    true,
 	},
+	"sample_query_string": {
+		Description: "Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
+	"sample_headers": {
+		Description: "Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
+	"sample_body": {
+		Description: "Sample request body the webhook. Used only to make the configuration easier.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
 	"started_rule_type": {
 		Description: "Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
@@ -171,6 +189,18 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"created_at": {
+		Description: "The time when this incoming webhook was created.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
+	"updated_at": {
+		Description: "The time when this incoming webhook was updated.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
 }
 
 func newIncomingWebhookResource() *schema.Resource {
@@ -199,6 +229,9 @@ type incomingWebhook struct {
 	RecoveryPeriod           *int                `json:"recovery_period,omitempty"`
 	Paused                   *bool               `json:"paused,omitempty"`
 	Url                      *string             `json:"url,omitempty"`
+	SampleQueryString        *string             `json:"sample_query_string,omitempty"`
+	SampleHeaders            *string             `json:"sample_headers,omitempty"`
+	SampleBody               *string             `json:"sample_body,omitempty"`
 	StartedRuleType          *string             `json:"started_rule_type,omitempty"`
 	AcknowledgedRuleType     *string             `json:"acknowledged_rule_type,omitempty"`
 	ResolvedRuleType         *string             `json:"resolved_rule_type,omitempty"`
@@ -213,6 +246,8 @@ type incomingWebhook struct {
 	OtherAcknowledgedFields  *[]integrationField `json:"other_acknowledged_fields,omitempty"`
 	OtherResolvedFields      *[]integrationField `json:"other_resolved_fields,omitempty"`
 	TeamName                 *string             `json:"team_name,omitempty"`
+	CreatedAt                *string             `json:"created_at,omitempty"`
+	UpdatedAt                *string             `json:"updated_at,omitempty"`
 }
 
 type incomingWebhookHTTPResponse struct {
@@ -241,6 +276,9 @@ func incomingWebhookRef(in *incomingWebhook) []struct {
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},
 		{k: "url", v: &in.Url},
+		{k: "sample_query_string", v: &in.SampleQueryString},
+		{k: "sample_headers", v: &in.SampleHeaders},
+		{k: "sample_body", v: &in.SampleBody},
 		{k: "started_rule_type", v: &in.StartedRuleType},
 		{k: "acknowledged_rule_type", v: &in.AcknowledgedRuleType},
 		{k: "resolved_rule_type", v: &in.ResolvedRuleType},
@@ -254,6 +292,8 @@ func incomingWebhookRef(in *incomingWebhook) []struct {
 		{k: "other_started_fields", v: &in.OtherStartedFields},
 		{k: "other_acknowledged_fields", v: &in.OtherAcknowledgedFields},
 		{k: "other_resolved_fields", v: &in.OtherResolvedFields},
+		{k: "created_at", v: &in.CreatedAt},
+		{k: "updated_at", v: &in.UpdatedAt},
 	}
 }
 

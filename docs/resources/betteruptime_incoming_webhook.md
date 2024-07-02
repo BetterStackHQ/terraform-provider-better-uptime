@@ -46,7 +46,12 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 
 ### Read-Only
 
+- **created_at** (String) The time when this incoming webhook was created.
 - **id** (String) The ID of this incoming webhook.
+- **sample_body** (String) Sample request body the webhook. Used only to make the configuration easier.
+- **sample_headers** (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
+- **sample_query_string** (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
+- **updated_at** (String) The time when this incoming webhook was updated.
 - **url** (String) The url at which we expect to receive the webhook.
 
 <a id="nestedblock--acknowledged_alert_id_field"></a>

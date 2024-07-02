@@ -26,6 +26,7 @@ Incoming Webhook lookup.
 - **acknowledged_rules** (List of Object) An array of rules to match to acknowledge an incident. (see [below for nested schema](#nestedatt--acknowledged_rules))
 - **call** (Boolean) Should we call the on-call person?
 - **cause_field** (Set of Object) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedatt--cause_field))
+- **created_at** (String) The time when this incoming webhook was created.
 - **email** (Boolean) Should we send an email to the on-call person?
 - **id** (String) The ID of this incoming webhook.
 - **other_acknowledged_fields** (List of Object) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for nested schema](#nestedatt--other_acknowledged_fields))
@@ -38,11 +39,15 @@ Incoming Webhook lookup.
 - **resolved_alert_id_field** (Set of Object) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--resolved_alert_id_field))
 - **resolved_rule_type** (String) Should an incident be resolved for all webhooks, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any
 - **resolved_rules** (List of Object) An array of rules to match to resolved an incident. (see [below for nested schema](#nestedatt--resolved_rules))
+- **sample_body** (String) Sample request body the webhook. Used only to make the configuration easier.
+- **sample_headers** (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
+- **sample_query_string** (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **started_alert_id_field** (Set of Object) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--started_alert_id_field))
 - **started_rule_type** (String) Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
 - **started_rules** (List of Object) An array of rules to match to start a new incident. (see [below for nested schema](#nestedatt--started_rules))
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
+- **updated_at** (String) The time when this incoming webhook was updated.
 - **url** (String) The url at which we expect to receive the webhook.
 
 <a id="nestedatt--acknowledged_alert_id_field"></a>
