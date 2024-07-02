@@ -171,6 +171,18 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"created_at": {
+		Description: "The time when this email integration was created.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
+	"updated_at": {
+		Description: "The time when this email integration was updated.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
 }
 
 func newEmailIntegrationResource() *schema.Resource {
@@ -213,6 +225,8 @@ type emailIntegration struct {
 	OtherAcknowledgedFields  *[]integrationField `json:"other_acknowledged_fields,omitempty"`
 	OtherResolvedFields      *[]integrationField `json:"other_resolved_fields,omitempty"`
 	TeamName                 *string             `json:"team_name,omitempty"`
+	CreatedAt                *string             `json:"created_at,omitempty"`
+	UpdatedAt                *string             `json:"updated_at,omitempty"`
 }
 
 type emailIntegrationHTTPResponse struct {
@@ -254,6 +268,8 @@ func emailIntegrationRef(in *emailIntegration) []struct {
 		{k: "other_started_fields", v: &in.OtherStartedFields},
 		{k: "other_acknowledged_fields", v: &in.OtherAcknowledgedFields},
 		{k: "other_resolved_fields", v: &in.OtherResolvedFields},
+		{k: "created_at", v: &in.CreatedAt},
+		{k: "updated_at", v: &in.UpdatedAt},
 	}
 }
 

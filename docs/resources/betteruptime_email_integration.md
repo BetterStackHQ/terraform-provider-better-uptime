@@ -46,8 +46,10 @@ https://betterstack.com/docs/uptime/api/email-integrations/
 
 ### Read-Only
 
+- **created_at** (String) The time when this email integration was created.
 - **email_address** (String) The email address we expect emails to receive at.
 - **id** (String) The ID of this Email integration.
+- **updated_at** (String) The time when this email integration was updated.
 
 <a id="nestedblock--acknowledged_alert_id_field"></a>
 ### Nested Schema for `acknowledged_alert_id_field`
