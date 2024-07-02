@@ -15,6 +15,8 @@ betteruptime.com status page subdomain
 (e.g. if you set value to "my-status-page" your status page will be
 available at https://my-status-page.betteruptime.com)
 EOF
+  # The value can be omitted and random domain will be provided.
+  default = null
 }
 
 variable "betteruptime_severity_name" {

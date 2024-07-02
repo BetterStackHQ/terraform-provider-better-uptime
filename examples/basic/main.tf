@@ -2,11 +2,16 @@ provider "betteruptime" {
   api_token = var.betteruptime_api_token
 }
 
+resource "random_id" "status_page_subdomain" {
+  byte_length = 8
+  prefix      = "tf-status-"
+}
+
 resource "betteruptime_status_page" "this" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   timezone     = "UTC"
-  subdomain    = var.betteruptime_status_page_subdomain
+  subdomain    = coalesce(var.betteruptime_status_page_subdomain, random_id.status_page_subdomain.hex)
 }
 
 resource "betteruptime_monitor" "this" {
