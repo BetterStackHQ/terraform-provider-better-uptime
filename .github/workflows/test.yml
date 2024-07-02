@@ -51,7 +51,7 @@ jobs:
         run: |
           make terraform CONFIGURATION="${{ matrix.config }}" ARGS="plan --input=false --out=tfplan"
           make terraform CONFIGURATION="${{ matrix.config }}" ARGS="show --json tfplan > tfplan.json"
-          CHANGES="$(jq "[.resource_changes[] | select(.change.actions != ["no-op"])] | length" "${{ matrix.config }}/tfplan.json")"
+          CHANGES="$(jq "[.resource_changes[] | select(.change.actions != [\"no-op\"])] | length" "${{ matrix.config }}/tfplan.json")"
           if [ "$CHANGES" == "0" ]; then
             echo "No planned changes detected after first apply. Success!"
           else
