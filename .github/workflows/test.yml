@@ -25,7 +25,7 @@ jobs:
   e2e_test:
     strategy:
       matrix:
-        terraform-version: [0.13, 1.8.5]
+        terraform-version: [0.13, 0.14, 0.15, 1.0, 1.2, 1.4, 1.6, 1.8]
         config: [examples/basic, examples/advanced, examples/on_call_calendars]
       fail-fast: false
     runs-on: ubuntu-latest
