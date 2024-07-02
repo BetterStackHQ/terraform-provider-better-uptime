@@ -49,9 +49,12 @@ jobs:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
       - name: Plan resources via Terraform - must be empty
         run: |
-          make terraform CONFIGURATION="${{ matrix.config }}" ARGS="plan --detailed-exitcode --input=false"
-          if [ $? -eq 2 ]; then
-            echo "Terraform plan has changes, exiting with error."
+          make terraform CONFIGURATION="${{ matrix.config }}" ARGS="plan --input=false --out=tfplan"
+          CHANGES="$(terraform -chdir="examples/advanced" show --json tfplan | jq '.resource_changes | length')"
+          if [ "$CHANGES" == "0" ]; then
+            echo "No planned changes detected after first apply. Success!"
+          else
+            echo "$CHANGES planned changes detected after first apply. Failure!"
             exit 1
           fi
         env:
