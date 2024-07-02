@@ -158,10 +158,6 @@ resource "betteruptime_incoming_webhook" "this" {
   acknowledged_rule_type = "unused"
   resolved_rule_type     = "all"
 
-  sample_query_string = "severity=medium"
-  sample_headers      = "Authorization: Bearer 123456\r\nContent-Type: application/json"
-  sample_body         = "{ \"incident\": { \"status\": \"cpu alert\", \"id\": \"abc123<123-med>\", \"description\": \"by: CPU exceeding 80%, description: Node cloud-v1-mtr CPU alert, source: cluster-001\" }"
-
   started_rules {
     rule_target  = "json"
     target_field = "incident.status"
@@ -251,16 +247,16 @@ resource "betteruptime_policy" "this" {
     wait_before = 0
     time_from   = "00:00"
     time_to     = "00:00"
-    days = ["sat", "sun"]
+    days        = ["sat", "sun"]
     timezone    = "Eastern Time (US & Canada)"
     policy_id   = null
   }
   steps {
-    type         = "metadata_branching"
-    wait_before  = 0
-    metadata_key = "Description"
+    type            = "metadata_branching"
+    wait_before     = 0
+    metadata_key    = "Description"
     metadata_values = ["Low priority issue", "FYI", "Notice"]
-    policy_id    = null
+    policy_id       = null
   }
   steps {
     type        = "escalation"

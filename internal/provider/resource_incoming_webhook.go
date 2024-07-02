@@ -89,19 +89,19 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"sample_query_string": {
 		Description: "Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.",
 		Type:        schema.TypeString,
-		Optional:    true,
+		Optional:    false,
 		Computed:    true,
 	},
 	"sample_headers": {
 		Description: "Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.",
 		Type:        schema.TypeString,
-		Optional:    true,
+		Optional:    false,
 		Computed:    true,
 	},
 	"sample_body": {
 		Description: "Sample request body the webhook. Used only to make the configuration easier.",
 		Type:        schema.TypeString,
-		Optional:    true,
+		Optional:    false,
 		Computed:    true,
 	},
 	"started_rule_type": {

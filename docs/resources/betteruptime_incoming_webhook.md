@@ -38,9 +38,6 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 - **recovery_period** (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
 - **resolved_alert_id_field** (Block Set) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--resolved_alert_id_field))
 - **resolved_rules** (Block List) An array of rules to match to resolved an incident. (see [below for nested schema](#nestedblock--resolved_rules))
-- **sample_body** (String) Sample request body the webhook. Used only to make the configuration easier.
-- **sample_headers** (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
-- **sample_query_string** (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
 - **started_alert_id_field** (Block Set) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--started_alert_id_field))
 - **started_rules** (Block List) An array of rules to match to start a new incident. (see [below for nested schema](#nestedblock--started_rules))
@@ -51,6 +48,9 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 
 - **created_at** (String) The time when this incoming webhook was created.
 - **id** (String) The ID of this incoming webhook.
+- **sample_body** (String) Sample request body the webhook. Used only to make the configuration easier.
+- **sample_headers** (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
+- **sample_query_string** (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
 - **updated_at** (String) The time when this incoming webhook was updated.
 - **url** (String) The url at which we expect to receive the webhook.
 
