@@ -181,7 +181,6 @@ resource "betteruptime_incoming_webhook" "this" {
     field_target = "json"
     target_field = "incident.status"
     match_type   = "match_everything"
-    content      = "title"
   }
   started_alert_id_field {
     name           = "Alert ID"
@@ -217,6 +216,12 @@ resource "betteruptime_incoming_webhook" "this" {
     match_type     = "match_between"
     content_before = "description:"
     content_after  = ","
+  }
+  other_started_fields {
+    name         = "Severity"
+    field_target = "query_string"
+    target_field = "severity"
+    match_type   = "match_everything"
   }
 }
 
