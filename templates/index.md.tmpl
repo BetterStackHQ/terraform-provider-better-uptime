@@ -13,7 +13,7 @@ The Better Uptime provider provides resources to interact with the [Better Uptim
 
 ```terraform
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 0.14"
   required_providers {
     betteruptime = {
       source  = "BetterStackHQ/better-uptime"

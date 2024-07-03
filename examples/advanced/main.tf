@@ -2,12 +2,17 @@ provider "betteruptime" {
   api_token = var.betteruptime_api_token
 }
 
+resource "random_id" "status_page_subdomain" {
+  byte_length = 8
+  prefix      = "tf-status-"
+}
+
 resource "betteruptime_status_page" "this" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   contact_url  = "mailto:support@example.com"
   timezone     = "Eastern Time (US & Canada)"
-  subdomain    = var.betteruptime_status_page_subdomain
+  subdomain    = coalesce(var.betteruptime_status_page_subdomain, random_id.status_page_subdomain.hex)
   subscribable = true
 }
 

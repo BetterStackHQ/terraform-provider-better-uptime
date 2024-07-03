@@ -36,9 +36,6 @@ var statusPageSectionSchema = map[string]*schema.Schema{
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Computed:    true,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return !d.HasChange(k)
-		},
 	},
 }
 
