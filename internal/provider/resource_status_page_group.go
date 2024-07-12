@@ -79,7 +79,7 @@ type statusPageGroup struct {
 
 type statusPageGroupHTTPResponse struct {
 	Data struct {
-		ID         string       `json:"id"`
+		ID         string          `json:"id"`
 		Attributes statusPageGroup `json:"attributes"`
 	} `json:"data"`
 }
