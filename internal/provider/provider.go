@@ -64,6 +64,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_policy":                        newPolicyResource(),
 			"betteruptime_severity":                      newSeverityResource(),
 			"betteruptime_status_page":                   newStatusPageResource(),
+			"betteruptime_status_page_group":             newStatusPageGroupResource(),
 			"betteruptime_status_page_section":           newStatusPageSectionResource(),
 			"betteruptime_status_page_resource":          newStatusPageResourceResource(),
 			"betteruptime_pagerduty_integration":         newPagerdutyIntegrationResource(),
