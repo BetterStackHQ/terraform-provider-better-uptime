@@ -42,9 +42,9 @@ https://betterstack.com/docs/uptime/api/status-pages/
 - **min_incident_length** (Number) If you don't want to display short incidents on your status page, this attribute is for you.
 - **password** (String, Sensitive) Set a password of your status page (we won't store it as plaintext, promise). Required when password_enabled: true. We will set password_enabled: false automatically when you send us an empty password.
 - **password_enabled** (Boolean) Do you want to enable password protection on your status page?
+- **status_page_group_id** (Number) Set this attribute if you want to add this status page to a status page group.
 - **subscribable** (Boolean) Do you want to allow users to subscribe to your status page changes?
 - **theme** (String) Choose theme of your status page. Only applicable when design: v2. Possible values: 'light', 'dark'.
-- **status_page_group_id** (Number) Set this attribute if you want to add this status page to a status page group.
 
 ### Read-Only
 
