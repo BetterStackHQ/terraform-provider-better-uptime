@@ -184,6 +184,12 @@ var statusPageSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"status_page_group_id": {
+		Description: "Set this attribute if you want to add this status page to a status page group.",
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Computed:    true,
+	},
 }
 
 func newStatusPageResource() *schema.Resource {
@@ -228,6 +234,7 @@ type statusPage struct {
 	Theme                    *string `json:"theme,omitempty"`
 	Layout                   *string `json:"layout,omitempty"`
 	AutomaticReports         *bool   `json:"automatic_reports,omitempty"`
+	StatusPageGroupID        *int    `json:"status_page_group_id,omitempty"`
 }
 
 type statusPageHTTPResponse struct {
@@ -273,6 +280,7 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "theme", v: &in.Theme},
 		{k: "layout", v: &in.Layout},
 		{k: "automatic_reports", v: &in.AutomaticReports},
+		{k: "status_page_group_id", v: &in.StatusPageGroupID},
 	}
 }
 func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

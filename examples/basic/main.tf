@@ -7,11 +7,17 @@ resource "random_id" "status_page_subdomain" {
   prefix      = "tf-status-"
 }
 
+resource "betteruptime_status_page_group" "this" {
+  name = "Status pages from Terraform"
+}
+
 resource "betteruptime_status_page" "this" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   timezone     = "UTC"
   subdomain    = coalesce(var.betteruptime_status_page_subdomain, random_id.status_page_subdomain.hex)
+
+  status_page_group_id = betteruptime_status_page_group.this.id
 }
 
 resource "betteruptime_monitor" "this" {
