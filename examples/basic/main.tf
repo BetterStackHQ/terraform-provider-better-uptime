@@ -8,7 +8,7 @@ resource "random_id" "status_page_subdomain" {
 }
 
 resource "betteruptime_status_page_group" "this" {
-  name = "tf group"
+  name = "Status pages from Terraform"
 }
 
 resource "betteruptime_status_page" "this" {

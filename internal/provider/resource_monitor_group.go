@@ -35,8 +35,7 @@ var monitorGroupSchema = map[string]*schema.Schema{
 	"name": {
 		Description: "A name of the group that you can see in the dashboard.",
 		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Required:    true,
 	},
 	"sort_index": {
 		Description: "Set sort_index to specify how to sort your monitor groups.",
