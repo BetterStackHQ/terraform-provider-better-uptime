@@ -25,6 +25,7 @@ Severity lookup.
 - **email** (Boolean) Whether to send email when a new incident is created.
 - **id** (String) The ID of this Severity.
 - **push** (Boolean) Whether to send push notification when a new incident is created.
+- **severity_group_id** (Number) Set this attribute if you want to add this severity to a severity group.
 - **sms** (Boolean) Whether to send SMS when a new incident is created.
 
 

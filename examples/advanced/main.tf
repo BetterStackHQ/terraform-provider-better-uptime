@@ -275,3 +275,17 @@ resource "betteruptime_policy" "this" {
     step_members { type = "entire_team" }
   }
 }
+
+resource "betteruptime_severity_group" "this" {
+  name = "Severities from Terraform"
+}
+
+resource "betteruptime_severity" "this" {
+  name  = "Terraform"
+  call  = false
+  email = false
+  push  = false
+  sms   = false
+
+  severity_group_id = betteruptime_severity_group.this.id
+}
