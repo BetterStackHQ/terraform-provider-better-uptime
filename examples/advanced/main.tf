@@ -234,10 +234,15 @@ data "betteruptime_severity" "this" {
   name = var.betteruptime_severity_name
 }
 
+resource "betteruptime_policy_group" "this" {
+  name = "Policies from Terraform"
+}
+
 resource "betteruptime_policy" "this" {
-  name         = "Standard Escalation Policy"
-  repeat_count = 3
-  repeat_delay = 60
+  name            = "Standard Escalation Policy"
+  repeat_count    = 3
+  repeat_delay    = 60
+  policy_group_id = betteruptime_policy_group.this.id
 
   steps {
     type        = "escalation"

@@ -23,6 +23,7 @@ Policy lookup.
 
 - **id** (String) The ID of this Policy.
 - **incident_token** (String) Incident token that can be used for manually reporting incidents.
+- **policy_group_id** (Number) Set this attribute if you want to add this policy to a policy group.
 - **repeat_count** (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
 - **repeat_delay** (Number) How long in seconds to wait before each repetition.
 - **steps** (List of Object) An array of escalation policy steps (see [below for nested schema](#nestedatt--steps))
