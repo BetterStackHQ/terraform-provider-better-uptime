@@ -78,7 +78,7 @@ type severityGroup struct {
 
 type severityGroupHTTPResponse struct {
 	Data struct {
-		ID         string          `json:"id"`
+		ID         string        `json:"id"`
 		Attributes severityGroup `json:"attributes"`
 	} `json:"data"`
 }

@@ -78,7 +78,7 @@ type policyGroup struct {
 
 type policyGroupHTTPResponse struct {
 	Data struct {
-		ID         string          `json:"id"`
+		ID         string      `json:"id"`
 		Attributes policyGroup `json:"attributes"`
 	} `json:"data"`
 }
