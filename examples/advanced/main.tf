@@ -234,10 +234,15 @@ data "betteruptime_severity" "this" {
   name = var.betteruptime_severity_name
 }
 
+resource "betteruptime_policy_group" "this" {
+  name = "Policies from Terraform"
+}
+
 resource "betteruptime_policy" "this" {
-  name         = "Standard Escalation Policy"
-  repeat_count = 3
-  repeat_delay = 60
+  name            = "Standard Escalation Policy"
+  repeat_count    = 3
+  repeat_delay    = 60
+  policy_group_id = betteruptime_policy_group.this.id
 
   steps {
     type        = "escalation"
@@ -269,4 +274,18 @@ resource "betteruptime_policy" "this" {
     urgency_id  = data.betteruptime_severity.this.id
     step_members { type = "entire_team" }
   }
+}
+
+resource "betteruptime_severity_group" "this" {
+  name = "Severities from Terraform"
+}
+
+resource "betteruptime_severity" "this" {
+  name  = "Terraform"
+  call  = false
+  email = false
+  push  = false
+  sms   = false
+
+  severity_group_id = betteruptime_severity_group.this.id
 }

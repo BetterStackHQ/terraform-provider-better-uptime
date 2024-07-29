@@ -151,6 +151,12 @@ var policySchema = map[string]*schema.Schema{
 		Elem:        &schema.Resource{Schema: policyStepSchema},
 		Required:    true,
 	},
+	"policy_group_id": {
+		Description: "Set this attribute if you want to add this policy to a policy group.",
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Computed:    true,
+	},
 }
 
 func newPolicyResource() *schema.Resource {
@@ -195,6 +201,7 @@ type policy struct {
 	IncidentToken *string       `json:"incident_token,omitempty"`
 	Steps         *[]policyStep `json:"steps"`
 	TeamName      *string       `json:"team_name,omitempty"`
+	PolicyGroupID *int          `json:"policy_group_id,omitempty"`
 }
 
 type policyHTTPResponse struct {
