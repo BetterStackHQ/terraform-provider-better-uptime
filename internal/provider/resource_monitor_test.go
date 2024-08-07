@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strconv"
 	"sync/atomic"
 	"testing"
@@ -193,7 +194,7 @@ func TestResourceMonitorWithHeaders(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.#", "2"),
 				),
 			},
-			// Step 2 - remove the first header.
+			// Step 3 - remove the first header.
 			{
 				Config: fmt.Sprintf(`
 				provider "betteruptime" {
@@ -217,6 +218,90 @@ func TestResourceMonitorWithHeaders(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "request_headers.0.value", "test-2"),
 					resource.TestCheckNoResourceAttr("betteruptime_monitor.this", "request_headers.1.name"),
 				),
+			},
+			// Step 4 - invalid header with empty name.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					request_headers = [
+						{
+							name  = ""
+							value = "test"
+						}
+					]
+				}
+				`, url, monitorType),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Invalid request header map\[name: value:test\]: must contain 'name' key with a non-empty string value`),
+			},
+			// Step 5 - invalid header with empty value.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					request_headers = [
+						{
+							name  = "X-TEST"
+							value = ""
+						}
+					]
+				}
+				`, url, monitorType),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Invalid request header map\[name:X-TEST value:\]: must contain 'value' key with a non-empty string value`),
+			},
+			// Step 6 - invalid header with extra keys.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					request_headers = [
+						{
+							name  = "X-TEST"
+							value = "test"
+							extra = "invalid"
+						}
+					]
+				}
+				`, url, monitorType),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Invalid request header map\[extra:invalid name:X-TEST value:test\]: must only contain 'name' and 'value' keys`),
+			},
+			// Step 7 - invalid header with incorrect format.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					request_headers = [
+						{
+							"X-TEST" = "test"
+						}
+					]
+				}
+				`, url, monitorType),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Invalid request header map\[X-TEST:test\]: must contain 'name' key with a non-empty string value`),
 			},
 		},
 	})

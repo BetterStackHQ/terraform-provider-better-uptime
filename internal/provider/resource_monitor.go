@@ -397,8 +397,9 @@ func newMonitorResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/monitors/",
-		Schema:      monitorSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/monitors/",
+		Schema:        monitorSchema,
 	}
 }
 
@@ -564,6 +565,37 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 
 func monitorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/monitors/%s", url.PathEscape(d.Id())))
+}
+
+func validateRequestHeaders(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	if headers, ok := diff.GetOk("request_headers"); ok {
+		for _, header := range headers.([]interface{}) {
+			headerMap := header.(map[string]interface{})
+			if err := validateRequestHeader(headerMap); err != nil {
+				return fmt.Errorf("Invalid request header %v: %v", headerMap, err)
+			}
+		}
+	}
+	return nil
+}
+
+func validateRequestHeader(header map[string]interface{}) error {
+	name, nameOk := header["name"].(string)
+	value, valueOk := header["value"].(string)
+
+	if !nameOk || name == "" {
+		return fmt.Errorf("must contain 'name' key with a non-empty string value")
+	}
+
+	if !valueOk || value == "" {
+		return fmt.Errorf("must contain 'value' key with a non-empty string value")
+	}
+
+	if len(header) != 2 {
+		return fmt.Errorf("must only contain 'name' and 'value' keys")
+	}
+
+	return nil
 }
 
 func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interface{}) {

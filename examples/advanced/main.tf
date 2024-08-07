@@ -37,6 +37,12 @@ resource "betteruptime_monitor" "status" {
   url              = "https://example.com"
   monitor_type     = "status"
   monitor_group_id = betteruptime_monitor_group.this.id
+  request_headers = [
+    {
+      "name" : "X-For-Status-Page",
+      "value" : "https://${betteruptime_status_page.this.subdomain}.betteruptime.com"
+    },
+  ]
 }
 
 resource "betteruptime_monitor" "dns" {

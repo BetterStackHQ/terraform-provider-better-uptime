@@ -103,8 +103,9 @@ func newDatadogIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/datadog-integrations/",
-		Schema:      datadogIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/datadog-integrations/",
+		Schema:        datadogIntegrationSchema,
 	}
 }
 

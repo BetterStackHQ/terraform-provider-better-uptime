@@ -48,8 +48,9 @@ func newSplunkOnCallIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/",
-		Schema:      splunkOnCallIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/",
+		Schema:        splunkOnCallIntegrationSchema,
 	}
 }
 

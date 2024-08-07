@@ -103,8 +103,9 @@ func newNewRelicIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/new-relic-integrations/",
-		Schema:      newRelicIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/new-relic-integrations/",
+		Schema:        newRelicIntegrationSchema,
 	}
 }
 

@@ -97,8 +97,9 @@ func newPrometheusIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/prometheus-integrations/",
-		Schema:      prometheusIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/prometheus-integrations/",
+		Schema:        prometheusIntegrationSchema,
 	}
 }
 
