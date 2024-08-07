@@ -152,7 +152,9 @@ func grafanaIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta 
 	var in grafanaIntegration
 	for _, e := range grafanaIntegrationRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -193,7 +195,9 @@ func grafanaIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	for _, e := range grafanaIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}

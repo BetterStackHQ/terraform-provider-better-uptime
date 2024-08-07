@@ -87,7 +87,9 @@ func splunkOnCallIntegrationCreate(ctx context.Context, d *schema.ResourceData, 
 	var in splunkOnCallIntegration
 	for _, e := range splunkOnCallIntegrationRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -128,7 +130,9 @@ func splunkOnCallIntegrationUpdate(ctx context.Context, d *schema.ResourceData, 
 	for _, e := range splunkOnCallIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}

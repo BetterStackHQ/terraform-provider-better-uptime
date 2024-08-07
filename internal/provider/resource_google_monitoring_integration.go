@@ -152,7 +152,9 @@ func googleMonitoringIntegrationCreate(ctx context.Context, d *schema.ResourceDa
 	var in googleMonitoringIntegration
 	for _, e := range googleMonitoringIntegrationRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -193,7 +195,9 @@ func googleMonitoringIntegrationUpdate(ctx context.Context, d *schema.ResourceDa
 	for _, e := range googleMonitoringIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}

@@ -512,7 +512,9 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	var in monitor
 	for _, e := range monitorRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -553,7 +555,9 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	for _, e := range monitorRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}
@@ -580,6 +584,11 @@ func validateRequestHeaders(ctx context.Context, diff *schema.ResourceDiff, v in
 }
 
 func validateRequestHeader(header map[string]interface{}) error {
+	if len(header) == 0 {
+		// Headers with calculated fields that are not known at the time will be passed as empty maps, ignore them
+		return nil
+	}
+
 	name, nameOk := header["name"].(string)
 	value, valueOk := header["value"].(string)
 
@@ -598,7 +607,7 @@ func validateRequestHeader(header map[string]interface{}) error {
 	return nil
 }
 
-func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interface{}) {
+func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interface{}) error {
 	x := receiver
 	v := d.Get("request_headers")
 	var t []map[string]interface{}
@@ -613,6 +622,14 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 	for _, v := range old.([]interface{}) {
 		header := v.(map[string]interface{})
 		foundHeader := findRequestHeader(&t, &header)
+
+		// Validation at apply time, empty map is considered invalid (fields should be known at this point)
+		if len(header) == 0 {
+			return fmt.Errorf("Invalid request header %v: map cannot be empty", header)
+		}
+		if err := validateRequestHeader(header); err != nil {
+			return fmt.Errorf("Invalid request header %v: %v", header, err)
+		}
 
 		var hasId bool // Check if the found header already has an ID
 		if foundHeader == nil {
@@ -630,6 +647,8 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 	}
 
 	*x = &t
+
+	return nil
 }
 
 func findRequestHeader(headers *[]map[string]interface{}, header *map[string]interface{}) *map[string]interface{} {
