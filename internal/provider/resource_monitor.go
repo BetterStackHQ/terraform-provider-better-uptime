@@ -613,6 +613,22 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 	var t []map[string]interface{}
 	for _, v := range v.([]interface{}) {
 		header := v.(map[string]interface{})
+
+		// Validation at apply time, empty map is considered invalid (fields should be known at this point)
+		if len(header) == 0 {
+			return fmt.Errorf("Invalid request header %v: map cannot be empty", header)
+		}
+		// Headers can have ID at apply time, temporarily remove it before validation and reattach it afterwards
+		id, idPresent := header["id"]
+		delete(header, "id")
+		err := validateRequestHeader(header)
+		if idPresent {
+			header["id"] = id
+		}
+		if err != nil {
+			return fmt.Errorf("Invalid request header %v: %v", header, err)
+		}
+
 		newHeader := map[string]interface{}{"name": header["name"], "value": header["value"]}
 		t = append(t, newHeader)
 	}
@@ -622,14 +638,6 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 	for _, v := range old.([]interface{}) {
 		header := v.(map[string]interface{})
 		foundHeader := findRequestHeader(&t, &header)
-
-		// Validation at apply time, empty map is considered invalid (fields should be known at this point)
-		if len(header) == 0 {
-			return fmt.Errorf("Invalid request header %v: map cannot be empty", header)
-		}
-		if err := validateRequestHeader(header); err != nil {
-			return fmt.Errorf("Invalid request header %v: %v", header, err)
-		}
 
 		var hasId bool // Check if the found header already has an ID
 		if foundHeader == nil {
