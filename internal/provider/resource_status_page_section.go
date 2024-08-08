@@ -93,9 +93,12 @@ func statusPageSectionRef(in *statusPageSection) []struct {
 func statusPageSectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in statusPageSection
 	for _, e := range statusPageSectionRef(&in) {
+		if e.k == "position" {
+			// When creating resource, keep the position fixed if known
+			in.FixedPosition = truePtr()
+		}
 		load(d, e.k, e.v)
 	}
-	in.FixedPosition = truePtr()
 	statusPageID := d.Get("status_page_id").(string)
 	var out statusPageSectionHTTPResponse
 	if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/sections", url.PathEscape(statusPageID)), &in, &out); err != nil {
@@ -131,11 +134,16 @@ func statusPageSectionUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	var in statusPageSection
 	var out policyHTTPResponse
 	for _, e := range statusPageSectionRef(&in) {
+		if e.k == "position" {
+			// When updating resource, keep the position fixed and always send it if known
+			in.FixedPosition = truePtr()
+			load(d, e.k, e.v)
+			continue
+		}
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
 		}
 	}
-	in.FixedPosition = truePtr()
 	statusPageID := d.Get("status_page_id").(string)
 	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/sections/%s", url.PathEscape(statusPageID), url.PathEscape(d.Id())), &in, &out)
 }

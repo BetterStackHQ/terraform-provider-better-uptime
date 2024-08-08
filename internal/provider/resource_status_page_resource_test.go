@@ -64,7 +64,7 @@ func TestResourceStatusPageResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_status_page_resource.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "public_name", name),
 					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "resource_id", "3"),
-					server.TestCheckCalledRequest("PATCH", "/api/v2/status-pages/0/resources/1", `{"resource_id":3,"resource_type":"Monitor","fixed_position":true}`),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/status-pages/0/resources/1", `{"resource_id":3,"resource_type":"Monitor","position":0,"fixed_position":true}`),
 				),
 				PreConfig: func() {
 					t.Log("step 2")

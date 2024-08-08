@@ -189,12 +189,16 @@ func statusPageResourceRef(in *statusPageResource) []struct {
 func statusPageResourceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in statusPageResource
 	for _, e := range statusPageResourceRef(&in) {
-		// Skip loading status history when preparing to send the request
-		if e.k != "status_history" {
-			load(d, e.k, e.v)
+		if e.k == "status_history" {
+			// Skip loading status history when preparing to send the request
+			continue
 		}
+		if e.k == "position" {
+			// When creating resource, keep the position fixed if known
+			in.FixedPosition = truePtr()
+		}
+		load(d, e.k, e.v)
 	}
-	in.FixedPosition = truePtr()
 	statusPageID := d.Get("status_page_id").(string)
 	var out statusPageResourceHTTPResponse
 	if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/resources", url.PathEscape(statusPageID)), &in, &out); err != nil {
@@ -230,6 +234,12 @@ func statusPageResourceUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	var in statusPageResource
 	var out policyHTTPResponse
 	for _, e := range statusPageResourceRef(&in) {
+		if e.k == "position" {
+			// When updating resource, keep the position fixed and always send it if known
+			in.FixedPosition = truePtr()
+			load(d, e.k, e.v)
+			continue
+		}
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
 			// When updating resource ID, we need to update resource type as well (and vice-versa)
@@ -241,7 +251,6 @@ func statusPageResourceUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 	}
-	in.FixedPosition = truePtr()
 	statusPageID := d.Get("status_page_id").(string)
 	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s/resources/%s", url.PathEscape(statusPageID), url.PathEscape(d.Id())), &in, &out)
 }
