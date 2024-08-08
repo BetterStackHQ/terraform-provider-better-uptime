@@ -97,8 +97,9 @@ func newGrafanaIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/grafana-integrations/",
-		Schema:      grafanaIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/grafana-integrations/",
+		Schema:        grafanaIntegrationSchema,
 	}
 }
 
@@ -151,7 +152,9 @@ func grafanaIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta 
 	var in grafanaIntegration
 	for _, e := range grafanaIntegrationRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -192,7 +195,9 @@ func grafanaIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	for _, e := range grafanaIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}

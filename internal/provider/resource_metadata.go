@@ -69,8 +69,9 @@ func newMetadataResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/metadata/",
-		Schema:      metadataSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/metadata/",
+		Schema:        metadataSchema,
 	}
 }
 
@@ -115,7 +116,9 @@ func metadataCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	var in metadata
 	for _, e := range metadataRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -156,7 +159,9 @@ func metadataUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	for _, e := range metadataRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}

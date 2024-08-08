@@ -103,8 +103,9 @@ func newDatadogIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/datadog-integrations/",
-		Schema:      datadogIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/datadog-integrations/",
+		Schema:        datadogIntegrationSchema,
 	}
 }
 
@@ -159,7 +160,9 @@ func datadogIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta 
 	var in datadogIntegration
 	for _, e := range datadogIntegrationRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -200,7 +203,9 @@ func datadogIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	for _, e := range datadogIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}

@@ -97,8 +97,9 @@ func newPrometheusIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/prometheus-integrations/",
-		Schema:      prometheusIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/prometheus-integrations/",
+		Schema:        prometheusIntegrationSchema,
 	}
 }
 
@@ -151,7 +152,9 @@ func prometheusIntegrationCreate(ctx context.Context, d *schema.ResourceData, me
 	var in prometheusIntegration
 	for _, e := range prometheusIntegrationRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -192,7 +195,9 @@ func prometheusIntegrationUpdate(ctx context.Context, d *schema.ResourceData, me
 	for _, e := range prometheusIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}

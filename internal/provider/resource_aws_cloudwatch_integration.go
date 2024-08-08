@@ -97,8 +97,9 @@ func newAwsCloudWatchIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/",
-		Schema:      awsCloudWatchIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/",
+		Schema:        awsCloudWatchIntegrationSchema,
 	}
 }
 
@@ -151,7 +152,9 @@ func awsCloudWatchIntegrationCreate(ctx context.Context, d *schema.ResourceData,
 	var in awsCloudWatchIntegration
 	for _, e := range awsCloudWatchIntegrationRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -192,7 +195,9 @@ func awsCloudWatchIntegrationUpdate(ctx context.Context, d *schema.ResourceData,
 	for _, e := range awsCloudWatchIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}

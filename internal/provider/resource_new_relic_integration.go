@@ -103,8 +103,9 @@ func newNewRelicIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/new-relic-integrations/",
-		Schema:      newRelicIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/new-relic-integrations/",
+		Schema:        newRelicIntegrationSchema,
 	}
 }
 
@@ -159,7 +160,9 @@ func newRelicIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta
 	var in newRelicIntegration
 	for _, e := range newRelicIntegrationRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -200,7 +203,9 @@ func newRelicIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta
 	for _, e := range newRelicIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}

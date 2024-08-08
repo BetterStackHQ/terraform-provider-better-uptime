@@ -397,8 +397,9 @@ func newMonitorResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/monitors/",
-		Schema:      monitorSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/monitors/",
+		Schema:        monitorSchema,
 	}
 }
 
@@ -511,7 +512,9 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	var in monitor
 	for _, e := range monitorRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -552,7 +555,9 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	for _, e := range monitorRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}
@@ -566,12 +571,64 @@ func monitorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}
 	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/monitors/%s", url.PathEscape(d.Id())))
 }
 
-func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interface{}) {
+func validateRequestHeaders(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	if headers, ok := diff.GetOk("request_headers"); ok {
+		for _, header := range headers.([]interface{}) {
+			headerMap := header.(map[string]interface{})
+			if err := validateRequestHeader(headerMap); err != nil {
+				return fmt.Errorf("Invalid request header %v: %v", headerMap, err)
+			}
+		}
+	}
+	return nil
+}
+
+func validateRequestHeader(header map[string]interface{}) error {
+	if len(header) == 0 {
+		// Headers with calculated fields that are not known at the time will be passed as empty maps, ignore them
+		return nil
+	}
+
+	name, nameOk := header["name"].(string)
+	value, valueOk := header["value"].(string)
+
+	if !nameOk || name == "" {
+		return fmt.Errorf("must contain 'name' key with a non-empty string value")
+	}
+
+	if !valueOk || value == "" {
+		return fmt.Errorf("must contain 'value' key with a non-empty string value")
+	}
+
+	if len(header) != 2 {
+		return fmt.Errorf("must only contain 'name' and 'value' keys")
+	}
+
+	return nil
+}
+
+func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interface{}) error {
 	x := receiver
 	v := d.Get("request_headers")
 	var t []map[string]interface{}
 	for _, v := range v.([]interface{}) {
 		header := v.(map[string]interface{})
+
+		// Validation at apply time, empty map is considered invalid (fields should be known at this point)
+		if len(header) == 0 {
+			return fmt.Errorf("Invalid request header %v: map cannot be empty", header)
+		}
+		// Headers can have ID at apply time, temporarily remove it before validation and reattach it afterwards
+		id, idPresent := header["id"]
+		delete(header, "id")
+		err := validateRequestHeader(header)
+		if idPresent {
+			header["id"] = id
+		}
+		if err != nil {
+			return fmt.Errorf("Invalid request header %v: %v", header, err)
+		}
+
 		newHeader := map[string]interface{}{"name": header["name"], "value": header["value"]}
 		t = append(t, newHeader)
 	}
@@ -598,6 +655,8 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 	}
 
 	*x = &t
+
+	return nil
 }
 
 func findRequestHeader(headers *[]map[string]interface{}, header *map[string]interface{}) *map[string]interface{} {

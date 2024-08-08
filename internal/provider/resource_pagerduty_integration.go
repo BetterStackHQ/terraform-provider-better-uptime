@@ -48,8 +48,9 @@ func newPagerdutyIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/pagerduty-integrations/",
-		Schema:      pagerdutyIntegrationSchema,
+		CustomizeDiff: validateRequestHeaders,
+		Description:   "https://betterstack.com/docs/uptime/api/pagerduty-integrations/",
+		Schema:        pagerdutyIntegrationSchema,
 	}
 }
 
@@ -86,7 +87,9 @@ func pagerdutyIntegrationCreate(ctx context.Context, d *schema.ResourceData, met
 	var in pagerdutyIntegration
 	for _, e := range pagerdutyIntegrationRef(&in) {
 		if e.k == "request_headers" {
-			loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+				return diag.FromErr(err)
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -127,7 +130,9 @@ func pagerdutyIntegrationUpdate(ctx context.Context, d *schema.ResourceData, met
 	for _, e := range pagerdutyIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "request_headers" {
-				loadRequestHeaders(d, e.v.(**[]map[string]interface{}))
+				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
+					return diag.FromErr(err)
+				}
 			} else {
 				load(d, e.k, e.v)
 			}
