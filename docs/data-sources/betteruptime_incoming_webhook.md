@@ -47,6 +47,7 @@ Incoming Webhook lookup.
 - **started_rule_type** (String) Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
 - **started_rules** (List of Object) An array of rules to match to start a new incident. (see [below for nested schema](#nestedatt--started_rules))
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
+- **title_field** (Set of Object) An optional field describing how to extract a customized incident title. (see [below for nested schema](#nestedatt--title_field))
 - **updated_at** (String) The time when this incoming webhook was updated.
 - **url** (String) The url at which we expect to receive the webhook.
 
@@ -185,6 +186,21 @@ Read-Only:
 - **content** (String)
 - **match_type** (String)
 - **rule_target** (String)
+- **target_field** (String)
+
+
+<a id="nestedatt--title_field"></a>
+### Nested Schema for `title_field`
+
+Read-Only:
+
+- **content** (String)
+- **content_after** (String)
+- **content_before** (String)
+- **field_target** (String)
+- **match_type** (String)
+- **name** (String)
+- **special_type** (String)
 - **target_field** (String)
 
 
