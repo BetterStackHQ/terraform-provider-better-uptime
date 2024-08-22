@@ -2,6 +2,7 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -19,10 +20,11 @@ var integrationFieldSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"field_target": {
-		Description: "The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Description:  "The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.StringInSlice([]string{"from_email", "subject", "body", "query_string", "header", "body", "json", "xml"}, false),
 	},
 	"target_field": {
 		Description: "The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters",
@@ -31,10 +33,11 @@ var integrationFieldSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"match_type": {
-		Description: "The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Description:  "The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.StringInSlice([]string{"match_before", "match_after", "match_between", "match_regex", "match_everything"}, false),
 	},
 	"content": {
 		Description: "How should we extract content the field. Should be a valid Regex when match_type is match_regex.",
@@ -58,10 +61,11 @@ var integrationFieldSchema = map[string]*schema.Schema{
 
 var integrationRuleSchema = map[string]*schema.Schema{
 	"rule_target": {
-		Description: "The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Description:  "The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.StringInSlice([]string{"from_email", "subject", "body", "query_string", "header", "body", "json", "xml"}, false),
 	},
 	"target_field": {
 		Description: "The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters",
@@ -70,10 +74,11 @@ var integrationRuleSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"match_type": {
-		Description: "The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Description:  "The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.StringInSlice([]string{"contains", "contains_not", "matches_regex", "matches_regex_not", "equals", "equals_not"}, false),
 	},
 	"content": {
 		Description: "The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.",

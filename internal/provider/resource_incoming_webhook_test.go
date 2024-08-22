@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -308,6 +309,154 @@ func TestResourceIncomingWebhook(t *testing.T) {
 				PreConfig: func() {
 					t.Log("step 4")
 				},
+			},
+		},
+	})
+}
+
+func TestResourceIncomingWebhookValidation(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/incoming-webhooks", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+				resource "betteruptime_incoming_webhook" "this" {
+				  name = "Terraform Test"
+				  call = false
+				  sms = false
+				  email = true
+				  push = true
+				  team_wait = 180
+				  recovery_period = 0
+				  paused = false
+				  started_rule_type = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type = "all"
+				  started_rules {
+					rule_target = "metadata"
+					target_field = "incident.status"
+					match_type = "contains"
+					content = "alert"
+				  }
+				  cause_field {
+					field_target = "json"
+					target_field = "incident.status"
+					match_type = "match_everything"
+					content = "title"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \[from_email subject body query_string header body json xml\], got metadata`),
+			},
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+				resource "betteruptime_incoming_webhook" "this" {
+				  name = "Terraform Test"
+				  call = false
+				  sms = false
+				  email = true
+				  push = true
+				  team_wait = 180
+				  recovery_period = 0
+				  paused = false
+				  started_rule_type = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type = "all"
+				  started_rules {
+					rule_target = "json"
+					target_field = "incident.status"
+					match_type = "feels_like"
+					content = "alert"
+				  }
+				  cause_field {
+					field_target = "json"
+					target_field = "incident.status"
+					match_type = "match_everything"
+					content = "title"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.match_type to be one of \[contains contains_not matches_regex matches_regex_not equals equals_not\], got feels_like`),
+			},
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+				resource "betteruptime_incoming_webhook" "this" {
+				  name = "Terraform Test"
+				  call = false
+				  sms = false
+				  email = true
+				  push = true
+				  team_wait = 180
+				  recovery_period = 0
+				  paused = false
+				  started_rule_type = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type = "all"
+				  started_rules {
+					rule_target = "json"
+					target_field = "incident.status"
+					match_type = "contains"
+					content = "alert"
+				  }
+				  cause_field {
+					field_target = "from_json"
+					target_field = "incident.status"
+					match_type = "match_everything"
+					content = "title"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \[from_email subject body query_string header body json xml\], got from_json`),
+			},
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+				resource "betteruptime_incoming_webhook" "this" {
+				  name = "Terraform Test"
+				  call = false
+				  sms = false
+				  email = true
+				  push = true
+				  team_wait = 180
+				  recovery_period = 0
+				  paused = false
+				  started_rule_type = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type = "all"
+				  started_rules {
+					rule_target = "json"
+					target_field = "incident.status"
+					match_type = "contains"
+					content = "alert"
+				  }
+				  cause_field {
+					field_target = "json"
+					target_field = "incident.status"
+					match_type = "match_something"
+					content = "title"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.match_type to be one of \[match_before match_after match_between match_regex match_everything\], got match_something`),
 			},
 		},
 	})
