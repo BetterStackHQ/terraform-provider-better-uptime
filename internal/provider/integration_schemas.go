@@ -102,7 +102,7 @@ type integrationRule struct {
 }
 
 var RulesAttributes = []string{"started_rules", "acknowledged_rules", "resolved_rules"}
-var FieldAttributes = []string{"cause_field", "started_alert_id_field", "acknowledged_alert_id_field", "resolved_alert_id_field"}
+var FieldAttributes = []string{"cause_field", "title_field", "started_alert_id_field", "acknowledged_alert_id_field", "resolved_alert_id_field"}
 var FieldsAttributes = []string{"other_started_fields", "other_acknowledged_fields", "other_resolved_fields"}
 
 func containsString(s []string, e string) bool {

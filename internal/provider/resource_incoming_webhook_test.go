@@ -61,6 +61,12 @@ func TestResourceIncomingWebhook(t *testing.T) {
 					match_type = "match_everything"
 					content = "title"
 				  }
+				  title_field {
+					field_target = "json"
+					target_field = "incident.title"
+					match_type = "match_everything"
+					content = "title"
+				  }
 				  started_alert_id_field {
 					name = "Alert ID"
 					special_type = "alert_id"
@@ -105,7 +111,10 @@ func TestResourceIncomingWebhook(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "started_rules.1.content", "reminder"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "resolved_rules.0.match_type", "contains"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "resolved_rules.0.content", "resolved"),
+					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "cause_field.0.target_field", "incident.status"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "cause_field.0.match_type", "match_everything"),
+					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "title_field.0.target_field", "incident.title"),
+					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "title_field.0.match_type", "match_everything"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "started_alert_id_field.0.content_before", "<"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "resolved_alert_id_field.0.content_after", "-"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "other_started_fields.0.content_before", "by:"),
@@ -198,6 +207,7 @@ func TestResourceIncomingWebhook(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "recovery_period", "180"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "paused", "true"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "started_rules.0.content", "alert"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/incoming-webhooks/1", `{"name":"Terraform Test - Updated","team_wait":0,"recovery_period":180,"paused":true,"title_field":null}`),
 				),
 				PreConfig: func() {
 					t.Log("step 2")

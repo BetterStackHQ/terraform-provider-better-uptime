@@ -147,6 +147,13 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"title_field": {
+		Description: "An optional field describing how to extract a customized incident title.",
+		Type:        schema.TypeSet,
+		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Optional:    true,
+		Computed:    false,
+	},
 	"started_alert_id_field": {
 		Description: "When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeSet,
@@ -239,6 +246,7 @@ type incomingWebhook struct {
 	AcknowledgedRules        *[]integrationRule  `json:"acknowledged_rules,omitempty"`
 	ResolvedRules            *[]integrationRule  `json:"resolved_rules,omitempty"`
 	CauseField               *integrationField   `json:"cause_field,omitempty"`
+	TitleField               *integrationField   `json:"title_field"`
 	StartedAlertIdField      *integrationField   `json:"started_alert_id_field,omitempty"`
 	AcknowledgedAlertIdField *integrationField   `json:"acknowledged_alert_id_field,omitempty"`
 	ResolvedAlertIdField     *integrationField   `json:"resolved_alert_id_field,omitempty"`
@@ -286,6 +294,7 @@ func incomingWebhookRef(in *incomingWebhook) []struct {
 		{k: "acknowledged_rules", v: &in.AcknowledgedRules},
 		{k: "resolved_rules", v: &in.ResolvedRules},
 		{k: "cause_field", v: &in.CauseField},
+		{k: "title_field", v: &in.TitleField},
 		{k: "started_alert_id_field", v: &in.StartedAlertIdField},
 		{k: "acknowledged_alert_id_field", v: &in.AcknowledgedAlertIdField},
 		{k: "resolved_alert_id_field", v: &in.ResolvedAlertIdField},
