@@ -193,6 +193,11 @@ resource "betteruptime_incoming_webhook" "this" {
     target_field = "incident.status"
     match_type   = "match_everything"
   }
+  title_field {
+    field_target = "json"
+    target_field = "incident.title"
+    match_type   = "match_everything"
+  }
   started_alert_id_field {
     name           = "Alert ID"
     special_type   = "alert_id"

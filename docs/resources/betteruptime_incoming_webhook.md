@@ -43,6 +43,7 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 - **started_rules** (Block List) An array of rules to match to start a new incident. (see [below for nested schema](#nestedblock--started_rules))
 - **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
+- **title_field** (Block Set) An optional field describing how to extract a customized incident title. (see [below for nested schema](#nestedblock--title_field))
 
 ### Read-Only
 
@@ -190,5 +191,20 @@ Optional:
 - **match_type** (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
 - **rule_target** (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - **target_field** (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
+
+
+<a id="nestedblock--title_field"></a>
+### Nested Schema for `title_field`
+
+Optional:
+
+- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
+- **name** (String) The name of the field.
+- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
+- **target_field** (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
 
 
