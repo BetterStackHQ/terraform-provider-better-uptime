@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix:
         terraform-version: ["0.14", "1.0", "1.8", "latest"]
-        config: [examples/basic, examples/advanced, examples/on_call_calendars]
+        config: [examples/basic, examples/advanced, examples/ips, examples/on_call_calendars]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
