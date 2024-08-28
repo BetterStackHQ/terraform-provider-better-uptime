@@ -48,6 +48,9 @@ func TestIpListData(t *testing.T) {
 					resource.TestCheckResourceAttr("data.betteruptime_ip_list.this", "ips.3", "66.228.56.2"),
 					resource.TestCheckResourceAttr("data.betteruptime_ip_list.this", "ips.4", "66.228.56.3"),
 					resource.TestCheckNoResourceAttr("data.betteruptime_ip_list.this", "ips.5"),
+					resource.TestCheckResourceAttr("data.betteruptime_ip_list.this", "all_clusters.0", "eu"),
+					resource.TestCheckResourceAttr("data.betteruptime_ip_list.this", "all_clusters.1", "us"),
+					resource.TestCheckNoResourceAttr("data.betteruptime_ip_list.this", "all_clusters.2"),
 				),
 			},
 			{
@@ -57,7 +60,7 @@ func TestIpListData(t *testing.T) {
 				}
 
 				data "betteruptime_ip_list" "this" {
-					clusters = ["us"]
+					filter_clusters = ["us"]
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
@@ -66,6 +69,9 @@ func TestIpListData(t *testing.T) {
 					resource.TestCheckResourceAttr("data.betteruptime_ip_list.this", "ips.1", "66.228.56.2"),
 					resource.TestCheckResourceAttr("data.betteruptime_ip_list.this", "ips.2", "66.228.56.3"),
 					resource.TestCheckNoResourceAttr("data.betteruptime_ip_list.this", "ips.3"),
+					resource.TestCheckResourceAttr("data.betteruptime_ip_list.this", "all_clusters.0", "eu"),
+					resource.TestCheckResourceAttr("data.betteruptime_ip_list.this", "all_clusters.1", "us"),
+					resource.TestCheckNoResourceAttr("data.betteruptime_ip_list.this", "all_clusters.2"),
 				),
 			},
 		},
