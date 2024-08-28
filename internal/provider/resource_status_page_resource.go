@@ -90,6 +90,12 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 			Schema: statusPageStatusHistorySchema,
 		},
 	},
+	"status": {
+		Description: "The current status of the resource. Can be one of `not_monitored` (when the underlying monitor is paused), `operational`, `maintenance`, `degraded`, or `downtime`",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
 }
 
 var statusPageStatusHistorySchema = map[string]*schema.Schema{
@@ -154,6 +160,7 @@ type statusPageResource struct {
 	FixedPosition       *bool                     `json:"fixed_position,omitempty"`
 	WidgetType          *string                   `json:"widget_type,omitempty"`
 	Availability        *float32                  `json:"availability,omitempty"`
+	Status              *string                   `json:"status,omitempty"`
 	StatusHistory       *[]map[string]interface{} `json:"status_history,omitempty"`
 }
 
@@ -183,6 +190,7 @@ func statusPageResourceRef(in *statusPageResource) []struct {
 		{k: "widget_type", v: &in.WidgetType},
 		{k: "availability", v: &in.Availability},
 		{k: "status_history", v: &in.StatusHistory},
+		{k: "status", v: &in.Status},
 	}
 }
 

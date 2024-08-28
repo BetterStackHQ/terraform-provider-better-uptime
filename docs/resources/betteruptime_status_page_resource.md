@@ -34,6 +34,7 @@ https://betterstack.com/docs/uptime/api/status-page-resources/
 
 - **availability** (Number) The availability of this resource (from 0.0 to 1.0).
 - **id** (String) The ID of this Status Page Resource.
+- **status** (String) The current status of the resource. Can be one of `not_monitored` (when the underlying monitor is paused), `operational`, `maintenance`, `degraded`, or `downtime`
 - **status_history** (List of Object) History of a single status page resource history (see [below for nested schema](#nestedatt--status_history))
 
 <a id="nestedatt--status_history"></a>
