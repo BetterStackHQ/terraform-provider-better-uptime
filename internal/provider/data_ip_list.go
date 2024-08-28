@@ -1,10 +1,13 @@
 package provider
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
+	"net"
 	"net/http"
+	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -59,6 +62,23 @@ func ipListLookup(ctx context.Context, d *schema.ResourceData, meta interface{})
 		}
 		allClusters = append(allClusters, cluster)
 	}
+
+	// Sort the IPs and cluster to be deterministic
+	sort.Slice(filteredIPs, func(i, j int) bool {
+		ip1 := net.ParseIP(filteredIPs[i])
+		ip2 := net.ParseIP(filteredIPs[j])
+
+		if ip1.To4() != nil && ip2.To4() == nil {
+			return true // IPv4 before IPv6
+		}
+		if ip1.To4() == nil && ip2.To4() != nil {
+			return false // IPv6 after IPv4
+		}
+
+		// Compare IPs directly
+		return bytes.Compare(ip1, ip2) < 0
+	})
+	sort.Strings(allClusters)
 
 	// Set the data in the Terraform schema
 	d.SetId("betterstack_ip_list")
