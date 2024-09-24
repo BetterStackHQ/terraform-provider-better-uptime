@@ -1,4 +1,7 @@
-# terraform-provider-better-uptime [![build](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/build.yml) [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs)
+# terraform-provider-better-uptime
+[![build](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/build.yml)
+[![tests](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/test.yml)
+[![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs)
 
 Terraform (0.14+) provider for [Better Uptime](https://uptime.betterstack.com/).
 
