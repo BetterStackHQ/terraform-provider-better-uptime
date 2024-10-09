@@ -241,10 +241,6 @@ resource "betteruptime_incoming_webhook" "this" {
   }
 }
 
-data "betteruptime_severity" "this" {
-  name = var.betteruptime_severity_name
-}
-
 resource "betteruptime_policy_group" "this" {
   name = "Policies from Terraform"
 }
@@ -258,7 +254,7 @@ resource "betteruptime_policy" "this" {
   steps {
     type        = "escalation"
     wait_before = 0
-    urgency_id  = data.betteruptime_severity.this.id
+    urgency_id  = betteruptime_severity.this.id
     step_members { type = "all_slack_integrations" }
     step_members { type = "all_webhook_integrations" }
     step_members { type = "current_on_call" }
@@ -282,7 +278,7 @@ resource "betteruptime_policy" "this" {
   steps {
     type        = "escalation"
     wait_before = 180
-    urgency_id  = data.betteruptime_severity.this.id
+    urgency_id  = betteruptime_severity.this.id
     step_members { type = "entire_team" }
   }
 }
@@ -292,7 +288,7 @@ resource "betteruptime_severity_group" "this" {
 }
 
 resource "betteruptime_severity" "this" {
-  name  = "Terraform"
+  name  = var.betteruptime_severity_name
   call  = false
   email = false
   push  = false
