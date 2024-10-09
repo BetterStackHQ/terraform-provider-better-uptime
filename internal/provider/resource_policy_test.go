@@ -271,4 +271,110 @@ func TestResourcePolicy(t *testing.T) {
 			},
 		},
 	})
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Test wait_until_time / wait_until_timezone
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name		   = "Terraform - Test"
+				  repeat_count = 3
+				  repeat_delay = 60
+
+				  steps {
+					type		= "escalation"
+					wait_before = 0
+					urgency_id	= 123
+					step_members { type = "current_on_call" }
+					step_members {
+					  type = "slack_integration"
+					  id = 123
+					}
+				  }
+				  steps {
+					type				= "escalation"
+					wait_until_time		= "07:45"
+					wait_until_timezone = "UTC"
+					urgency_id			= 123
+					step_members {
+					  type = "entire_team"
+					  id = 123
+					}
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_policy.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.wait_before", "0"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.wait_until_time", "07:45"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.wait_until_timezone", "UTC"),
+				),
+				PreConfig: func() {
+					t.Log("test valid wait_until_time")
+				},
+			},
+		},
+	})
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Test wait_until_time validation
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name		   = "Terraform - Test"
+				  repeat_count = 3
+				  repeat_delay = 60
+
+				  steps {
+					type		= "escalation"
+					wait_before = 0
+					urgency_id	= 123
+					step_members { type = "current_on_call" }
+					step_members {
+						type = "slack_integration"
+						id = 123
+					}
+				  }
+				  steps {
+					type				= "escalation"
+					wait_until_time		= "9 AM"
+					wait_until_timezone = "UTC"
+					urgency_id			= 123
+					step_members {
+					  type = "entire_team"
+					  id = 123
+					}
+				  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`invalid value for steps\.1\.wait_until_time \(use HH:MM format\)`),
+				PreConfig: func() {
+					t.Log("test validation: wait_until_time")
+				},
+			},
+		},
+	})
 }
