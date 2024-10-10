@@ -44,6 +44,8 @@ Read-Only:
 - **type** (String)
 - **urgency_id** (Number)
 - **wait_before** (Number)
+- **wait_until_time** (String)
+- **wait_until_timezone** (String)
 
 <a id="nestedobjatt--steps--step_members"></a>
 ### Nested Schema for `steps.step_members`

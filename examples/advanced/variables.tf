@@ -22,5 +22,5 @@ EOF
 variable "betteruptime_severity_name" {
   type        = string
   description = "Name of the severity from Better Uptime you want to use with Escalation policies created using Terraform"
-  default     = "Low Severity"
+  default     = "Terraform Severity"
 }

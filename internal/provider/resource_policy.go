@@ -41,9 +41,20 @@ var policyStepSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"wait_before": {
-		Description: "How long to wait before executing this step since previous step.",
+		Description: "How long to wait in seconds before executing this step since previous step. Omit if wait_until_time is set.",
 		Type:        schema.TypeInt,
-		Required:    true,
+		Optional:    true,
+	},
+	"wait_until_time": {
+		Description:  "Execute this step at the specified time. Use HH:MM format. Omit if wait_before is set.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(2[0-3]|[01][0-9]):[0-5][0-9]$`), "use HH:MM format"),
+	},
+	"wait_until_timezone": {
+		Description: "Timezone to use when interpreting wait_until_time. Omit if wait_before is set.",
+		Type:        schema.TypeString,
+		Optional:    true,
 	},
 	"urgency_id": {
 		Description: "Which severity to use for this step. Used when step type is escalation.",
@@ -180,17 +191,19 @@ type policyStepMember struct {
 }
 
 type policyStep struct {
-	Type           *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
-	WaitBefore     *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
-	UrgencyId      *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
-	Steps          *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
-	Timezone       *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
-	Days           *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
-	TimeFrom       *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
-	TimeTo         *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
-	MetadataKey    *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
-	MetadataValues *[]string           `mapstructure:"metadata_values,omitempty" json:"metadata_values,omitempty"`
-	PolicyId       *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
+	Type              *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
+	WaitBefore        *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
+	WaitUntilTime     *string             `mapstructure:"wait_until_time,omitempty" json:"wait_until_time,omitempty"`
+	WaitUntilTimezone *string             `mapstructure:"wait_until_timezone,omitempty" json:"wait_until_timezone,omitempty"`
+	UrgencyId         *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
+	Steps             *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
+	Timezone          *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
+	Days              *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
+	TimeFrom          *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
+	TimeTo            *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
+	MetadataKey       *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
+	MetadataValues    *[]string           `mapstructure:"metadata_values,omitempty" json:"metadata_values,omitempty"`
+	PolicyId          *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
 }
 
 type policy struct {

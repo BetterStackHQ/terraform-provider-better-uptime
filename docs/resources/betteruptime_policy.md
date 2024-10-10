@@ -38,7 +38,6 @@ https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
 Required:
 
 - **type** (String) The type of the step. Can be either escalation, time_branching, or metadata_branching.
-- **wait_before** (Number) How long to wait before executing this step since previous step.
 
 Optional:
 
@@ -51,6 +50,9 @@ Optional:
 - **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.
 - **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is time_branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
 - **urgency_id** (Number) Which severity to use for this step. Used when step type is escalation.
+- **wait_before** (Number) How long to wait in seconds before executing this step since previous step. Omit if wait_until_time is set.
+- **wait_until_time** (String) Execute this step at the specified time. Use HH:MM format. Omit if wait_before is set.
+- **wait_until_timezone** (String) Timezone to use when interpreting wait_until_time. Omit if wait_before is set.
 
 <a id="nestedblock--steps--step_members"></a>
 ### Nested Schema for `steps.step_members`
