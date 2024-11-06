@@ -296,3 +296,32 @@ resource "betteruptime_severity" "this" {
 
   severity_group_id = betteruptime_severity_group.this.id
 }
+
+resource "betteruptime_outgoing_webhook" "this" {
+  name         = "Terraform Outgoing Webhook"
+  url          = "https://example.com"
+  trigger_type = "incident_change"
+
+  on_incident_started      = true
+  on_incident_acknowledged = false
+  on_incident_resolved     = false
+
+  custom_webhook_template_attributes {
+    http_method = "get"
+
+    auth_user     = "user"
+    auth_password = "password"
+
+    headers_template {
+      name  = "Content-Type"
+      value = "application/json"
+    }
+
+    body_template = jsonencode({
+      incident = {
+        id         = "$INCIDENT_ID"
+        started_at = "$STARTED_AT"
+      }
+    })
+  }
+}
