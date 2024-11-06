@@ -9,7 +9,7 @@ import (
 )
 
 func TestResourceOutgoingWebhookIntegration(t *testing.T) {
-	server := newResourceServer(t, "/api/v2/outgoing-webhooks", "1", "password")
+	server := newResourceServer(t, "/api/v2/outgoing-webhooks", "1")
 	defer server.Close()
 
 	var name = "test"
@@ -58,7 +58,7 @@ func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 
 				resource "betteruptime_outgoing_webhook" "this" {
 					name = "%s1"
-					url  = "%s"
+					url  = "%s?different=true"
 					trigger_type = "incident_change"
 					on_incident_started = false
 					on_incident_acknowledged = true
@@ -68,7 +68,7 @@ func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_outgoing_webhook.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "name", fmt.Sprintf("%s1", name)),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "url", fmt.Sprintf("%s?different=true", url)),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "on_incident_started", "false"),
 				),
 			},
@@ -81,7 +81,7 @@ func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 
 				resource "betteruptime_outgoing_webhook" "this" {
 					name = "%s1"
-					url  = "%s"
+					url  = "%s?different=true"
 					trigger_type = "incident_change"
 					on_incident_started = false
 					on_incident_acknowledged = true
@@ -106,7 +106,7 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 
 	var name = "test-custom"
 	var url = "https://example.com/webhook"
-	var bodyTemplate = `{"incident": {"id": "{{ incident.id }}", "status": "{{ incident.status }}"}}`
+	var bodyTemplate = `{"incident":{"id":"$INCIDENT_ID","started_at":"$STARTED_AT"}}`
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest: true,
@@ -129,9 +129,9 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 					trigger_type = "incident_change"
 
 					custom_webhook_template_attributes {
-						http_method = "POST"
-						auth_user = "testuser"
-						auth_password = "testpass"
+						http_method = "patch"
+						auth_user = "user"
+						auth_password = "password"
 
 						headers_template {
 							name = "Content-Type"
@@ -150,13 +150,14 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_outgoing_webhook.custom", "id"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "name", name),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "url", url),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.http_method", "POST"),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_user", "testuser"),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_password", "testpass"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.http_method", "patch"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_user", "user"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_password", "password"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.headers_template.0.name", "Content-Type"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.headers_template.0.value", "application/json"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.headers_template.1.name", "X-Custom-Header"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.headers_template.1.value", "custom-value"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.body_template", bodyTemplate),
 				),
 			},
 			// Step 2 - update template
@@ -172,9 +173,9 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 					trigger_type = "incident_change"
 
 					custom_webhook_template_attributes {
-						http_method = "PUT"
-						auth_user = "testuser2"
-						auth_password = "testpass2"
+						http_method = "put"
+						auth_user = "user2"
+						auth_password = "password2"
 
 						headers_template {
 							name = "Content-Type"
@@ -187,9 +188,9 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 				`, name, url, bodyTemplate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_outgoing_webhook.custom", "id"),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.http_method", "PUT"),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_user", "testuser2"),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_password", "testpass2"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.http_method", "put"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_user", "user2"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_password", "password2"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.headers_template.#", "1"),
 				),
 			},
@@ -206,9 +207,9 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 					trigger_type = "incident_change"
 
 					custom_webhook_template_attributes {
-						http_method = "PUT"
-						auth_user = "testuser2"
-						auth_password = "testpass2"
+						http_method = "put"
+						auth_user = "user2"
+						auth_password = "password2"
 
 						headers_template {
 							name = "Content-Type"

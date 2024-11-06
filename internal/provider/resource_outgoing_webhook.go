@@ -79,7 +79,7 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 				"http_method": {
 					Type:     schema.TypeString,
 					Optional: true,
-					Default:  "POST",
+					Default:  "post",
 				},
 				"auth_user": {
 					Type:     schema.TypeString,
