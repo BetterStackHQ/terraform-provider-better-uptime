@@ -79,6 +79,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_new_relic_integration":         newNewRelicIntegrationResource(),
 			"betteruptime_grafana_integration":           newGrafanaIntegrationResource(),
 			"betteruptime_prometheus_integration":        newPrometheusIntegrationResource(),
+			"betteruptime_outgoing_webhook":              newOutgoingWebhookResource(),
 		},
 		ConfigureContextFunc: func(ctx context.Context, r *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			var userAgent string
