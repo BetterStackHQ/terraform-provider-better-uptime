@@ -29,7 +29,7 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 	"name": {
 		Description: "The name of the outgoing webhook.",
 		Type:        schema.TypeString,
-		Required:    true,
+		Optional:    true,
 	},
 	"url": {
 		Description: "The URL to send webhooks to.",
@@ -37,7 +37,7 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"trigger_type": {
-		Description: "The type of trigger for the webhook. Only settable during creation.",
+		Description: "The type of trigger for the webhook. Only settable during creation. Available values: `incident_change`, `on_call_change`, `monitor_change`.",
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
@@ -48,19 +48,19 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 		}, false),
 	},
 	"on_incident_started": {
-		Description: "Whether to trigger webhook when incident starts.",
+		Description: "Whether to trigger webhook when incident starts. Only when `trigger_type=incident_change`.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
 	},
 	"on_incident_acknowledged": {
-		Description: "Whether to trigger webhook when incident is acknowledged.",
+		Description: "Whether to trigger webhook when incident is acknowledged. Only when `trigger_type=incident_change`.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
 	},
 	"on_incident_resolved": {
-		Description: "Whether to trigger webhook when incident is resolved.",
+		Description: "Whether to trigger webhook when incident is resolved. Only when `trigger_type=incident_change`.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
