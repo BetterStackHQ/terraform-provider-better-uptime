@@ -186,11 +186,11 @@ func newOutgoingWebhookResource() *schema.Resource {
 	}
 }
 
-func outgoingWebhookRef(in *outgoingWebhook) []struct {
+func outgoingWebhookRef(in *outgoingWebhook, triggerType string) []struct {
 	k string
 	v interface{}
 } {
-	return []struct {
+	refs := []struct {
 		k string
 		v interface{}
 	}{
@@ -198,17 +198,28 @@ func outgoingWebhookRef(in *outgoingWebhook) []struct {
 		{k: "name", v: &in.Name},
 		{k: "url", v: &in.URL},
 		{k: "trigger_type", v: &in.TriggerType},
-		{k: "on_incident_started", v: &in.OnIncidentStarted},
-		{k: "on_incident_acknowledged", v: &in.OnIncidentAcknowledged},
-		{k: "on_incident_resolved", v: &in.OnIncidentResolved},
 	}
+
+	// Only include incident-related fields if trigger_type is incident_change
+	if triggerType == "incident_change" {
+		refs = append(refs, []struct {
+			k string
+			v interface{}
+		}{
+			{k: "on_incident_started", v: &in.OnIncidentStarted},
+			{k: "on_incident_acknowledged", v: &in.OnIncidentAcknowledged},
+			{k: "on_incident_resolved", v: &in.OnIncidentResolved},
+		}...)
+	}
+	return refs
 }
 
 func outgoingWebhookCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in outgoingWebhook
+	triggerType := d.Get("trigger_type").(string)
 
 	// Load basic fields
-	for _, e := range outgoingWebhookRef(&in) {
+	for _, e := range outgoingWebhookRef(&in, triggerType) {
 		load(d, e.k, e.v)
 	}
 
@@ -272,9 +283,13 @@ func outgoingWebhookRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 func outgoingWebhookCopyAttrs(d *schema.ResourceData, in *outgoingWebhook) diag.Diagnostics {
 	var derr diag.Diagnostics
+	triggerType := ""
+	if in.TriggerType != nil {
+		triggerType = *in.TriggerType
+	}
 
 	// Copy basic fields
-	for _, e := range outgoingWebhookRef(in) {
+	for _, e := range outgoingWebhookRef(in, triggerType) {
 		if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
@@ -311,9 +326,10 @@ func outgoingWebhookCopyAttrs(d *schema.ResourceData, in *outgoingWebhook) diag.
 
 func outgoingWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in outgoingWebhook
+	triggerType := d.Get("trigger_type").(string)
 
 	// Only include changed fields in the update
-	for _, e := range outgoingWebhookRef(&in) {
+	for _, e := range outgoingWebhookRef(&in, triggerType) {
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
 		}

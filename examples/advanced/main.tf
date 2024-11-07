@@ -332,11 +332,6 @@ resource "betteruptime_outgoing_webhook" "outgoing_webhook_2" {
   trigger_type = "on_call_change"
 
   custom_webhook_template_attributes {
-    body_template {
-      incident = {
-        id         = "$INCIDENT_ID"
-        started_at = "$STARTED_AT"
-      }
-    }
+    body_template = "{\"incident\":{\"id\":\"$INCIDENT_ID\",\"started_at\":\"$STARTED_AT\"}}"
   }
 }
