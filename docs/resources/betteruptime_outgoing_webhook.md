@@ -38,11 +38,11 @@ https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/
 
 Optional:
 
-- **auth_password** (String, Sensitive)
-- **auth_username** (String)
-- **body_template** (String)
-- **headers_template** (Block List) (see [below for nested schema](#nestedblock--custom_webhook_template_attributes--headers_template))
-- **http_method** (String)
+- **auth_password** (String, Sensitive) The password to use for basic authentication.
+- **auth_username** (String) The username to use for basic authentication.
+- **body_template** (String) The body of the webhook request.
+- **headers_template** (Block List) The headers to include in the webhook request. (see [below for nested schema](#nestedblock--custom_webhook_template_attributes--headers_template))
+- **http_method** (String) The HTTP method to use when sending the webhook. Possible values: `get`, `post`, `put`, `patch` and `head`.
 
 Read-Only:
 

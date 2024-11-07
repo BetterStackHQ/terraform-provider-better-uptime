@@ -77,22 +77,26 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 					Computed: true,
 				},
 				"http_method": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Default:  "post",
+					Type:        schema.TypeString,
+					Optional:    true,
+					Default:     "post",
+					Description: "The HTTP method to use when sending the webhook. Possible values: `get`, `post`, `put`, `patch` and `head`.",
 				},
 				"auth_username": {
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "The username to use for basic authentication.",
 				},
 				"auth_password": {
-					Type:      schema.TypeString,
-					Optional:  true,
-					Sensitive: true,
+					Type:        schema.TypeString,
+					Optional:    true,
+					Sensitive:   true,
+					Description: "The password to use for basic authentication.",
 				},
 				"headers_template": {
-					Type:     schema.TypeList,
-					Optional: true,
+					Type:        schema.TypeList,
+					Optional:    true,
+					Description: "The headers to include in the webhook request.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"name": {
@@ -110,6 +114,7 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 					Type:             schema.TypeString,
 					Optional:         true,
 					DiffSuppressFunc: suppressEquivalentJSONDiffs,
+					Description:      "The body of the webhook request.",
 				},
 			},
 		},
