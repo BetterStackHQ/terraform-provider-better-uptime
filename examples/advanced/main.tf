@@ -297,8 +297,8 @@ resource "betteruptime_severity" "this" {
   severity_group_id = betteruptime_severity_group.this.id
 }
 
-resource "betteruptime_outgoing_webhook" "this" {
-  name         = "Terraform Outgoing Webhook"
+resource "betteruptime_outgoing_webhook" "outgoing_webhook_1" {
+  name         = "Terraform Outgoing Webhook 1"
   url          = "https://example.com"
   trigger_type = "incident_change"
 
@@ -309,7 +309,7 @@ resource "betteruptime_outgoing_webhook" "this" {
   custom_webhook_template_attributes {
     http_method = "get"
 
-    auth_user     = "user"
+    auth_username = "user"
     auth_password = "password"
 
     headers_template {
@@ -323,5 +323,20 @@ resource "betteruptime_outgoing_webhook" "this" {
         started_at = "$STARTED_AT"
       }
     })
+  }
+}
+
+resource "betteruptime_outgoing_webhook" "outgoing_webhook_2" {
+  name         = "Terraform Outgoing Webhook 2"
+  url          = "https://example.com"
+  trigger_type = "on_call_change"
+
+  custom_webhook_template_attributes {
+    body_template {
+      incident = {
+        id         = "$INCIDENT_ID"
+        started_at = "$STARTED_AT"
+      }
+    }
   }
 }
