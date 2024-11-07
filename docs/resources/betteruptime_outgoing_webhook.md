@@ -3,12 +3,12 @@
 page_title: "betteruptime_outgoing_webhook Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  
+  https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/
 ---
 
 # betteruptime_outgoing_webhook (Resource)
 
-
+https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/
 
 
 
@@ -39,7 +39,7 @@ description: |-
 Optional:
 
 - **auth_password** (String, Sensitive)
-- **auth_user** (String)
+- **auth_username** (String)
 - **body_template** (String)
 - **headers_template** (Block List) (see [below for nested schema](#nestedblock--custom_webhook_template_attributes--headers_template))
 - **http_method** (String)

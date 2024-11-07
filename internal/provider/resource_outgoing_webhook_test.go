@@ -130,7 +130,7 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 
 					custom_webhook_template_attributes {
 						http_method = "patch"
-						auth_user = "user"
+						auth_username = "user"
 						auth_password = "password"
 
 						headers_template {
@@ -151,7 +151,7 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "name", name),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.http_method", "patch"),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_user", "user"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_username", "user"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_password", "password"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.headers_template.0.name", "Content-Type"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.headers_template.0.value", "application/json"),
@@ -174,7 +174,7 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 
 					custom_webhook_template_attributes {
 						http_method = "put"
-						auth_user = "user2"
+						auth_username = "user2"
 						auth_password = "password2"
 
 						headers_template {
@@ -189,7 +189,7 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_outgoing_webhook.custom", "id"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.http_method", "put"),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_user", "user2"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_username", "user2"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.auth_password", "password2"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.custom", "custom_webhook_template_attributes.0.headers_template.#", "1"),
 				),
@@ -208,7 +208,7 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 
 					custom_webhook_template_attributes {
 						http_method = "put"
-						auth_user = "user2"
+						auth_username = "user2"
 						auth_password = "password2"
 
 						headers_template {

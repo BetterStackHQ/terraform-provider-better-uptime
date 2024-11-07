@@ -81,7 +81,7 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 					Optional: true,
 					Default:  "post",
 				},
-				"auth_user": {
+				"auth_username": {
 					Type:     schema.TypeString,
 					Optional: true,
 				},
@@ -124,7 +124,7 @@ type headerTemplate struct {
 type customWebhookTemplateAttributes struct {
 	ID             *string          `json:"id,omitempty"`
 	HTTPMethod     *string          `json:"http_method,omitempty"`
-	AuthUser       *string          `json:"auth_user,omitempty"`
+	AuthUsername   *string          `json:"auth_username,omitempty"`
 	AuthPassword   *string          `json:"auth_password,omitempty"`
 	HeaderTemplate []headerTemplate `json:"headers_template,omitempty"`
 	BodyTemplate   interface{}      `json:"body_template,omitempty"`
@@ -175,6 +175,7 @@ func newOutgoingWebhookResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		Description:   "https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/",
 		CustomizeDiff: validateOutgoingWebhook,
 		Schema:        outgoingWebhookSchema,
 	}
@@ -217,8 +218,8 @@ func outgoingWebhookCreate(ctx context.Context, d *schema.ResourceData, meta int
 		if method, ok := attrs["http_method"].(string); ok {
 			template.HTTPMethod = &method
 		}
-		if user, ok := attrs["auth_user"].(string); ok {
-			template.AuthUser = &user
+		if user, ok := attrs["auth_username"].(string); ok {
+			template.AuthUsername = &user
 		}
 		if pass, ok := attrs["auth_password"].(string); ok {
 			template.AuthPassword = &pass
@@ -279,7 +280,7 @@ func outgoingWebhookCopyAttrs(d *schema.ResourceData, in *outgoingWebhook) diag.
 		template := map[string]interface{}{
 			"id":            in.CustomWebhookTemplateAttributes.ID,
 			"http_method":   in.CustomWebhookTemplateAttributes.HTTPMethod,
-			"auth_user":     in.CustomWebhookTemplateAttributes.AuthUser,
+			"auth_username": in.CustomWebhookTemplateAttributes.AuthUsername,
 			"auth_password": in.CustomWebhookTemplateAttributes.AuthPassword,
 			"body_template": in.CustomWebhookTemplateAttributes.BodyTemplate,
 		}
@@ -322,8 +323,8 @@ func outgoingWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta int
 			if method, ok := attrs["http_method"].(string); ok {
 				template.HTTPMethod = &method
 			}
-			if user, ok := attrs["auth_user"].(string); ok {
-				template.AuthUser = &user
+			if user, ok := attrs["auth_username"].(string); ok {
+				template.AuthUsername = &user
 			}
 			if pass, ok := attrs["auth_password"].(string); ok {
 				template.AuthPassword = &pass
