@@ -18,6 +18,7 @@ https://betterstack.com/docs/uptime/api/pagerduty-integrations/
 ### Required
 
 - **key** (String) The PagerDuty routing key.
+- **severity** (String) The PagerDuty alert severity. Can be any of the following: info, warning, error, or critical.
 
 ### Optional
 
