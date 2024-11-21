@@ -52,6 +52,20 @@ resource "betteruptime_monitor" "dns" {
   monitor_group_id = betteruptime_monitor_group.this.id
 }
 
+resource "betteruptime_monitor" "playwright" {
+  monitor_type     = "playwright"
+  monitor_group_id = betteruptime_monitor_group.this.id
+  playwright_script = <<-EOT
+    const { test, expect } = require('@playwright/test');
+
+    test('has title', async ({ page }) => {
+      await page.goto('https://betterstack.com/')
+      await expect(page).toHaveTitle(/Better Stack/)
+    });
+  EOT
+  request_timeout  = 60
+}
+
 resource "betteruptime_status_page_resource" "monitor_status" {
   status_page_id         = betteruptime_status_page.this.id
   status_page_section_id = betteruptime_status_page_section.monitors.id
