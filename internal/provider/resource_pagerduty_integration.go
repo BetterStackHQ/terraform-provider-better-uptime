@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var pagerdutyIntegrationSchema = map[string]*schema.Schema{
@@ -37,6 +38,12 @@ var pagerdutyIntegrationSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 	},
+	"severity": {
+		Description:  "The PagerDuty alert severity. Can be any of the following: info, warning, error, or critical.",
+		Type:         schema.TypeString,
+		Required:     true,
+		ValidateFunc: validation.StringInSlice([]string{"info", "warning", "error", "critical"}, false),
+	},
 }
 
 func newPagerdutyIntegrationResource() *schema.Resource {
@@ -59,6 +66,7 @@ type pagerdutyIntegration struct {
 	Name     *string `json:"name,omitempty"`
 	Key      *string `json:"key,omitempty"`
 	TeamName *string `json:"team_name,omitempty"`
+	Severity *string `json:"severity,omitempty"`
 }
 
 type pagerdutyIntegrationHTTPResponse struct {
@@ -80,6 +88,7 @@ func pagerdutyIntegrationRef(in *pagerdutyIntegration) []struct {
 		{k: "id", v: &in.ID},
 		{k: "name", v: &in.Name},
 		{k: "key", v: &in.Key},
+		{k: "severity", v: &in.Severity},
 	}
 }
 
