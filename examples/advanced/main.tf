@@ -53,7 +53,7 @@ resource "betteruptime_monitor" "dns" {
 }
 
 resource "betteruptime_monitor" "playwright" {
-  scenario_name     = "Better Stack Homepage"
+  url               = "Better Stack Homepage"
   monitor_type      = "playwright"
   monitor_group_id  = betteruptime_monitor_group.this.id
   playwright_script = <<-EOT
