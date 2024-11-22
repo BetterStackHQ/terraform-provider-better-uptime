@@ -53,10 +53,9 @@ resource "betteruptime_monitor" "dns" {
 }
 
 resource "betteruptime_monitor" "playwright" {
-  url               = "https://betterstack.com/"
+  scenario_name     = "Better Stack Homepage"
   monitor_type      = "playwright"
   monitor_group_id  = betteruptime_monitor_group.this.id
-  scenario_name     = "Better Stack Homepage"
   playwright_script = <<-EOT
     const { test, expect } = require('@playwright/test');
 
