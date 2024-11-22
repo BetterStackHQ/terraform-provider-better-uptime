@@ -239,7 +239,7 @@ var monitorSchema = map[string]*schema.Schema{
 		// TODO: ValidateDiagFunc: validation.StringInSlice
 	},
 	"request_timeout": {
-		Description: "How long to wait before timing out the request? In seconds.",
+		Description: "How long to wait before timing out the request? In seconds. When `monitor_type` is set to `playwright`, this determines the Playwright scenario timeout.",
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Computed:    true,

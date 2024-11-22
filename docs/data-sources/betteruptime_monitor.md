@@ -87,7 +87,7 @@ Monitor lookup.
 - **remember_cookies** (Boolean) Set to true to keep cookies when redirecting.
 - **request_body** (String) Request body for POST, PUT, PATCH requests. Required if monitor_type is set to dns (domain to query the DNS server with).
 - **request_headers** (List of Map of String) An array of request headers, consisting of name and value pairs
-- **request_timeout** (Number) How long to wait before timing out the request? In seconds.
+- **request_timeout** (Number) How long to wait before timing out the request? In seconds. When `monitor_type` is set to `playwright`, this determines the Playwright scenario timeout.
 - **required_keyword** (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
 - **scenario_name** (String) For Playwright monitors, the scenario name identifying the monitor in the UI.
 - **sms** (Boolean) Should we send an SMS to the on-call person?
