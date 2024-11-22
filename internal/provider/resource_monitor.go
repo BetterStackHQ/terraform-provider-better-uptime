@@ -56,7 +56,7 @@ var monitorSchema = map[string]*schema.Schema{
 	"url": {
 		Description: "URL of your website or the host you want to ping (see monitor_type below).",
 		Type:        schema.TypeString,
-		Optional:    true,
+		Required:    true,
 	},
 	"monitor_type": {
 		Description: strings.ReplaceAll(`Valid values:
