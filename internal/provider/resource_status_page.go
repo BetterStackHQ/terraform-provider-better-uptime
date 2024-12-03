@@ -190,6 +190,25 @@ var statusPageSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"navigation_links": {
+		Description: "Adjust the navigation links on your status page. Only applicable when design: v2. Only first 4 links considered.",
+		Type:        schema.TypeList,
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"text": {
+					Description: "Label of the link.",
+					Type:        schema.TypeString,
+					Required:    true,
+				},
+				"href": {
+					Description: "Href of the link. Use full URL for external links. Use `/`, `/maintenance` and `/incidents` for built-in links.",
+					Type:        schema.TypeString,
+					Required:    true,
+				},
+			},
+		},
+	},
 }
 
 func newStatusPageResource() *schema.Resource {
@@ -206,35 +225,41 @@ func newStatusPageResource() *schema.Resource {
 	}
 }
 
+type navigationLink struct {
+	Text *string `json:"text,omitempty"`
+	Href *string `json:"href,omitempty"`
+}
+
 type statusPage struct {
-	History                  *int    `json:"history,omitempty"`
-	CompanyName              *string `json:"company_name,omitempty"`
-	CompanyURL               *string `json:"company_url,omitempty"`
-	ContactURL               *string `json:"contact_url,omitempty"`
-	LogoURL                  *string `json:"logo_remote_url,omitempty"`
-	Timezone                 *string `json:"timezone,omitempty"`
-	Subdomain                *string `json:"subdomain,omitempty"`
-	CustomDomain             *string `json:"custom_domain,omitempty"`
-	MinIncidentLength        *int    `json:"min_incident_length,omitempty"`
-	Subscribable             *bool   `json:"subscribable,omitempty"`
-	HideFromSearchEngines    *bool   `json:"hide_from_search_engines,omitempty"`
-	CustomCSS                *string `json:"custom_css,omitempty"`
-	CustomJavaScript         *string `json:"custom_javascript,omitempty"`
-	GoogleAnalyticsID        *string `json:"google_analytics_id,omitempty"`
-	Announcement             *string `json:"announcement,omitempty"`
-	AnnouncementEmbedVisible *bool   `json:"announcement_embed_visible,omitempty"`
-	AnnouncementEmbedLink    *string `json:"announcement_embed_link,omitempty"`
-	AnnouncementEmbedCSS     *string `json:"announcement_embed_css,omitempty"`
-	PasswordEnabled          *bool   `json:"password_enabled,omitempty"`
-	Password                 *string `json:"password,omitempty"`
-	AggregateState           *string `json:"aggregate_state,omitempty"`
-	CreatedAt                *string `json:"created_at,omitempty"`
-	UpdatedAt                *string `json:"updated_at,omitempty"`
-	Design                   *string `json:"design,omitempty"`
-	Theme                    *string `json:"theme,omitempty"`
-	Layout                   *string `json:"layout,omitempty"`
-	AutomaticReports         *bool   `json:"automatic_reports,omitempty"`
-	StatusPageGroupID        *int    `json:"status_page_group_id,omitempty"`
+	History                  *int              `json:"history,omitempty"`
+	CompanyName              *string           `json:"company_name,omitempty"`
+	CompanyURL               *string           `json:"company_url,omitempty"`
+	ContactURL               *string           `json:"contact_url,omitempty"`
+	LogoURL                  *string           `json:"logo_remote_url,omitempty"`
+	Timezone                 *string           `json:"timezone,omitempty"`
+	Subdomain                *string           `json:"subdomain,omitempty"`
+	CustomDomain             *string           `json:"custom_domain,omitempty"`
+	MinIncidentLength        *int              `json:"min_incident_length,omitempty"`
+	Subscribable             *bool             `json:"subscribable,omitempty"`
+	HideFromSearchEngines    *bool             `json:"hide_from_search_engines,omitempty"`
+	CustomCSS                *string           `json:"custom_css,omitempty"`
+	CustomJavaScript         *string           `json:"custom_javascript,omitempty"`
+	GoogleAnalyticsID        *string           `json:"google_analytics_id,omitempty"`
+	Announcement             *string           `json:"announcement,omitempty"`
+	AnnouncementEmbedVisible *bool             `json:"announcement_embed_visible,omitempty"`
+	AnnouncementEmbedLink    *string           `json:"announcement_embed_link,omitempty"`
+	AnnouncementEmbedCSS     *string           `json:"announcement_embed_css,omitempty"`
+	PasswordEnabled          *bool             `json:"password_enabled,omitempty"`
+	Password                 *string           `json:"password,omitempty"`
+	AggregateState           *string           `json:"aggregate_state,omitempty"`
+	CreatedAt                *string           `json:"created_at,omitempty"`
+	UpdatedAt                *string           `json:"updated_at,omitempty"`
+	Design                   *string           `json:"design,omitempty"`
+	Theme                    *string           `json:"theme,omitempty"`
+	Layout                   *string           `json:"layout,omitempty"`
+	AutomaticReports         *bool             `json:"automatic_reports,omitempty"`
+	StatusPageGroupID        *int              `json:"status_page_group_id,omitempty"`
+	NavigationLinks          *[]navigationLink `json:"navigation_links,omitempty"`
 }
 
 type statusPageHTTPResponse struct {
@@ -281,12 +306,19 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "layout", v: &in.Layout},
 		{k: "automatic_reports", v: &in.AutomaticReports},
 		{k: "status_page_group_id", v: &in.StatusPageGroupID},
+		{k: "navigation_links", v: &in.NavigationLinks},
 	}
 }
 func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in statusPage
 	for _, e := range statusPageRef(&in) {
-		load(d, e.k, e.v)
+		if e.k == "navigation_links" {
+			if err := loadNavigationLinks(d, e.v.(**[]navigationLink)); err != nil {
+				return diag.FromErr(err)
+			}
+		} else {
+			load(d, e.k, e.v)
+		}
 	}
 	var out statusPageHTTPResponse
 	if err := resourceCreate(ctx, meta, "/api/v2/status-pages", &in, &out); err != nil {
@@ -309,6 +341,13 @@ func statusPageRead(ctx context.Context, d *schema.ResourceData, meta interface{
 		d.SetId("") // Force "create" on 404.
 		return nil
 	}
+
+	if out.Data.Attributes.NavigationLinks != nil {
+		if err := d.Set("navigation_links", flattenNavigationLinks(out.Data.Attributes.NavigationLinks)); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return statusPageCopyAttrs(d, &out.Data.Attributes, nil)
 }
 
@@ -316,6 +355,12 @@ func statusPageCopyAttrs(d *schema.ResourceData, in *statusPage, derr diag.Diagn
 	for _, e := range statusPageRef(in) {
 		if e.k == "password" {
 			// Skip copying password as it's never returned from the API
+			continue
+		}
+		if e.k == "navigation_links" {
+			if err := d.Set("navigation_links", flattenNavigationLinks(in.NavigationLinks)); err != nil {
+				derr = append(derr, diag.FromErr(err)[0])
+			}
 			continue
 		}
 		if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
@@ -329,8 +374,14 @@ func statusPageUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 	var in statusPage
 	var out policyHTTPResponse
 	for _, e := range statusPageRef(&in) {
-		if d.HasChange(e.k) {
-			load(d, e.k, e.v)
+		if e.k == "navigation_links" {
+			if err := loadNavigationLinks(d, e.v.(**[]navigationLink)); err != nil {
+				return diag.FromErr(err)
+			}
+		} else {
+			if d.HasChange(e.k) {
+				load(d, e.k, e.v)
+			}
 		}
 	}
 	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s", url.PathEscape(d.Id())), &in, &out)
@@ -338,4 +389,50 @@ func statusPageUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 
 func statusPageDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s", url.PathEscape(d.Id())))
+}
+
+func loadNavigationLinks(d *schema.ResourceData, target **[]navigationLink) error {
+	v, ok := d.GetOk("navigation_links")
+	if !ok {
+		return nil
+	}
+
+	links := v.([]interface{})
+	result := make([]navigationLink, len(links))
+
+	for i, link := range links {
+		linkMap := link.(map[string]interface{})
+
+		text := linkMap["text"].(string)
+		href := linkMap["href"].(string)
+
+		result[i] = navigationLink{
+			Text: &text,
+			Href: &href,
+		}
+	}
+
+	*target = &result
+	return nil
+}
+
+func flattenNavigationLinks(links *[]navigationLink) []interface{} {
+	if links == nil {
+		return nil
+	}
+
+	result := make([]interface{}, len(*links))
+	for i, link := range *links {
+		m := make(map[string]interface{})
+
+		if link.Text != nil {
+			m["text"] = *link.Text
+		}
+		if link.Href != nil {
+			m["href"] = *link.Href
+		}
+
+		result[i] = m
+	}
+	return result
 }

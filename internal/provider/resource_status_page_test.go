@@ -37,6 +37,15 @@ func TestResourceStatusPage(t *testing.T) {
 					subdomain         = "%s"
 					password          = "secret123"
 					automatic_reports = true
+
+					navigation_links {
+						text = "Example"
+						href = "https://example.com"
+					}
+					navigation_links {
+						text = "Status"
+						href = "/status"
+					}
 				}
 				`, subdomain),
 				Check: resource.ComposeTestCheckFunc(
@@ -45,6 +54,10 @@ func TestResourceStatusPage(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "timezone", "UTC"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "password", "secret123"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "automatic_reports", "true"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.0.text", "Example"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.0.href", "https://example.com"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.1.text", "Status"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.1.href", "/status"),
 				),
 			},
 			// Step 2 - update.
@@ -60,6 +73,14 @@ func TestResourceStatusPage(t *testing.T) {
 					timezone     = "America/Los_Angeles"
 					subdomain    = "%s"
 					password     = "secret1234"
+					navigation_links {
+						text = "Example2"
+						href = "https://example.com/test"
+					}
+					navigation_links {
+						text = "Status"
+						href = "/status"
+					}
 				}
 				`, subdomain),
 				Check: resource.ComposeTestCheckFunc(
@@ -67,6 +88,10 @@ func TestResourceStatusPage(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "timezone", "America/Los_Angeles"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "password", "secret1234"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.0.text", "Example2"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.0.href", "https://example.com/test"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.1.text", "Status"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.1.href", "/status"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty.
@@ -82,6 +107,14 @@ func TestResourceStatusPage(t *testing.T) {
 					timezone     = "America/Los_Angeles"
 					subdomain    = "%s"
 					password     = "secret1234"
+					navigation_links {
+						text = "Example2"
+						href = "https://example.com/test"
+					}
+					navigation_links {
+						text = "Status"
+						href = "/status"
+					}
 				}
 				`, subdomain),
 				PlanOnly: true,
