@@ -78,6 +78,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_google_monitoring_integration": newGoogleMonitoringIntegrationResource(),
 			"betteruptime_new_relic_integration":         newNewRelicIntegrationResource(),
 			"betteruptime_grafana_integration":           newGrafanaIntegrationResource(),
+			"betteruptime_elastic_integration":           newElasticIntegrationResource(),
 			"betteruptime_prometheus_integration":        newPrometheusIntegrationResource(),
 			"betteruptime_outgoing_webhook":              newOutgoingWebhookResource(),
 		},
