@@ -350,3 +350,11 @@ resource "betteruptime_outgoing_webhook" "outgoing_webhook_2" {
     body_template = "{\"incident\":{\"id\":\"$INCIDENT_ID\",\"started_at\":\"$STARTED_AT\"}}"
   }
 }
+
+resource "betteruptime_elastic_integration" "this" {
+  name  = "Elastic Integration"
+  sms   = false
+  call  = false
+  email = true
+  push  = true
+}
