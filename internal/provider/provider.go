@@ -81,6 +81,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_elastic_integration":           newElasticIntegrationResource(),
 			"betteruptime_prometheus_integration":        newPrometheusIntegrationResource(),
 			"betteruptime_outgoing_webhook":              newOutgoingWebhookResource(),
+			"betteruptime_jira_integration":              newJiraIntegrationResource(),
 		},
 		ConfigureContextFunc: func(ctx context.Context, r *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			var userAgent string
