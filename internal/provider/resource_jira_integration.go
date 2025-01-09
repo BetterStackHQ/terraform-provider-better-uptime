@@ -11,20 +11,16 @@ import (
 )
 
 var jiraIntegrationSchema = map[string]*schema.Schema{
-	"team_name": {
-		Description: "Used to specify the team the resource should be created in when using global tokens.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Default:     nil,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return d.Id() != ""
-		},
-	},
 	"id": {
-		Description: "The ID of the Jira Integration.",
+		Description: "The internal ID of the resource, can be ignored.",
 		Type:        schema.TypeString,
-		Optional:    true,
+		Optional:    false,
 		Computed:    true,
+	},
+	"better_stack_id": {
+		Description: "The ID of the Jira Integration to control in Better Stack. Due to required authentication in Jira, the integration has to be created and removed in Better Stack web UI.",
+		Type:        schema.TypeString,
+		Required:    true,
 		ForceNew:    true,
 	},
 	"name": {
@@ -37,21 +33,25 @@ var jiraIntegrationSchema = map[string]*schema.Schema{
 		Description: "Whether to automatically create issues in Jira on incident start.",
 		Type:        schema.TypeBool,
 		Optional:    true,
+		Computed:    true,
 	},
 	"jira_project_key": {
 		Description: "The Jira project key.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"jira_issue_type_id": {
 		Description: "The Jira issue type ID.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 	"jira_fields": {
 		Description: "JSON object representing Jira fields.",
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 	},
 }
 
@@ -70,7 +70,6 @@ func newJiraIntegrationResource() *schema.Resource {
 }
 
 type jiraIntegration struct {
-	ID                     *string `json:"id,omitempty"`
 	Name                   *string `json:"name,omitempty"`
 	AutomaticIssueCreation *bool   `json:"automatic_issue_creation,omitempty"`
 	JiraProjectKey         *string `json:"jira_project_key,omitempty"`
@@ -78,30 +77,39 @@ type jiraIntegration struct {
 	JiraFields             *string `json:"jira_fields,omitempty"`
 }
 
-func jiraIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// If ID is provided, treat this as an import
-	if id, ok := d.GetOk("id"); ok {
-		d.SetId(id.(string))
-		// Read the existing resource
-		return jiraIntegrationRead(ctx, d, meta)
-	}
+type jiraIntegrationHTTPResponse struct {
+	Data struct {
+		ID         string          `json:"id"`
+		Attributes jiraIntegration `json:"attributes"`
+	} `json:"data"`
+}
 
-	return diag.Errorf("resource ID is required, please import the resource first")
+func jiraIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	// creation is not supported for this resource, import better_stack_id and do a complete update instead
+	d.SetId(d.Get("better_stack_id").(string))
+	var current jiraIntegrationHTTPResponse
+	if err, _ := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/jira-integrations/%s", url.PathEscape(d.Id())), &current); err != nil {
+		return diag.Errorf("Jira integration %s not found.", d.Id())
+	}
+	if err := jiraIntegrationUpdate(ctx, d, meta); err != nil {
+		return err
+	}
+	return nil
 }
 
 func jiraIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var out jiraIntegration
+	var out jiraIntegrationHTTPResponse
 	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/jira-integrations/%s", url.PathEscape(d.Id())), &out); err != nil {
 		return err
 	} else if !ok {
 		return diag.Errorf("Jira integration %s not found.", d.Id())
 	}
-	return jiraIntegrationCopyAttrs(d, &out)
+	return jiraIntegrationCopyAttrs(d, &out.Data.Attributes)
 }
 
 func jiraIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in jiraIntegration
-	var out jiraIntegration
+	var out jiraIntegrationHTTPResponse
 	for _, e := range jiraIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
@@ -111,7 +119,9 @@ func jiraIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func jiraIntegrationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf("deletion is not supported for this resource")
+	// deletion is not supported for this resource, silently ignore
+	d.SetId("")
+	return nil
 }
 
 func jiraIntegrationCopyAttrs(d *schema.ResourceData, in *jiraIntegration) diag.Diagnostics {
@@ -132,7 +142,6 @@ func jiraIntegrationRef(in *jiraIntegration) []struct {
 		k string
 		v interface{}
 	}{
-		{k: "id", v: &in.ID},
 		{k: "name", v: &in.Name},
 		{k: "automatic_issue_creation", v: &in.AutomaticIssueCreation},
 		{k: "jira_project_key", v: &in.JiraProjectKey},

@@ -8,8 +8,16 @@ import (
 )
 
 func TestJiraIntegration(t *testing.T) {
-	server := newResourceServer(t, "/api/v2/jira-integrations", "1")
+	server := newResourceServer(t, "/api/v2/jira-integrations", "42")
 	defer server.Close()
+	// Initialize the resource, since it's not created by a POST request
+	server.Data.Store([]byte(`{
+		"name": "Original name",
+		"automatic_issue_creation": false,
+		"jira_project_key": "PROJ",
+		"jira_issue_type_id": "10001",
+		"jira_fields": "{}"
+	}`))
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest: true,
@@ -26,16 +34,16 @@ func TestJiraIntegration(t *testing.T) {
 				}
 
 				resource "betteruptime_jira_integration" "this" {
-					id 												= "1"
-					name                   		= "Test"
-					automatic_issue_creation 	= true
-					jira_project_key       		= "PROJ"
-					jira_issue_type_id     		= "10001"
-					jira_fields            		= "{\"customfield_10000\":\"value\"}"
+					better_stack_id          = "42"
+					name                   	 = "Test"
+					automatic_issue_creation = true
+					jira_project_key       	 = "PROJ"
+					jira_issue_type_id     	 = "10001"
+					jira_fields            	 = "{\"customfield_10000\":\"value\"}"
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "id", "1"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "id", "42"),
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "name", "Test"),
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "automatic_issue_creation", "true"),
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_project_key", "PROJ"),
@@ -43,7 +51,7 @@ func TestJiraIntegration(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_fields", "{\"customfield_10000\":\"value\"}"),
 				),
 			},
-			// Step 2 - make no changes, check plan is empty.
+			// Step 2 - change only automatic_issue_creation, omit the rest
 			{
 				Config: `
 				provider "betteruptime" {
@@ -51,21 +59,18 @@ func TestJiraIntegration(t *testing.T) {
 				}
 
 				resource "betteruptime_jira_integration" "this" {
-					id 												= "1"
-					name                   		= "Test"
-					automatic_issue_creation 	= true
-					jira_project_key       		= "PROJ"
-					jira_issue_type_id     		= "10001"
-					jira_fields            		= "{\"customfield_10000\":\"value\"}"
+					better_stack_id          = "42"
+					automatic_issue_creation = false
 				}
 				`,
-				PlanOnly: true,
-			},
-			// Step 3 - destroy.
-			{
-				ResourceName:      "betteruptime_jira_integration.this",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "id", "42"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "name", "Test"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "automatic_issue_creation", "false"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_project_key", "PROJ"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_issue_type_id", "10001"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_fields", "{\"customfield_10000\":\"value\"}"),
+				),
 			},
 		},
 	})
