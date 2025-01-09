@@ -35,11 +35,11 @@ func TestJiraIntegration(t *testing.T) {
 
 				resource "betteruptime_jira_integration" "this" {
 					better_stack_id          = "42"
-					name                   	 = "Test"
+					name                     = "Test"
 					automatic_issue_creation = true
-					jira_project_key       	 = "PROJ"
-					jira_issue_type_id     	 = "10001"
-					jira_fields            	 = "{\"customfield_10000\":\"value\"}"
+					jira_project_key         = "PROJ"
+					jira_issue_type_id       = "10001"
+					jira_fields              = "{\"customfield_10000\":\"value\"}"
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
