@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -149,6 +150,41 @@ func TestJiraIntegration(t *testing.T) {
 						return nil
 					},
 				),
+			},
+		},
+	})
+}
+
+func TestJiraIntegrationWithoutId(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/jira-integrations", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_jira_integration" "this" {
+					name                     = "Test"
+					automatic_issue_creation = true
+					jira_project_key         = "PROJ"
+					jira_issue_type_id       = "10001"
+					jira_fields_json         = jsonencode({
+						duedate = 1209600
+						customfield_10000 = "new value"
+					})
+				}
+				`,
+				ExpectError: regexp.MustCompile(`Due to required authentication in Jira, the integration has to be created and removed in Better Stack web UI\. You can either import the resource, or set the ID of the Jira Integration in better_stack_id field and it will be auto-imported during resource creation\.`),
 			},
 		},
 	})

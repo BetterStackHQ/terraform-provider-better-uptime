@@ -4,23 +4,24 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"net/url"
 	"reflect"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var jiraIntegrationSchema = map[string]*schema.Schema{
 	"id": {
-		Description: "The internal ID of the resource, can be ignored.",
+		Description: "The ID of the Jira Integration.",
 		Type:        schema.TypeString,
 		Optional:    false,
 		Computed:    true,
 	},
 	"better_stack_id": {
-		Description: "The ID of the Jira Integration to control in Better Stack. Due to required authentication in Jira, the integration has to be created and removed in Better Stack web UI.",
+		Description: "Due to required authentication in Jira, the integration has to be created and removed in Better Stack web UI. You can set the ID of the Jira Integration to control in Better Stack, and it will be auto-imported during resource creation.",
 		Type:        schema.TypeString,
-		Required:    true,
+		Optional:    true,
 		ForceNew:    true,
 	},
 	"name": {
@@ -86,16 +87,20 @@ type jiraIntegrationHTTPResponse struct {
 }
 
 func jiraIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// creation is not supported for this resource, import better_stack_id and do a complete update instead
-	d.SetId(d.Get("better_stack_id").(string))
-	var current jiraIntegrationHTTPResponse
-	if err, _ := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/jira-integrations/%s", url.PathEscape(d.Id())), &current); err != nil {
-		return err
+	if id, ok := d.GetOk("better_stack_id"); ok {
+		// creation is not supported for this resource, import better_stack_id and do a complete update instead
+		d.SetId(id.(string))
+		var current jiraIntegrationHTTPResponse
+		if err, _ := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/jira-integrations/%s", url.PathEscape(d.Id())), &current); err != nil {
+			return err
+		}
+		if err := jiraIntegrationUpdate(ctx, d, meta); err != nil {
+			return err
+		}
+		return nil
 	}
-	if err := jiraIntegrationUpdate(ctx, d, meta); err != nil {
-		return err
-	}
-	return nil
+
+	return diag.Errorf("Due to required authentication in Jira, the integration has to be created and removed in Better Stack web UI. You can either import the resource, or set the ID of the Jira Integration in better_stack_id field and it will be auto-imported during resource creation.")
 }
 
 func jiraIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
