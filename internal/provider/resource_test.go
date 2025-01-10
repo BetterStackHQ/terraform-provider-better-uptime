@@ -24,11 +24,10 @@ type TestServer struct {
 	*httptest.Server
 	CalledRequests []CalledRequest
 	mu             sync.Mutex
+	Data           atomic.Value
 }
 
 func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturnedFromApi ...string) *TestServer {
-	var data atomic.Value
-
 	ts := &TestServer{}
 	ts.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
@@ -63,14 +62,14 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 				t.Fail()
 			}
 
-			data.Store(body)
+			ts.Data.Store(body)
 			w.WriteHeader(http.StatusCreated)
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, body)))
 		case r.Method == http.MethodGet && r.RequestURI == baseRequestURI+"/"+id:
-			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, data.Load().([]byte))))
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, ts.Data.Load().([]byte))))
 		case r.Method == http.MethodPatch && r.RequestURI == baseRequestURI+"/"+id:
 			patch := make(map[string]interface{})
-			if err = json.Unmarshal(data.Load().([]byte), &patch); err != nil {
+			if err = json.Unmarshal(ts.Data.Load().([]byte), &patch); err != nil {
 				t.Fatal(err)
 				t.Fail()
 			}
@@ -83,11 +82,11 @@ func newResourceServer(t *testing.T, baseRequestURI, id string, fieldsNotReturne
 				t.Fatal(err)
 				t.Fail()
 			}
-			data.Store(patched)
+			ts.Data.Store(patched)
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, patched)))
 		case r.Method == http.MethodDelete && r.RequestURI == baseRequestURI+"/"+id:
 			w.WriteHeader(http.StatusNoContent)
-			data.Store([]byte(nil))
+			ts.Data.Store([]byte(nil))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 			t.Fail()
