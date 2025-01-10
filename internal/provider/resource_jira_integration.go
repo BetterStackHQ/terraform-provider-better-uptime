@@ -2,13 +2,12 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"net/url"
-	"reflect"
-	"strconv"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"net/url"
+	"reflect"
 )
 
 var jiraIntegrationSchema = map[string]*schema.Schema{
@@ -48,9 +47,9 @@ var jiraIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
-	"jira_fields": {
-		Description: "Map representing Jira fields. Values can be strings or numbers.",
-		Type:        schema.TypeMap,
+	"jira_fields_json": {
+		Description: "JSON object representing Jira fields.",
+		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
 	},
@@ -75,6 +74,7 @@ type jiraIntegration struct {
 	AutomaticIssueCreation *bool                   `json:"automatic_issue_creation,omitempty"`
 	JiraProjectKey         *string                 `json:"jira_project_key,omitempty"`
 	JiraIssueTypeID        *string                 `json:"jira_issue_type_id,omitempty"`
+	JiraFieldsJSON         *string                 `json:"-"`
 	JiraFields             *map[string]interface{} `json:"jira_fields,omitempty"`
 }
 
@@ -118,18 +118,13 @@ func jiraIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	// Handle jira_fields separately
-	if d.HasChange("jira_fields") {
-		if v, ok := d.GetOk("jira_fields"); ok {
+	if d.HasChange("jira_fields_json") {
+		if newJson, ok := d.GetOk("jira_fields_json"); ok {
+			stringJson := newJson.(string)
+			in.JiraFieldsJSON = &stringJson
 			fields := make(map[string]interface{})
-			for k, v := range v.(map[string]interface{}) {
-				// Dynamically determine type, as internally it will always be a string
-				if intVal, err := strconv.ParseInt(v.(string), 10, 64); err == nil {
-					fields[k] = intVal
-				} else if floatVal, err := strconv.ParseFloat(v.(string), 64); err == nil {
-					fields[k] = floatVal
-				} else {
-					fields[k] = v // Assume string
-				}
+			if err := json.Unmarshal([]byte(stringJson), &fields); err != nil {
+				return diag.FromErr(err)
 			}
 			in.JiraFields = &fields
 		}
@@ -157,18 +152,13 @@ func jiraIntegrationCopyAttrs(d *schema.ResourceData, in *jiraIntegration) diag.
 
 	// Handle jira_fields separately
 	if in.JiraFields != nil {
-		fields := make(map[string]string)
-		for k, v := range *in.JiraFields {
-			// Internally, it should always be a string in Terraform state
-			if floatVal, isFloat := v.(float64); isFloat {
-				fields[k] = strconv.FormatFloat(floatVal, 'f', -1, 64)
-			} else if intVal, isInt := v.(int64); isInt {
-				fields[k] = strconv.FormatInt(intVal, 10)
-			} else {
-				fields[k] = v.(string) // Assume string
-			}
+		newJson, err := json.Marshal(&in.JiraFields)
+		if err != nil {
+			derr = append(derr, diag.FromErr(err)[0])
 		}
-		if err := d.Set("jira_fields", fields); err != nil {
+		stringJson := string(newJson)
+		in.JiraFieldsJSON = &stringJson
+		if err := d.Set("jira_fields_json", stringJson); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}

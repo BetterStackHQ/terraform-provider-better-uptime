@@ -22,7 +22,7 @@ https://betterstack.com/docs/uptime/api/jira-integrations/
 ### Optional
 
 - **automatic_issue_creation** (Boolean) Whether to automatically create issues in Jira on incident start.
-- **jira_fields** (Map of String) Map representing Jira fields. Values can be strings or numbers.
+- **jira_fields_json** (String) JSON object representing Jira fields.
 - **jira_issue_type_id** (String) The Jira issue type ID.
 - **jira_project_key** (String) The Jira project key.
 - **name** (String) The name of the Jira Integration.

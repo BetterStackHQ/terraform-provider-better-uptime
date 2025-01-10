@@ -47,10 +47,10 @@ func TestJiraIntegration(t *testing.T) {
 					automatic_issue_creation = true
 					jira_project_key         = "PROJ"
 					jira_issue_type_id       = "10001"
-					jira_fields              = {
-						"duedate" : 1209600
-						"customfield_10000" : "new value"
-					}
+					jira_fields_json         = jsonencode({
+						duedate = 1209600
+						customfield_10000 = "new value"
+					})
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
@@ -59,9 +59,7 @@ func TestJiraIntegration(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "automatic_issue_creation", "true"),
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_project_key", "PROJ"),
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_issue_type_id", "10001"),
-					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_fields.duedate", "1209600"),
-					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_fields.customfield_10000", "new value"),
-					resource.TestCheckNoResourceAttr("betteruptime_jira_integration.this", "jira_fields.customfield_10001"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_fields_json", "{\"customfield_10000\":\"new value\",\"duedate\":1209600}"),
 					func(s *terraform.State) error {
 						var lastPatch CalledRequest
 						for _, req := range server.CalledRequests {
@@ -73,6 +71,10 @@ func TestJiraIntegration(t *testing.T) {
 						expectedSubstring := `"jira_fields":{"customfield_10000":"new value","duedate":1209600}`
 						if !strings.Contains(lastPatch.Body, expectedSubstring) {
 							return fmt.Errorf("expected last PATCH body to contain %s, got %s", expectedSubstring, lastPatch.Body)
+						}
+						// Check that PATCH request does not contain the JSON field
+						if strings.Contains(strings.ToLower(lastPatch.Body), "jirafieldsjson") || strings.Contains(strings.ToLower(lastPatch.Body), "jira_fields_json") {
+							return fmt.Errorf("did not expect last PATCH body to contain mention of the JSON field, got %s", lastPatch.Body)
 						}
 						return nil
 					},
@@ -96,9 +98,7 @@ func TestJiraIntegration(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "automatic_issue_creation", "false"),
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_project_key", "PROJ"),
 					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_issue_type_id", "10001"),
-					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_fields.duedate", "1209600"),
-					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_fields.customfield_10000", "new value"),
-					resource.TestCheckNoResourceAttr("betteruptime_jira_integration.this", "jira_fields.customfield_10001"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_fields_json", "{\"customfield_10000\":\"new value\",\"duedate\":1209600}"),
 					func(s *terraform.State) error {
 						var lastPatch CalledRequest
 						for _, req := range server.CalledRequests {
@@ -110,6 +110,41 @@ func TestJiraIntegration(t *testing.T) {
 						unexpectedSubstring := `"jira_fields"`
 						if strings.Contains(lastPatch.Body, unexpectedSubstring) {
 							return fmt.Errorf("did not expect last PATCH body to contain %s, got %s", unexpectedSubstring, lastPatch.Body)
+						}
+						return nil
+					},
+				),
+			},
+			// Step 3 - remove jira_fields
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_jira_integration" "this" {
+					better_stack_id          = "42"
+					jira_fields_json         = jsonencode({})
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "id", "42"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "name", "Test"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "automatic_issue_creation", "false"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_project_key", "PROJ"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_issue_type_id", "10001"),
+					resource.TestCheckResourceAttr("betteruptime_jira_integration.this", "jira_fields_json", "{}"),
+					func(s *terraform.State) error {
+						var lastPatch CalledRequest
+						for _, req := range server.CalledRequests {
+							if req.Method == "PATCH" {
+								lastPatch = req
+							}
+						}
+						// Check that PATCH request JSON contains the empty jira_fields
+						expectedSubstring := `"jira_fields":{}`
+						if !strings.Contains(lastPatch.Body, expectedSubstring) {
+							return fmt.Errorf("expected last PATCH body to contain %s, got %s", expectedSubstring, lastPatch.Body)
 						}
 						return nil
 					},
