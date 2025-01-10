@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -48,8 +49,8 @@ var jiraIntegrationSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"jira_fields": {
-		Description: "JSON object representing Jira fields.",
-		Type:        schema.TypeString,
+		Description: "Map representing Jira fields. Values can be strings or numbers.",
+		Type:        schema.TypeMap,
 		Optional:    true,
 		Computed:    true,
 	},
@@ -70,11 +71,11 @@ func newJiraIntegrationResource() *schema.Resource {
 }
 
 type jiraIntegration struct {
-	Name                   *string `json:"name,omitempty"`
-	AutomaticIssueCreation *bool   `json:"automatic_issue_creation,omitempty"`
-	JiraProjectKey         *string `json:"jira_project_key,omitempty"`
-	JiraIssueTypeID        *string `json:"jira_issue_type_id,omitempty"`
-	JiraFields             *string `json:"jira_fields,omitempty"`
+	Name                   *string                 `json:"name,omitempty"`
+	AutomaticIssueCreation *bool                   `json:"automatic_issue_creation,omitempty"`
+	JiraProjectKey         *string                 `json:"jira_project_key,omitempty"`
+	JiraIssueTypeID        *string                 `json:"jira_issue_type_id,omitempty"`
+	JiraFields             *map[string]interface{} `json:"jira_fields,omitempty"`
 }
 
 type jiraIntegrationHTTPResponse struct {
@@ -89,7 +90,7 @@ func jiraIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta int
 	d.SetId(d.Get("better_stack_id").(string))
 	var current jiraIntegrationHTTPResponse
 	if err, _ := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/jira-integrations/%s", url.PathEscape(d.Id())), &current); err != nil {
-		return diag.Errorf("Jira integration %s not found.", d.Id())
+		return err
 	}
 	if err := jiraIntegrationUpdate(ctx, d, meta); err != nil {
 		return err
@@ -115,7 +116,29 @@ func jiraIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta int
 			load(d, e.k, e.v)
 		}
 	}
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/jira-integrations/%s", url.PathEscape(d.Id())), &in, &out)
+
+	// Handle jira_fields separately
+	if d.HasChange("jira_fields") {
+		if v, ok := d.GetOk("jira_fields"); ok {
+			fields := make(map[string]interface{})
+			for k, v := range v.(map[string]interface{}) {
+				// Dynamically determine type, as internally it will always be a string
+				if intVal, err := strconv.ParseInt(v.(string), 10, 64); err == nil {
+					fields[k] = intVal
+				} else if floatVal, err := strconv.ParseFloat(v.(string), 64); err == nil {
+					fields[k] = floatVal
+				} else {
+					fields[k] = v // Assume string
+				}
+			}
+			in.JiraFields = &fields
+		}
+	}
+
+	if err := resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/jira-integrations/%s", url.PathEscape(d.Id())), &in, &out); err != nil {
+		return err
+	}
+	return jiraIntegrationCopyAttrs(d, &out.Data.Attributes)
 }
 
 func jiraIntegrationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -131,6 +154,25 @@ func jiraIntegrationCopyAttrs(d *schema.ResourceData, in *jiraIntegration) diag.
 			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}
+
+	// Handle jira_fields separately
+	if in.JiraFields != nil {
+		fields := make(map[string]string)
+		for k, v := range *in.JiraFields {
+			// Internally, it should always be a string in Terraform state
+			if floatVal, isFloat := v.(float64); isFloat {
+				fields[k] = strconv.FormatFloat(floatVal, 'f', -1, 64)
+			} else if intVal, isInt := v.(int64); isInt {
+				fields[k] = strconv.FormatInt(intVal, 10)
+			} else {
+				fields[k] = v.(string) // Assume string
+			}
+		}
+		if err := d.Set("jira_fields", fields); err != nil {
+			derr = append(derr, diag.FromErr(err)[0])
+		}
+	}
+
 	return derr
 }
 
@@ -146,6 +188,5 @@ func jiraIntegrationRef(in *jiraIntegration) []struct {
 		{k: "automatic_issue_creation", v: &in.AutomaticIssueCreation},
 		{k: "jira_project_key", v: &in.JiraProjectKey},
 		{k: "jira_issue_type_id", v: &in.JiraIssueTypeID},
-		{k: "jira_fields", v: &in.JiraFields},
 	}
 }
