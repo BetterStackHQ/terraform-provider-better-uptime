@@ -239,10 +239,10 @@ var monitorSchema = map[string]*schema.Schema{
 		// TODO: ValidateDiagFunc: validation.StringInSlice
 	},
 	"request_timeout": {
-		Description: "How long to wait before timing out the request?\n\n" +
-			"  - For Server and Port monitors (`ping`, `tcp`, `udp`, `smtp`, `pop`, `imap` and `dns`) timeout is specified in *milliseconds*. Valid options: 500, 1000, 2000, 3000, 5000.\n" +
-			"  - For all other monitor types timeout is specified in *seconds*. Valid options: 2, 3, 5, 10, 15, 30, 45, 60.\n\n" +
-			"  When monitor_type is set to playwright, this determines the Playwright scenario timeout instead. In *seconds*. Valid options: 15, 30, 45, 60",
+		Description: "How long to wait before timing out the request?\n" +
+			"  - For Server and Port monitors (types `ping`, `tcp`, `udp`, `smtp`, `pop`, `imap` and `dns`) the timeout is specified in *milliseconds*. Valid options: 500, 1000, 2000, 3000, 5000.\n" +
+			"  - For Playwright monitors (type `playwright`), this determines the Playwright scenario timeout instead in *seconds*. Valid options: 15, 30, 45, 60.\n" +
+			"  - For all other monitors, the timeout is specified in *seconds*. Valid options: 2, 3, 5, 10, 15, 30, 45, 60.\n",
 		Type:     schema.TypeInt,
 		Optional: true,
 		Computed: true,
