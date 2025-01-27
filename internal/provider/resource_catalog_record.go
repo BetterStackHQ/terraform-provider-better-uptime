@@ -116,7 +116,7 @@ type catalogRecordValue struct {
 type catalogRecordAttribute struct {
 	Attribute struct {
 		ID   json.Number `json:"id"`
-		Name string      `json:"name"`
+		Name string      `json:"name,omitempty"`
 	} `json:"attribute"`
 	Values []catalogRecordValue `json:"values"`
 }
