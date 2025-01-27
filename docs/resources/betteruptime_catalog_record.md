@@ -17,7 +17,7 @@ https://betterstack.com/docs/uptime/api/create-catalog-record/
 
 ### Required
 
-- **attribute** (Block Set, Min: 1) List of attribute values for the Catalog record. (see [below for nested schema](#nestedblock--attribute))
+- **attribute** (Block List, Min: 1) List of attribute values for the Catalog record. (see [below for nested schema](#nestedblock--attribute))
 - **relation_id** (String) The ID of the Catalog relation this record belongs to.
 
 ### Read-Only

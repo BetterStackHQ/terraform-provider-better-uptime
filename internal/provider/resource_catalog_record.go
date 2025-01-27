@@ -27,7 +27,7 @@ var catalogRecordSchema = map[string]*schema.Schema{
 	},
 	"attribute": {
 		Description: "List of attribute values for the Catalog record.",
-		Type:        schema.TypeSet,
+		Type:        schema.TypeList,
 		Required:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -127,10 +127,10 @@ type catalogRecordHTTPResponse struct {
 }
 
 func expandCatalogRecordAttributes(d *schema.ResourceData) []catalogRecordAttribute {
-	attributeSet := d.Get("attribute").(*schema.Set)
-	attributes := make([]catalogRecordAttribute, 0, attributeSet.Len())
+	attributeList := d.Get("attribute").([]interface{})
+	attributes := make([]catalogRecordAttribute, 0, len(attributeList))
 
-	for _, attr := range attributeSet.List() {
+	for _, attr := range attributeList {
 		attrMap := attr.(map[string]interface{})
 		var attribute catalogRecordAttribute
 		attribute.Attribute.ID = json.Number(attrMap["attribute_id"].(string))
