@@ -250,58 +250,6 @@ func catalogRecordCopyAttrs(d *schema.ResourceData, in *catalogRecord) diag.Diag
 	return nil
 }
 
-func validateCatalogRecordAttribute() schema.SchemaValidateFunc {
-	return func(i interface{}, k string) (warnings []string, errors []error) {
-		v, ok := i.(map[string]interface{})
-		if !ok {
-			errors = append(errors, fmt.Errorf("expected type of %s to be map[string]interface{}", k))
-			return
-		}
-
-		attrType := v["type"].(string)
-
-		// Validation for String type
-		if attrType == "String" {
-			if value, ok := v["value"].(string); !ok || value == "" {
-				errors = append(errors, fmt.Errorf("value must be set for String type attribute"))
-			}
-			if itemID, ok := v["item_id"].(string); ok && itemID != "" {
-				errors = append(errors, fmt.Errorf("item_id must not be set for String type attribute"))
-			}
-			if email, ok := v["email"].(string); ok && email != "" {
-				errors = append(errors, fmt.Errorf("email must not be set for String type attribute"))
-			}
-			if name, ok := v["name"].(string); ok && name != "" {
-				errors = append(errors, fmt.Errorf("name must not be set for String type attribute"))
-			}
-			return
-		}
-
-		// Validation for non-String types
-		if value, ok := v["value"].(string); ok && value != "" {
-			errors = append(errors, fmt.Errorf("value must not be set for %s type attribute", attrType))
-		}
-
-		// At least one of item_id, email, or name must be set
-		hasIdentifier := false
-		if itemID, ok := v["item_id"].(string); ok && itemID != "" {
-			hasIdentifier = true
-		}
-		if email, ok := v["email"].(string); ok && email != "" {
-			hasIdentifier = true
-		}
-		if name, ok := v["name"].(string); ok && name != "" {
-			hasIdentifier = true
-		}
-
-		if !hasIdentifier {
-			errors = append(errors, fmt.Errorf("at least one of item_id, email, or name must be set for %s type attribute", attrType))
-		}
-
-		return
-	}
-}
-
 func validateCatalogRecordAttributes(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 	attributes := d.Get("attribute").([]interface{})
 
