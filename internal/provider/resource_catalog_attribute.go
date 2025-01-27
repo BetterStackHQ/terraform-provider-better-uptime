@@ -62,7 +62,7 @@ func newCatalogAttributeResource() *schema.Resource {
 				return []*schema.ResourceData{d}, nil
 			},
 		},
-		Description: "https://betterstack.com/docs/uptime/api/create-catalog-attribute/",
+		Description: "https://betterstack.com/docs/uptime/api/catalog-integrations-attributes/",
 		Schema:      catalogAttributeSchema,
 	}
 }

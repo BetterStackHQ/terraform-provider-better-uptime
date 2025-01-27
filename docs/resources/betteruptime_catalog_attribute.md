@@ -3,12 +3,12 @@
 page_title: "betteruptime_catalog_attribute Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/create-catalog-attribute/
+  https://betterstack.com/docs/uptime/api/catalog-integrations-attributes/
 ---
 
 # betteruptime_catalog_attribute (Resource)
 
-https://betterstack.com/docs/uptime/api/create-catalog-attribute/
+https://betterstack.com/docs/uptime/api/catalog-integrations-attributes/
 
 
 

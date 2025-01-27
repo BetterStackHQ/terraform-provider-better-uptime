@@ -3,12 +3,12 @@
 page_title: "betteruptime_catalog_record Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/create-catalog-record/
+  https://betterstack.com/docs/uptime/api/catalog-integrations-records/
 ---
 
 # betteruptime_catalog_record (Resource)
 
-https://betterstack.com/docs/uptime/api/create-catalog-record/
+https://betterstack.com/docs/uptime/api/catalog-integrations-records/
 
 
 

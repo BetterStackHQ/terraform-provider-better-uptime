@@ -101,7 +101,7 @@ func newCatalogRecordResource() *schema.Resource {
 			},
 		},
 		CustomizeDiff: validateCatalogRecordAttributes,
-		Description:   "https://betterstack.com/docs/uptime/api/create-catalog-record/",
+		Description:   "https://betterstack.com/docs/uptime/api/catalog-integrations-records/",
 		Schema:        catalogRecordSchema,
 	}
 }
