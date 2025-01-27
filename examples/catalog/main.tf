@@ -6,31 +6,31 @@ resource "betteruptime_catalog_relation" "office" {
   name        = "Office"
   description = "A physical office building representing ACME Group"
 }
-#
-# resource "betteruptime_catalog_attribute" "office_address" {
-#   relation_id = betteruptime_catalog_relation.office.id
-#   name        = "Address"
-#   primary     = true
-# }
-#
-# resource "betteruptime_catalog_attribute" "office_country" {
-#   relation_id = betteruptime_catalog_relation.office.id
-#   name        = "Country code"
-#   primary     = false
-# }
-#
-# resource "betteruptime_catalog_attribute" "office_contact_person" {
-#   relation_id = betteruptime_catalog_relation.office.id
-#   name        = "Contact person"
-#   primary     = false
-# }
-#
-# resource "betteruptime_catalog_attribute" "office_schedule" {
-#   relation_id = betteruptime_catalog_relation.office.id
-#   name        = "Schedule"
-#   primary     = false
-# }
-#
+
+resource "betteruptime_catalog_attribute" "office_address" {
+  relation_id = betteruptime_catalog_relation.office.id
+  name        = "Office address"
+  primary     = true
+}
+
+resource "betteruptime_catalog_attribute" "office_country" {
+  relation_id = betteruptime_catalog_relation.office.id
+  name        = "Office country code"
+  primary     = false
+}
+
+resource "betteruptime_catalog_attribute" "office_contact_person" {
+  relation_id = betteruptime_catalog_relation.office.id
+  name        = "Office contact"
+  primary     = false
+}
+
+resource "betteruptime_catalog_attribute" "office_schedule" {
+  relation_id = betteruptime_catalog_relation.office.id
+  name        = "Office on-call"
+  primary     = false
+}
+
 # data "betteruptime_on_call_calendar" "prague" {
 #   name = "Prague On-call"
 # }

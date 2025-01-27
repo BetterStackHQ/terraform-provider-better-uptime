@@ -83,6 +83,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_outgoing_webhook":              newOutgoingWebhookResource(),
 			"betteruptime_jira_integration":              newJiraIntegrationResource(),
 			"betteruptime_catalog_relation":              newCatalogRelationResource(),
+			"betteruptime_catalog_attribute":             newCatalogAttributeResource(),
 		},
 		ConfigureContextFunc: func(ctx context.Context, r *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			var userAgent string
