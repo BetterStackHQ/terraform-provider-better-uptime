@@ -36,6 +36,12 @@ var catalogRecordSchema = map[string]*schema.Schema{
 					Type:        schema.TypeString,
 					Required:    true,
 				},
+				"attribute_name": {
+					Description: "Name of the Catalog attribute.",
+					Type:        schema.TypeString,
+					Computed:    true,
+					Optional:    false,
+				},
 				"type": {
 					Description: "Type of the value.",
 					Type:        schema.TypeString,
@@ -164,8 +170,9 @@ func flattenCatalogRecordAttributes(attributes []catalogRecordAttribute) []inter
 	for _, attr := range attributes {
 		for _, value := range attr.Values {
 			m := map[string]interface{}{
-				"attribute_id": attr.Attribute.ID.String(),
-				"type":         value.Type,
+				"attribute_id":   attr.Attribute.ID.String(),
+				"attribute_name": attr.Attribute.Name,
+				"type":           value.Type,
 			}
 
 			if value.Value != nil {

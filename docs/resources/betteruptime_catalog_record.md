@@ -39,4 +39,8 @@ Optional:
 - **name** (String) Human readable name of the referenced item when type is different than String and the item has a name.
 - **value** (String) Value when type is String.
 
+Read-Only:
+
+- **attribute_name** (String) Name of the Catalog attribute.
+
 
