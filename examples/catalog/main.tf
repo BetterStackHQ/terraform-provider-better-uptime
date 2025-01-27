@@ -31,62 +31,60 @@ resource "betteruptime_catalog_attribute" "office_schedule" {
   primary     = false
 }
 
-# data "betteruptime_on_call_calendar" "prague" {
-#   name = "Prague On-call"
-# }
-#
-# resource "betteruptime_catalog_record" "office_prague" {
-#   relation_id = betteruptime_catalog_relation.office.id
-#
-#   attribute {
-#     attribute_id = betteruptime_catalog_attribute.office_country.id
-#     type         = "string"
-#     value        = "123 Charles Street, Prague"
-#   }
-#   attribute {
-#     attribute_id = betteruptime_catalog_attribute.office_country.id
-#     type         = "string"
-#     value        = "CZ"
-#   }
-#   attribute {
-#     attribute_id = betteruptime_catalog_attribute.office_contact_person.id
-#     type         = "User"
-#   #  name         = "Jan Novák"
-#     email        = "jan.n@acme.cz"
-#   }
-#   attribute {
-#     attribute_id = betteruptime_catalog_attribute.office_schedule.id
-#     type         = "Schedule"
-#     item_id      = data.betteruptime_on_call_calendar.prague.id
-#   }
-# }
-#
-# data "betteruptime_on_call_calendar" "berlin" {
-#   name = "Berlin On-call"
-# }
-#
-# resource "betteruptime_catalog_record" "office_berlin" {
-#   relation_id = betteruptime_catalog_relation.office.id
-#
-#   attribute {
-#     attribute_id = betteruptime_catalog_attribute.office_address.id
-#     type         = "string"
-#     value        = "45 Brandenburg Gate, Berlin"
-#   }
-#   attribute {
-#     attribute_id = betteruptime_catalog_attribute.office_country.id
-#     type         = "string"
-#     value        = "DE"
-#   }
-#   attribute {
-#     attribute_id = betteruptime_catalog_attribute.office_contact_person.id
-#     type         = "User"
-#   #  name         = "Anna Schmidt"
-#     email        = "anna.s@acme.de"
-#   }
-#   attribute {
-#     attribute_id = betteruptime_catalog_attribute.office_schedule.id
-#     type         = "Schedule"
-#     item_id      = data.betteruptime_on_call_calendar.berlin.id
-#   }
-# }
+data "betteruptime_on_call_calendar" "prague" {
+  name = "Prague On-call"
+}
+
+resource "betteruptime_catalog_record" "office_prague" {
+  relation_id = betteruptime_catalog_relation.office.id
+
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.office_country.id
+    type         = "String"
+    value        = "123 Charles Street, Prague"
+  }
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.office_country.id
+    type         = "String"
+    value        = "CZ"
+  }
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.office_contact_person.id
+    type         = "User"
+    email        = "petr@betterstack.com"
+  }
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.office_schedule.id
+    type         = "Schedule"
+    item_id      = data.betteruptime_on_call_calendar.prague.id
+  }
+}
+
+data "betteruptime_on_call_calendar" "berlin" {
+  name = "Berlin On-call"
+}
+
+resource "betteruptime_catalog_record" "office_berlin" {
+  relation_id = betteruptime_catalog_relation.office.id
+
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.office_address.id
+    type         = "String"
+    value        = "45 Brandenburg Gate, Berlin"
+  }
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.office_country.id
+    type         = "String"
+    value        = "DE"
+  }
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.office_contact_person.id
+    type         = "User"
+    email        = "juraj@betterstack.com"
+  }
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.office_schedule.id
+    type         = "Schedule"
+    item_id      = data.betteruptime_on_call_calendar.berlin.id
+  }
+}
