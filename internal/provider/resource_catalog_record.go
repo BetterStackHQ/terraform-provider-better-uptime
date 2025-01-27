@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -52,19 +53,22 @@ var catalogRecordSchema = map[string]*schema.Schema{
 					Optional:    true,
 				},
 				"item_id": {
-					Description: "ID of the referenced item when type is not String.",
+					Description: "ID of the referenced item when type is different than String.",
 					Type:        schema.TypeString,
 					Optional:    true,
+					Computed:    true,
 				},
 				"name": {
-					Description: "Name of the referenced item when type is not String.",
+					Description: "Human readable name of the referenced item when type is different than String and the item has a name.",
 					Type:        schema.TypeString,
 					Optional:    true,
+					Computed:    true,
 				},
 				"email": {
 					Description: "Email of the referenced user when type is User.",
 					Type:        schema.TypeString,
 					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -96,17 +100,17 @@ func newCatalogRecordResource() *schema.Resource {
 }
 
 type catalogRecordValue struct {
-	Type   string  `json:"type"`
-	Value  *string `json:"value,omitempty"`
-	ItemID *string `json:"item_id,omitempty"`
-	Name   *string `json:"name,omitempty"`
-	Email  *string `json:"email,omitempty"`
+	Type   string      `json:"type"`
+	Value  *string     `json:"value,omitempty"`
+	ItemID json.Number `json:"item_id,omitempty"`
+	Name   *string     `json:"name,omitempty"`
+	Email  *string     `json:"email,omitempty"`
 }
 
 type catalogRecordAttribute struct {
 	Attribute struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
+		ID   json.Number `json:"id"`
+		Name string      `json:"name"`
 	} `json:"attribute"`
 	Values []catalogRecordValue `json:"values"`
 }
@@ -129,7 +133,7 @@ func expandCatalogRecordAttributes(d *schema.ResourceData) []catalogRecordAttrib
 	for _, attr := range attributeSet.List() {
 		attrMap := attr.(map[string]interface{})
 		var attribute catalogRecordAttribute
-		attribute.Attribute.ID = attrMap["attribute_id"].(string)
+		attribute.Attribute.ID = json.Number(attrMap["attribute_id"].(string))
 
 		var value catalogRecordValue
 		value.Type = attrMap["type"].(string)
@@ -138,7 +142,7 @@ func expandCatalogRecordAttributes(d *schema.ResourceData) []catalogRecordAttrib
 			value.Value = &v
 		}
 		if v, ok := attrMap["item_id"].(string); ok && v != "" {
-			value.ItemID = &v
+			value.ItemID = json.Number(v)
 		}
 		if v, ok := attrMap["name"].(string); ok && v != "" {
 			value.Name = &v
@@ -160,15 +164,15 @@ func flattenCatalogRecordAttributes(attributes []catalogRecordAttribute) []inter
 	for _, attr := range attributes {
 		for _, value := range attr.Values {
 			m := map[string]interface{}{
-				"attribute_id": attr.Attribute.ID,
+				"attribute_id": attr.Attribute.ID.String(),
 				"type":         value.Type,
 			}
 
 			if value.Value != nil {
 				m["value"] = *value.Value
 			}
-			if value.ItemID != nil {
-				m["item_id"] = *value.ItemID
+			if len(value.ItemID) > 0 {
+				m["item_id"] = value.ItemID.String()
 			}
 			if value.Name != nil {
 				m["name"] = *value.Name
