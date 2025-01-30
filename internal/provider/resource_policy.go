@@ -102,16 +102,30 @@ var policyStepSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Default:     nil,
 	},
-	"metadata_values": {
-		Description: "An array of metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching.",
+	//"metadata_values": {
+	//	Description: "An array of metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching.",
+	//	Type:        schema.TypeList,
+	//	Elem:        &schema.Schema{Type: schema.TypeString},
+	//	Optional:    true,
+	//	Default:     nil,
+	//	Deprecated:  "Use repeatable block metadata_value to define values with types instead.",
+	//},
+	"metadata_value": {
+		Description: "An array of typed metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
 		Default:     nil,
+		Elem:        &schema.Resource{Schema: metadataValueSchema},
 	},
 	"policy_id": {
 		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.",
 		Type:        schema.TypeInt,
+		Optional:    true,
+		Default:     nil,
+	},
+	"policy_metadata_key": {
+		Description: "A metadata key from which to extract the policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.",
+		Type:        schema.TypeString,
 		Optional:    true,
 		Default:     nil,
 	},
@@ -172,15 +186,16 @@ var policySchema = map[string]*schema.Schema{
 
 func newPolicyResource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: policyCreate,
-		ReadContext:   policyRead,
-		UpdateContext: policyUpdate,
-		DeleteContext: policyDelete,
+		CreateContext: resourcePolicyCreate,
+		ReadContext:   resourcePolicyRead,
+		UpdateContext: resourcePolicyUpdate,
+		DeleteContext: resourcePolicyDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/list-all-escalation-policies/",
-		Schema:      policySchema,
+		CustomizeDiff: validatePolicy,
+		Schema:        policySchema,
+		Description:   "https://betterstack.com/docs/uptime/api/policies/",
 	}
 }
 
@@ -196,14 +211,15 @@ type policyStep struct {
 	WaitUntilTime     *string             `mapstructure:"wait_until_time,omitempty" json:"wait_until_time,omitempty"`
 	WaitUntilTimezone *string             `mapstructure:"wait_until_timezone,omitempty" json:"wait_until_timezone,omitempty"`
 	UrgencyId         *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
-	Steps             *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
+	Members           *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
 	Timezone          *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
 	Days              *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
 	TimeFrom          *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
 	TimeTo            *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
 	MetadataKey       *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
-	MetadataValues    *[]string           `mapstructure:"metadata_values,omitempty" json:"metadata_values,omitempty"`
+	MetadataValues    *[]metadataValue    `mapstructure:"metadata_value" json:"metadata_values,omitempty"`
 	PolicyId          *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
+	PolicyMetadataKey *string             `mapstructure:"policy_metadata_key,omitempty" json:"policy_metadata_key,omitempty"`
 }
 
 type policy struct {
@@ -241,7 +257,7 @@ func policyRef(in *policy) []struct {
 	}
 }
 
-func policyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcePolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in policy
 	for _, e := range policyRef(&in) {
 		if e.k == "steps" {
@@ -254,16 +270,16 @@ func policyCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 	load(d, "team_name", &in.TeamName)
 	var out policyHTTPResponse
-	if err := resourceCreate(ctx, meta, "/api/v2/policies", &in, &out); err != nil {
+	if err := resourceCreate(ctx, meta, "/api/v3/policies", &in, &out); err != nil {
 		return err
 	}
 	d.SetId(out.Data.ID)
 	return policyCopyAttrs(d, &out.Data.Attributes)
 }
 
-func policyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcePolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var out policyHTTPResponse
-	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/policies/%s", url.PathEscape(d.Id())), &out); err != nil {
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v3/policies/%s", url.PathEscape(d.Id())), &out); err != nil {
 		return err
 	} else if !ok {
 		d.SetId("") // Force "create" on 404.
@@ -282,7 +298,7 @@ func policyCopyAttrs(d *schema.ResourceData, in *policy) diag.Diagnostics {
 	return derr
 }
 
-func policyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcePolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in policy
 	var out policyHTTPResponse
 	for _, e := range policyRef(&in) {
@@ -297,15 +313,15 @@ func policyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	if err := resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/policies/%s", url.PathEscape(d.Id())), &in, &out); err != nil {
+	if err := resourceUpdate(ctx, meta, fmt.Sprintf("/api/v3/policies/%s", url.PathEscape(d.Id())), &in, &out); err != nil {
 		return err
 	}
 	d.SetId(out.Data.ID)
 	return policyCopyAttrs(d, &out.Data.Attributes)
 }
 
-func policyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/policies/%s", url.PathEscape(d.Id())))
+func resourcePolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v3/policies/%s", url.PathEscape(d.Id())))
 }
 
 func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) error {
@@ -337,6 +353,19 @@ func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) error {
 			}
 		}
 
+		// Remove default values ("" or 0) from metadata values
+		metadataValues, ok := stepValuesObject["metadata_values"].([]interface{})
+		if ok {
+			for _, value := range metadataValues {
+				valueObject := value.(map[string]interface{})
+				for k, v := range valueObject {
+					if v == "" || v == 0 {
+						valueObject[k] = nil
+					}
+				}
+			}
+		}
+
 		var policyStep policyStep
 		if err := mapstructure.Decode(stepValuesObject, &policyStep); err != nil {
 			return err
@@ -346,6 +375,34 @@ func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) error {
 	}
 
 	*x = &steps
+	return nil
+}
 
+func validatePolicy(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+	steps := d.Get("steps").([]interface{})
+	for i, step := range steps {
+		stepMap := step.(map[string]interface{})
+
+		if stepMap["type"].(string) == "metadata_branching" {
+			if err := validatePolicyMetadataValues(stepMap, fmt.Sprintf("steps.%d", i)); err != nil {
+				return err
+			}
+		} else {
+			if len(stepMap["metadata_value"].([]interface{})) > 0 {
+				return fmt.Errorf("steps.%d: metadata_value must be empty for non-metadata_branching steps", i)
+			}
+		}
+	}
+	return nil
+}
+
+func validatePolicyMetadataValues(stepMap map[string]interface{}, prefix string) error {
+	values := stepMap["metadata_value"].([]interface{})
+	for i, v := range values {
+		value := v.(map[string]interface{})
+		if err := validateMetadataValue(value, fmt.Sprintf("%s.metadata_value.%d", prefix, i)); err != nil {
+			return err
+		}
+	}
 	return nil
 }

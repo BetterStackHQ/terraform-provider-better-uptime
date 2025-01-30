@@ -284,11 +284,29 @@ resource "betteruptime_policy" "this" {
     policy_id   = null
   }
   steps {
-    type            = "metadata_branching"
-    wait_before     = 0
-    metadata_key    = "Description"
-    metadata_values = ["Low priority issue", "FYI", "Notice"]
-    policy_id       = null
+    type         = "metadata_branching"
+    wait_before  = 0
+    metadata_key = "Description"
+    metadata_value {
+      value = "Low priority issue"
+    }
+    metadata_value {
+      value = "FYI"
+    }
+    metadata_value {
+      value = "Notice"
+    }
+    policy_id = null
+  }
+  steps {
+    type         = "metadata_branching"
+    wait_before  = 0
+    metadata_key = "Assigned User"
+    metadata_value {
+      type  = "User"
+      email = "petr@betterstack.com"
+    }
+    policy_metadata_key = "Assigned Policy"
   }
   steps {
     type        = "escalation"

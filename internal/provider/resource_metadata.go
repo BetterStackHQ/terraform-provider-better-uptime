@@ -104,11 +104,11 @@ var metadataValueSchema = map[string]*schema.Schema{
 }
 
 type metadataValue struct {
-	Type   string      `json:"type"`
-	Value  *string     `json:"value,omitempty"`
-	ItemID json.Number `json:"item_id,omitempty"`
-	Name   *string     `json:"name,omitempty"`
-	Email  *string     `json:"email,omitempty"`
+	Type   string      `mapstructure:"type" json:"type"`
+	Value  *string     `mapstructure:"value,omitempty" json:"value,omitempty"`
+	ItemID json.Number `mapstructure:"item_id,omitempty" json:"item_id,omitempty"`
+	Name   *string     `mapstructure:"name,omitempty" json:"name,omitempty"`
+	Email  *string     `mapstructure:"email,omitempty" json:"email,omitempty"`
 }
 
 func newMetadataResource() *schema.Resource {
