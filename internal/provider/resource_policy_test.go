@@ -390,3 +390,177 @@ func TestResourcePolicy(t *testing.T) {
 		},
 	})
 }
+func TestResourcePolicyMetadataValidation(t *testing.T) {
+	server := newResourceServer(t, "/api/v3/policies", "1")
+	defer server.Close()
+
+	cases := []struct {
+		name        string
+		config      string
+		expectError *regexp.Regexp
+	}{
+		{
+			name: "invalid - metadata_value on non-metadata step",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "escalation"
+						metadata_value {
+							type = "String"
+							value = "test"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: metadata_value must be empty for non-metadata_branching steps`),
+		},
+		{
+			name: "invalid - no metadata_key on metadata step",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_value {
+							value = "test"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: missing metadata_key for metadata_branching step`),
+		},
+		{
+			name: "invalid - no metadata_value on metadata step",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: there must be at least 1 metadata_value for metadata_branching step`),
+		},
+		{
+			name: "invalid - metadata value missing value",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "String"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0\.metadata_value\.0: value must be set for String type`),
+		},
+		{
+			name: "invalid - metadata value in non-String",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "User"
+							value = "My user"
+							email = "user@email.com"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0\.metadata_value\.0: value must not be set for User type`),
+		},
+		{
+			name: "invalid - no identification in non-String",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "User"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0\.metadata_value\.0: at least one of item_id, email, or name must be set for User type`),
+		},
+		{
+			name: "valid - metadata branching with values",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "String"
+							value = "production"
+						}
+						metadata_value {
+							type = "String"
+							value = "staging"
+						}
+						policy_id = 123
+					}
+				}
+			`,
+			expectError: nil,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			resource.Test(t, resource.TestCase{
+				IsUnitTest: true,
+				ProviderFactories: map[string]func() (*schema.Provider, error){
+					"betteruptime": func() (*schema.Provider, error) {
+						return New(WithURL(server.URL)), nil
+					},
+				},
+				Steps: []resource.TestStep{
+					{
+						Config:      tc.config,
+						ExpectError: tc.expectError,
+					},
+				},
+			})
+		})
+	}
+}

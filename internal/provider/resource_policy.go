@@ -384,6 +384,12 @@ func validatePolicy(ctx context.Context, d *schema.ResourceDiff, m interface{}) 
 		stepMap := step.(map[string]interface{})
 
 		if stepMap["type"].(string) == "metadata_branching" {
+			if stepMap["metadata_key"].(string) == "" {
+				return fmt.Errorf("steps.%d: missing metadata_key for metadata_branching step", i)
+			}
+			if len(stepMap["metadata_value"].([]interface{})) == 0 {
+				return fmt.Errorf("steps.%d: there must be at least 1 metadata_value for metadata_branching step", i)
+			}
 			if err := validatePolicyMetadataValues(stepMap, fmt.Sprintf("steps.%d", i)); err != nil {
 				return err
 			}
