@@ -206,7 +206,19 @@ func catalogRecordDelete(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func catalogRecordCopyAttrs(d *schema.ResourceData, in *catalogRecord) diag.Diagnostics {
-	if err := d.Set("attribute", flattenCatalogRecordAttributes(in.Attributes)); err != nil {
+	attributes := flattenCatalogRecordAttributes(in.Attributes)
+
+	// Remove item_id, name, and email from attributes if they were not configured, avoid loading them from API
+	for attributeIndex, attribute := range attributes {
+		attributeMap := attribute.(map[string]interface{})
+		for _, field := range []string{"item_id", "name", "email"} {
+			if value, ok := d.GetOk(fmt.Sprintf("attribute.%d.%s", attributeIndex, field)); !ok || value == "" {
+				delete(attributeMap, field)
+			}
+		}
+	}
+
+	if err := d.Set("attribute", attributes); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
