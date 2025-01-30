@@ -2,9 +2,12 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"reflect"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -58,6 +61,54 @@ var metadataSchema = map[string]*schema.Schema{
 		Optional:    false,
 		Computed:    true,
 	},
+}
+
+var metadataTypes = []string{
+	"String", "User", "Team", "Policy", "Schedule",
+	"SlackIntegration", "LinearIntegration", "JiraIntegration",
+	"MicrosoftTeamsWebhook", "ZapierWebhook", "NativeWebhook",
+	"PagerDutyWebhook",
+}
+
+var metadataValueSchema = map[string]*schema.Schema{
+	"type": {
+		Description:  "Type of the value.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      "String",
+		ValidateFunc: validation.StringInSlice(metadataTypes, false),
+	},
+	"value": {
+		Description: "Value when type is String.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"item_id": {
+		Description: "ID of the referenced item when type is different than String.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
+	},
+	"name": {
+		Description: "Human readable name of the referenced item when type is different than String and the item has a name.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
+	},
+	"email": {
+		Description: "Email of the referenced user when type is User.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
+	},
+}
+
+type metadataValue struct {
+	Type   string      `json:"type"`
+	Value  *string     `json:"value,omitempty"`
+	ItemID json.Number `json:"item_id,omitempty"`
+	Name   *string     `json:"name,omitempty"`
+	Email  *string     `json:"email,omitempty"`
 }
 
 func newMetadataResource() *schema.Resource {
@@ -173,4 +224,46 @@ func metadataUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 
 func metadataDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/metadata/%s", url.PathEscape(d.Id())))
+}
+
+func validateMetadataValue(attrMap map[string]interface{}, path string) error {
+	attrType := attrMap["type"].(string)
+
+	// Validation for String type
+	if attrType == "String" {
+		if value, ok := attrMap["value"].(string); !ok || value == "" {
+			return fmt.Errorf("%s: value must be set for String type", path)
+		}
+		if itemID, ok := attrMap["item_id"].(string); ok && itemID != "" {
+			return fmt.Errorf("%s: item_id must not be set for String type", path)
+		}
+		if email, ok := attrMap["email"].(string); ok && email != "" {
+			return fmt.Errorf("%s: email must not be set for String type", path)
+		}
+		if name, ok := attrMap["name"].(string); ok && name != "" {
+			return fmt.Errorf("%s: name must not be set for String type", path)
+		}
+		return nil
+	}
+
+	// Validation for non-String types
+	if value, ok := attrMap["value"].(string); ok && value != "" {
+		return fmt.Errorf("%s: value must not be set for %s type", path, attrType)
+	}
+
+	hasIdentifier := false
+	if itemID, ok := attrMap["item_id"].(string); ok && itemID != "" {
+		hasIdentifier = true
+	}
+	if email, ok := attrMap["email"].(string); ok && email != "" {
+		hasIdentifier = true
+	}
+	if name, ok := attrMap["name"].(string); ok && name != "" {
+		hasIdentifier = true
+	}
+	if !hasIdentifier {
+		return fmt.Errorf("%s: at least one of item_id, email, or name must be set for %s type", path, attrType)
+	}
+
+	return nil
 }

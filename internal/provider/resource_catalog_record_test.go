@@ -94,7 +94,7 @@ func TestResourceCatalogRecordValidation(t *testing.T) {
 					}
 				}
 			`,
-			expectError: regexp.MustCompile("value must be set for String type attribute"),
+			expectError: regexp.MustCompile("value must be set for String type"),
 		},
 		{
 			name: "invalid string attribute - with item_id",
@@ -113,7 +113,7 @@ func TestResourceCatalogRecordValidation(t *testing.T) {
 					}
 				}
 			`,
-			expectError: regexp.MustCompile("item_id must not be set for String type attribute"),
+			expectError: regexp.MustCompile("item_id must not be set for String type"),
 		},
 		{
 			name: "valid user attribute",
@@ -150,7 +150,7 @@ func TestResourceCatalogRecordValidation(t *testing.T) {
 					}
 				}
 			`,
-			expectError: regexp.MustCompile("value must not be set for User type attribute"),
+			expectError: regexp.MustCompile("value must not be set for User type"),
 		},
 		{
 			name: "invalid user attribute - no identifier",
@@ -167,7 +167,7 @@ func TestResourceCatalogRecordValidation(t *testing.T) {
 					}
 				}
 			`,
-			expectError: regexp.MustCompile("at least one of item_id, email, or name must be set for User type attribute"),
+			expectError: regexp.MustCompile("at least one of item_id, email, or name must be set for User type"),
 		},
 	}
 
