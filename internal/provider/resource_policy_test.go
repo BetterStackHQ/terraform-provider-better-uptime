@@ -9,7 +9,7 @@ import (
 )
 
 func TestResourcePolicy(t *testing.T) {
-	server := newResourceServer(t, "/api/v2/policies", "1")
+	server := newResourceServer(t, "/api/v3/policies", "1")
 	defer server.Close()
 
 	resource.Test(t, resource.TestCase{
@@ -68,8 +68,9 @@ func TestResourcePolicy(t *testing.T) {
 					t.Log("step 1")
 				},
 			},
-			// Step 2 - change to a branching policy.
+			// Step 2 - change to a branching policy, use legacy metadata_values
 			{
+				ExpectNonEmptyPlan: true, // Ignoring plan not empty error since we're using legacy metadata_values attribute
 				Config: `
                 provider "betteruptime" {
 					api_token = "foo"
@@ -93,14 +94,14 @@ func TestResourcePolicy(t *testing.T) {
                     days        = ["sat", "sun"]
                     time_from   = "08:00"
                     time_to     = "22:00"
-                    policy_id   = 456
+                    policy_metadata_key = "Team Policy"
                   }
                   steps {
                     type            = "metadata_branching"
                     wait_before     = 0
                     metadata_key    = "severity"
                     metadata_values = ["critical", "error"]
-                    policy_id       = 456
+                    policy_id = 456
                   }
 				}
 				`,
@@ -118,19 +119,21 @@ func TestResourcePolicy(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.timezone", "Prague"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.days.0", "sat"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.time_to", "22:00"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.policy_id", "456"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.policy_metadata_key", "Team Policy"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.type", "metadata_branching"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.wait_before", "0"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_key", "severity"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_values.0", "critical"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_values.1", "error"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_value.0.type", "String"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_value.0.value", "critical"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_value.1.type", "String"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.metadata_value.1.value", "error"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.2.policy_id", "456"),
 				),
 				PreConfig: func() {
 					t.Log("step 2")
 				},
 			},
-			// Step 3 - make no changes, check plan is empty.
+			// Step 3 - make no changes, only update to metadata_value blocks, check plan is empty.
 			{
 				Config: `
                 provider "betteruptime" {
@@ -155,14 +158,19 @@ func TestResourcePolicy(t *testing.T) {
                     days        = ["sat", "sun"]
                     time_from   = "08:00"
                     time_to     = "22:00"
-                    policy_id   = 456
+                    policy_metadata_key = "Team Policy"
                   }
                   steps {
                     type            = "metadata_branching"
                     wait_before     = 0
                     metadata_key    = "severity"
-                    metadata_values = ["critical", "error"]
-                    policy_id       = 456
+                    metadata_value {
+                      value = "critical"
+					}
+                    metadata_value {
+                      value = "error"
+					}
+                    policy_id = 456
                   }
 				}`,
 				PlanOnly: true,
@@ -377,4 +385,178 @@ func TestResourcePolicy(t *testing.T) {
 			},
 		},
 	})
+}
+func TestResourcePolicyMetadataValidation(t *testing.T) {
+	server := newResourceServer(t, "/api/v3/policies", "1")
+	defer server.Close()
+
+	cases := []struct {
+		name        string
+		config      string
+		expectError *regexp.Regexp
+	}{
+		{
+			name: "invalid - metadata_value on non-metadata step",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "escalation"
+						metadata_value {
+							type = "String"
+							value = "test"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: metadata_value must be empty for non-metadata_branching steps`),
+		},
+		{
+			name: "invalid - no metadata_key on metadata step",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_value {
+							value = "test"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: missing metadata_key for metadata_branching step`),
+		},
+		{
+			name: "invalid - no metadata_value on metadata step",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: there must be at least 1 metadata_value for metadata_branching step`),
+		},
+		{
+			name: "invalid - metadata value missing value",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "String"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0\.metadata_value\.0: value must be set for String type`),
+		},
+		{
+			name: "invalid - metadata value in non-String",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "User"
+							value = "My user"
+							email = "user@email.com"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0\.metadata_value\.0: value must not be set for User type`),
+		},
+		{
+			name: "invalid - no identification in non-String",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "User"
+						}
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0\.metadata_value\.0: at least one of item_id, email, or name must be set for User type`),
+		},
+		{
+			name: "valid - metadata branching with values",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "String"
+							value = "production"
+						}
+						metadata_value {
+							type = "String"
+							value = "staging"
+						}
+						policy_id = 123
+					}
+				}
+			`,
+			expectError: nil,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			resource.Test(t, resource.TestCase{
+				IsUnitTest: true,
+				ProviderFactories: map[string]func() (*schema.Provider, error){
+					"betteruptime": func() (*schema.Provider, error) {
+						return New(WithURL(server.URL)), nil
+					},
+				},
+				Steps: []resource.TestStep{
+					{
+						Config:      tc.config,
+						ExpectError: tc.expectError,
+					},
+				},
+			})
+		})
+	}
 }

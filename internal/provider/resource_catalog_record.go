@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var catalogRecordSchema = map[string]*schema.Schema{
@@ -42,40 +41,11 @@ var catalogRecordSchema = map[string]*schema.Schema{
 					Computed:    true,
 					Optional:    false,
 				},
-				"type": {
-					Description: "Type of the value.",
-					Type:        schema.TypeString,
-					Required:    true,
-					ValidateFunc: validation.StringInSlice([]string{
-						"String", "User", "Team", "Policy", "Schedule",
-						"SlackIntegration", "LinearIntegration", "JiraIntegration",
-						"MicrosoftTeamsWebhook", "ZapierWebhook", "NativeWebhook",
-						"PagerDutyWebhook",
-					}, false),
-				},
-				"value": {
-					Description: "Value when type is String.",
-					Type:        schema.TypeString,
-					Optional:    true,
-				},
-				"item_id": {
-					Description: "ID of the referenced item when type is different than String.",
-					Type:        schema.TypeString,
-					Optional:    true,
-					Computed:    true,
-				},
-				"name": {
-					Description: "Human readable name of the referenced item when type is different than String and the item has a name.",
-					Type:        schema.TypeString,
-					Optional:    true,
-					Computed:    true,
-				},
-				"email": {
-					Description: "Email of the referenced user when type is User.",
-					Type:        schema.TypeString,
-					Optional:    true,
-					Computed:    true,
-				},
+				"type":    metadataValueSchema["type"],
+				"value":   metadataValueSchema["value"],
+				"item_id": metadataValueSchema["item_id"],
+				"name":    metadataValueSchema["name"],
+				"email":   metadataValueSchema["email"],
 			},
 		},
 	},
@@ -106,20 +76,12 @@ func newCatalogRecordResource() *schema.Resource {
 	}
 }
 
-type catalogRecordValue struct {
-	Type   string      `json:"type"`
-	Value  *string     `json:"value,omitempty"`
-	ItemID json.Number `json:"item_id,omitempty"`
-	Name   *string     `json:"name,omitempty"`
-	Email  *string     `json:"email,omitempty"`
-}
-
 type catalogRecordAttribute struct {
 	Attribute struct {
 		ID   json.Number `json:"id"`
 		Name string      `json:"name,omitempty"`
 	} `json:"attribute"`
-	Values []catalogRecordValue `json:"values"`
+	Values []metadataValue `json:"values"`
 }
 
 type catalogRecord struct {
@@ -142,7 +104,7 @@ func expandCatalogRecordAttributes(d *schema.ResourceData) []catalogRecordAttrib
 		var attribute catalogRecordAttribute
 		attribute.Attribute.ID = json.Number(attrMap["attribute_id"].(string))
 
-		var value catalogRecordValue
+		var value metadataValue
 		value.Type = attrMap["type"].(string)
 
 		if v, ok := attrMap["value"].(string); ok && v != "" {
@@ -158,7 +120,7 @@ func expandCatalogRecordAttributes(d *schema.ResourceData) []catalogRecordAttrib
 			value.Email = &v
 		}
 
-		attribute.Values = []catalogRecordValue{value}
+		attribute.Values = []metadataValue{value}
 		attributes = append(attributes, attribute)
 	}
 
@@ -255,44 +217,8 @@ func validateCatalogRecordAttributes(ctx context.Context, d *schema.ResourceDiff
 
 	for i, attr := range attributes {
 		attrMap := attr.(map[string]interface{})
-		attrType := attrMap["type"].(string)
-
-		// Validation for String type
-		if attrType == "String" {
-			if value, ok := attrMap["value"].(string); !ok || value == "" {
-				return fmt.Errorf("attribute.%d: value must be set for String type attribute (for empty values omit the attirbute altogether)", i)
-			}
-			if itemID, ok := attrMap["item_id"].(string); ok && itemID != "" {
-				return fmt.Errorf("attribute.%d: item_id must not be set for String type attribute", i)
-			}
-			if email, ok := attrMap["email"].(string); ok && email != "" {
-				return fmt.Errorf("attribute.%d: email must not be set for String type attribute", i)
-			}
-			if name, ok := attrMap["name"].(string); ok && name != "" {
-				return fmt.Errorf("attribute.%d: name must not be set for String type attribute", i)
-			}
-			continue
-		}
-
-		// Validation for non-String types
-		if value, ok := attrMap["value"].(string); ok && value != "" {
-			return fmt.Errorf("attribute.%d: value must not be set for %s type attribute", i, attrType)
-		}
-
-		// At least one of item_id, email, or name must be set
-		hasIdentifier := false
-		if itemID, ok := attrMap["item_id"].(string); ok && itemID != "" {
-			hasIdentifier = true
-		}
-		if email, ok := attrMap["email"].(string); ok && email != "" {
-			hasIdentifier = true
-		}
-		if name, ok := attrMap["name"].(string); ok && name != "" {
-			hasIdentifier = true
-		}
-
-		if !hasIdentifier {
-			return fmt.Errorf("attribute.%d: at least one of item_id, email, or name must be set for %s type attribute", i, attrType)
+		if err := validateMetadataValue(attrMap, fmt.Sprintf("attribute.%d", i)); err != nil {
+			return err
 		}
 	}
 

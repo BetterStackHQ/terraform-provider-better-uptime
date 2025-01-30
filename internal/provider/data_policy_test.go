@@ -19,7 +19,7 @@ func TestDataPolicy(t *testing.T) {
 			t.Fail()
 		}
 
-		prefix := "/api/v2/policies"
+		prefix := "/api/v3/policies"
 
 		switch {
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=1":

@@ -52,7 +52,7 @@ type policiesPageHTTPResponse struct {
 
 func policyLookup(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	fetch := func(page int) (*policiesPageHTTPResponse, error) {
-		res, err := meta.(*client).Get(ctx, fmt.Sprintf("/api/v2/policies?page=%d", page))
+		res, err := meta.(*client).Get(ctx, fmt.Sprintf("/api/v3/policies?page=%d", page))
 		if err != nil {
 			return nil, err
 		}

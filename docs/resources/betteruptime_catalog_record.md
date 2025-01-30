@@ -30,13 +30,13 @@ https://betterstack.com/docs/uptime/api/catalog-integrations-records/
 Required:
 
 - **attribute_id** (String) ID of the target Catalog attribute.
-- **type** (String) Type of the value.
 
 Optional:
 
 - **email** (String) Email of the referenced user when type is User.
 - **item_id** (String) ID of the referenced item when type is different than String.
 - **name** (String) Human readable name of the referenced item when type is different than String and the item has a name.
+- **type** (String) Type of the value. When left empty, the String type is used.
 - **value** (String) Value when type is String.
 
 Read-Only:
