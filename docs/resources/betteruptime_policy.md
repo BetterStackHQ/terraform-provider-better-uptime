@@ -3,12 +3,12 @@
 page_title: "betteruptime_policy Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
+  https://betterstack.com/docs/uptime/api/policies/
 ---
 
 # betteruptime_policy (Resource)
 
-https://betterstack.com/docs/uptime/api/list-all-escalation-policies/
+https://betterstack.com/docs/uptime/api/policies/
 
 
 
@@ -43,8 +43,9 @@ Optional:
 
 - **days** (List of String) An array of days during which the branching rule will be executed. Valid values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]. Used when step type is branching.
 - **metadata_key** (String) A metadata field key to check. Used when step type is metadata_branching.
-- **metadata_values** (List of String) An array of metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching.
+- **metadata_value** (Block List) An array of typed metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching. (see [below for nested schema](#nestedblock--steps--metadata_value))
 - **policy_id** (Number) A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.
+- **policy_metadata_key** (String) A metadata key from which to extract the policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.
 - **step_members** (Block List) An array of escalation policy steps members. Used when step type is escalation. (see [below for nested schema](#nestedblock--steps--step_members))
 - **time_from** (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is time_branching.
 - **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.
@@ -53,6 +54,18 @@ Optional:
 - **wait_before** (Number) How long to wait in seconds before executing this step since previous step. Omit if wait_until_time is set.
 - **wait_until_time** (String) Execute this step at the specified time. Use HH:MM format. Omit if wait_before is set.
 - **wait_until_timezone** (String) Timezone to use when interpreting wait_until_time. Omit if wait_before is set.
+
+<a id="nestedblock--steps--metadata_value"></a>
+### Nested Schema for `steps.metadata_value`
+
+Optional:
+
+- **email** (String) Email of the referenced user when type is User.
+- **item_id** (String) ID of the referenced item when type is different than String.
+- **name** (String) Human readable name of the referenced item when type is different than String and the item has a name.
+- **type** (String) Type of the value. When left empty, the String type is used.
+- **value** (String) Value when type is String.
+
 
 <a id="nestedblock--steps--step_members"></a>
 ### Nested Schema for `steps.step_members`

@@ -35,8 +35,9 @@ Read-Only:
 
 - **days** (List of String)
 - **metadata_key** (String)
-- **metadata_values** (List of String)
+- **metadata_value** (List of Object) (see [below for nested schema](#nestedobjatt--steps--metadata_value))
 - **policy_id** (Number)
+- **policy_metadata_key** (String)
 - **step_members** (List of Object) (see [below for nested schema](#nestedobjatt--steps--step_members))
 - **time_from** (String)
 - **time_to** (String)
@@ -46,6 +47,18 @@ Read-Only:
 - **wait_before** (Number)
 - **wait_until_time** (String)
 - **wait_until_timezone** (String)
+
+<a id="nestedobjatt--steps--metadata_value"></a>
+### Nested Schema for `steps.metadata_value`
+
+Read-Only:
+
+- **email** (String)
+- **item_id** (String)
+- **name** (String)
+- **type** (String)
+- **value** (String)
+
 
 <a id="nestedobjatt--steps--step_members"></a>
 ### Nested Schema for `steps.step_members`

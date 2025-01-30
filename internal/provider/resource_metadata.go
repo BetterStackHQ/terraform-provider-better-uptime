@@ -72,7 +72,7 @@ var metadataTypes = []string{
 
 var metadataValueSchema = map[string]*schema.Schema{
 	"type": {
-		Description:  "Type of the value.",
+		Description:  "Type of the value. When left empty, the String type is used.",
 		Type:         schema.TypeString,
 		Optional:     true,
 		Default:      "String",
