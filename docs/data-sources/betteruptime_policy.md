@@ -36,6 +36,7 @@ Read-Only:
 - **days** (List of String)
 - **metadata_key** (String)
 - **metadata_value** (List of Object) (see [below for nested schema](#nestedobjatt--steps--metadata_value))
+- **metadata_values** (List of String)
 - **policy_id** (Number)
 - **policy_metadata_key** (String)
 - **step_members** (List of Object) (see [below for nested schema](#nestedobjatt--steps--step_members))

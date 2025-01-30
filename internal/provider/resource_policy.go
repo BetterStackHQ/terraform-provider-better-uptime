@@ -102,14 +102,14 @@ var policyStepSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Default:     nil,
 	},
-	//"metadata_values": {
-	//	Description: "An array of metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching.",
-	//	Type:        schema.TypeList,
-	//	Elem:        &schema.Schema{Type: schema.TypeString},
-	//	Optional:    true,
-	//	Default:     nil,
-	//	Deprecated:  "Use repeatable block metadata_value to define values with types instead.",
-	//},
+	"metadata_values": {
+		Description: "An array of metadata String values which will cause the branching rule to be executed. Used when step type is metadata_branching.",
+		Type:        schema.TypeList,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Default:     nil,
+		Deprecated:  "Use repeatable block metadata_value to define values with types instead.",
+	},
 	"metadata_value": {
 		Description: "An array of typed metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching.",
 		Type:        schema.TypeList,
@@ -206,20 +206,21 @@ type policyStepMember struct {
 }
 
 type policyStep struct {
-	Type              *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
-	WaitBefore        *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
-	WaitUntilTime     *string             `mapstructure:"wait_until_time,omitempty" json:"wait_until_time,omitempty"`
-	WaitUntilTimezone *string             `mapstructure:"wait_until_timezone,omitempty" json:"wait_until_timezone,omitempty"`
-	UrgencyId         *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
-	Members           *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
-	Timezone          *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
-	Days              *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
-	TimeFrom          *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
-	TimeTo            *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
-	MetadataKey       *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
-	MetadataValues    *[]metadataValue    `mapstructure:"metadata_value" json:"metadata_values,omitempty"`
-	PolicyId          *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
-	PolicyMetadataKey *string             `mapstructure:"policy_metadata_key,omitempty" json:"policy_metadata_key,omitempty"`
+	Type                 *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
+	WaitBefore           *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
+	WaitUntilTime        *string             `mapstructure:"wait_until_time,omitempty" json:"wait_until_time,omitempty"`
+	WaitUntilTimezone    *string             `mapstructure:"wait_until_timezone,omitempty" json:"wait_until_timezone,omitempty"`
+	UrgencyId            *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
+	Members              *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
+	Timezone             *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
+	Days                 *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
+	TimeFrom             *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
+	TimeTo               *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
+	MetadataKey          *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
+	MetadataValues       *[]metadataValue    `mapstructure:"metadata_value" json:"metadata_values,omitempty"`
+	LegacyMetadataValues *[]string           `mapstructure:"metadata_values" json:"-"`
+	PolicyId             *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
+	PolicyMetadataKey    *string             `mapstructure:"policy_metadata_key,omitempty" json:"policy_metadata_key,omitempty"`
 }
 
 type policy struct {
@@ -353,8 +354,23 @@ func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) error {
 			}
 		}
 
+		// Convert legacy metadata_values to metadata_value blocks
+		if metadataValues, ok := stepValuesObject["metadata_values"].([]interface{}); ok && len(metadataValues) > 0 {
+			var metadataValueBlocks []map[string]interface{}
+			for _, value := range metadataValues {
+				if strValue, ok := value.(string); ok {
+					metadataValueBlocks = append(metadataValueBlocks, map[string]interface{}{
+						"type":  "String",
+						"value": strValue,
+					})
+				}
+			}
+			stepValuesObject["metadata_value"] = metadataValueBlocks
+			stepValuesObject["metadata_values"] = nil
+		}
+
 		// Remove default values ("" or 0) from metadata values
-		metadataValues, ok := stepValuesObject["metadata_values"].([]interface{})
+		metadataValues, ok := stepValuesObject["metadata_value"].([]interface{})
 		if ok {
 			for _, value := range metadataValues {
 				valueObject := value.(map[string]interface{})
@@ -387,8 +403,11 @@ func validatePolicy(ctx context.Context, d *schema.ResourceDiff, m interface{}) 
 			if stepMap["metadata_key"].(string) == "" {
 				return fmt.Errorf("steps.%d: missing metadata_key for metadata_branching step", i)
 			}
-			if len(stepMap["metadata_value"].([]interface{})) == 0 {
+			if len(stepMap["metadata_value"].([]interface{})) == 0 && len(stepMap["metadata_values"].([]interface{})) == 0 {
 				return fmt.Errorf("steps.%d: there must be at least 1 metadata_value for metadata_branching step", i)
+			}
+			if len(stepMap["metadata_value"].([]interface{})) > 0 && len(stepMap["metadata_values"].([]interface{})) > 0 {
+				return fmt.Errorf("steps.%d: metadata_value blocks cannot be used simultaneously with metadata_values array", i)
 			}
 			if err := validatePolicyMetadataValues(stepMap, fmt.Sprintf("steps.%d", i)); err != nil {
 				return err

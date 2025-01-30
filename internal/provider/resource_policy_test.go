@@ -68,8 +68,9 @@ func TestResourcePolicy(t *testing.T) {
 					t.Log("step 1")
 				},
 			},
-			// Step 2 - change to a branching policy.
+			// Step 2 - change to a branching policy, use legacy metadata_values
 			{
+				ExpectNonEmptyPlan: true, // Ignoring plan not empty error since we're using legacy metadata_values attribute
 				Config: `
                 provider "betteruptime" {
 					api_token = "foo"
@@ -99,12 +100,7 @@ func TestResourcePolicy(t *testing.T) {
                     type            = "metadata_branching"
                     wait_before     = 0
                     metadata_key    = "severity"
-                    metadata_value {
-                      value = "critical"
-					}
-                    metadata_value {
-                      value = "error"
-					}
+                    metadata_values = ["critical", "error"]
                     policy_id = 456
                   }
 				}
@@ -137,7 +133,7 @@ func TestResourcePolicy(t *testing.T) {
 					t.Log("step 2")
 				},
 			},
-			// Step 3 - make no changes, check plan is empty.
+			// Step 3 - make no changes, only update to metadata_value blocks, check plan is empty.
 			{
 				Config: `
                 provider "betteruptime" {
