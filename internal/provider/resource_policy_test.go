@@ -1,11 +1,13 @@
 package provider
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestResourcePolicy(t *testing.T) {
@@ -559,4 +561,86 @@ func TestResourcePolicyMetadataValidation(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestResourcePolicyMetadataValueStateCleanup(t *testing.T) {
+	server := newResourceServer(t, "/api/v3/policies", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - Create with User type
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "owner"
+						metadata_value {
+							type = "User"
+							email = "test@example.com"
+						}
+					}
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					// Simulate API setting computed fields
+					func(s *terraform.State) error {
+						rs, ok := s.RootModule().Resources["betteruptime_policy.test"]
+						if !ok {
+							return fmt.Errorf("resource not found")
+						}
+						rs.Primary.Attributes["steps.0.metadata_value.0.item_id"] = "456"
+						rs.Primary.Attributes["steps.0.metadata_value.0.name"] = "Test User"
+						return nil
+					},
+					// Verify all User type fields are present
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.type", "User"),
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.email", "test@example.com"),
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.item_id", "456"),
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.name", "Test User"),
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.value", ""),
+				),
+			},
+			// Step 2 - Update to String type, should clean up computed fields
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "owner"
+						metadata_value {
+							type = "String"
+							value = "test@example.com"
+						}
+					}
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					// Verify only String type fields are present
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.type", "String"),
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.value", "test@example.com"),
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.email", ""),
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.item_id", ""),
+					resource.TestCheckResourceAttr("betteruptime_policy.test", "steps.0.metadata_value.0.name", ""),
+				),
+			},
+		},
+	})
 }
