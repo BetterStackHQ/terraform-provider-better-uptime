@@ -238,7 +238,7 @@ func TestResourceMonitorWithHeaders(t *testing.T) {
 				}
 				`, url, monitorType),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`Invalid request header map\[name: value:test\]: must contain 'name' key with a non-empty string value`),
+				ExpectError: regexp.MustCompile(`invalid request header map\[name: value:test\]: must contain 'name' key with a non-empty string value`),
 			},
 			// Step 5 - invalid header with empty value.
 			{
@@ -259,7 +259,7 @@ func TestResourceMonitorWithHeaders(t *testing.T) {
 				}
 				`, url, monitorType),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`Invalid request header map\[name:X-TEST value:\]: must contain 'value' key with a non-empty string value`),
+				ExpectError: regexp.MustCompile(`invalid request header map\[name:X-TEST value:\]: must contain 'value' key with a non-empty string value`),
 			},
 			// Step 6 - invalid header with extra keys.
 			{
@@ -281,7 +281,7 @@ func TestResourceMonitorWithHeaders(t *testing.T) {
 				}
 				`, url, monitorType),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`Invalid request header map\[extra:invalid name:X-TEST value:test\]: must only contain 'name' and 'value' keys`),
+				ExpectError: regexp.MustCompile(`invalid request header map\[extra:invalid name:X-TEST value:test\]: must only contain 'name' and 'value' keys`),
 			},
 			// Step 7 - invalid header with incorrect format.
 			{
@@ -301,7 +301,7 @@ func TestResourceMonitorWithHeaders(t *testing.T) {
 				}
 				`, url, monitorType),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`Invalid request header map\[X-TEST:test\]: must contain 'name' key with a non-empty string value`),
+				ExpectError: regexp.MustCompile(`invalid request header map\[X-TEST:test\]: must contain 'name' key with a non-empty string value`),
 			},
 		},
 	})

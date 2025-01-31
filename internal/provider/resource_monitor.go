@@ -579,7 +579,7 @@ func validateRequestHeaders(ctx context.Context, diff *schema.ResourceDiff, v in
 		for _, header := range headers.([]interface{}) {
 			headerMap := header.(map[string]interface{})
 			if err := validateRequestHeader(headerMap); err != nil {
-				return fmt.Errorf("Invalid request header %v: %v", headerMap, err)
+				return fmt.Errorf("invalid request header %v: %v", headerMap, err)
 			}
 		}
 	}
@@ -619,7 +619,7 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 
 		// Validation at apply time, empty map is considered invalid (fields should be known at this point)
 		if len(header) == 0 {
-			return fmt.Errorf("Invalid request header %v: map cannot be empty", header)
+			return fmt.Errorf("invalid request header %v: map cannot be empty", header)
 		}
 		// Headers can have ID at apply time, temporarily remove it before validation and reattach it afterwards
 		id, idPresent := header["id"]
@@ -629,7 +629,7 @@ func loadRequestHeaders(d *schema.ResourceData, receiver **[]map[string]interfac
 			header["id"] = id
 		}
 		if err != nil {
-			return fmt.Errorf("Invalid request header %v: %v", header, err)
+			return fmt.Errorf("invalid request header %v: %v", header, err)
 		}
 
 		newHeader := map[string]interface{}{"name": header["name"], "value": header["value"]}
