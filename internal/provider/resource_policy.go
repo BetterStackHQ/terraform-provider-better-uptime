@@ -292,17 +292,19 @@ func resourcePolicyRead(ctx context.Context, d *schema.ResourceData, meta interf
 func policyCopyAttrs(d *schema.ResourceData, in *policy) diag.Diagnostics {
 	var derr diag.Diagnostics
 
-	// Remember which item_id, name, and email from metadata values in policy steps were not configured
-	var emptyPaths []string
+	// Remove item_id, name, and email from metadata values in policy steps if they were not configured, avoid loading them from API
 	if in.Steps != nil {
 		for stepIndex, step := range *in.Steps {
 			if step.MetadataValues != nil {
 				for valueIndex := range *step.MetadataValues {
-					for _, field := range []string{"item_id", "name", "email"} {
-						path := fmt.Sprintf("steps.%d.metadata_value.%d.%s", stepIndex, valueIndex, field)
-						if value, ok := d.GetOk(path); !ok || value == "" {
-							emptyPaths = append(emptyPaths, path)
-						}
+					if value, ok := d.GetOk(fmt.Sprintf("steps.%d.metadata_value.%d.item_id", stepIndex, valueIndex)); !ok || value == "" {
+						(*(*in.Steps)[stepIndex].MetadataValues)[valueIndex].ItemID = ""
+					}
+					if value, ok := d.GetOk(fmt.Sprintf("steps.%d.metadata_value.%d.email", stepIndex, valueIndex)); !ok || value == "" {
+						(*(*in.Steps)[stepIndex].MetadataValues)[valueIndex].Email = nil
+					}
+					if value, ok := d.GetOk(fmt.Sprintf("steps.%d.metadata_value.%d.name", stepIndex, valueIndex)); !ok || value == "" {
+						(*(*in.Steps)[stepIndex].MetadataValues)[valueIndex].Name = nil
 					}
 				}
 			}
@@ -311,13 +313,6 @@ func policyCopyAttrs(d *schema.ResourceData, in *policy) diag.Diagnostics {
 
 	for _, e := range policyRef(in) {
 		if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
-			derr = append(derr, diag.FromErr(err)[0])
-		}
-	}
-
-	// Remove item_id, name, and email from metadata values in policy steps if they were not configured, avoid loading them from API
-	for _, path := range emptyPaths {
-		if err := d.Set(path, nil); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}
