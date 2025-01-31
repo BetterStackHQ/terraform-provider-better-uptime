@@ -87,19 +87,16 @@ var metadataValueSchema = map[string]*schema.Schema{
 		Description: "ID of the referenced item when type is different than String.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 	},
 	"name": {
 		Description: "Human readable name of the referenced item when type is different than String and the item has a name.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 	},
 	"email": {
 		Description: "Email of the referenced user when type is User.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 	},
 }
 
