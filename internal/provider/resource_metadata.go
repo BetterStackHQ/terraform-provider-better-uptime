@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -70,9 +71,22 @@ var metadataTypes = []string{
 	"PagerDutyWebhook",
 }
 
+const scalarMetadataTypesCount = 1
+
 var metadataValueSchema = map[string]*schema.Schema{
 	"type": {
-		Description:  "Type of the value. When left empty, the String type is used.",
+		Description: "Value types can be grouped into 2 main categories:\n" +
+			"  - **Scalar**: `" + strings.Join(metadataTypes[:scalarMetadataTypesCount], "`, `") + "`\n" +
+			"  - **Reference**: `" + strings.Join(metadataTypes[scalarMetadataTypesCount:], "`, `") + "`\n" +
+			"  \n" +
+			"  The value of a **Scalar** type is defined using the value field.\n" +
+			"  \n" +
+			"  The value of a **Reference** type is defined using one of the following fields:\n" +
+			"  - `item_id` - great choice when you know the ID of the target item.\n" +
+			"  - `email` - your go to choice when you're referencing users.\n" +
+			"  - `name` - can be used to reference other items like teams, policies, etc.\n" +
+			"  \n" +
+			"  **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**\n",
 		Type:         schema.TypeString,
 		Optional:     true,
 		Default:      "String",
@@ -84,17 +98,17 @@ var metadataValueSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"item_id": {
-		Description: "ID of the referenced item when type is different than String.",
+		Description: "ID of the referenced item when type is different than `String`.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"name": {
-		Description: "Human readable name of the referenced item when type is different than String and the item has a name.",
+		Description: "Name of the referenced item when type is different than `String`.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
 	"email": {
-		Description: "Email of the referenced user when type is User.",
+		Description: "Email of the referenced user when type is `User`.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},

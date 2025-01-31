@@ -14,7 +14,7 @@ import (
 
 var catalogRecordSchema = map[string]*schema.Schema{
 	"id": {
-		Description: "The ID of this Catalog Record.",
+		Description: "The ID of this Catalog record.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
@@ -25,7 +25,7 @@ var catalogRecordSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"attribute": {
-		Description: "List of attribute values for the Catalog record.",
+		Description: "List of attribute values for the Catalog record. You can have multiple blocks with same `attribute_id` for multiple values.",
 		Type:        schema.TypeList,
 		Required:    true,
 		Elem: &schema.Resource{

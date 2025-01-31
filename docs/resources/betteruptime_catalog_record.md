@@ -17,12 +17,12 @@ https://betterstack.com/docs/uptime/api/catalog-integrations-records/
 
 ### Required
 
-- **attribute** (Block List, Min: 1) List of attribute values for the Catalog record. (see [below for nested schema](#nestedblock--attribute))
+- **attribute** (Block List, Min: 1) List of attribute values for the Catalog record. You can have multiple blocks with same `attribute_id` for multiple values. (see [below for nested schema](#nestedblock--attribute))
 - **relation_id** (String) The ID of the Catalog relation this record belongs to.
 
 ### Read-Only
 
-- **id** (String) The ID of this Catalog Record.
+- **id** (String) The ID of this Catalog record.
 
 <a id="nestedblock--attribute"></a>
 ### Nested Schema for `attribute`
@@ -33,10 +33,21 @@ Required:
 
 Optional:
 
-- **email** (String) Email of the referenced user when type is User.
-- **item_id** (String) ID of the referenced item when type is different than String.
-- **name** (String) Human readable name of the referenced item when type is different than String and the item has a name.
-- **type** (String) Type of the value. When left empty, the String type is used.
+- **email** (String) Email of the referenced user when type is `User`.
+- **item_id** (String) ID of the referenced item when type is different than `String`.
+- **name** (String) Name of the referenced item when type is different than `String`.
+- **type** (String) Value types can be grouped into 2 main categories:
+  - **Scalar**: `String`
+  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
+  
+  The value of a **Scalar** type is defined using the value field.
+  
+  The value of a **Reference** type is defined using one of the following fields:
+  - `item_id` - great choice when you know the ID of the target item.
+  - `email` - your go to choice when you're referencing users.
+  - `name` - can be used to reference other items like teams, policies, etc.
+  
+  **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
 - **value** (String) Value when type is String.
 
 Read-Only:

@@ -12,17 +12,17 @@ import (
 
 var catalogRelationSchema = map[string]*schema.Schema{
 	"id": {
-		Description: "The ID of this Catalog Relation.",
+		Description: "The ID of this Catalog relation.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
 	"name": {
-		Description: "The name of the Catalog Relation.",
+		Description: "The name of the Catalog relation.",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"description": {
-		Description: "A description of the Catalog Relation.",
+		Description: "A description of the Catalog relation.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
