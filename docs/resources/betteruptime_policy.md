@@ -72,7 +72,7 @@ Optional:
   
   The value of a **Reference** type is defined using one of the following fields:
   - `item_id` - great choice when you know the ID of the target item.
-  - `email` - your go to choice when you're referencing users.
+  - `email` - your go-to choice when you're referencing users.
   - `name` - can be used to reference other items like teams, policies, etc.
   
   **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
