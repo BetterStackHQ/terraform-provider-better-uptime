@@ -10,6 +10,7 @@ git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
 echo '# See variables.tf for more.
 betteruptime_api_token               = "XXXXXXXXXXXXXXXXXXXXXXXX"
 betteruptime_secondary_calendar_name = "My secondary calendar"
+betteruptime_rotation_users = ["albert@acme.com", "betty@acme.com", "charlie@acme.com"]
 ' > terraform.tfvars
 
 terraform init

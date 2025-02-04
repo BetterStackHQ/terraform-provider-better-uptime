@@ -15,3 +15,11 @@ The name of your secondary on-call calendar.
 EOF
   default     = "Secondary calendar"
 }
+
+variable "betteruptime_rotation_users" {
+  type        = list(string)
+  description = <<EOF
+Emails of users to use in new on-call rotation.
+EOF
+  default     = ["petr@betterstack.com", "simon@betterstack.com"]
+}
