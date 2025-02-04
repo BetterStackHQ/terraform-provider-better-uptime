@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"time"
+
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -80,6 +84,50 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 			},
 		},
 	},
+	"on_call_rotation": {
+		Description: "Configuration block for the on-call rotation schedule. Ignored when omitted - on-call can be controlled in Better Stack.",
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"users": {
+					Description: "List of email addresses for users participating in the rotation.",
+					Type:        schema.TypeList,
+					Required:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"rotation_length": {
+					Description: "The length of each rotation shift. See `rotation_interval` for units.",
+					Type:        schema.TypeInt,
+					Required:    true,
+				},
+				"rotation_interval": {
+					Description:  "The interval unit for rotation_length. Must be one of: `hour`, `day`, `week`.",
+					Type:         schema.TypeString,
+					Required:     true,
+					ValidateFunc: validation.StringInSlice([]string{"hour", "day", "week"}, false),
+				},
+				"start_rotations_at": {
+					Description:      "Start time of the rotation in RFC 3339 format (e.g. `2026-01-01T00:00:00Z`)",
+					Type:             schema.TypeString,
+					Required:         true,
+					ValidateDiagFunc: validateRFC3339DateTime,
+					DiffSuppressFunc: diffSuppressRFC3339DateTime,
+				},
+				"end_rotations_at": {
+					Description:      "End time of the rotation in RFC 3339 format (e.g. `2026-01-01T00:00:00Z`)",
+					Type:             schema.TypeString,
+					Required:         true,
+					ValidateDiagFunc: validateRFC3339DateTime,
+					DiffSuppressFunc: diffSuppressRFC3339DateTime,
+				},
+			},
+		},
+	},
 }
 
 func newOnCallCalendarResource() *schema.Resource {
@@ -101,6 +149,14 @@ type onCallCalendar struct {
 	Name            *string `json:"name,omitempty"`
 	DefaultCalendar *bool   `json:"default_calendar,omitempty"`
 	TeamName        *string `json:"team_name,omitempty"`
+}
+
+type onCallRotation struct {
+	Users            *[]string `mapstructure:"users,omitempty" json:"users,omitempty"`
+	RotationLength   *int      `mapstructure:"rotation_length,omitempty" json:"rotation_length,omitempty"`
+	RotationInterval *string   `mapstructure:"rotation_interval,omitempty" json:"rotation_interval,omitempty"`
+	StartRotationsAt *string   `mapstructure:"start_rotations_at,omitempty" json:"start_rotations_at,omitempty"`
+	EndRotationsAt   *string   `mapstructure:"end_rotations_at,omitempty" json:"end_rotations_at,omitempty"`
 }
 
 type onCallRelationships struct {
@@ -140,7 +196,7 @@ func onCallCalendarRef(cal *onCallCalendar) []struct {
 	}
 }
 
-func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel onCallRelationships, inc []onCallIncluded) diag.Diagnostics {
+func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel onCallRelationships, inc []onCallIncluded, rot *onCallRotation) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range onCallCalendarRef(cal) {
 		if !isFieldAttribute(e.k) {
@@ -166,7 +222,48 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}
+
+	// Only set rotation if it exists
+	var rotationList []onCallRotation
+	if rot != nil {
+		rotationList = []onCallRotation{*rot}
+	}
+	if err := d.Set("on_call_rotation", rotationList); err != nil {
+		derr = append(derr, diag.FromErr(err)[0])
+	}
+
 	return derr
+}
+
+func validateRFC3339DateTime(i interface{}, p cty.Path) diag.Diagnostics {
+	v, ok := i.(string)
+	if !ok {
+		return diag.Errorf("expected type to be string")
+	}
+
+	if _, err := time.Parse(time.RFC3339, v); err != nil {
+		return diag.Errorf("expected RFC 3339 datetime (e.g. 2026-01-01T00:00:00Z), got %s: %v", v, err)
+	}
+
+	return nil
+}
+
+func diffSuppressRFC3339DateTime(k, old, new string, d *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return false
+	}
+
+	oldTime, err := time.Parse(time.RFC3339, old)
+	if err != nil {
+		return false
+	}
+
+	newTime, err := time.Parse(time.RFC3339, new)
+	if err != nil {
+		return false
+	}
+
+	return oldTime.UTC().Equal(newTime.UTC())
 }
 
 func resourceOnCallCalendarCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -189,7 +286,23 @@ func resourceOnCallCalendarCreate(ctx context.Context, d *schema.ResourceData, m
 		return err
 	}
 	d.SetId(out.Data.ID)
-	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included)
+
+	if inRotations, ok := d.GetOk("on_call_rotation"); ok && len(inRotations.([]interface{})) > 0 {
+		var outRotation onCallRotation
+		if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), inRotations.([]interface{})[0], &outRotation); err != nil {
+			return err
+		}
+		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
+	}
+
+	var outRotation onCallRotation
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &outRotation); err != nil {
+		return err
+	} else if !ok {
+		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
+	}
+
+	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
 }
 
 func resourceOnCallCalendarRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -208,7 +321,15 @@ func resourceOnCallCalendarRead(ctx context.Context, d *schema.ResourceData, met
 		d.SetId("") // Force "create" on 404
 		return nil
 	}
-	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included)
+
+	var outRotation onCallRotation
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &outRotation); err != nil {
+		return err
+	} else if !ok {
+		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
+	}
+
+	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
 }
 
 func resourceOnCallCalendarUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -231,7 +352,25 @@ func resourceOnCallCalendarUpdate(ctx context.Context, d *schema.ResourceData, m
 	if err := resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s", url.PathEscape(d.Id())), &in, &out); err != nil {
 		return err
 	}
-	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included)
+
+	if d.HasChange("on_call_rotation") {
+		if inRotations, ok := d.GetOk("on_call_rotation"); ok && len(inRotations.([]interface{})) > 0 {
+			var outRotation onCallRotation
+			if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), inRotations.([]interface{})[0], &outRotation); err != nil {
+				return err
+			}
+			return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
+		}
+	}
+
+	var outRotation onCallRotation
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &outRotation); err != nil {
+		return err
+	} else if !ok {
+		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
+	}
+
+	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
 }
 
 func resourceOnCallCalendarDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

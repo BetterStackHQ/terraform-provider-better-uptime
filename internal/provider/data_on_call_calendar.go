@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,6 +29,7 @@ func newOnCallCalendarDataSource() *schema.Resource {
 			cp.Default = nil
 			cp.DefaultFunc = nil
 			cp.DiffSuppressFunc = nil
+			cp.MaxItems = 0
 		}
 		s[k] = &cp
 	}
@@ -81,10 +83,15 @@ func onCallDefaultCalendar(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.FromErr(err)
 	}
 	d.SetId(res.Data.ID)
-	if derr := onCallCalendarCopyAttrs(d, &res.Data.Attributes, res.Data.Relationships, res.Included); derr != nil {
-		return derr
+
+	var outRotation onCallRotation
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(res.Data.ID)), &outRotation); err != nil {
+		return err
+	} else if !ok {
+		return onCallCalendarCopyAttrs(d, &res.Data.Attributes, res.Data.Relationships, res.Included, nil)
 	}
-	return nil
+
+	return onCallCalendarCopyAttrs(d, &res.Data.Attributes, res.Data.Relationships, res.Included, &outRotation)
 }
 
 type onCallCalendarsPageHTTPResponse struct {
@@ -136,9 +143,15 @@ func onCallCalendarLookup(ctx context.Context, d *schema.ResourceData, meta inte
 					return diag.Errorf("There are multiple on-call calendars with the same name: %s", calendarName)
 				}
 				d.SetId(e.ID)
-				if derr := onCallCalendarCopyAttrs(d, &e.Attributes, e.Relationships, res.Included); derr != nil {
-					return derr
+
+				var outRotation onCallRotation
+				if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(e.ID)), &outRotation); err != nil {
+					return err
+				} else if !ok {
+					return onCallCalendarCopyAttrs(d, &e.Attributes, e.Relationships, res.Included, nil)
 				}
+
+				return onCallCalendarCopyAttrs(d, &e.Attributes, e.Relationships, res.Included, &outRotation)
 			}
 		}
 		page++
