@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -110,14 +112,18 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 					ValidateFunc: validation.StringInSlice([]string{"hour", "day", "week"}, false),
 				},
 				"start_rotations_at": {
-					Description: "TODO",
-					Type:        schema.TypeString,
-					Required:    true,
+					Description:      "Start time of the rotation in RFC 3339 format (e.g. 2026-01-01T00:00:00Z)",
+					Type:             schema.TypeString,
+					Required:         true,
+					ValidateDiagFunc: validateRFC3339DateTime,
+					DiffSuppressFunc: diffSuppressRFC3339DateTime,
 				},
 				"end_rotations_at": {
-					Description: "TODO",
-					Type:        schema.TypeString,
-					Required:    true,
+					Description:      "End time of the rotation in RFC 3339 format (e.g. 2026-01-01T00:00:00Z)",
+					Type:             schema.TypeString,
+					Required:         true,
+					ValidateDiagFunc: validateRFC3339DateTime,
+					DiffSuppressFunc: diffSuppressRFC3339DateTime,
 				},
 			},
 		},
@@ -227,6 +233,37 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 	}
 
 	return derr
+}
+
+func validateRFC3339DateTime(i interface{}, p cty.Path) diag.Diagnostics {
+	v, ok := i.(string)
+	if !ok {
+		return diag.Errorf("expected type to be string")
+	}
+
+	if _, err := time.Parse(time.RFC3339, v); err != nil {
+		return diag.Errorf("expected RFC 3339 datetime (e.g. 2026-01-01T00:00:00Z), got %s: %v", v, err)
+	}
+
+	return nil
+}
+
+func diffSuppressRFC3339DateTime(k, old, new string, d *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return false
+	}
+
+	oldTime, err := time.Parse(time.RFC3339, old)
+	if err != nil {
+		return false
+	}
+
+	newTime, err := time.Parse(time.RFC3339, new)
+	if err != nil {
+		return false
+	}
+
+	return oldTime.UTC().Equal(newTime.UTC())
 }
 
 func resourceOnCallCalendarCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
