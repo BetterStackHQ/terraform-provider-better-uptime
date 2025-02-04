@@ -23,7 +23,20 @@ On-call calendar lookup.
 
 - **default_calendar** (Boolean) Whether the on-call calendar is the default on-call calendar.
 - **id** (String) The ID of the on-call calendar.
+- **on_call_rotation** (List of Object) Configuration block for the on-call rotation schedule. Ignored when omitted - on-call can be controlled in Better Stack. (see [below for nested schema](#nestedatt--on_call_rotation))
 - **on_call_users** (List of Object) Array of on-call persons. (see [below for nested schema](#nestedatt--on_call_users))
+
+<a id="nestedatt--on_call_rotation"></a>
+### Nested Schema for `on_call_rotation`
+
+Read-Only:
+
+- **end_rotations_at** (String)
+- **rotation_interval** (String)
+- **rotation_length** (Number)
+- **start_rotations_at** (String)
+- **users** (List of String)
+
 
 <a id="nestedatt--on_call_users"></a>
 ### Nested Schema for `on_call_users`

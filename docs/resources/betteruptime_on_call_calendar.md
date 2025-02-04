@@ -21,6 +21,7 @@ https://betterstack.com/docs/uptime/api/on-call-calendar/
 
 ### Optional
 
+- **on_call_rotation** (Block List, Max: 1) Configuration block for the on-call rotation schedule. Ignored when omitted - on-call can be controlled in Better Stack. (see [below for nested schema](#nestedblock--on_call_rotation))
 - **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
@@ -28,6 +29,18 @@ https://betterstack.com/docs/uptime/api/on-call-calendar/
 - **default_calendar** (Boolean) Whether the on-call calendar is the default on-call calendar.
 - **id** (String) The ID of the on-call calendar.
 - **on_call_users** (List of Object) Array of on-call persons. (see [below for nested schema](#nestedatt--on_call_users))
+
+<a id="nestedblock--on_call_rotation"></a>
+### Nested Schema for `on_call_rotation`
+
+Required:
+
+- **end_rotations_at** (String) End time of the rotation in RFC 3339 format (e.g. `2026-01-01T00:00:00Z`)
+- **rotation_interval** (String) The interval unit for rotation_length. Must be one of: `hour`, `day`, `week`.
+- **rotation_length** (Number) The length of each rotation shift. See `rotation_interval` for units.
+- **start_rotations_at** (String) Start time of the rotation in RFC 3339 format (e.g. `2026-01-01T00:00:00Z`)
+- **users** (List of String) List of email addresses for users participating in the rotation.
+
 
 <a id="nestedatt--on_call_users"></a>
 ### Nested Schema for `on_call_users`

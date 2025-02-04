@@ -85,7 +85,7 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 		},
 	},
 	"on_call_rotation": {
-		Description: "TODO",
+		Description: "Configuration block for the on-call rotation schedule. Ignored when omitted - on-call can be controlled in Better Stack.",
 		Type:        schema.TypeList,
 		Optional:    true,
 		Computed:    true,
@@ -93,7 +93,7 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"users": {
-					Description: "TODO",
+					Description: "List of email addresses for users participating in the rotation.",
 					Type:        schema.TypeList,
 					Required:    true,
 					Elem: &schema.Schema{
@@ -101,25 +101,25 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 					},
 				},
 				"rotation_length": {
-					Description: "TODO",
+					Description: "The length of each rotation shift. See `rotation_interval` for units.",
 					Type:        schema.TypeInt,
 					Required:    true,
 				},
 				"rotation_interval": {
-					Description:  "TODO",
+					Description:  "The interval unit for rotation_length. Must be one of: `hour`, `day`, `week`.",
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringInSlice([]string{"hour", "day", "week"}, false),
 				},
 				"start_rotations_at": {
-					Description:      "Start time of the rotation in RFC 3339 format (e.g. 2026-01-01T00:00:00Z)",
+					Description:      "Start time of the rotation in RFC 3339 format (e.g. `2026-01-01T00:00:00Z`)",
 					Type:             schema.TypeString,
 					Required:         true,
 					ValidateDiagFunc: validateRFC3339DateTime,
 					DiffSuppressFunc: diffSuppressRFC3339DateTime,
 				},
 				"end_rotations_at": {
-					Description:      "End time of the rotation in RFC 3339 format (e.g. 2026-01-01T00:00:00Z)",
+					Description:      "End time of the rotation in RFC 3339 format (e.g. `2026-01-01T00:00:00Z`)",
 					Type:             schema.TypeString,
 					Required:         true,
 					ValidateDiagFunc: validateRFC3339DateTime,
