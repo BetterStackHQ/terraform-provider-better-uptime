@@ -92,7 +92,7 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"user_emails": {
+				"users": {
 					Description: "TODO",
 					Type:        schema.TypeList,
 					Required:    true,
@@ -152,7 +152,7 @@ type onCallCalendar struct {
 }
 
 type onCallRotation struct {
-	UserEmails       *[]string `mapstructure:"user_emails,omitempty" json:"user_emails,omitempty"`
+	Users            *[]string `mapstructure:"users,omitempty" json:"users,omitempty"`
 	RotationLength   *int      `mapstructure:"rotation_length,omitempty" json:"rotation_length,omitempty"`
 	RotationInterval *string   `mapstructure:"rotation_interval,omitempty" json:"rotation_interval,omitempty"`
 	StartRotationsAt *string   `mapstructure:"start_rotations_at,omitempty" json:"start_rotations_at,omitempty"`
@@ -287,15 +287,9 @@ func resourceOnCallCalendarCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 	d.SetId(out.Data.ID)
 
-	if rotationList, ok := d.GetOk("on_call_rotation"); ok && len(rotationList.([]interface{})) > 0 {
-		// TODO: Simplify after user_emails and users are consistent in API
-		inRotation := rotationList.([]interface{})[0].(map[string]interface{})
-		if emails, ok := inRotation["user_emails"]; ok {
-			inRotation["users"] = emails
-			delete(inRotation, "user_emails")
-		}
+	if inRotations, ok := d.GetOk("on_call_rotation"); ok && len(inRotations.([]interface{})) > 0 {
 		var outRotation onCallRotation
-		if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &inRotation, &outRotation); err != nil {
+		if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), inRotations.([]interface{})[0], &outRotation); err != nil {
 			return err
 		}
 		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
@@ -352,17 +346,10 @@ func resourceOnCallCalendarUpdate(ctx context.Context, d *schema.ResourceData, m
 		return err
 	}
 
-	// Handle rotation changes
 	if d.HasChange("on_call_rotation") {
-		if rotationList, ok := d.GetOk("on_call_rotation"); ok && len(rotationList.([]interface{})) > 0 {
-			// TODO: Simplify after user_emails and users are consistent in API
-			inRotation := rotationList.([]interface{})[0].(map[string]interface{})
-			if emails, ok := inRotation["user_emails"]; ok {
-				inRotation["users"] = emails
-				delete(inRotation, "user_emails")
-			}
+		if inRotations, ok := d.GetOk("on_call_rotation"); ok && len(inRotations.([]interface{})) > 0 {
 			var outRotation onCallRotation
-			if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), inRotation, &outRotation); err != nil {
+			if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), inRotations.([]interface{})[0], &outRotation); err != nil {
 				return err
 			}
 			return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
