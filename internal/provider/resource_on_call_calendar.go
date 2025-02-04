@@ -295,7 +295,14 @@ func resourceOnCallCalendarCreate(ctx context.Context, d *schema.ResourceData, m
 		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
 	}
 
-	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
+	var outRotation onCallRotation
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &outRotation); err != nil {
+		return err
+	} else if !ok {
+		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
+	}
+
+	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
 }
 
 func resourceOnCallCalendarRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -356,7 +363,14 @@ func resourceOnCallCalendarUpdate(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
+	var outRotation onCallRotation
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &outRotation); err != nil {
+		return err
+	} else if !ok {
+		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
+	}
+
+	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
 }
 
 func resourceOnCallCalendarDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
