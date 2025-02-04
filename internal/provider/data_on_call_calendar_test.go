@@ -26,6 +26,8 @@ func TestOnCallCalendarData(t *testing.T) {
 			_, _ = w.Write([]byte(`{"data":[{"id":"123","attributes":{"name":"Primary","default_calendar":true},"relationships":{"on_call_users":{"data":[{"id":"123456","type":"user"}]}}}],"included":[{"id":"123456","type":"user","attributes":{"first_name":"John","last_name":"Smith","email":"john@example.com","phone_numbers":[]}}],"pagination":{"next":"..."}}`))
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=2":
 			_, _ = w.Write([]byte(`{"data":[{"id":"456","attributes":{"name":"Secondary","default_calendar":false},"relationships":{"on_call_users":{"data":[{"id":"456789","type":"user"}]}}}],"included":[{"id":"456789","type":"user","attributes":{"first_name":"Jane","last_name":"Doe","email":"jane@example.com","phone_numbers":["+44 808 157 0192"]}}],"pagination":{"next":null}}`))
+		case r.Method == http.MethodGet && r.RequestURI == prefix+"/456/rotation":
+			w.WriteHeader(http.StatusNotFound)
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 			t.Fail()
@@ -62,6 +64,7 @@ func TestOnCallCalendarData(t *testing.T) {
 					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.last_name", "Doe"),
 					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.email", "jane@example.com"),
 					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.phone_numbers.0", "+44 808 157 0192"),
+					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_rotation.#", "0"),
 				),
 			},
 		},
@@ -80,6 +83,8 @@ func TestDefaultOnCallCalendarData(t *testing.T) {
 		switch {
 		case r.Method == http.MethodGet && r.RequestURI == "/api/v2/on-calls/default":
 			_, _ = w.Write([]byte(`{"data":{"id":"123","attributes":{"name":"Primary","default_calendar":true},"relationships":{"on_call_users":{"data":[{"id":"123456","type":"user"}]}}},"included":[{"id":"123456","type":"user","attributes":{"first_name":"John","last_name":"Smith","email":"john@example.com","phone_numbers":[]}}]}`))
+		case r.Method == http.MethodGet && r.RequestURI == "/api/v2/on-calls/123/rotation":
+			w.WriteHeader(http.StatusNotFound)
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 			t.Fail()
@@ -112,6 +117,7 @@ func TestDefaultOnCallCalendarData(t *testing.T) {
 					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.first_name", "John"),
 					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.last_name", "Smith"),
 					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_users.0.email", "john@example.com"),
+					resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "on_call_rotation.#", "0"),
 				),
 			},
 		},
