@@ -1,6 +1,9 @@
 package provider
 
 import (
+	"context"
+	"fmt"
+	"net/url"
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -26,8 +29,7 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 	"name": {
 		Description: "Name of the on-call calendar.",
 		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Required:    true,
 	},
 	"default_calendar": {
 		Description: "Whether the on-call calendar is the default on-call calendar.",
@@ -78,6 +80,20 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 			},
 		},
 	},
+}
+
+func newOnCallCalendarResource() *schema.Resource {
+	return &schema.Resource{
+		CreateContext: resourceOnCallCalendarCreate,
+		ReadContext:   resourceOnCallCalendarRead,
+		UpdateContext: resourceOnCallCalendarUpdate,
+		DeleteContext: resourceOnCallCalendarDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+		Schema:      onCallCalendarSchema,
+		Description: "https://betterstack.com/docs/uptime/api/on-call-calendar/",
+	}
 }
 
 type onCallCalendar struct {
@@ -151,4 +167,73 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 		}
 	}
 	return derr
+}
+
+func resourceOnCallCalendarCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var in onCallCalendar
+	for _, e := range onCallCalendarRef(&in) {
+		load(d, e.k, e.v)
+	}
+	load(d, "team_name", &in.TeamName)
+
+	var out struct {
+		Data struct {
+			ID            string              `json:"id"`
+			Attributes    onCallCalendar      `json:"attributes"`
+			Relationships onCallRelationships `json:"relationships"`
+		} `json:"data"`
+		Included []onCallIncluded `json:"included"`
+	}
+
+	if err := resourceCreate(ctx, meta, "/api/v2/on-calls", &in, &out); err != nil {
+		return err
+	}
+	d.SetId(out.Data.ID)
+	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included)
+}
+
+func resourceOnCallCalendarRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var out struct {
+		Data struct {
+			ID            string              `json:"id"`
+			Attributes    onCallCalendar      `json:"attributes"`
+			Relationships onCallRelationships `json:"relationships"`
+		} `json:"data"`
+		Included []onCallIncluded `json:"included"`
+	}
+
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s", url.PathEscape(d.Id())), &out); err != nil {
+		return err
+	} else if !ok {
+		d.SetId("") // Force "create" on 404
+		return nil
+	}
+	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included)
+}
+
+func resourceOnCallCalendarUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var in onCallCalendar
+	for _, e := range onCallCalendarRef(&in) {
+		if d.HasChange(e.k) {
+			load(d, e.k, e.v)
+		}
+	}
+
+	var out struct {
+		Data struct {
+			ID            string              `json:"id"`
+			Attributes    onCallCalendar      `json:"attributes"`
+			Relationships onCallRelationships `json:"relationships"`
+		} `json:"data"`
+		Included []onCallIncluded `json:"included"`
+	}
+
+	if err := resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s", url.PathEscape(d.Id())), &in, &out); err != nil {
+		return err
+	}
+	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included)
+}
+
+func resourceOnCallCalendarDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s", url.PathEscape(d.Id())))
 }

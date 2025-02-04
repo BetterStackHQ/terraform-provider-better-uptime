@@ -1,6 +1,7 @@
 locals {
   primary_on_calls   = data.betteruptime_on_call_calendar.primary.on_call_users
   secondary_on_calls = data.betteruptime_on_call_calendar.secondary.on_call_users
+  new_on_calls       = betteruptime_on_call_calendar.new.on_call_users
 }
 
 output "on_call_primary" {
@@ -9,4 +10,8 @@ output "on_call_primary" {
 
 output "on_call_secondary" {
   value = local.secondary_on_calls != null ? (length(local.secondary_on_calls) > 0 ? local.secondary_on_calls[0].email : "Nobody on call!") : "Secondary calendar not found!"
+}
+
+output "on_call_new" {
+  value = length(local.new_on_calls) > 0 ? local.new_on_calls[0].email : "Nobody on call!"
 }

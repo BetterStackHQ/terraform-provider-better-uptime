@@ -62,6 +62,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_metadata":                      newMetadataResource(),
 			"betteruptime_monitor":                       newMonitorResource(),
 			"betteruptime_monitor_group":                 newMonitorGroupResource(),
+			"betteruptime_on_call_calendar":              newOnCallCalendarResource(),
 			"betteruptime_policy":                        newPolicyResource(),
 			"betteruptime_policy_group":                  newPolicyGroupResource(),
 			"betteruptime_severity":                      newSeverityResource(),
