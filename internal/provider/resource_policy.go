@@ -15,13 +15,19 @@ import (
 
 var policyStepMemberSchema = map[string]*schema.Schema{
 	"type": {
-		Description: "Type type of the member to notify during an incident. Can be one of current_on_call, entire_team, all_slack_integrations, all_microsoft_teams_integrations, all_zapier_integrations, all_webhook_integrations, all_splunk_on_call_integrations, user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook, pagerduty_integration.",
+		Description: "Type type of the member to notify during an incident. Can be one of current_on_call, entire_team, all_slack_integrations, all_microsoft_teams_integrations, all_zapier_integrations, all_webhook_integrations, all_splunk_on_call_integrations, incident_metadata, user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook or pagerduty_integration.",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"id": {
-		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration and zapier_webhook member types. This is e.g. the ID of the user to notify when member type is user, or on-call calendar ID of when member type is current_on_call.",
+		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook and pagerduty_integration member types. This is e.g. the ID of the user to notify when member type is user, or on-call calendar ID of when member type is current_on_call.",
 		Type:        schema.TypeInt,
+		Optional:    true,
+		Default:     nil,
+	},
+	"metadata_key": {
+		Description: "The metadata key to use to retrieve the escalation target from the incident's metadata. Required when type is incident_metadata.",
+		Type:        schema.TypeString,
 		Optional:    true,
 		Default:     nil,
 	},
@@ -200,9 +206,10 @@ func newPolicyResource() *schema.Resource {
 }
 
 type policyStepMember struct {
-	Type   *string `mapstructure:"type,omitempty" json:"type,omitempty"`
-	Id     *int    `mapstructure:"id,omitempty" json:"id,omitempty"`
-	TeamId *int    `mapstructure:"team_id,omitempty" json:"team_id,omitempty"`
+	Type        *string `mapstructure:"type,omitempty" json:"type,omitempty"`
+	Id          *int    `mapstructure:"id,omitempty" json:"id,omitempty"`
+	MetadataKey *string `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
+	TeamId      *int    `mapstructure:"team_id,omitempty" json:"team_id,omitempty"`
 }
 
 type policyStep struct {
