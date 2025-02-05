@@ -52,6 +52,10 @@ func TestResourcePolicy(t *testing.T) {
                       type = "entire_team"
                       id = 123
                     }
+                    step_members {
+                      type = "incident_metadata"
+                      metadata_key = "Team"
+                    }
 				  }
 				}
 				`,
@@ -65,6 +69,8 @@ func TestResourcePolicy(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.1.id", "123"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.step_members.0.type", "entire_team"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.step_members.0.id", "123"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.step_members.1.type", "incident_metadata"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.step_members.1.metadata_key", "Team"),
 				),
 				PreConfig: func() {
 					t.Log("step 1")

@@ -67,6 +67,7 @@ Read-Only:
 Read-Only:
 
 - **id** (Number)
+- **metadata_key** (String)
 - **team_id** (Number)
 - **type** (String)
 
