@@ -3,7 +3,7 @@ terraform {
   required_providers {
     betteruptime = {
       source  = "BetterStackHQ/better-uptime"
-      version = ">= 0.16.0"
+      version = ">= 0.18.0"
     }
   }
 }
