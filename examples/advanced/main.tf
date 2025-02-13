@@ -34,9 +34,10 @@ resource "betteruptime_monitor_group" "this" {
 }
 
 resource "betteruptime_monitor" "status" {
-  url              = "https://example.com"
-  monitor_type     = "status"
-  monitor_group_id = betteruptime_monitor_group.this.id
+  url                  = "https://example.com"
+  monitor_type         = "status"
+  monitor_group_id     = betteruptime_monitor_group.this.id
+  expiration_policy_id = betteruptime_policy.this.id
   request_headers = [
     {
       "name" : "X-For-Status-Page",
