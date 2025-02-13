@@ -53,6 +53,12 @@ var monitorSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"expiration_policy_id": {
+		Description: "Set the expiration escalation policy for the monitor. It is used for SSL certificate and domain expiration checks. When set to null, an e-mail is sent to the entire team.",
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Default:     nil,
+	},
 	"url": {
 		Description: "URL of your website or the host you want to ping (see monitor_type below).",
 		Type:        schema.TypeString,
@@ -410,6 +416,7 @@ type monitor struct {
 	SSLExpiration       *int                      `json:"ssl_expiration,omitempty"`
 	DomainExpiration    *int                      `json:"domain_expiration,omitempty"`
 	PolicyID            *string                   `json:"policy_id,omitempty"`
+	ExpirationPolicyID  *int                      `json:"expiration_policy_id"`
 	URL                 *string                   `json:"url,omitempty"`
 	MonitorType         *string                   `json:"monitor_type,omitempty"`
 	RequiredKeyword     *string                   `json:"required_keyword,omitempty"`
@@ -470,6 +477,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "ssl_expiration", v: &in.SSLExpiration},
 		{k: "domain_expiration", v: &in.DomainExpiration},
 		{k: "policy_id", v: &in.PolicyID},
+		{k: "expiration_policy_id", v: &in.ExpirationPolicyID},
 		{k: "url", v: &in.URL},
 		{k: "monitor_type", v: &in.MonitorType},
 		{k: "required_keyword", v: &in.RequiredKeyword},
@@ -518,6 +526,9 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
 				return diag.FromErr(err)
 			}
+		} else if e.k == "expiration_policy_id" {
+			// Work around the fact that Terraform represents null value as 0
+			loadExpirationPolicy(d, e.v.(**int))
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -556,7 +567,10 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	var in monitor
 	var out policyHTTPResponse
 	for _, e := range monitorRef(&in) {
-		if d.HasChange(e.k) {
+		if e.k == "expiration_policy_id" {
+			// Work around the fact that Terraform represents null value as 0
+			loadExpirationPolicy(d, e.v.(**int))
+		} else if d.HasChange(e.k) {
 			if e.k == "request_headers" {
 				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
 					return diag.FromErr(err)
@@ -669,4 +683,15 @@ func findRequestHeader(headers *[]map[string]interface{}, header *map[string]int
 		}
 	}
 	return nil
+}
+
+func loadExpirationPolicy(d *schema.ResourceData, receiver **int) {
+	if v, ok := d.GetOk("expiration_policy_id"); ok {
+		t := v.(int)
+		if t == 0 {
+			*receiver = nil
+		} else {
+			*receiver = &t
+		}
+	}
 }

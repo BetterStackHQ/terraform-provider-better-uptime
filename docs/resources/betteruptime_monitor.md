@@ -60,6 +60,7 @@ https://betterstack.com/docs/uptime/api/monitors/
 - **domain_expiration** (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **email** (Boolean) Should we send an email to the on-call person?
 - **expected_status_codes** (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.
+- **expiration_policy_id** (Number) Set the expiration escalation policy for the monitor. It is used for SSL certificate and domain expiration checks. When set to null, an e-mail is sent to the entire team.
 - **follow_redirects** (Boolean) Set to true for the monitor to follow redirects.
 - **http_method** (String) HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH
 - **ip_version** (String) Valid values:
