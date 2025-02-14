@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"regexp"
 	"strconv"
-	"sync/atomic"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,8 +16,7 @@ import (
 )
 
 func TestResourceMonitor(t *testing.T) {
-	var data atomic.Value
-	server := createTestServer(t, &data)
+	server := createTestServer(t)
 	defer server.Close()
 
 	var url = "http://example.com"
@@ -122,8 +120,7 @@ func TestResourceMonitor(t *testing.T) {
 }
 
 func TestResourceMonitorWithHeaders(t *testing.T) {
-	var data atomic.Value
-	server := createTestServer(t, &data)
+	server := createTestServer(t)
 	defer server.Close()
 
 	var url = "http://example.com"
@@ -307,9 +304,132 @@ func TestResourceMonitorWithHeaders(t *testing.T) {
 	})
 }
 
+func TestResourceMonitorWithExpirationPolicyId(t *testing.T) {
+	server := createTestServer(t)
+	defer server.Close()
+
+	var url = "http://example.com"
+	var monitorType = "status"
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "expiration_policy_id", "0"),
+					server.TestCheckCalledRequest("POST", "/api/v2/monitors", `{"expiration_policy_id":null,"url":"http://example.com","monitor_type":"status","request_headers":null}`),
+				),
+			},
+			// Step 2 - update (set to non-null value).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url                  = "%s"
+					monitor_type         = "%s"
+					expiration_policy_id = 5
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "expiration_policy_id", "5"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"expiration_policy_id":5}`),
+				),
+			},
+			// Step 3 - update (set to null).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url                  = "%s"
+					monitor_type         = "%s"
+					expiration_policy_id = null
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "expiration_policy_id", "0"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"expiration_policy_id":null}`),
+				),
+			},
+			// Step 4 - update (set to non-null value again).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url                  = "%s"
+					monitor_type         = "%s"
+					expiration_policy_id = 6
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "expiration_policy_id", "6"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"expiration_policy_id":6}`),
+				),
+			},
+			// Step 5 - update (unset).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "expiration_policy_id", "0"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"expiration_policy_id":null}`),
+				),
+			},
+			// Step 5 - destroy.
+			{
+				ResourceName:      "betteruptime_monitor.this",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 func TestExpectedStatusCodeMonitor(t *testing.T) {
-	var data atomic.Value
-	server := createTestServer(t, &data)
+	server := createTestServer(t)
 	defer server.Close()
 
 	var url = "http://example.com"
@@ -354,8 +474,18 @@ func TestExpectedStatusCodeMonitor(t *testing.T) {
 	})
 }
 
-func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func createTestServer(t *testing.T) *TestServer {
+	ts := &TestServer{}
+	ts.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+			t.Fail()
+		}
+		ts.mu.Lock()
+		ts.CalledRequests = append(ts.CalledRequests, CalledRequest{Method: r.Method, URL: r.RequestURI, Body: string(body)})
+		ts.mu.Unlock()
+
 		t.Log("Received " + r.Method + " " + r.RequestURI)
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
@@ -363,17 +493,26 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			t.Fail()
 		}
 
+		// Check for custom request handlers first
+		ts.mu.Lock()
+		for _, expected := range ts.ExpectedRequests {
+			if expected.Method == r.Method && expected.URL == r.RequestURI {
+				if expected.Body == "" || expected.Body == string(body) {
+					w.WriteHeader(expected.StatusCode)
+					_, _ = w.Write([]byte(expected.Response))
+					ts.mu.Unlock()
+					return
+				}
+			}
+		}
+		ts.mu.Unlock()
+
 		prefix := "/api/v2/monitors"
 		id := "1"
 
 		switch {
 		case r.Method == http.MethodPost && r.RequestURI == prefix:
-			body, err := io.ReadAll(r.Body)
-			if err != nil {
-				t.Fatal(err)
-				t.Fail()
-			}
-			data.Store(body)
+			ts.Data.Store(body)
 			w.WriteHeader(http.StatusCreated)
 			// Inject pronounceable_name.
 			computed := make(map[string]interface{})
@@ -392,15 +531,10 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 			}
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, body)))
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"/"+id:
-			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, data.Load().([]byte))))
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, ts.Data.Load().([]byte))))
 		case r.Method == http.MethodPatch && r.RequestURI == prefix+"/"+id:
-			body, err := io.ReadAll(r.Body)
-			if err != nil {
-				t.Fatal(err)
-				t.Fail()
-			}
 			patch := make(map[string]interface{})
-			if err = json.Unmarshal(data.Load().([]byte), &patch); err != nil {
+			if err = json.Unmarshal(ts.Data.Load().([]byte), &patch); err != nil {
 				t.Fatal(err)
 				t.Fail()
 			}
@@ -416,16 +550,18 @@ func createTestServer(t *testing.T, data *atomic.Value) *httptest.Server {
 				t.Fatal(err)
 				t.Fail()
 			}
-			data.Store(patched)
+			ts.Data.Store(patched)
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":%q,"attributes":%s}}`, id, patched)))
 		case r.Method == http.MethodDelete && r.RequestURI == prefix+"/"+id:
 			w.WriteHeader(http.StatusNoContent)
-			data.Store([]byte(nil))
+			ts.Data.Store([]byte(nil))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 			t.Fail()
 		}
 	}))
+
+	return ts
 }
 
 func processRequestHeaders(headers []interface{}) []interface{} {
