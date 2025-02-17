@@ -27,9 +27,9 @@ Monitor lookup.
 - **check_frequency** (Number) How often should we check your website? In seconds.
 - **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident? In seconds.
 - **created_at** (String) The time when this monitor was created.
-- **critical_alert** (Boolean) Whether to send critical alert when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical alert when a new incident is created.
 - **domain_expiration** (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
-- **email** (Boolean) Whether to send email when a new incident is created.
+- **email** (Boolean) Whether to send an email when a new incident is created.
 - **expected_status_codes** (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.
 - **expiration_policy_id** (Number) Set the expiration escalation policy for the monitor. It is used for SSL certificate and domain expiration checks. When set to null, an e-mail is sent to the entire team.
 - **follow_redirects** (Boolean) Set to true for the monitor to follow redirects.
@@ -83,7 +83,7 @@ Monitor lookup.
 - **policy_id** (String) Set the escalation policy for the monitor.
 - **port** (String) Required if monitor_type is set to tcp, udp, smtp, pop, or imap. tcp and udp monitors accept any ports, while smtp, pop, and imap accept only the specified ports corresponding with their servers (e.g. "25,465,587" for smtp).
 - **pronounceable_name** (String) Pronounceable name of the monitor. We will use this when we call you. Try to make it tongue-friendly, please?
-- **push** (Boolean) Whether to send push notification when a new incident is created.
+- **push** (Boolean) Whether to send a push notification when a new incident is created.
 - **recovery_period** (Number) How long the monitor must be up to automatically mark an incident as resolved after being down. In seconds.
 - **regions** (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.
 - **remember_cookies** (Boolean) Set to true to keep cookies when redirecting.
@@ -95,7 +95,7 @@ Monitor lookup.
   - For all other monitors, the timeout is specified in *seconds*. Valid options: 2, 3, 5, 10, 15, 30, 45, 60.
 - **required_keyword** (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
 - **scenario_name** (String) For Playwright monitors, the scenario name identifying the monitor in the UI.
-- **sms** (Boolean) Whether to send SMS when a new incident is created.
+- **sms** (Boolean) Whether to send an SMS when a new incident is created.
 - **ssl_expiration** (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **status** (String) The status of this website check.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.

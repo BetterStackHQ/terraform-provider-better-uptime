@@ -22,11 +22,11 @@ Severity lookup.
 ### Read-Only
 
 - **call** (Boolean) Whether to call when a new incident is created.
-- **critical_alert** (Boolean) Whether to send critical alert when a new incident is created.
-- **email** (Boolean) Whether to send email when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical alert when a new incident is created.
+- **email** (Boolean) Whether to send an email when a new incident is created.
 - **id** (String) The ID of this Severity.
-- **push** (Boolean) Whether to send push notification when a new incident is created.
+- **push** (Boolean) Whether to send a push notification when a new incident is created.
 - **severity_group_id** (Number) Set this attribute if you want to add this severity to a severity group.
-- **sms** (Boolean) Whether to send SMS when a new incident is created.
+- **sms** (Boolean) Whether to send an SMS when a new incident is created.
 
 

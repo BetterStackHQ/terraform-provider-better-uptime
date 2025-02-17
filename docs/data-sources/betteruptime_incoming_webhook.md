@@ -27,15 +27,15 @@ Incoming Webhook lookup.
 - **call** (Boolean) Whether to call when a new incident is created.
 - **cause_field** (Set of Object) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedatt--cause_field))
 - **created_at** (String) The time when this incoming webhook was created.
-- **critical_alert** (Boolean) Whether to send critical alert when a new incident is created.
-- **email** (Boolean) Whether to send email when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical alert when a new incident is created.
+- **email** (Boolean) Whether to send an email when a new incident is created.
 - **id** (String) The ID of this incoming webhook.
 - **other_acknowledged_fields** (List of Object) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for nested schema](#nestedatt--other_acknowledged_fields))
 - **other_resolved_fields** (List of Object) An array of additional fields, which will be extracted when resolving an incident. (see [below for nested schema](#nestedatt--other_resolved_fields))
 - **other_started_fields** (List of Object) An array of additional fields, which will be extracted when starting an incident. (see [below for nested schema](#nestedatt--other_started_fields))
 - **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
 - **policy_id** (String) ID of the escalation policy associated with the incoming webhook.
-- **push** (Boolean) Whether to send push notification when a new incident is created.
+- **push** (Boolean) Whether to send a push notification when a new incident is created.
 - **recovery_period** (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
 - **resolved_alert_id_field** (Set of Object) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--resolved_alert_id_field))
 - **resolved_rule_type** (String) Should an incident be resolved for all webhooks, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any
@@ -43,7 +43,7 @@ Incoming Webhook lookup.
 - **sample_body** (String) Sample request body the webhook. Used only to make the configuration easier.
 - **sample_headers** (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
 - **sample_query_string** (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
-- **sms** (Boolean) Whether to send SMS when a new incident is created.
+- **sms** (Boolean) Whether to send an SMS when a new incident is created.
 - **started_alert_id_field** (Set of Object) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--started_alert_id_field))
 - **started_rule_type** (String) Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
 - **started_rules** (List of Object) An array of rules to match to start a new incident. (see [below for nested schema](#nestedatt--started_rules))

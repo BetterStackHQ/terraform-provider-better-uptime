@@ -50,31 +50,31 @@ var heartbeatSchema = map[string]*schema.Schema{
 		// TODO: ValidateDiagFunc
 	},
 	"call": {
-		Description: "Whether to call the on-call person when a new incident is created.",
+		Description: "Whether to call when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"sms": {
-		Description: "Whether to send SMS when a new incident is created.",
+		Description: "Whether to send an SMS when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"email": {
-		Description: "Whether to send email when a new incident is created.",
+		Description: "Whether to send an email when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"push": {
-		Description: "Whether to send push notification when a new incident is created.",
+		Description: "Whether to send a push notification when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"critical_alert": {
-		Description: "Whether to send critical alert when a new incident is created.",
+		Description: "Whether to send a critical alert when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
