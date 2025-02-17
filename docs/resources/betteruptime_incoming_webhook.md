@@ -27,6 +27,7 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 - **acknowledged_rules** (Block List) An array of rules to match to acknowledge an incident. (see [below for nested schema](#nestedblock--acknowledged_rules))
 - **call** (Boolean) Should we call the on-call person?
 - **cause_field** (Block Set) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedblock--cause_field))
+- **critical_alert** (Boolean) Should we send a critical alert to the on-call person?
 - **email** (Boolean) Should we send an email to the on-call person?
 - **name** (String) The name of this incoming webhook.
 - **other_acknowledged_fields** (Block List) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for nested schema](#nestedblock--other_acknowledged_fields))

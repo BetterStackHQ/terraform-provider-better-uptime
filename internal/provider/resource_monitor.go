@@ -154,6 +154,12 @@ var monitorSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"critical_alert": {
+		Description: "Should we send a critical alert to the on-call person?",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
 	"team_wait": {
 		Description: "How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.",
 		Type:        schema.TypeInt,
@@ -425,6 +431,7 @@ type monitor struct {
 	SMS                 *bool                     `json:"sms,omitempty"`
 	Email               *bool                     `json:"email,omitempty"`
 	Push                *bool                     `json:"push,omitempty"`
+	CriticalAlert       *bool                     `json:"critical_alert,omitempty"`
 	TeamWait            *int                      `json:"team_wait,omitempty"`
 	Paused              *bool                     `json:"paused,omitempty"`
 	PausedAt            *string                   `json:"paused_at,omitempty"`
@@ -486,6 +493,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "sms", v: &in.SMS},
 		{k: "email", v: &in.Email},
 		{k: "push", v: &in.Push},
+		{k: "critical_alert", v: &in.CriticalAlert},
 		{k: "team_wait", v: &in.TeamWait},
 		{k: "paused", v: &in.Paused},
 		{k: "paused_at", v: &in.PausedAt},

@@ -18,6 +18,7 @@ https://betterstack.com/docs/uptime/api/elastic-integrations/
 ### Optional
 
 - **call** (Boolean) Do we call the on-call person?
+- **critical_alert** (Boolean) Do we send a critical alert to the on-call person?
 - **email** (Boolean) Do we send an email to the on-call person?
 - **name** (String) The name of the Elastic Integration.
 - **paused** (Boolean) Is the Elastic integration paused.

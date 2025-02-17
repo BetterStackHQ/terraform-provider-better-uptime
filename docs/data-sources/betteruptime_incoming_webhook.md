@@ -27,6 +27,7 @@ Incoming Webhook lookup.
 - **call** (Boolean) Should we call the on-call person?
 - **cause_field** (Set of Object) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedatt--cause_field))
 - **created_at** (String) The time when this incoming webhook was created.
+- **critical_alert** (Boolean) Should we send a critical alert to the on-call person?
 - **email** (Boolean) Should we send an email to the on-call person?
 - **id** (String) The ID of this incoming webhook.
 - **other_acknowledged_fields** (List of Object) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for nested schema](#nestedatt--other_acknowledged_fields))

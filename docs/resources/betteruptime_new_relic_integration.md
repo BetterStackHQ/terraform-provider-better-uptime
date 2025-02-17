@@ -19,6 +19,7 @@ https://betterstack.com/docs/uptime/api/new-relic-integrations/
 
 - **alerting_rule** (String) Should we alert only on alarms, or on both alarms and warnings. Possible values: alert, alert_and_warn.
 - **call** (Boolean) Do we call the on-call person?
+- **critical_alert** (Boolean) Do we send a critical alert to the on-call person?
 - **email** (Boolean) Do we send an email to the on-call person?
 - **name** (String) The name of the AWS CloudWatch Integration.
 - **paused** (Boolean) Is the AWS CloudWatch integration paused.

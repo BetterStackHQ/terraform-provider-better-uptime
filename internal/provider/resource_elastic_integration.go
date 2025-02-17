@@ -62,6 +62,12 @@ var elasticIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"critical_alert": {
+		Description: "Do we send a critical alert to the on-call person?",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
 	"team_wait": {
 		Description: "How long we wait before escalating the incident alert to the team. In seconds.",
 		Type:        schema.TypeInt,
@@ -111,6 +117,7 @@ type elasticIntegration struct {
 	SMS            *bool   `json:"sms,omitempty"`
 	Email          *bool   `json:"email,omitempty"`
 	Push           *bool   `json:"push,omitempty"`
+	CriticalAlert  *bool   `json:"critical_alert,omitempty"`
 	TeamWait       *int    `json:"team_wait,omitempty"`
 	RecoveryPeriod *int    `json:"recovery_period,omitempty"`
 	Paused         *bool   `json:"paused,omitempty"`
@@ -141,6 +148,7 @@ func elasticIntegrationRef(in *elasticIntegration) []struct {
 		{k: "sms", v: &in.SMS},
 		{k: "email", v: &in.Email},
 		{k: "push", v: &in.Push},
+		{k: "critical_alert", v: &in.CriticalAlert},
 		{k: "team_wait", v: &in.TeamWait},
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},

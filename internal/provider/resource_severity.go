@@ -55,6 +55,12 @@ var severitySchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"critical_alert": {
+		Description: "Whether to send critical alert when a new incident is created.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
 	"severity_group_id": {
 		Description: "Set this attribute if you want to add this severity to a severity group.",
 		Type:        schema.TypeInt,
@@ -84,6 +90,7 @@ type severity struct {
 	Call            *bool   `json:"call,omitempty"`
 	Email           *bool   `json:"email,omitempty"`
 	Push            *bool   `json:"push,omitempty"`
+	CriticalAlert   *bool   `json:"critical_alert,omitempty"`
 	TeamName        *string `json:"team_name,omitempty"`
 	SeverityGroupID *int    `json:"urgency_group_id,omitempty"`
 }
@@ -109,6 +116,7 @@ func severityRef(in *severity) []struct {
 		{k: "call", v: &in.Call},
 		{k: "email", v: &in.Email},
 		{k: "push", v: &in.Push},
+		{k: "critical_alert", v: &in.CriticalAlert},
 		{k: "severity_group_id", v: &in.SeverityGroupID},
 	}
 }

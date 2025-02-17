@@ -57,6 +57,7 @@ https://betterstack.com/docs/uptime/api/monitors/
 - **call** (Boolean) Should we call the on-call person?
 - **check_frequency** (Number) How often should we check your website? In seconds.
 - **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident? In seconds.
+- **critical_alert** (Boolean) Should we send a critical alert to the on-call person?
 - **domain_expiration** (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **email** (Boolean) Should we send an email to the on-call person?
 - **expected_status_codes** (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.
