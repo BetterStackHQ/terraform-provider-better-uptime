@@ -371,7 +371,15 @@ resource "betteruptime_outgoing_webhook" "outgoing_webhook_2" {
 }
 
 resource "betteruptime_elastic_integration" "this" {
-  name  = "Elastic Integration"
+  name  = "Terraform Elastic Integration"
+  sms   = false
+  call  = false
+  email = true
+  push  = true
+}
+
+resource "betteruptime_datadog_integration" "this" {
+  name  = "Terraform Datadog Integration"
   sms   = false
   call  = false
   email = true
