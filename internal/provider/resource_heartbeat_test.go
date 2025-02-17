@@ -31,9 +31,14 @@ func TestResourceHeartbeat(t *testing.T) {
 				}
 
 				resource "betteruptime_heartbeat" "this" {
-					name   = "%s"
-					period = 30
-					grace  = 0
+					name           = "%s"
+					period         = 30
+					grace          = 0
+					call           = false
+					sms            = true
+					email          = true
+					push           = true
+					critical_alert = false
 				}
 				`, name),
 				Check: resource.ComposeTestCheckFunc(
@@ -41,6 +46,11 @@ func TestResourceHeartbeat(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "name", name),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "period", "30"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "grace", "0"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "call", "false"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "sms", "true"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "email", "true"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "push", "true"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "critical_alert", "false"),
 				),
 			},
 			// Step 2 - update.
@@ -51,9 +61,14 @@ func TestResourceHeartbeat(t *testing.T) {
 				}
 
 				resource "betteruptime_heartbeat" "this" {
-					name   = "%s"
-					period = 31
-					grace  = 1
+					name           = "%s"
+					period         = 31
+					grace          = 1
+					call           = true
+					sms            = false
+					email          = true
+					push           = true
+					critical_alert = true
 				}
 				`, name),
 				Check: resource.ComposeTestCheckFunc(
@@ -61,6 +76,11 @@ func TestResourceHeartbeat(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "name", name),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "period", "31"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "grace", "1"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "call", "true"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "sms", "false"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "email", "true"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "push", "true"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "critical_alert", "true"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty.
@@ -71,9 +91,14 @@ func TestResourceHeartbeat(t *testing.T) {
 				}
 
 				resource "betteruptime_heartbeat" "this" {
-					name   = "%s"
-					period = 31
-					grace  = 1
+					name           = "%s"
+					period         = 31
+					grace          = 1
+					call           = true
+					sms            = false
+					email          = true
+					push           = true
+					critical_alert = true
 				}
 				`, name),
 				PlanOnly: true,

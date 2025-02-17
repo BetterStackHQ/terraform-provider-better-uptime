@@ -50,25 +50,31 @@ var heartbeatSchema = map[string]*schema.Schema{
 		// TODO: ValidateDiagFunc
 	},
 	"call": {
-		Description: "Should we call the on-call person?",
+		Description: "Whether to call the on-call person when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"sms": {
-		Description: "Should we send an SMS to the on-call person?",
+		Description: "Whether to send SMS when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"email": {
-		Description: "Should we send an email to the on-call person?",
+		Description: "Whether to send email when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"push": {
-		Description: "Should we send a push notification to the on-call person?",
+		Description: "Whether to send push notification when a new incident is created.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
+	"critical_alert": {
+		Description: "Whether to send critical alert when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
@@ -184,6 +190,7 @@ type heartbeat struct {
 	SMS                 *bool     `json:"sms,omitempty"`
 	Email               *bool     `json:"email,omitempty"`
 	Push                *bool     `json:"push,omitempty"`
+	CriticalAlert       *bool     `json:"critical_alert,omitempty"`
 	TeamWait            *int      `json:"team_wait,omitempty"`
 	HeartbeatGroupID    *int      `json:"heartbeat_group_id,omitempty"`
 	SortIndex           *int      `json:"sort_index,omitempty"`
@@ -224,6 +231,7 @@ func heartbeatRef(in *heartbeat) []struct {
 		{k: "sms", v: &in.SMS},
 		{k: "email", v: &in.Email},
 		{k: "push", v: &in.Push},
+		{k: "critical_alert", v: &in.CriticalAlert},
 		{k: "team_wait", v: &in.TeamWait},
 		{k: "heartbeat_group_id", v: &in.HeartbeatGroupID},
 		{k: "sort_index", v: &in.SortIndex},

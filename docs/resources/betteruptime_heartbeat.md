@@ -23,8 +23,9 @@ https://betterstack.com/docs/uptime/api/heartbeats/
 
 ### Optional
 
-- **call** (Boolean) Should we call the on-call person?
-- **email** (Boolean) Should we send an email to the on-call person?
+- **call** (Boolean) Whether to call the on-call person when a new incident is created.
+- **critical_alert** (Boolean) Whether to send critical alert when a new incident is created.
+- **email** (Boolean) Whether to send email when a new incident is created.
 - **heartbeat_group_id** (Number) Set this attribute if you want to add this heartbeat to a heartbeat group..
 - **maintenance_days** (List of String) An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] or any subset of these days.
 - **maintenance_from** (String) Start of the maintenance window each day. We won't create incidents during this window. Example: "01:00:00"
@@ -32,8 +33,8 @@ https://betterstack.com/docs/uptime/api/heartbeats/
 - **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
 - **paused** (Boolean) Set to true to pause monitoring — we won't notify you about downtime. Set to false to resume monitoring.
 - **policy_id** (String) Set the escalation policy for the heartbeat.
-- **push** (Boolean) Should we send a push notification to the on-call person?
-- **sms** (Boolean) Should we send an SMS to the on-call person?
+- **push** (Boolean) Whether to send push notification when a new incident is created.
+- **sms** (Boolean) Whether to send SMS when a new incident is created.
 - **sort_index** (Number) An index controlling the position of a heartbeat in the heartbeat group.
 - **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 - **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
