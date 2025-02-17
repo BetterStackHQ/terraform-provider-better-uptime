@@ -9,3 +9,7 @@ output "escalation_policy_id" {
 output "betteruptime_email_integration_address" { value = betteruptime_email_integration.this.email_address }
 
 output "betteruptime_incoming_webhook_url" { value = betteruptime_incoming_webhook.this.url }
+
+output "betteruptime_elastic_integration_webhook_url" { value = betteruptime_elastic_integration.this.webhook_url }
+
+output "betteruptime_datadog_integration_webhook_url" { value = betteruptime_datadog_integration.this.webhook_url }
