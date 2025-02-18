@@ -18,7 +18,7 @@ https://betterstack.com/docs/uptime/api/prometheus-integrations/
 ### Optional
 
 - **call** (Boolean) Whether to call when a new incident is created.
-- **critical_alert** (Boolean) Whether to send a critical alert when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
 - **email** (Boolean) Whether to send an email when a new incident is created.
 - **name** (String) The name of the AWS CloudWatch Integration.
 - **paused** (Boolean) Is the AWS CloudWatch integration paused.

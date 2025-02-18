@@ -57,7 +57,7 @@ https://betterstack.com/docs/uptime/api/monitors/
 - **call** (Boolean) Whether to call when a new incident is created.
 - **check_frequency** (Number) How often should we check your website? In seconds.
 - **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident? In seconds.
-- **critical_alert** (Boolean) Whether to send a critical alert when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
 - **domain_expiration** (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - **email** (Boolean) Whether to send an email when a new incident is created.
 - **expected_status_codes** (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.

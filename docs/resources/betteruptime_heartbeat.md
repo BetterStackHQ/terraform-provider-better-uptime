@@ -24,7 +24,7 @@ https://betterstack.com/docs/uptime/api/heartbeats/
 ### Optional
 
 - **call** (Boolean) Whether to call when a new incident is created.
-- **critical_alert** (Boolean) Whether to send a critical alert when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
 - **email** (Boolean) Whether to send an email when a new incident is created.
 - **heartbeat_group_id** (Number) Set this attribute if you want to add this heartbeat to a heartbeat group..
 - **maintenance_days** (List of String) An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] or any subset of these days.

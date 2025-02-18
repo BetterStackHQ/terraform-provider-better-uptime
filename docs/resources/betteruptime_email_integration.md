@@ -27,7 +27,7 @@ https://betterstack.com/docs/uptime/api/email-integrations/
 - **acknowledged_rules** (Block List) An array of rules to match to acknowledge an incident. (see [below for nested schema](#nestedblock--acknowledged_rules))
 - **call** (Boolean) Whether to call when a new incident is created.
 - **cause_field** (Block Set) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedblock--cause_field))
-- **critical_alert** (Boolean) Whether to send a critical alert when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
 - **email** (Boolean) Whether to send an email when a new incident is created.
 - **name** (String) The name of this Email integration.
 - **other_acknowledged_fields** (Block List) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for nested schema](#nestedblock--other_acknowledged_fields))

@@ -27,7 +27,7 @@ Incoming Webhook lookup.
 - **call** (Boolean) Whether to call when a new incident is created.
 - **cause_field** (Set of Object) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedatt--cause_field))
 - **created_at** (String) The time when this incoming webhook was created.
-- **critical_alert** (Boolean) Whether to send a critical alert when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
 - **email** (Boolean) Whether to send an email when a new incident is created.
 - **id** (String) The ID of this incoming webhook.
 - **other_acknowledged_fields** (List of Object) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for nested schema](#nestedatt--other_acknowledged_fields))

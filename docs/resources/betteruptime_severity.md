@@ -22,7 +22,7 @@ https://betterstack.com/docs/uptime/api/list-all-severities/
 ### Optional
 
 - **call** (Boolean) Whether to call when a new incident is created.
-- **critical_alert** (Boolean) Whether to send a critical alert when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
 - **email** (Boolean) Whether to send an email when a new incident is created.
 - **push** (Boolean) Whether to send a push notification when a new incident is created.
 - **severity_group_id** (Number) Set this attribute if you want to add this severity to a severity group.

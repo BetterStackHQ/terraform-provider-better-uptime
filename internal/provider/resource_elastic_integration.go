@@ -63,7 +63,7 @@ var elasticIntegrationSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"critical_alert": {
-		Description: "Whether to send a critical alert when a new incident is created.",
+		Description: "Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
