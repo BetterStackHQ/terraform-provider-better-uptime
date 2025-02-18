@@ -25,20 +25,21 @@ https://betterstack.com/docs/uptime/api/email-integrations/
 
 - **acknowledged_alert_id_field** (Block Set) When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--acknowledged_alert_id_field))
 - **acknowledged_rules** (Block List) An array of rules to match to acknowledge an incident. (see [below for nested schema](#nestedblock--acknowledged_rules))
-- **call** (Boolean) Should we call the on-call person?
+- **call** (Boolean) Whether to call when a new incident is created.
 - **cause_field** (Block Set) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedblock--cause_field))
-- **email** (Boolean) Should we send an email to the on-call person?
+- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
+- **email** (Boolean) Whether to send an email when a new incident is created.
 - **name** (String) The name of this Email integration.
 - **other_acknowledged_fields** (Block List) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for nested schema](#nestedblock--other_acknowledged_fields))
 - **other_resolved_fields** (Block List) An array of additional fields, which will be extracted when resolving an incident. (see [below for nested schema](#nestedblock--other_resolved_fields))
 - **other_started_fields** (Block List) An array of additional fields, which will be extracted when starting an incident. (see [below for nested schema](#nestedblock--other_started_fields))
 - **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
 - **policy_id** (String) ID of the escalation policy associated with the email integration.
-- **push** (Boolean) Should we send a push notification to the on-call person?
+- **push** (Boolean) Whether to send a push notification when a new incident is created.
 - **recovery_period** (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
 - **resolved_alert_id_field** (Block Set) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--resolved_alert_id_field))
 - **resolved_rules** (Block List) An array of rules to match to resolved an incident. (see [below for nested schema](#nestedblock--resolved_rules))
-- **sms** (Boolean) Should we send an SMS to the on-call person?
+- **sms** (Boolean) Whether to send an SMS when a new incident is created.
 - **started_alert_id_field** (Block Set) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--started_alert_id_field))
 - **started_rules** (Block List) An array of rules to match to start a new incident. (see [below for nested schema](#nestedblock--started_rules))
 - **team_name** (String) Used to specify the team the resource should be created in when using global tokens.

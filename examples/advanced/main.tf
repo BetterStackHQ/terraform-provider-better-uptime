@@ -110,6 +110,7 @@ resource "betteruptime_email_integration" "this" {
   sms                    = false
   email                  = true
   push                   = true
+  critical_alert         = false
   team_wait              = 180
   recovery_period        = 0
   paused                 = false
@@ -178,6 +179,7 @@ resource "betteruptime_incoming_webhook" "this" {
   sms                    = false
   email                  = true
   push                   = true
+  critical_alert         = false
   team_wait              = 180
   recovery_period        = 0
   paused                 = false
@@ -322,11 +324,12 @@ resource "betteruptime_severity_group" "this" {
 }
 
 resource "betteruptime_severity" "this" {
-  name  = var.betteruptime_severity_name
-  call  = false
-  email = false
-  push  = false
-  sms   = false
+  name           = var.betteruptime_severity_name
+  call           = false
+  sms            = false
+  email          = false
+  push           = false
+  critical_alert = false
 
   severity_group_id = betteruptime_severity_group.this.id
 }
@@ -371,17 +374,19 @@ resource "betteruptime_outgoing_webhook" "outgoing_webhook_2" {
 }
 
 resource "betteruptime_elastic_integration" "this" {
-  name  = "Terraform Elastic Integration"
-  sms   = false
-  call  = false
-  email = true
-  push  = true
+  name           = "Terraform Elastic Integration"
+  call           = false
+  sms            = false
+  email          = true
+  push           = true
+  critical_alert = true
 }
 
 resource "betteruptime_datadog_integration" "this" {
-  name  = "Terraform Datadog Integration"
-  sms   = false
-  call  = false
-  email = true
-  push  = true
+  name           = "Terraform Datadog Integration"
+  call           = false
+  sms            = false
+  email          = true
+  push           = true
+  critical_alert = false
 }

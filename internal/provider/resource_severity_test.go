@@ -32,6 +32,7 @@ func TestResourceSeverity(t *testing.T) {
 				  call         = false
 				  email        = false
 				  push         = true
+				  critical_alert = true
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
@@ -59,6 +60,7 @@ func TestResourceSeverity(t *testing.T) {
 				  call         = true
 				  email        = false
 				  push         = false
+				  critical_alert = false
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
@@ -85,6 +87,7 @@ func TestResourceSeverity(t *testing.T) {
 				  call         = true
 				  email        = false
 				  push         = false
+				  critical_alert = false
 				}`,
 				PlanOnly: true,
 				PreConfig: func() {

@@ -39,25 +39,31 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"call": {
-		Description: "Should we call the on-call person?",
+		Description: "Whether to call when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"sms": {
-		Description: "Should we send an SMS to the on-call person?",
+		Description: "Whether to send an SMS when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"email": {
-		Description: "Should we send an email to the on-call person?",
+		Description: "Whether to send an email when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
 	},
 	"push": {
-		Description: "Should we send a push notification to the on-call person?",
+		Description: "Whether to send a push notification when a new incident is created.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
+	"critical_alert": {
+		Description: "Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
@@ -232,6 +238,7 @@ type incomingWebhook struct {
 	SMS                      *bool               `json:"sms,omitempty"`
 	Email                    *bool               `json:"email,omitempty"`
 	Push                     *bool               `json:"push,omitempty"`
+	CriticalAlert            *bool               `json:"critical_alert,omitempty"`
 	TeamWait                 *int                `json:"team_wait,omitempty"`
 	RecoveryPeriod           *int                `json:"recovery_period,omitempty"`
 	Paused                   *bool               `json:"paused,omitempty"`
@@ -280,6 +287,7 @@ func incomingWebhookRef(in *incomingWebhook) []struct {
 		{k: "sms", v: &in.SMS},
 		{k: "email", v: &in.Email},
 		{k: "push", v: &in.Push},
+		{k: "critical_alert", v: &in.CriticalAlert},
 		{k: "team_wait", v: &in.TeamWait},
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},

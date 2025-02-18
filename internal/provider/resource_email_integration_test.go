@@ -32,6 +32,7 @@ func TestResourceEmailIntegration(t *testing.T) {
 				  sms = false
 				  email = true
 				  push = true
+				  critical_alert = true
 				  team_wait = 180
 				  recovery_period = 0
 				  paused = false
@@ -123,6 +124,7 @@ func TestResourceEmailIntegration(t *testing.T) {
 				  sms = false
 				  email = true
 				  push = true
+				  critical_alert = true
 				  team_wait = 0
 				  recovery_period = 180
 				  paused = true
@@ -208,6 +210,7 @@ func TestResourceEmailIntegration(t *testing.T) {
 				  sms = false
 				  email = true
 				  push = true
+				  critical_alert = true
 				  team_wait = 0
 				  recovery_period = 180
 				  paused = true

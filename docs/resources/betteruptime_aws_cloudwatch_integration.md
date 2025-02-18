@@ -17,14 +17,15 @@ https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/
 
 ### Optional
 
-- **call** (Boolean) Do we call the on-call person?
-- **email** (Boolean) Do we send an email to the on-call person?
+- **call** (Boolean) Whether to call when a new incident is created.
+- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
+- **email** (Boolean) Whether to send an email when a new incident is created.
 - **name** (String) The name of the AWS CloudWatch Integration.
 - **paused** (Boolean) Is the AWS CloudWatch integration paused.
 - **policy_id** (Number) ID of the escalation policy associated with the AWS CloudWatch integration.
-- **push** (Boolean) Do we send a push notification to the on-call person?
+- **push** (Boolean) Whether to send a push notification when a new incident is created.
 - **recovery_period** (Number) How long the alert must be up to automatically mark an incident as resolved. In seconds.
-- **sms** (Boolean) Do we send an SMS to the on-call person?
+- **sms** (Boolean) Whether to send an SMS when a new incident is created.
 - **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
 - **team_wait** (Number) How long we wait before escalating the incident alert to the team. In seconds.
 
