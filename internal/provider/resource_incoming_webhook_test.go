@@ -361,7 +361,7 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \[from_email subject body query_string header body json xml\], got metadata`),
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml"\], got metadata`),
 			},
 			{
 				Config: `
@@ -395,7 +395,7 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected started_rules\.0\.match_type to be one of \[contains contains_not matches_regex matches_regex_not equals equals_not\], got feels_like`),
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.match_type to be one of \["contains" "contains_not" "matches_regex" "matches_regex_not" "equals" "equals_not"\], got feels_like`),
 			},
 			{
 				Config: `
@@ -429,7 +429,7 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \[from_email subject body query_string header body json xml\], got from_json`),
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml"\], got from_json`),
 			},
 			{
 				Config: `
@@ -463,7 +463,7 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected cause_field\.0\.match_type to be one of \[match_before match_after match_between match_regex match_everything\], got match_something`),
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.match_type to be one of \["match_before" "match_after" "match_between" "match_regex" "match_everything"\], got match_something`),
 			},
 		},
 	})

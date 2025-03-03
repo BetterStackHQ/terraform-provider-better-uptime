@@ -228,7 +228,7 @@ func TestResourcePolicy(t *testing.T) {
 				}
 				`,
 				Check:       resource.ComposeTestCheckFunc(),
-				ExpectError: regexp.MustCompile(`expected steps\.0\.days\.2 to be one of \[mon tue wed thu fri sat sun], got invalid`),
+				ExpectError: regexp.MustCompile(`expected steps\.0\.days\.2 to be one of \["mon" "tue" "wed" "thu" "fri" "sat" "sun"], got invalid`),
 				PreConfig: func() {
 					t.Log("test validation: days")
 				},
