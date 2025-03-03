@@ -262,6 +262,7 @@ func policyRef(in *policy) []struct {
 		{k: "repeat_delay", v: &in.RepeatDelay},
 		{k: "incident_token", v: &in.IncidentToken},
 		{k: "steps", v: &in.Steps},
+		{k: "policy_group_id", v: &in.PolicyGroupID},
 	}
 }
 
