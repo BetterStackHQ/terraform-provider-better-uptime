@@ -17,15 +17,15 @@ https://betterstack.com/docs/uptime/api/jira-integrations/
 
 ### Optional
 
-- **automatic_issue_creation** (Boolean) Whether to automatically create issues in Jira on incident start.
-- **better_stack_id** (String) Due to required authentication in Jira, the integration has to be created and removed in Better Stack web UI. You can set the ID of the Jira Integration to control in Better Stack, and it will be auto-imported during resource creation.
-- **jira_fields_json** (String) JSON object representing Jira fields.
-- **jira_issue_type_id** (String) The Jira issue type ID.
-- **jira_project_key** (String) The Jira project key.
-- **name** (String) The name of the Jira Integration.
+- `automatic_issue_creation` (Boolean) Whether to automatically create issues in Jira on incident start.
+- `better_stack_id` (String) Due to required authentication in Jira, the integration has to be created and removed in Better Stack web UI. You can set the ID of the Jira Integration to control in Better Stack, and it will be auto-imported during resource creation.
+- `jira_fields_json` (String) JSON object representing Jira fields.
+- `jira_issue_type_id` (String) The Jira issue type ID.
+- `jira_project_key` (String) The Jira project key.
+- `name` (String) The name of the Jira Integration.
 
 ### Read-Only
 
-- **id** (String) The ID of the Jira Integration.
+- `id` (String) The ID of the Jira Integration.
 
 

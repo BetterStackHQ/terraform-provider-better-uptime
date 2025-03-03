@@ -17,35 +17,35 @@ https://betterstack.com/docs/uptime/api/heartbeats/
 
 ### Required
 
-- **grace** (Number) Heartbeats can fluctuate; specify this value to control what is still acceptable. Minimum value: 0 seconds. We recommend setting this to approx. 20% of period
-- **name** (String) A name of the service for this heartbeat.
-- **period** (Number) How often should we expect this heartbeat? In seconds. Minimum value: 30 seconds
+- `grace` (Number) Heartbeats can fluctuate; specify this value to control what is still acceptable. Minimum value: 0 seconds. We recommend setting this to approx. 20% of period
+- `name` (String) A name of the service for this heartbeat.
+- `period` (Number) How often should we expect this heartbeat? In seconds. Minimum value: 30 seconds
 
 ### Optional
 
-- **call** (Boolean) Whether to call when a new incident is created.
-- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
-- **email** (Boolean) Whether to send an email when a new incident is created.
-- **heartbeat_group_id** (Number) Set this attribute if you want to add this heartbeat to a heartbeat group..
-- **maintenance_days** (List of String) An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] or any subset of these days.
-- **maintenance_from** (String) Start of the maintenance window each day. We won't create incidents during this window. Example: "01:00:00"
-- **maintenance_timezone** (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
-- **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
-- **paused** (Boolean) Set to true to pause monitoring — we won't notify you about downtime. Set to false to resume monitoring.
-- **policy_id** (String) Set the escalation policy for the heartbeat.
-- **push** (Boolean) Whether to send a push notification when a new incident is created.
-- **sms** (Boolean) Whether to send an SMS when a new incident is created.
-- **sort_index** (Number) An index controlling the position of a heartbeat in the heartbeat group.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
-- **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
+- `call` (Boolean) Whether to call when a new incident is created.
+- `critical_alert` (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
+- `email` (Boolean) Whether to send an email when a new incident is created.
+- `heartbeat_group_id` (Number) Set this attribute if you want to add this heartbeat to a heartbeat group..
+- `maintenance_days` (List of String) An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] or any subset of these days.
+- `maintenance_from` (String) Start of the maintenance window each day. We won't create incidents during this window. Example: "01:00:00"
+- `maintenance_timezone` (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+- `maintenance_to` (String) End of the maintenance window each day. Example: "03:00:00"
+- `paused` (Boolean) Set to true to pause monitoring — we won't notify you about downtime. Set to false to resume monitoring.
+- `policy_id` (String) Set the escalation policy for the heartbeat.
+- `push` (Boolean) Whether to send a push notification when a new incident is created.
+- `sms` (Boolean) Whether to send an SMS when a new incident is created.
+- `sort_index` (Number) An index controlling the position of a heartbeat in the heartbeat group.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
+- `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
 
 ### Read-Only
 
-- **created_at** (String) The time when this heartbeat was created.
-- **id** (String) The ID of this heartbeat.
-- **paused_at** (String) The time when this heartbeat was paused.
-- **status** (String) The status of this heartbeat.
-- **updated_at** (String) The time when this heartbeat was updated.
-- **url** (String) The url of this heartbeat.
+- `created_at` (String) The time when this heartbeat was created.
+- `id` (String) The ID of this heartbeat.
+- `paused_at` (String) The time when this heartbeat was paused.
+- `status` (String) The status of this heartbeat.
+- `updated_at` (String) The time when this heartbeat was updated.
+- `url` (String) The url of this heartbeat.
 
 

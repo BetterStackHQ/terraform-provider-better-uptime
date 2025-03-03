@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -43,16 +42,11 @@ func main() {
 		log.SetOutput(io.Discard)
 	}
 
-	opts := &plugin.ServeOpts{ProviderFunc: func() *schema.Provider {
-		return provider.New(provider.WithVersion(version))
-	}}
-
-	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/BetterStackHQ/better-uptime", opts)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		return
+	opts := &plugin.ServeOpts{
+		ProviderFunc: func() *schema.Provider {
+			return provider.New(provider.WithVersion(version))
+		},
+		Debug: debugMode,
 	}
 
 	plugin.Serve(opts)

@@ -17,12 +17,12 @@ Monitoring IPs lookup.
 
 ### Optional
 
-- **filter_clusters** (List of String) The optional list of clusters used to filter the IPs.
+- `filter_clusters` (List of String) The optional list of clusters used to filter the IPs.
 
 ### Read-Only
 
-- **all_clusters** (List of String) The list of all clusters.
-- **id** (String) The internal ID of the resource, can be ignored.
-- **ips** (List of String) The list of IPs used for monitoring.
+- `all_clusters` (List of String) The list of all clusters.
+- `id` (String) The internal ID of the resource, can be ignored.
+- `ips` (List of String) The list of IPs used for monitoring.
 
 

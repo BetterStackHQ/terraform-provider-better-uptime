@@ -17,15 +17,15 @@ https://betterstack.com/docs/uptime/api/status-page-sections/
 
 ### Required
 
-- **status_page_id** (String) The ID of the Status Page.
+- `status_page_id` (String) The ID of the Status Page.
 
 ### Optional
 
-- **name** (String) The section name displayed publicly on your status page.
-- **position** (Number) The position of this section on your status page, indexed from zero. If you don't specify a position, we add the section to the end of the status page. When you specify a position of an existing section, we add the section to this position and shift sections below to accommodate.
+- `name` (String) The section name displayed publicly on your status page.
+- `position` (Number) The position of this section on your status page, indexed from zero. If you don't specify a position, we add the section to the end of the status page. When you specify a position of an existing section, we add the section to this position and shift sections below to accommodate.
 
 ### Read-Only
 
-- **id** (String) The ID of this Status Page Section.
+- `id` (String) The ID of this Status Page Section.
 
 

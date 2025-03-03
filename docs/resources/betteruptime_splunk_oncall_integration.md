@@ -17,15 +17,15 @@ https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/
 
 ### Required
 
-- **url** (String) The Splunk On-Call URL to post webhooks to.
+- `url` (String) The Splunk On-Call URL to post webhooks to.
 
 ### Optional
 
-- **name** (String) The name of the Splunk On-Call Integration.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
+- `name` (String) The name of the Splunk On-Call Integration.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 
-- **id** (String) The ID of the Splunk On-Call Integration.
+- `id` (String) The ID of the Splunk On-Call Integration.
 
 

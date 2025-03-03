@@ -17,26 +17,26 @@ https://betterstack.com/docs/uptime/api/catalog-integrations-records/
 
 ### Required
 
-- **attribute** (Block List, Min: 1) List of attribute values for the Catalog record. You can have multiple blocks with same `attribute_id` for multiple values. (see [below for nested schema](#nestedblock--attribute))
-- **relation_id** (String) The ID of the Catalog relation this record belongs to.
+- `attribute` (Block List, Min: 1) List of attribute values for the Catalog record. You can have multiple blocks with same `attribute_id` for multiple values. (see [below for nested schema](#nestedblock--attribute))
+- `relation_id` (String) The ID of the Catalog relation this record belongs to.
 
 ### Read-Only
 
-- **id** (String) The ID of this Catalog record.
+- `id` (String) The ID of this Catalog record.
 
 <a id="nestedblock--attribute"></a>
 ### Nested Schema for `attribute`
 
 Required:
 
-- **attribute_id** (String) ID of the target Catalog attribute.
+- `attribute_id` (String) ID of the target Catalog attribute.
 
 Optional:
 
-- **email** (String) Email of the referenced user when type is `User`.
-- **item_id** (String) ID of the referenced item when type is different than `String`.
-- **name** (String) Name of the referenced item when type is different than `String`.
-- **type** (String) Value types can be grouped into 2 main categories:
+- `email` (String) Email of the referenced user when type is `User`.
+- `item_id` (String) ID of the referenced item when type is different than `String`.
+- `name` (String) Name of the referenced item when type is different than `String`.
+- `type` (String) Value types can be grouped into 2 main categories:
   - **Scalar**: `String`
   - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
   
@@ -48,10 +48,10 @@ Optional:
   - `name` - can be used to reference other items like teams, policies, etc.
   
   **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
-- **value** (String) Value when type is String.
+- `value` (String) Value when type is String.
 
 Read-Only:
 
-- **attribute_name** (String) Name of the Catalog attribute.
+- `attribute_name` (String) Name of the Catalog attribute.
 
 

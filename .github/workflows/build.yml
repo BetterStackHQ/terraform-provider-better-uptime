@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.16.x'
+          go-version: '1.23.x'
       - run: make lint
   check_docs:
     runs-on: ubuntu-20.04
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.16.x'
+          go-version: '1.23.x'
       - name: Generate docs automatically
         run: make gen
       - name: Check no versioned file has been updated

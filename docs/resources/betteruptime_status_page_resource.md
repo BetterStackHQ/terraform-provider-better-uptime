@@ -17,34 +17,34 @@ https://betterstack.com/docs/uptime/api/status-page-resources/
 
 ### Required
 
-- **public_name** (String) The resource name displayed publicly on your status page.
-- **resource_id** (Number) The ID of the resource you are adding.
-- **resource_type** (String) The type of the resource you are adding. Available values: Monitor, Heartbeat, WebhookIntegration, EmailIntegration, IncomingWebhook.
-- **status_page_id** (String) The ID of the Status Page.
+- `public_name` (String) The resource name displayed publicly on your status page.
+- `resource_id` (Number) The ID of the resource you are adding.
+- `resource_type` (String) The type of the resource you are adding. Available values: Monitor, Heartbeat, WebhookIntegration, EmailIntegration, IncomingWebhook.
+- `status_page_id` (String) The ID of the Status Page.
 
 ### Optional
 
-- **explanation** (String) A detailed text displayed as a help icon.
-- **history** (Boolean, Deprecated) Do you want to display detailed historical status for this item? This field is deprecated, use widget_type instead.
-- **position** (Number) The position of this resource on your status page, indexed from zero. If you don't specify a position, we add the resource to the end of the status page. When you specify a position of an existing resource, we add the resource to this position and shift resources below to accommodate.
-- **status_page_section_id** (Number) The ID of the Status Page Section. If you don't specify a status_page_section_id, we add the resource to the first section. If there are no sections in the status page yet, one will be automatically created for you.
-- **widget_type** (String) What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type). This takes preference over history when both parameters are present.
+- `explanation` (String) A detailed text displayed as a help icon.
+- `history` (Boolean, Deprecated) Do you want to display detailed historical status for this item? This field is deprecated, use widget_type instead.
+- `position` (Number) The position of this resource on your status page, indexed from zero. If you don't specify a position, we add the resource to the end of the status page. When you specify a position of an existing resource, we add the resource to this position and shift resources below to accommodate.
+- `status_page_section_id` (Number) The ID of the Status Page Section. If you don't specify a status_page_section_id, we add the resource to the first section. If there are no sections in the status page yet, one will be automatically created for you.
+- `widget_type` (String) What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type). This takes preference over history when both parameters are present.
 
 ### Read-Only
 
-- **availability** (Number) The availability of this resource (from 0.0 to 1.0).
-- **id** (String) The ID of this Status Page Resource.
-- **status** (String) The current status of the resource. Can be one of `not_monitored` (when the underlying monitor is paused), `operational`, `maintenance`, `degraded`, or `downtime`
-- **status_history** (List of Object) History of a single status page resource history (see [below for nested schema](#nestedatt--status_history))
+- `availability` (Number) The availability of this resource (from 0.0 to 1.0).
+- `id` (String) The ID of this Status Page Resource.
+- `status` (String) The current status of the resource. Can be one of `not_monitored` (when the underlying monitor is paused), `operational`, `maintenance`, `degraded`, or `downtime`
+- `status_history` (List of Object) History of a single status page resource history (see [below for nested schema](#nestedatt--status_history))
 
 <a id="nestedatt--status_history"></a>
 ### Nested Schema for `status_history`
 
 Read-Only:
 
-- **day** (String)
-- **downtime_duration** (Number)
-- **maintenance_duration** (Number)
-- **status** (String)
+- `day` (String)
+- `downtime_duration` (Number)
+- `maintenance_duration` (Number)
+- `status` (String)
 
 

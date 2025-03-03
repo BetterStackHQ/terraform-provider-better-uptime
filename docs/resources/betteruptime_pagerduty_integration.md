@@ -17,16 +17,16 @@ https://betterstack.com/docs/uptime/api/pagerduty-integrations/
 
 ### Required
 
-- **key** (String) The PagerDuty routing key.
-- **severity** (String) The PagerDuty alert severity. Can be any of the following: info, warning, error, or critical.
+- `key` (String) The PagerDuty routing key.
+- `severity` (String) The PagerDuty alert severity. Can be any of the following: info, warning, error, or critical.
 
 ### Optional
 
-- **name** (String) The name of the PagerDuty Integration.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
+- `name` (String) The name of the PagerDuty Integration.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 
-- **id** (String) The ID of the PagerDuty Integration.
+- `id` (String) The ID of the PagerDuty Integration.
 
 

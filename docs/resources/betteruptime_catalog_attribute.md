@@ -17,16 +17,16 @@ https://betterstack.com/docs/uptime/api/catalog-integrations-attributes/
 
 ### Required
 
-- **name** (String) The name of the Catalog attribute.
-- **relation_id** (String) The ID of the Catalog relation this attribute belongs to.
+- `name` (String) The name of the Catalog attribute.
+- `relation_id` (String) The ID of the Catalog relation this attribute belongs to.
 
 ### Optional
 
-- **position** (Number) The position of the attribute in the Catalog relation.
-- **primary** (Boolean) Whether this attribute is one of the primary attributes.
+- `position` (Number) The position of the attribute in the Catalog relation.
+- `primary` (Boolean) Whether this attribute is one of the primary attributes.
 
 ### Read-Only
 
-- **id** (String) The ID of this Catalog attribute.
+- `id` (String) The ID of this Catalog attribute.
 
 

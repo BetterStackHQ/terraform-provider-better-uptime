@@ -93,7 +93,7 @@ func TestAccResourceOnCallCalendarWithRotation(t *testing.T) {
 				}
 				`, name),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected on_call_rotation.0.rotation_interval to be one of \[hour day week\], got invalid`),
+				ExpectError: regexp.MustCompile(`expected on_call_rotation.0.rotation_interval to be one of \["hour" "day" "week"\], got invalid`),
 			},
 			// Step 3 - test invalid datetime format
 			{
