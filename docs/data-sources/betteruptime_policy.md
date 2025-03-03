@@ -17,48 +17,48 @@ Policy lookup.
 
 ### Required
 
-- **name** (String) The name of this Policy.
+- `name` (String) The name of this Policy.
 
 ### Read-Only
 
-- **id** (String) The ID of this Policy.
-- **incident_token** (String) Incident token that can be used for manually reporting incidents.
-- **policy_group_id** (Number) Set this attribute if you want to add this policy to a policy group.
-- **repeat_count** (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
-- **repeat_delay** (Number) How long in seconds to wait before each repetition.
-- **steps** (List of Object) An array of escalation policy steps (see [below for nested schema](#nestedatt--steps))
+- `id` (String) The ID of this Policy.
+- `incident_token` (String) Incident token that can be used for manually reporting incidents.
+- `policy_group_id` (Number) Set this attribute if you want to add this policy to a policy group.
+- `repeat_count` (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
+- `repeat_delay` (Number) How long in seconds to wait before each repetition.
+- `steps` (List of Object) An array of escalation policy steps (see [below for nested schema](#nestedatt--steps))
 
 <a id="nestedatt--steps"></a>
 ### Nested Schema for `steps`
 
 Read-Only:
 
-- **days** (List of String)
-- **metadata_key** (String)
-- **metadata_value** (List of Object) (see [below for nested schema](#nestedobjatt--steps--metadata_value))
-- **metadata_values** (List of String)
-- **policy_id** (Number)
-- **policy_metadata_key** (String)
-- **step_members** (List of Object) (see [below for nested schema](#nestedobjatt--steps--step_members))
-- **time_from** (String)
-- **time_to** (String)
-- **timezone** (String)
-- **type** (String)
-- **urgency_id** (Number)
-- **wait_before** (Number)
-- **wait_until_time** (String)
-- **wait_until_timezone** (String)
+- `days` (List of String)
+- `metadata_key` (String)
+- `metadata_value` (List of Object) (see [below for nested schema](#nestedobjatt--steps--metadata_value))
+- `metadata_values` (List of String)
+- `policy_id` (Number)
+- `policy_metadata_key` (String)
+- `step_members` (List of Object) (see [below for nested schema](#nestedobjatt--steps--step_members))
+- `time_from` (String)
+- `time_to` (String)
+- `timezone` (String)
+- `type` (String)
+- `urgency_id` (Number)
+- `wait_before` (Number)
+- `wait_until_time` (String)
+- `wait_until_timezone` (String)
 
 <a id="nestedobjatt--steps--metadata_value"></a>
 ### Nested Schema for `steps.metadata_value`
 
 Read-Only:
 
-- **email** (String)
-- **item_id** (String)
-- **name** (String)
-- **type** (String)
-- **value** (String)
+- `email` (String)
+- `item_id` (String)
+- `name` (String)
+- `type` (String)
+- `value` (String)
 
 
 <a id="nestedobjatt--steps--step_members"></a>
@@ -66,9 +66,9 @@ Read-Only:
 
 Read-Only:
 
-- **id** (Number)
-- **metadata_key** (String)
-- **team_id** (Number)
-- **type** (String)
+- `id` (Number)
+- `metadata_key` (String)
+- `team_id` (Number)
+- `type` (String)
 
 

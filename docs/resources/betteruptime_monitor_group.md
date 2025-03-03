@@ -17,18 +17,18 @@ https://betterstack.com/docs/uptime/api/monitor-groups/
 
 ### Required
 
-- **name** (String) A name of the group that you can see in the dashboard.
+- `name` (String) A name of the group that you can see in the dashboard.
 
 ### Optional
 
-- **paused** (Boolean) Set to true to pause monitoring for any existing monitors in the group - we won't notify you about downtime. Set to false to resume monitoring for any existing monitors in the group.
-- **sort_index** (Number) Set sort_index to specify how to sort your monitor groups.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
+- `paused` (Boolean) Set to true to pause monitoring for any existing monitors in the group - we won't notify you about downtime. Set to false to resume monitoring for any existing monitors in the group.
+- `sort_index` (Number) Set sort_index to specify how to sort your monitor groups.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 
-- **created_at** (String) The time when this monitor group was created.
-- **id** (String) The ID of this Monitor group.
-- **updated_at** (String) The time when this monitor group was updated.
+- `created_at` (String) The time when this monitor group was created.
+- `id` (String) The ID of this Monitor group.
+- `updated_at` (String) The time when this monitor group was updated.
 
 

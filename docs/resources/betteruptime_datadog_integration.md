@@ -17,22 +17,22 @@ https://betterstack.com/docs/uptime/api/datadog-integrations/
 
 ### Optional
 
-- **alerting_rule** (String) Should we alert only on alarms, or on both alarms and warnings. Possible values: alert, alert_and_warn.
-- **call** (Boolean) Whether to call when a new incident is created.
-- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
-- **email** (Boolean) Whether to send an email when a new incident is created.
-- **name** (String) The name of the Datadog Integration.
-- **paused** (Boolean) Is the Datadog integration paused.
-- **policy_id** (Number) ID of the escalation policy associated with the Datadog integration.
-- **push** (Boolean) Whether to send a push notification when a new incident is created.
-- **recovery_period** (Number) How long the alert must be up to automatically mark an incident as resolved. In seconds.
-- **sms** (Boolean) Whether to send an SMS when a new incident is created.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
-- **team_wait** (Number) How long we wait before escalating the incident alert to the team. In seconds.
+- `alerting_rule` (String) Should we alert only on alarms, or on both alarms and warnings. Possible values: alert, alert_and_warn.
+- `call` (Boolean) Whether to call when a new incident is created.
+- `critical_alert` (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
+- `email` (Boolean) Whether to send an email when a new incident is created.
+- `name` (String) The name of the Datadog Integration.
+- `paused` (Boolean) Is the Datadog integration paused.
+- `policy_id` (Number) ID of the escalation policy associated with the Datadog integration.
+- `push` (Boolean) Whether to send a push notification when a new incident is created.
+- `recovery_period` (Number) How long the alert must be up to automatically mark an incident as resolved. In seconds.
+- `sms` (Boolean) Whether to send an SMS when a new incident is created.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
+- `team_wait` (Number) How long we wait before escalating the incident alert to the team. In seconds.
 
 ### Read-Only
 
-- **id** (String) The ID of the Datadog Integration.
-- **webhook_url** (String) The webhook URL for the Datadog integration.
+- `id` (String) The ID of the Datadog Integration.
+- `webhook_url` (String) The webhook URL for the Datadog integration.
 
 

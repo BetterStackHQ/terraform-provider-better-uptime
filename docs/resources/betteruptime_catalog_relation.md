@@ -17,14 +17,14 @@ https://betterstack.com/docs/uptime/api/catalog-integrations-relations/
 
 ### Required
 
-- **name** (String) The name of the Catalog relation.
+- `name` (String) The name of the Catalog relation.
 
 ### Optional
 
-- **description** (String) A description of the Catalog relation.
+- `description` (String) A description of the Catalog relation.
 
 ### Read-Only
 
-- **id** (String) The ID of this Catalog relation.
+- `id` (String) The ID of this Catalog relation.
 
 

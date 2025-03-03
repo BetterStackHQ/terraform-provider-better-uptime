@@ -17,36 +17,36 @@ Monitor lookup.
 
 ### Required
 
-- **url** (String) URL of your website or the host you want to ping (see monitor_type below).
+- `url` (String) URL of your website or the host you want to ping (see monitor_type below).
 
 ### Read-Only
 
-- **auth_password** (String, Sensitive) Basic HTTP authentication password to include with the request.
-- **auth_username** (String, Sensitive) Basic HTTP authentication username to include with the request.
-- **call** (Boolean) Whether to call when a new incident is created.
-- **check_frequency** (Number) How often should we check your website? In seconds.
-- **confirmation_period** (Number) How long should we wait after observing a failure before we start a new incident? In seconds.
-- **created_at** (String) The time when this monitor was created.
-- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
-- **domain_expiration** (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
-- **email** (Boolean) Whether to send an email when a new incident is created.
-- **expected_status_codes** (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.
-- **expiration_policy_id** (Number) Set the expiration escalation policy for the monitor. It is used for SSL certificate and domain expiration checks. When set to null, an e-mail is sent to the entire team.
-- **follow_redirects** (Boolean) Set to true for the monitor to follow redirects.
-- **http_method** (String) HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH
-- **id** (String) The ID of this Monitor.
-- **ip_version** (String) Valid values:
+- `auth_password` (String, Sensitive) Basic HTTP authentication password to include with the request.
+- `auth_username` (String, Sensitive) Basic HTTP authentication username to include with the request.
+- `call` (Boolean) Whether to call when a new incident is created.
+- `check_frequency` (Number) How often should we check your website? In seconds.
+- `confirmation_period` (Number) How long should we wait after observing a failure before we start a new incident? In seconds.
+- `created_at` (String) The time when this monitor was created.
+- `critical_alert` (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
+- `domain_expiration` (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
+- `email` (Boolean) Whether to send an email when a new incident is created.
+- `expected_status_codes` (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.
+- `expiration_policy_id` (Number) Set the expiration escalation policy for the monitor. It is used for SSL certificate and domain expiration checks. When set to null, an e-mail is sent to the entire team.
+- `follow_redirects` (Boolean) Set to true for the monitor to follow redirects.
+- `http_method` (String) HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH
+- `id` (String) The ID of this Monitor.
+- `ip_version` (String) Valid values:
 
     `ipv4` Use IPv4 only,
 
     `ipv6` Use IPv6 only.
-- **last_checked_at** (String) When the website was last checked.
-- **maintenance_days** (List of String) An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] or any subset of these days.
-- **maintenance_from** (String) Start of the maintenance window each day. We won't check your website during this window. Example: "01:00:00"
-- **maintenance_timezone** (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
-- **maintenance_to** (String) End of the maintenance window each day. Example: "03:00:00"
-- **monitor_group_id** (Number) Set this attribute if you want to add this monitor to a monitor group.
-- **monitor_type** (String) Valid values:
+- `last_checked_at` (String) When the website was last checked.
+- `maintenance_days` (List of String) An array of maintenance days to set. If a maintenance window is overnight both affected days should be set. Allowed values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] or any subset of these days.
+- `maintenance_from` (String) Start of the maintenance window each day. We won't check your website during this window. Example: "01:00:00"
+- `maintenance_timezone` (String) The timezone to use for the maintenance window each day. Defaults to UTC. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+- `maintenance_to` (String) End of the maintenance window each day. Example: "03:00:00"
+- `monitor_group_id` (Number) Set this attribute if you want to add this monitor to a monitor group.
+- `monitor_type` (String) Valid values:
 
     `status` We will check your website for 2XX HTTP status code.
 
@@ -77,29 +77,29 @@ Monitor lookup.
 (request_body is required, and should contain the domain to query the DNS server with).
 
     `playwright` We will run the scenario defined by playwright_script, identified in the UI by scenario_name
-- **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
-- **paused_at** (String) The time when this monitor was paused.
-- **playwright_script** (String) For Playwright monitors, the JavaScript source code of the scenario.
-- **policy_id** (String) Set the escalation policy for the monitor.
-- **port** (String) Required if monitor_type is set to tcp, udp, smtp, pop, or imap. tcp and udp monitors accept any ports, while smtp, pop, and imap accept only the specified ports corresponding with their servers (e.g. "25,465,587" for smtp).
-- **pronounceable_name** (String) Pronounceable name of the monitor. We will use this when we call you. Try to make it tongue-friendly, please?
-- **push** (Boolean) Whether to send a push notification when a new incident is created.
-- **recovery_period** (Number) How long the monitor must be up to automatically mark an incident as resolved after being down. In seconds.
-- **regions** (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.
-- **remember_cookies** (Boolean) Set to true to keep cookies when redirecting.
-- **request_body** (String) Request body for POST, PUT, PATCH requests. Required if monitor_type is set to dns (domain to query the DNS server with).
-- **request_headers** (List of Map of String) An array of request headers, consisting of name and value pairs
-- **request_timeout** (Number) How long to wait before timing out the request?
+- `paused` (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
+- `paused_at` (String) The time when this monitor was paused.
+- `playwright_script` (String) For Playwright monitors, the JavaScript source code of the scenario.
+- `policy_id` (String) Set the escalation policy for the monitor.
+- `port` (String) Required if monitor_type is set to tcp, udp, smtp, pop, or imap. tcp and udp monitors accept any ports, while smtp, pop, and imap accept only the specified ports corresponding with their servers (e.g. "25,465,587" for smtp).
+- `pronounceable_name` (String) Pronounceable name of the monitor. We will use this when we call you. Try to make it tongue-friendly, please?
+- `push` (Boolean) Whether to send a push notification when a new incident is created.
+- `recovery_period` (Number) How long the monitor must be up to automatically mark an incident as resolved after being down. In seconds.
+- `regions` (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.
+- `remember_cookies` (Boolean) Set to true to keep cookies when redirecting.
+- `request_body` (String) Request body for POST, PUT, PATCH requests. Required if monitor_type is set to dns (domain to query the DNS server with).
+- `request_headers` (List of Map of String) An array of request headers, consisting of name and value pairs
+- `request_timeout` (Number) How long to wait before timing out the request?
   - For Server and Port monitors (types `ping`, `tcp`, `udp`, `smtp`, `pop`, `imap` and `dns`) the timeout is specified in *milliseconds*. Valid options: 500, 1000, 2000, 3000, 5000.
   - For Playwright monitors (type `playwright`), this determines the Playwright scenario timeout instead in *seconds*. Valid options: 15, 30, 45, 60.
   - For all other monitors, the timeout is specified in *seconds*. Valid options: 2, 3, 5, 10, 15, 30, 45, 60.
-- **required_keyword** (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
-- **scenario_name** (String) For Playwright monitors, the scenario name identifying the monitor in the UI.
-- **sms** (Boolean) Whether to send an SMS when a new incident is created.
-- **ssl_expiration** (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
-- **status** (String) The status of this website check.
-- **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.
-- **updated_at** (String) The time when this monitor was updated.
-- **verify_ssl** (Boolean) Should we verify SSL certificate validity?
+- `required_keyword` (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
+- `scenario_name` (String) For Playwright monitors, the scenario name identifying the monitor in the UI.
+- `sms` (Boolean) Whether to send an SMS when a new incident is created.
+- `ssl_expiration` (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
+- `status` (String) The status of this website check.
+- `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.
+- `updated_at` (String) The time when this monitor was updated.
+- `verify_ssl` (Boolean) Should we verify SSL certificate validity?
 
 

@@ -17,49 +17,49 @@ https://betterstack.com/docs/uptime/api/status-pages/
 
 ### Required
 
-- **company_name** (String) Name of your company.
-- **company_url** (String) URL of your company's website.
-- **subdomain** (String) What subdomain should we use for your status page? This needs to be unique across our entire application, so choose carefully
-- **timezone** (String) What timezone should we display your status page in? The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+- `company_name` (String) Name of your company.
+- `company_url` (String) URL of your company's website.
+- `subdomain` (String) What subdomain should we use for your status page? This needs to be unique across our entire application, so choose carefully
+- `timezone` (String) What timezone should we display your status page in? The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
 
 ### Optional
 
-- **announcement** (String) Add an announcement to your status page.
-- **announcement_embed_css** (String) Modify the design of the announcement embed.
-- **announcement_embed_link** (String) Point your embedded announcement to a specified URL.
-- **announcement_embed_visible** (Boolean) Toggle this field if you want to show an announcement in your embed. You can embed the announcement using this snippet: `<script src="https://uptime.betterstack.com/widgets/announcement.js" data-id="<SET STATUS_PAGE_ID>" async="async" type="text/javascript"></script>`
-- **automatic_reports** (Boolean) Generate automatic reports when your services go down
-- **contact_url** (String) URL that should be used for contacting you in case of an emergency.
-- **custom_css** (String) Unleash your inner designer and tweak our status page design to fit your branding.
-- **custom_domain** (String) Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com`
-- **custom_javascript** (String) Add custom behavior to your status page. It is only allowed for status pages with a custom domain name.
-- **design** (String) Choose between classic and modern status page design. Possible values: 'v1', 'v2'.
-- **google_analytics_id** (String) Specify your own Google Analytics ID if you want to receive hits on your status page.
-- **hide_from_search_engines** (Boolean) Hide your status page from search engines.
-- **history** (Number) Number of days to display on the status page. Between 7 and 365 days.
-- **layout** (String) Choose usual vertical layout or space-saving horizontal layout. Only applicable when design: v2. Possible values: 'vertical', 'horizontal'.
-- **logo_url** (String) A direct link to your company's logo. The image should be under 20MB in size.
-- **min_incident_length** (Number) If you don't want to display short incidents on your status page, this attribute is for you.
-- **navigation_links** (Block List) Adjust the navigation links on your status page. Only applicable when design: v2. Only first 4 links considered. (see [below for nested schema](#nestedblock--navigation_links))
-- **password** (String, Sensitive) Set a password of your status page (we won't store it as plaintext, promise). Required when password_enabled: true. We will set password_enabled: false automatically when you send us an empty password.
-- **password_enabled** (Boolean) Do you want to enable password protection on your status page?
-- **status_page_group_id** (Number) Set this attribute if you want to add this status page to a status page group.
-- **subscribable** (Boolean) Do you want to allow users to subscribe to your status page changes?
-- **theme** (String) Choose theme of your status page. Only applicable when design: v2. Possible values: 'light', 'dark'.
+- `announcement` (String) Add an announcement to your status page.
+- `announcement_embed_css` (String) Modify the design of the announcement embed.
+- `announcement_embed_link` (String) Point your embedded announcement to a specified URL.
+- `announcement_embed_visible` (Boolean) Toggle this field if you want to show an announcement in your embed. You can embed the announcement using this snippet: `<script src="https://uptime.betterstack.com/widgets/announcement.js" data-id="<SET STATUS_PAGE_ID>" async="async" type="text/javascript"></script>`
+- `automatic_reports` (Boolean) Generate automatic reports when your services go down
+- `contact_url` (String) URL that should be used for contacting you in case of an emergency.
+- `custom_css` (String) Unleash your inner designer and tweak our status page design to fit your branding.
+- `custom_domain` (String) Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com`
+- `custom_javascript` (String) Add custom behavior to your status page. It is only allowed for status pages with a custom domain name.
+- `design` (String) Choose between classic and modern status page design. Possible values: 'v1', 'v2'.
+- `google_analytics_id` (String) Specify your own Google Analytics ID if you want to receive hits on your status page.
+- `hide_from_search_engines` (Boolean) Hide your status page from search engines.
+- `history` (Number) Number of days to display on the status page. Between 7 and 365 days.
+- `layout` (String) Choose usual vertical layout or space-saving horizontal layout. Only applicable when design: v2. Possible values: 'vertical', 'horizontal'.
+- `logo_url` (String) A direct link to your company's logo. The image should be under 20MB in size.
+- `min_incident_length` (Number) If you don't want to display short incidents on your status page, this attribute is for you.
+- `navigation_links` (Block List) Adjust the navigation links on your status page. Only applicable when design: v2. Only first 4 links considered. (see [below for nested schema](#nestedblock--navigation_links))
+- `password` (String, Sensitive) Set a password of your status page (we won't store it as plaintext, promise). Required when password_enabled: true. We will set password_enabled: false automatically when you send us an empty password.
+- `password_enabled` (Boolean) Do you want to enable password protection on your status page?
+- `status_page_group_id` (Number) Set this attribute if you want to add this status page to a status page group.
+- `subscribable` (Boolean) Do you want to allow users to subscribe to your status page changes?
+- `theme` (String) Choose theme of your status page. Only applicable when design: v2. Possible values: 'light', 'dark'.
 
 ### Read-Only
 
-- **aggregate_state** (String) The overall status of this status page.
-- **created_at** (String) The time when this status page was created.
-- **id** (String) The ID of this Status Page.
-- **updated_at** (String) The time when this status page was updated.
+- `aggregate_state` (String) The overall status of this status page.
+- `created_at` (String) The time when this status page was created.
+- `id` (String) The ID of this Status Page.
+- `updated_at` (String) The time when this status page was updated.
 
 <a id="nestedblock--navigation_links"></a>
 ### Nested Schema for `navigation_links`
 
 Required:
 
-- **href** (String) Href of the link. Use full URL for external links. Use `/`, `/maintenance` and `/incidents` for built-in links.
-- **text** (String) Label of the link.
+- `href` (String) Href of the link. Use full URL for external links. Use `/`, `/maintenance` and `/incidents` for built-in links.
+- `text` (String) Label of the link.
 
 

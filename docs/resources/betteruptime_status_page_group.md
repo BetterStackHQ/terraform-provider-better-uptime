@@ -17,17 +17,17 @@ https://betterstack.com/docs/uptime/api/status-page-groups/
 
 ### Required
 
-- **name** (String) A name of the group that you can see in the dashboard.
+- `name` (String) A name of the group that you can see in the dashboard.
 
 ### Optional
 
-- **sort_index** (Number) Set sort_index to specify how to sort your status page groups.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
+- `sort_index` (Number) Set sort_index to specify how to sort your status page groups.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 
-- **created_at** (String) The time when this status page group was created.
-- **id** (String) The ID of this status page group.
-- **updated_at** (String) The time when this status page group was updated.
+- `created_at` (String) The time when this status page group was created.
+- `id` (String) The ID of this status page group.
+- `updated_at` (String) The time when this status page group was updated.
 
 

@@ -17,58 +17,58 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 
 ### Required
 
-- **acknowledged_rule_type** (String) Should an incident be acknowledged for all webhooks, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any
-- **resolved_rule_type** (String) Should an incident be resolved for all webhooks, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any
-- **started_rule_type** (String) Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
+- `acknowledged_rule_type` (String) Should an incident be acknowledged for all webhooks, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any
+- `resolved_rule_type` (String) Should an incident be resolved for all webhooks, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any
+- `started_rule_type` (String) Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
 
 ### Optional
 
-- **acknowledged_alert_id_field** (Block Set) When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--acknowledged_alert_id_field))
-- **acknowledged_rules** (Block List) An array of rules to match to acknowledge an incident. (see [below for nested schema](#nestedblock--acknowledged_rules))
-- **call** (Boolean) Whether to call when a new incident is created.
-- **cause_field** (Block Set) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedblock--cause_field))
-- **critical_alert** (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
-- **email** (Boolean) Whether to send an email when a new incident is created.
-- **name** (String) The name of this incoming webhook.
-- **other_acknowledged_fields** (Block List) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for nested schema](#nestedblock--other_acknowledged_fields))
-- **other_resolved_fields** (Block List) An array of additional fields, which will be extracted when resolving an incident. (see [below for nested schema](#nestedblock--other_resolved_fields))
-- **other_started_fields** (Block List) An array of additional fields, which will be extracted when starting an incident. (see [below for nested schema](#nestedblock--other_started_fields))
-- **paused** (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
-- **policy_id** (String) ID of the escalation policy associated with the incoming webhook.
-- **push** (Boolean) Whether to send a push notification when a new incident is created.
-- **recovery_period** (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
-- **resolved_alert_id_field** (Block Set) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--resolved_alert_id_field))
-- **resolved_rules** (Block List) An array of rules to match to resolved an incident. (see [below for nested schema](#nestedblock--resolved_rules))
-- **sms** (Boolean) Whether to send an SMS when a new incident is created.
-- **started_alert_id_field** (Block Set) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--started_alert_id_field))
-- **started_rules** (Block List) An array of rules to match to start a new incident. (see [below for nested schema](#nestedblock--started_rules))
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
-- **team_wait** (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
-- **title_field** (Block Set) An optional field describing how to extract a customized incident title. (see [below for nested schema](#nestedblock--title_field))
+- `acknowledged_alert_id_field` (Block Set) When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--acknowledged_alert_id_field))
+- `acknowledged_rules` (Block List) An array of rules to match to acknowledge an incident. (see [below for nested schema](#nestedblock--acknowledged_rules))
+- `call` (Boolean) Whether to call when a new incident is created.
+- `cause_field` (Block Set) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedblock--cause_field))
+- `critical_alert` (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
+- `email` (Boolean) Whether to send an email when a new incident is created.
+- `name` (String) The name of this incoming webhook.
+- `other_acknowledged_fields` (Block List) An array of additional fields, which will be extracted when acknowledging an incident. (see [below for nested schema](#nestedblock--other_acknowledged_fields))
+- `other_resolved_fields` (Block List) An array of additional fields, which will be extracted when resolving an incident. (see [below for nested schema](#nestedblock--other_resolved_fields))
+- `other_started_fields` (Block List) An array of additional fields, which will be extracted when starting an incident. (see [below for nested schema](#nestedblock--other_started_fields))
+- `paused` (Boolean) Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.
+- `policy_id` (String) ID of the escalation policy associated with the incoming webhook.
+- `push` (Boolean) Whether to send a push notification when a new incident is created.
+- `recovery_period` (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
+- `resolved_alert_id_field` (Block Set) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--resolved_alert_id_field))
+- `resolved_rules` (Block List) An array of rules to match to resolved an incident. (see [below for nested schema](#nestedblock--resolved_rules))
+- `sms` (Boolean) Whether to send an SMS when a new incident is created.
+- `started_alert_id_field` (Block Set) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--started_alert_id_field))
+- `started_rules` (Block List) An array of rules to match to start a new incident. (see [below for nested schema](#nestedblock--started_rules))
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
+- `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
+- `title_field` (Block Set) An optional field describing how to extract a customized incident title. (see [below for nested schema](#nestedblock--title_field))
 
 ### Read-Only
 
-- **created_at** (String) The time when this incoming webhook was created.
-- **id** (String) The ID of this incoming webhook.
-- **sample_body** (String) Sample request body the webhook. Used only to make the configuration easier.
-- **sample_headers** (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
-- **sample_query_string** (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
-- **updated_at** (String) The time when this incoming webhook was updated.
-- **url** (String) The url at which we expect to receive the webhook.
+- `created_at` (String) The time when this incoming webhook was created.
+- `id` (String) The ID of this incoming webhook.
+- `sample_body` (String) Sample request body the webhook. Used only to make the configuration easier.
+- `sample_headers` (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
+- `sample_query_string` (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
+- `updated_at` (String) The time when this incoming webhook was updated.
+- `url` (String) The url at which we expect to receive the webhook.
 
 <a id="nestedblock--acknowledged_alert_id_field"></a>
 ### Nested Schema for `acknowledged_alert_id_field`
 
 Optional:
 
-- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
-- **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
-- **name** (String) The name of the field.
-- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- **target_field** (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
+- `name` (String) The name of the field.
+- `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
+- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--acknowledged_rules"></a>
@@ -76,10 +76,10 @@ Optional:
 
 Optional:
 
-- **content** (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
-- **match_type** (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
-- **rule_target** (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **target_field** (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
+- `match_type` (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
+- `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `target_field` (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--cause_field"></a>
@@ -87,14 +87,14 @@ Optional:
 
 Optional:
 
-- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
-- **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
-- **name** (String) The name of the field.
-- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- **target_field** (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
+- `name` (String) The name of the field.
+- `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
+- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--other_acknowledged_fields"></a>
@@ -102,14 +102,14 @@ Optional:
 
 Optional:
 
-- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
-- **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
-- **name** (String) The name of the field.
-- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- **target_field** (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
+- `name` (String) The name of the field.
+- `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
+- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--other_resolved_fields"></a>
@@ -117,14 +117,14 @@ Optional:
 
 Optional:
 
-- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
-- **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
-- **name** (String) The name of the field.
-- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- **target_field** (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
+- `name` (String) The name of the field.
+- `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
+- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--other_started_fields"></a>
@@ -132,14 +132,14 @@ Optional:
 
 Optional:
 
-- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
-- **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
-- **name** (String) The name of the field.
-- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- **target_field** (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
+- `name` (String) The name of the field.
+- `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
+- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--resolved_alert_id_field"></a>
@@ -147,14 +147,14 @@ Optional:
 
 Optional:
 
-- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
-- **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
-- **name** (String) The name of the field.
-- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- **target_field** (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
+- `name` (String) The name of the field.
+- `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
+- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--resolved_rules"></a>
@@ -162,10 +162,10 @@ Optional:
 
 Optional:
 
-- **content** (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
-- **match_type** (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
-- **rule_target** (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **target_field** (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
+- `match_type` (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
+- `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `target_field` (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--started_alert_id_field"></a>
@@ -173,14 +173,14 @@ Optional:
 
 Optional:
 
-- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
-- **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
-- **name** (String) The name of the field.
-- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- **target_field** (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
+- `name` (String) The name of the field.
+- `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
+- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--started_rules"></a>
@@ -188,10 +188,10 @@ Optional:
 
 Optional:
 
-- **content** (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
-- **match_type** (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
-- **rule_target** (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **target_field** (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
+- `match_type` (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
+- `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `target_field` (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
 
 
 <a id="nestedblock--title_field"></a>
@@ -199,13 +199,13 @@ Optional:
 
 Optional:
 
-- **content** (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- **content_after** (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- **content_before** (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
-- **field_target** (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
-- **match_type** (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
-- **name** (String) The name of the field.
-- **special_type** (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- **target_field** (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
+- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
+- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
+- `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
+- `name` (String) The name of the field.
+- `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
+- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters
 
 

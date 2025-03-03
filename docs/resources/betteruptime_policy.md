@@ -17,54 +17,54 @@ https://betterstack.com/docs/uptime/api/policies/
 
 ### Required
 
-- **name** (String) The name of this Policy.
-- **steps** (Block List, Min: 1) An array of escalation policy steps (see [below for nested schema](#nestedblock--steps))
+- `name` (String) The name of this Policy.
+- `steps` (Block List, Min: 1) An array of escalation policy steps (see [below for nested schema](#nestedblock--steps))
 
 ### Optional
 
-- **policy_group_id** (Number) Set this attribute if you want to add this policy to a policy group.
-- **repeat_count** (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
-- **repeat_delay** (Number) How long in seconds to wait before each repetition.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
+- `policy_group_id` (Number) Set this attribute if you want to add this policy to a policy group.
+- `repeat_count` (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
+- `repeat_delay` (Number) How long in seconds to wait before each repetition.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 
-- **id** (String) The ID of this Policy.
-- **incident_token** (String) Incident token that can be used for manually reporting incidents.
+- `id` (String) The ID of this Policy.
+- `incident_token` (String) Incident token that can be used for manually reporting incidents.
 
 <a id="nestedblock--steps"></a>
 ### Nested Schema for `steps`
 
 Required:
 
-- **type** (String) The type of the step. Can be either escalation, time_branching, or metadata_branching.
+- `type` (String) The type of the step. Can be either escalation, time_branching, or metadata_branching.
 
 Optional:
 
-- **days** (List of String) An array of days during which the branching rule will be executed. Valid values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]. Used when step type is branching.
-- **metadata_key** (String) A metadata field key to check. Used when step type is metadata_branching.
-- **metadata_value** (Block List) An array of typed metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching. (see [below for nested schema](#nestedblock--steps--metadata_value))
-- **metadata_values** (List of String, Deprecated) An array of metadata String values which will cause the branching rule to be executed. Used when step type is metadata_branching.
-- **policy_id** (Number) A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.
-- **policy_metadata_key** (String) A metadata key from which to extract the policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.
-- **step_members** (Block List) An array of escalation policy steps members. Used when step type is escalation. (see [below for nested schema](#nestedblock--steps--step_members))
-- **time_from** (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is time_branching.
-- **time_to** (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.
-- **timezone** (String) What timezone to use when evaluating time based branching rules. Used when step type is time_branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
-- **urgency_id** (Number) Which severity to use for this step. Used when step type is escalation.
-- **wait_before** (Number) How long to wait in seconds before executing this step since previous step. Omit if wait_until_time is set.
-- **wait_until_time** (String) Execute this step at the specified time. Use HH:MM format. Omit if wait_before is set.
-- **wait_until_timezone** (String) Timezone to use when interpreting wait_until_time. Omit if wait_before is set.
+- `days` (List of String) An array of days during which the branching rule will be executed. Valid values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]. Used when step type is branching.
+- `metadata_key` (String) A metadata field key to check. Used when step type is metadata_branching.
+- `metadata_value` (Block List) An array of typed metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching. (see [below for nested schema](#nestedblock--steps--metadata_value))
+- `metadata_values` (List of String, Deprecated) An array of metadata String values which will cause the branching rule to be executed. Used when step type is metadata_branching.
+- `policy_id` (Number) A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.
+- `policy_metadata_key` (String) A metadata key from which to extract the policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.
+- `step_members` (Block List) An array of escalation policy steps members. Used when step type is escalation. (see [below for nested schema](#nestedblock--steps--step_members))
+- `time_from` (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is time_branching.
+- `time_to` (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.
+- `timezone` (String) What timezone to use when evaluating time based branching rules. Used when step type is time_branching. The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+- `urgency_id` (Number) Which severity to use for this step. Used when step type is escalation.
+- `wait_before` (Number) How long to wait in seconds before executing this step since previous step. Omit if wait_until_time is set.
+- `wait_until_time` (String) Execute this step at the specified time. Use HH:MM format. Omit if wait_before is set.
+- `wait_until_timezone` (String) Timezone to use when interpreting wait_until_time. Omit if wait_before is set.
 
 <a id="nestedblock--steps--metadata_value"></a>
 ### Nested Schema for `steps.metadata_value`
 
 Optional:
 
-- **email** (String) Email of the referenced user when type is `User`.
-- **item_id** (String) ID of the referenced item when type is different than `String`.
-- **name** (String) Name of the referenced item when type is different than `String`.
-- **type** (String) Value types can be grouped into 2 main categories:
+- `email` (String) Email of the referenced user when type is `User`.
+- `item_id` (String) ID of the referenced item when type is different than `String`.
+- `name` (String) Name of the referenced item when type is different than `String`.
+- `type` (String) Value types can be grouped into 2 main categories:
   - **Scalar**: `String`
   - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
   
@@ -76,7 +76,7 @@ Optional:
   - `name` - can be used to reference other items like teams, policies, etc.
   
   **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
-- **value** (String) Value when type is String.
+- `value` (String) Value when type is String.
 
 
 <a id="nestedblock--steps--step_members"></a>
@@ -84,12 +84,12 @@ Optional:
 
 Required:
 
-- **type** (String) Type type of the member to notify during an incident. Can be one of current_on_call, entire_team, all_slack_integrations, all_microsoft_teams_integrations, all_zapier_integrations, all_webhook_integrations, all_splunk_on_call_integrations, incident_metadata, user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook or pagerduty_integration.
+- `type` (String) Type type of the member to notify during an incident. Can be one of current_on_call, entire_team, all_slack_integrations, all_microsoft_teams_integrations, all_zapier_integrations, all_webhook_integrations, all_splunk_on_call_integrations, incident_metadata, user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook or pagerduty_integration.
 
 Optional:
 
-- **id** (Number) The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook and pagerduty_integration member types. This is e.g. the ID of the user to notify when member type is user, or on-call calendar ID of when member type is current_on_call.
-- **metadata_key** (String) The metadata key to use to retrieve the escalation target from the incident's metadata. Required when type is incident_metadata.
-- **team_id** (Number, Deprecated) The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used. This field is deprecated, use id instead.
+- `id` (Number) The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook and pagerduty_integration member types. This is e.g. the ID of the user to notify when member type is user, or on-call calendar ID of when member type is current_on_call.
+- `metadata_key` (String) The metadata key to use to retrieve the escalation target from the incident's metadata. Required when type is incident_metadata.
+- `team_id` (Number, Deprecated) The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used. This field is deprecated, use id instead.
 
 

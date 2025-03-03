@@ -17,43 +17,43 @@ https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/
 
 ### Required
 
-- **trigger_type** (String) The type of trigger for the webhook. Only settable during creation. Available values: `incident_change`, `on_call_change`, `monitor_change`.
-- **url** (String) The URL to send webhooks to.
+- `trigger_type` (String) The type of trigger for the webhook. Only settable during creation. Available values: `incident_change`, `on_call_change`, `monitor_change`.
+- `url` (String) The URL to send webhooks to.
 
 ### Optional
 
-- **custom_webhook_template_attributes** (Block List, Max: 1) Custom webhook template configuration. (see [below for nested schema](#nestedblock--custom_webhook_template_attributes))
-- **name** (String) The name of the outgoing webhook.
-- **on_incident_acknowledged** (Boolean) Whether to trigger webhook when incident is acknowledged. Only when `trigger_type=incident_change`.
-- **on_incident_resolved** (Boolean) Whether to trigger webhook when incident is resolved. Only when `trigger_type=incident_change`.
-- **on_incident_started** (Boolean) Whether to trigger webhook when incident starts. Only when `trigger_type=incident_change`.
-- **team_name** (String) Used to specify the team the resource should be created in when using global tokens.
+- `custom_webhook_template_attributes` (Block List, Max: 1) Custom webhook template configuration. (see [below for nested schema](#nestedblock--custom_webhook_template_attributes))
+- `name` (String) The name of the outgoing webhook.
+- `on_incident_acknowledged` (Boolean) Whether to trigger webhook when incident is acknowledged. Only when `trigger_type=incident_change`.
+- `on_incident_resolved` (Boolean) Whether to trigger webhook when incident is resolved. Only when `trigger_type=incident_change`.
+- `on_incident_started` (Boolean) Whether to trigger webhook when incident starts. Only when `trigger_type=incident_change`.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only
 
-- **id** (String) The ID of the outgoing webhook.
+- `id` (String) The ID of the outgoing webhook.
 
 <a id="nestedblock--custom_webhook_template_attributes"></a>
 ### Nested Schema for `custom_webhook_template_attributes`
 
 Optional:
 
-- **auth_password** (String, Sensitive) The password to use for basic authentication.
-- **auth_username** (String) The username to use for basic authentication.
-- **body_template** (String) The body of the webhook request.
-- **headers_template** (Block List) The headers to include in the webhook request. (see [below for nested schema](#nestedblock--custom_webhook_template_attributes--headers_template))
-- **http_method** (String) The HTTP method to use when sending the webhook. Possible values: `get`, `post`, `put`, `patch` and `head`.
+- `auth_password` (String, Sensitive) The password to use for basic authentication.
+- `auth_username` (String) The username to use for basic authentication.
+- `body_template` (String) The body of the webhook request.
+- `headers_template` (Block List) The headers to include in the webhook request. (see [below for nested schema](#nestedblock--custom_webhook_template_attributes--headers_template))
+- `http_method` (String) The HTTP method to use when sending the webhook. Possible values: `get`, `post`, `put`, `patch` and `head`.
 
 Read-Only:
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--custom_webhook_template_attributes--headers_template"></a>
 ### Nested Schema for `custom_webhook_template_attributes.headers_template`
 
 Required:
 
-- **name** (String)
-- **value** (String)
+- `name` (String)
+- `value` (String)
 
 
