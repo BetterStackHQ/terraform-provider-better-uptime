@@ -42,7 +42,7 @@ func New(opts ...Option) *schema.Provider {
 				Sensitive:   true,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("BETTERUPTIME_API_TOKEN", nil),
-				Description: "Better Stack Uptime API Token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token on how to obtain the API token for your team.",
+				Description: "Better Stack Uptime API token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token on how to obtain the API token for your team.",
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
