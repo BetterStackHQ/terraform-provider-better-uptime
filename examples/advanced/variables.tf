@@ -1,7 +1,7 @@
 variable "betteruptime_api_token" {
   type        = string
   description = <<EOF
-Better Stack Uptime API Token
+Better Stack Uptime API token
 (https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token)
 EOF
   # The value can be omitted if BETTERUPTIME_API_TOKEN env var is set.
@@ -21,6 +21,6 @@ EOF
 
 variable "betteruptime_severity_name" {
   type        = string
-  description = "Name of the severity from Better Uptime you want to use with Escalation policies created using Terraform"
+  description = "Name of the severity from Better Stack Uptime you want to use with Escalation policies created using Terraform"
   default     = "Terraform Severity"
 }

@@ -3,7 +3,7 @@
 [![tests](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/test.yml)
 [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs)
 
-Terraform (0.14+) provider for [Better Uptime](https://uptime.betterstack.com/).
+Terraform (0.14+) provider for [Better Stack Uptime](https://uptime.betterstack.com/).
 
 ## Installation
 
@@ -19,7 +19,10 @@ terraform {
 }
 ```
 
-## Example Usage
+## Example usage
+
+See [`/examples` directory](./examples) for multiple ready-to-use examples.
+Here's a simple one to get you started:
 
 ```terraform
 provider "betteruptime" {
@@ -47,15 +50,14 @@ resource "betteruptime_status_page_resource" "monitor" {
 }
 ```
 
-> See [examples/](examples/) for more.
-
 ## Documentation
 
-See Better Uptime [API docs](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/) to obtain API Token and get the complete list of parameter options. Or explore the Terraform Registry [docs](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs).
+See [Better Stack Uptime API docs](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/) to obtain API token and get the complete list of parameter options.
+Or explore the [Terraform Registry provider documentation](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs).
 
 ## Development
 
-> PREREQUISITE: [go1.16+](https://golang.org/dl/).
+> PREREQUISITE: [go1.23+](https://golang.org/dl/).
 
 ```shell script
 git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
