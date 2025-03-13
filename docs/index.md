@@ -2,12 +2,12 @@
 layout: ""
 page_title: "Provider: betteruptime"
 description: |-
-  The Better Uptime provider.
+  The Better Stack Uptime provider.
 ---
 
-# betteruptime Provider
+# Better Stack Uptime Provider
 
-The Better Uptime provider provides resources to interact with the [Better Uptime API](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/).
+[Better Stack Uptime](https://uptime.betterstack.com) provider provides resources to interact with the [Uptime API](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/).
 
 ## Installation
 
@@ -23,7 +23,10 @@ terraform {
 }
 ```
 
-## Example Usage
+## Example usage
+
+In our GitHub repository, you can [see multiple executable examples](https://github.com/BetterStackHQ/terraform-provider-better-uptime/tree/master/examples).
+Here's a simple one to get you started:
 
 ```terraform
 provider "betteruptime" {
@@ -56,4 +59,4 @@ resource "betteruptime_status_page_resource" "monitor" {
 
 ### Required
 
-- `api_token` (String, Sensitive) Better Uptime API Token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token on how to obtain the API token for your team.
+- `api_token` (String, Sensitive) Better Stack Uptime API token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token on how to obtain the API token for your team.
