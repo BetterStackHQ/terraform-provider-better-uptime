@@ -19,9 +19,9 @@ terraform {
 }
 ```
 
-## Example Usage
+## Example usage
 
-See [`/examples` directory](./examples) for multiple executable configurations.
+See [`/examples` directory](./examples) for multiple ready-to-use examples.
 Here's a simple one to get you started:
 
 ```terraform
@@ -52,7 +52,7 @@ resource "betteruptime_status_page_resource" "monitor" {
 
 ## Documentation
 
-See [Better Stack Uptime API docs](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/) to obtain API Token and get the complete list of parameter options.
+See [Better Stack Uptime API docs](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/) to obtain API token and get the complete list of parameter options.
 Or explore the [Terraform Registry provider documentation](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs).
 
 ## Development
