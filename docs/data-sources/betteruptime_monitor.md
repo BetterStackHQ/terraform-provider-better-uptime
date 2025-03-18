@@ -30,6 +30,7 @@ Monitor lookup.
 - `critical_alert` (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
 - `domain_expiration` (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
 - `email` (Boolean) Whether to send an email when a new incident is created.
+- `environment_variables` (Map of String, Sensitive) For Playwright monitors, the environment variables that can be used in the scenario.
 - `expected_status_codes` (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.
 - `expiration_policy_id` (Number) Set the expiration escalation policy for the monitor. It is used for SSL certificate and domain expiration checks. When set to null, an e-mail is sent to the entire team.
 - `follow_redirects` (Boolean) Set to true for the monitor to follow redirects.
