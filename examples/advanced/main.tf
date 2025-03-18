@@ -66,6 +66,9 @@ resource "betteruptime_monitor" "playwright" {
     });
   EOT
   request_timeout   = 60
+  environment_variables = {
+    PASSWORD : "passw0rd"
+  }
 }
 
 resource "betteruptime_status_page_resource" "monitor_status" {
