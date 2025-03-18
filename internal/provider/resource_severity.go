@@ -160,7 +160,9 @@ func severityUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	var in severity
 	var out severityHTTPResponse
 	for _, e := range severityRef(&in) {
-		load(d, e.k, e.v)
+		if e.k != "severity_group_id" || d.HasChange(e.k) {
+			load(d, e.k, e.v)
+		}
 	}
 
 	if err := resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/urgencies/%s", url.PathEscape(d.Id())), &in, &out); err != nil {
