@@ -401,6 +401,40 @@ var monitorSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"environment_variables": {
+		Description: "For Playwright monitors, the environment variables that can be used in the scenario. Example: `{ \"PASSWORD\" = \"passw0rd\" }`.",
+		Type:        schema.TypeMap,
+		Elem:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
+		Sensitive:   true,
+		ValidateDiagFunc: func(v interface{}, path cty.Path) diag.Diagnostics {
+			m := v.(map[string]interface{})
+			for k, v := range m {
+				if k == "" {
+					return diag.Diagnostics{
+						diag.Diagnostic{
+							AttributePath: path,
+							Severity:      diag.Error,
+							Summary:       `Invalid "environment_variables"`,
+							Detail:        "Environment variable name cannot be empty",
+						},
+					}
+				}
+				if v == "" {
+					return diag.Diagnostics{
+						diag.Diagnostic{
+							AttributePath: path,
+							Severity:      diag.Error,
+							Summary:       `Invalid "environment_variables"`,
+							Detail:        fmt.Sprintf("Environment variable value for key %q cannot be empty", k),
+						},
+					}
+				}
+			}
+			return nil
+		},
+	},
 }
 
 func newMonitorResource() *schema.Resource {
@@ -419,50 +453,51 @@ func newMonitorResource() *schema.Resource {
 }
 
 type monitor struct {
-	SSLExpiration       *int                      `json:"ssl_expiration,omitempty"`
-	DomainExpiration    *int                      `json:"domain_expiration,omitempty"`
-	PolicyID            *string                   `json:"policy_id,omitempty"`
-	ExpirationPolicyID  *int                      `json:"expiration_policy_id"`
-	URL                 *string                   `json:"url,omitempty"`
-	MonitorType         *string                   `json:"monitor_type,omitempty"`
-	RequiredKeyword     *string                   `json:"required_keyword,omitempty"`
-	ExpectedStatusCodes *[]int                    `json:"expected_status_codes,omitempty"`
-	Call                *bool                     `json:"call,omitempty"`
-	SMS                 *bool                     `json:"sms,omitempty"`
-	Email               *bool                     `json:"email,omitempty"`
-	Push                *bool                     `json:"push,omitempty"`
-	CriticalAlert       *bool                     `json:"critical_alert,omitempty"`
-	TeamWait            *int                      `json:"team_wait,omitempty"`
-	Paused              *bool                     `json:"paused,omitempty"`
-	PausedAt            *string                   `json:"paused_at,omitempty"`
-	FollowRedirects     *bool                     `json:"follow_redirects,omitempty"`
-	Port                *string                   `json:"port,omitempty"`
-	Regions             *[]string                 `json:"regions,omitempty"`
-	MonitorGroupID      *int                      `json:"monitor_group_id,omitempty"`
-	PronounceableName   *string                   `json:"pronounceable_name,omitempty"`
-	RecoveryPeriod      *int                      `json:"recovery_period,omitempty"`
-	VerifySSL           *bool                     `json:"verify_ssl,omitempty"`
-	CheckFrequency      *int                      `json:"check_frequency,omitempty"`
-	ConfirmationPeriod  *int                      `json:"confirmation_period,omitempty"`
-	HTTPMethod          *string                   `json:"http_method,omitempty"`
-	RequestTimeout      *int                      `json:"request_timeout,omitempty"`
-	RequestBody         *string                   `json:"request_body,omitempty"`
-	RequestHeaders      *[]map[string]interface{} `json:"request_headers,omitempty"`
-	AuthUsername        *string                   `json:"auth_username,omitempty"`
-	AuthPassword        *string                   `json:"auth_password,omitempty"`
-	IpVersion           *string                   `json:"ip_version,omitempty"`
-	MaintenanceFrom     *string                   `json:"maintenance_from,omitempty"`
-	MaintenanceTo       *string                   `json:"maintenance_to,omitempty"`
-	MaintenanceTimezone *string                   `json:"maintenance_timezone,omitempty"`
-	MaintenanceDays     *[]string                 `json:"maintenance_days,omitempty"`
-	RememberCookies     *bool                     `json:"remember_cookies,omitempty"`
-	LastCheckedAt       *string                   `json:"last_checked_at,omitempty"`
-	Status              *string                   `json:"status,omitempty"`
-	CreatedAt           *string                   `json:"created_at,omitempty"`
-	UpdatedAt           *string                   `json:"updated_at,omitempty"`
-	PlaywrightScript    *string                   `json:"playwright_script,omitempty"`
-	ScenarioName        *string                   `json:"scenario_name,omitempty"`
-	TeamName            *string                   `json:"team_name,omitempty"`
+	SSLExpiration        *int                      `json:"ssl_expiration,omitempty"`
+	DomainExpiration     *int                      `json:"domain_expiration,omitempty"`
+	PolicyID             *string                   `json:"policy_id,omitempty"`
+	ExpirationPolicyID   *int                      `json:"expiration_policy_id"`
+	URL                  *string                   `json:"url,omitempty"`
+	MonitorType          *string                   `json:"monitor_type,omitempty"`
+	RequiredKeyword      *string                   `json:"required_keyword,omitempty"`
+	ExpectedStatusCodes  *[]int                    `json:"expected_status_codes,omitempty"`
+	Call                 *bool                     `json:"call,omitempty"`
+	SMS                  *bool                     `json:"sms,omitempty"`
+	Email                *bool                     `json:"email,omitempty"`
+	Push                 *bool                     `json:"push,omitempty"`
+	CriticalAlert        *bool                     `json:"critical_alert,omitempty"`
+	TeamWait             *int                      `json:"team_wait,omitempty"`
+	Paused               *bool                     `json:"paused,omitempty"`
+	PausedAt             *string                   `json:"paused_at,omitempty"`
+	FollowRedirects      *bool                     `json:"follow_redirects,omitempty"`
+	Port                 *string                   `json:"port,omitempty"`
+	Regions              *[]string                 `json:"regions,omitempty"`
+	MonitorGroupID       *int                      `json:"monitor_group_id,omitempty"`
+	PronounceableName    *string                   `json:"pronounceable_name,omitempty"`
+	RecoveryPeriod       *int                      `json:"recovery_period,omitempty"`
+	VerifySSL            *bool                     `json:"verify_ssl,omitempty"`
+	CheckFrequency       *int                      `json:"check_frequency,omitempty"`
+	ConfirmationPeriod   *int                      `json:"confirmation_period,omitempty"`
+	HTTPMethod           *string                   `json:"http_method,omitempty"`
+	RequestTimeout       *int                      `json:"request_timeout,omitempty"`
+	RequestBody          *string                   `json:"request_body,omitempty"`
+	RequestHeaders       *[]map[string]interface{} `json:"request_headers,omitempty"`
+	AuthUsername         *string                   `json:"auth_username,omitempty"`
+	AuthPassword         *string                   `json:"auth_password,omitempty"`
+	IpVersion            *string                   `json:"ip_version,omitempty"`
+	MaintenanceFrom      *string                   `json:"maintenance_from,omitempty"`
+	MaintenanceTo        *string                   `json:"maintenance_to,omitempty"`
+	MaintenanceTimezone  *string                   `json:"maintenance_timezone,omitempty"`
+	MaintenanceDays      *[]string                 `json:"maintenance_days,omitempty"`
+	RememberCookies      *bool                     `json:"remember_cookies,omitempty"`
+	LastCheckedAt        *string                   `json:"last_checked_at,omitempty"`
+	Status               *string                   `json:"status,omitempty"`
+	CreatedAt            *string                   `json:"created_at,omitempty"`
+	UpdatedAt            *string                   `json:"updated_at,omitempty"`
+	PlaywrightScript     *string                   `json:"playwright_script,omitempty"`
+	ScenarioName         *string                   `json:"scenario_name,omitempty"`
+	EnvironmentVariables *map[string]string        `json:"environment_variables,omitempty"`
+	TeamName             *string                   `json:"team_name,omitempty"`
 }
 
 type monitorHTTPResponse struct {
@@ -524,6 +559,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "updated_at", v: &in.UpdatedAt},
 		{k: "playwright_script", v: &in.PlaywrightScript},
 		{k: "scenario_name", v: &in.ScenarioName},
+		{k: "environment_variables", v: &in.EnvironmentVariables},
 	}
 }
 

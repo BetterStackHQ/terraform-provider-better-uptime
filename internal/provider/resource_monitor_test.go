@@ -428,6 +428,137 @@ func TestResourceMonitorWithExpirationPolicyId(t *testing.T) {
 		},
 	})
 }
+func TestResourceMonitorWithVariables(t *testing.T) {
+	server := createTestServer(t)
+	defer server.Close()
+
+	var url = "http://example.com"
+	var monitorType = "playwright"
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url                   = "%s"
+					monitor_type          = "%s"
+					environment_variables = {
+						"TEST_1" = "test-1"
+						"TEST_2" = "test-2"
+					}
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "environment_variables.%", "2"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "environment_variables.TEST_1", "test-1"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "environment_variables.TEST_2", "test-2"),
+				),
+			},
+			// Step 2 - update.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					environment_variables = {
+						"TEST_1" = "test-1"
+						"TEST_3" = "test-3"
+					}
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "environment_variables.%", "2"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "environment_variables.TEST_1", "test-1"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "environment_variables.TEST_3", "test-3"),
+				),
+			},
+			// Step 3 - invalid variable (empty name).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					environment_variables = {
+						"" = "test"
+					}
+				}
+				`, url, monitorType),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Environment variable name cannot be empty`),
+			},
+			// Step 4 - invalid variable (empty value).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					environment_variables = {
+						TEST = ""
+					}
+				}
+				`, url, monitorType),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Environment variable value for key "TEST" cannot be empty`),
+			},
+			// Step 5 - delete.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+					environment_variables = {}
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "environment_variables.%", "0"),
+				),
+			},
+			// Step 6 - destroy.
+			{
+				ResourceName:      "betteruptime_monitor.this",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestExpectedStatusCodeMonitor(t *testing.T) {
 	server := createTestServer(t)
 	defer server.Close()

@@ -60,12 +60,18 @@ resource "betteruptime_monitor" "playwright" {
   playwright_script = <<-EOT
     const { test, expect } = require('@playwright/test');
 
-    test('has title', async ({ page }) => {
+    test('has title and e-mail', async ({ page }) => {
       await page.goto('https://betterstack.com/')
       await expect(page).toHaveTitle(/Better Stack/)
+
+      const locator = page.locator('body')
+      await expect(locator).toContainText(process.env.EMAIL)
     });
   EOT
   request_timeout   = 60
+  environment_variables = {
+    EMAIL = "hello@betterstack.com"
+  }
 }
 
 resource "betteruptime_status_page_resource" "monitor_status" {

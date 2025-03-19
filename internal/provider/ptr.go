@@ -45,6 +45,14 @@ func load(d *schema.ResourceData, key string, receiver interface{}) {
 			}
 			*x = &t
 		}
+	case **map[string]string:
+		if v, ok := d.GetOkExists(key); ok {
+			var t = make(map[string]string, 0)
+			for k, v := range v.(map[string]interface{}) {
+				t[k] = v.(string)
+			}
+			*x = &t
+		}
 	default:
 		panic(fmt.Errorf("unexpected type %T", receiver))
 	}
