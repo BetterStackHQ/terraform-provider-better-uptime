@@ -402,7 +402,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"environment_variables": {
-		Description: "For Playwright monitors, the environment variables that can be used in the scenario.",
+		Description: "For Playwright monitors, the environment variables that can be used in the scenario. Example: `{ \"PASSWORD\" = \"passw0rd\" }`.",
 		Type:        schema.TypeMap,
 		Elem:        schema.TypeString,
 		Optional:    true,
