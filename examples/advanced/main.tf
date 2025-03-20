@@ -58,7 +58,7 @@ resource "betteruptime_monitor" "playwright" {
   monitor_type      = "playwright"
   monitor_group_id  = betteruptime_monitor_group.this.id
   playwright_script = <<-EOT
-    const { test, expect } = require('@playwright/test');
+    import { test, expect } from '@playwright/test';
 
     test('has title and e-mail', async ({ page }) => {
       await page.goto('https://betterstack.com/')
