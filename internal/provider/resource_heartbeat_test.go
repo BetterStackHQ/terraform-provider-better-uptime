@@ -147,7 +147,7 @@ func TestResourceHeartbeat(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "email", "true"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "push", "true"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "critical_alert", "true"),
-					server.TestCheckCalledRequest("PATCH", "/api/v2/heartbeats/1", `{"policy_id":null}`),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/heartbeats/1", `{"policy_id":""}`), // Understood as null by API
 				),
 			},
 			// Step 6 - make no changes, check plan is empty.

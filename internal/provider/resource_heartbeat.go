@@ -145,7 +145,6 @@ var heartbeatSchema = map[string]*schema.Schema{
 		Description: "Set the escalation policy for the heartbeat.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 	},
 	"status": {
 		Description: "The status of this heartbeat.",
