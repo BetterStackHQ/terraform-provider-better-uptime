@@ -145,7 +145,6 @@ var heartbeatSchema = map[string]*schema.Schema{
 		Description: "Set the escalation policy for the heartbeat.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 	},
 	"status": {
 		Description: "The status of this heartbeat.",
@@ -200,7 +199,7 @@ type heartbeat struct {
 	MaintenanceDays     *[]string `json:"maintenance_days,omitempty"`
 	Paused              *bool     `json:"paused,omitempty"`
 	PausedAt            *string   `json:"paused_at,omitempty"`
-	PolicyID            *string   `json:"policy_id"`
+	PolicyID            *string   `json:"policy_id,omitempty"`
 	Status              *string   `json:"status,omitempty"`
 	CreatedAt           *string   `json:"created_at,omitempty"`
 	UpdatedAt           *string   `json:"updated_at,omitempty"`
