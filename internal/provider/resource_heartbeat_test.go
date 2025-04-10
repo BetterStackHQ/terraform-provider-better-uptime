@@ -64,6 +64,7 @@ func TestResourceHeartbeat(t *testing.T) {
 					name           = "%s"
 					period         = 31
 					grace          = 1
+					policy_id      = 123
 					call           = true
 					sms            = false
 					email          = true
@@ -76,11 +77,45 @@ func TestResourceHeartbeat(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "name", name),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "period", "31"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "grace", "1"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "policy_id", "123"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "call", "true"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "sms", "false"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "email", "true"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "push", "true"),
 					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "critical_alert", "true"),
+				),
+			},
+			// Step 4 - change only period, expect only it be patched
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_heartbeat" "this" {
+					name           = "%s"
+					period         = 45
+					grace          = 1
+					policy_id      = 123
+					call           = true
+					sms            = false
+					email          = true
+					push           = true
+					critical_alert = true
+				}
+				`, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_heartbeat.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "name", name),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "period", "45"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "grace", "1"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "policy_id", "123"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "call", "true"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "sms", "false"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "email", "true"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "push", "true"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "critical_alert", "true"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/heartbeats/1", `{"period":45}`),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty.
@@ -92,8 +127,9 @@ func TestResourceHeartbeat(t *testing.T) {
 
 				resource "betteruptime_heartbeat" "this" {
 					name           = "%s"
-					period         = 31
+					period         = 45
 					grace          = 1
+					policy_id      = 123
 					call           = true
 					sms            = false
 					email          = true
