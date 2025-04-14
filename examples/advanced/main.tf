@@ -75,9 +75,9 @@ resource "betteruptime_monitor" "playwright" {
 }
 
 resource "betteruptime_metadata" "monitor_playwright" {
-  owner_id = betteruptime_monitor.playwright.id
+  owner_id   = betteruptime_monitor.playwright.id
   owner_type = "Monitor"
-  key = "E-mail"
+  key        = "E-mail"
   metadata_value {
     value = "hello@betterstack.com"
   }
