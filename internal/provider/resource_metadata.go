@@ -47,9 +47,18 @@ var metadataSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"value": {
-		Description: "The value of this Metadata.",
+		Description: "The value of this Metadata. This field is deprecated, use repeatable block metadata_value to define values with types instead.",
 		Type:        schema.TypeString,
-		Required:    true,
+		Optional:    true,
+		Default:     nil,
+		Deprecated:  "Use repeatable block metadata_value to define values with types instead.",
+	},
+	"metadata_value": {
+		Description: "An array of typed metadata values of this Metadata.",
+		Type:        schema.TypeList,
+		Optional:    true,
+		Default:     nil,
+		Elem:        &schema.Resource{Schema: metadataValueSchema},
 	},
 	"created_at": {
 		Description: "The time when this metadata was created.",
@@ -132,7 +141,7 @@ func newMetadataResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CustomizeDiff: validateRequestHeaders,
+		CustomizeDiff: validateMetadata,
 		Description:   "https://betterstack.com/docs/uptime/api/metadata/",
 		Schema:        metadataSchema,
 	}
@@ -236,6 +245,30 @@ func metadataUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 
 func metadataDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/metadata/%s", url.PathEscape(d.Id())))
+}
+
+func validateMetadata(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+	if err := validateRequestHeaders(ctx, d, m); err != nil {
+		return err
+	}
+
+	metadataStringValue := d.Get("value").(string)
+	metadataValues := d.Get("metadata_value").([]interface{})
+
+	if len(metadataStringValue) == 0 && len(metadataValues) == 0 {
+		return fmt.Errorf("there must be at least 1 metadata_value defined, or the deprecated field value must be used")
+	}
+	if len(metadataStringValue) > 0 && len(metadataValues) > 0 {
+		return fmt.Errorf("there cannot be metadata_value defined, when the deprecated field value is used")
+	}
+
+	for i, v := range metadataValues {
+		value := v.(map[string]interface{})
+		if err := validateMetadataValue(value, fmt.Sprintf("metadata_value.%d", i)); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func validateMetadataValue(attrMap map[string]interface{}, path string) error {
