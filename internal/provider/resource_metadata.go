@@ -23,6 +23,7 @@ var metadataSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return d.Id() != ""
 		},
+		Deprecated: "Team name doesn't have to be specified for this resource.",
 	},
 	"id": {
 		Description: "The ID of this Metadata.",
@@ -148,18 +149,24 @@ func newMetadataResource() *schema.Resource {
 }
 
 type metadata struct {
-	ID        *string `json:"id,omitempty"`
-	OwnerType *string `json:"owner_type,omitempty"`
-	OwnerID   *string `json:"owner_id,omitempty"`
-	Key       *string `json:"key,omitempty"`
-	Value     *string `json:"value,omitempty"`
-	CreatedAt *string `json:"created_at,omitempty"`
-	UpdatedAt *string `json:"updated_at,omitempty"`
-	TeamName  *string `json:"team_name,omitempty"`
+	ID             *string          `json:"id,omitempty"`
+	OwnerType      *string          `json:"owner_type,omitempty"`
+	OwnerID        *string          `json:"owner_id,omitempty"`
+	Key            *string          `json:"key,omitempty"`
+	MetadataValues *[]metadataValue `mapstructure:"metadata_value" json:"values"`
+	CreatedAt      *string          `json:"created_at,omitempty"`
+	UpdatedAt      *string          `json:"updated_at,omitempty"`
 }
 
 type metadataHTTPResponse struct {
 	Data struct {
+		ID         string   `json:"id"`
+		Attributes metadata `json:"attributes"`
+	} `json:"data"`
+}
+
+type metadataListHTTPResponse struct {
+	Data []struct {
 		ID         string   `json:"id"`
 		Attributes metadata `json:"attributes"`
 	} `json:"data"`
@@ -178,7 +185,6 @@ func metadataRef(in *metadata) []struct {
 		{k: "owner_type", v: &in.OwnerType},
 		{k: "owner_id", v: &in.OwnerID},
 		{k: "key", v: &in.Key},
-		{k: "value", v: &in.Value},
 		{k: "created_at", v: &in.CreatedAt},
 		{k: "updated_at", v: &in.UpdatedAt},
 	}
@@ -187,17 +193,10 @@ func metadataRef(in *metadata) []struct {
 func metadataCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in metadata
 	for _, e := range metadataRef(&in) {
-		if e.k == "request_headers" {
-			if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
-				return diag.FromErr(err)
-			}
-		} else {
-			load(d, e.k, e.v)
-		}
+		load(d, e.k, e.v)
 	}
-	load(d, "team_name", &in.TeamName)
 	var out metadataHTTPResponse
-	if err := resourceCreate(ctx, meta, "/api/v2/metadata", &in, &out); err != nil {
+	if err := resourceCreate(ctx, meta, "/api/v3/metadata", &in, &out); err != nil {
 		return err
 	}
 	d.SetId(out.Data.ID)
@@ -205,18 +204,69 @@ func metadataCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func metadataRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var out metadataHTTPResponse
-	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/metadata/%s", url.PathEscape(d.Id())), &out); err != nil {
+	var out metadataListHTTPResponse
+	apiUrl := fmt.Sprintf("/api/v3/metadata/?owner_id=%s&owner_type=%s", url.PathEscape(d.Get("owner_id").(string)), url.PathEscape(d.Get("owner_type").(string)))
+	if err, ok := resourceRead(ctx, meta, apiUrl, &out); err != nil {
 		return err
-	} else if !ok {
-		d.SetId("") // Force "create" on 404.
+	} else if !ok || len(out.Data) == 0 {
+		d.SetId("") // Force "create" on 404 or empty list
 		return nil
 	}
-	return metadataCopyAttrs(d, &out.Data.Attributes)
+	if len(out.Data) > 1 {
+		return diag.Errorf("Found multiple metadata entries for owner_id=%s and owner_type=%s", d.Get("owner_id").(string), d.Get("owner_type").(string))
+	}
+	return metadataCopyAttrs(d, &out.Data[0].Attributes)
+}
+
+func loadMetadataValues(d *schema.ResourceData, receiver **metadataValue) {
+
+	// Convert legacy metadata_values to metadata_value blocks
+	if metadataValues, ok := stepValuesObject["metadata_values"].([]interface{}); ok && len(metadataValues) > 0 {
+		var metadataValueBlocks []map[string]interface{}
+		for _, value := range metadataValues {
+			if strValue, ok := value.(string); ok {
+				metadataValueBlocks = append(metadataValueBlocks, map[string]interface{}{
+					"type":  "String",
+					"value": strValue,
+				})
+			}
+		}
+		stepValuesObject["metadata_value"] = metadataValueBlocks
+		stepValuesObject["metadata_values"] = nil
+	}
+
+	// Remove default values ("" or 0) from metadata values
+	metadataValues, ok := stepValuesObject["metadata_value"].([]interface{})
+	if ok {
+		for _, value := range metadataValues {
+			valueObject := value.(map[string]interface{})
+			for k, v := range valueObject {
+				if v == "" || v == 0 {
+					valueObject[k] = nil
+				}
+			}
+		}
+	}
 }
 
 func metadataCopyAttrs(d *schema.ResourceData, in *metadata) diag.Diagnostics {
 	var derr diag.Diagnostics
+
+	// Remove item_id, name, and email from metadata values if they were not configured, avoid loading them from API
+	if in.MetadataValues != nil {
+		for valueIndex := range *in.MetadataValues {
+			if value, ok := d.GetOk(fmt.Sprintf("metadata_value.%d.item_id", valueIndex)); !ok || value == "" {
+				(*in.MetadataValues)[valueIndex].ItemID = ""
+			}
+			if value, ok := d.GetOk(fmt.Sprintf("metadata_value.%d.email", valueIndex)); !ok || value == "" {
+				(*in.MetadataValues)[valueIndex].Email = nil
+			}
+			if value, ok := d.GetOk(fmt.Sprintf("metadata_value.%d.name", valueIndex)); !ok || value == "" {
+				(*in.MetadataValues)[valueIndex].Name = nil
+			}
+		}
+	}
+
 	for _, e := range metadataRef(in) {
 		if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
@@ -229,29 +279,20 @@ func metadataUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	var in metadata
 	var out metadataHTTPResponse
 	for _, e := range metadataRef(&in) {
-		if d.HasChange(e.k) {
-			if e.k == "request_headers" {
-				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
-					return diag.FromErr(err)
-				}
-			} else {
-				load(d, e.k, e.v)
-			}
+		if e.k != "created_at" && e.k != "updated_at" {
+			load(d, e.k, e.v)
 		}
 	}
 
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/metadata/%s", url.PathEscape(d.Id())), &in, &out)
+	// Using POST requests for updates
+	return resourceCreate(ctx, meta, "/api/v3/metadata", &in, &out)
 }
 
 func metadataDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/metadata/%s", url.PathEscape(d.Id())))
+	return resourceDelete(ctx, meta, "/api/v3/metadata")
 }
 
 func validateMetadata(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	if err := validateRequestHeaders(ctx, d, m); err != nil {
-		return err
-	}
-
 	metadataStringValue := d.Get("value").(string)
 	metadataValues := d.Get("metadata_value").([]interface{})
 
