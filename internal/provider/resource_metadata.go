@@ -31,9 +31,10 @@ var metadataSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"owner_type": {
-		Description: "The type of the owner of this Metadata. Valid values: `Monitor`, `Heartbeat`, `Incident`, `WebhookIntegration`, `EmailIntegration`, `IncomingWebhook`",
-		Type:        schema.TypeString,
-		Required:    true,
+		Description:  "The type of the owner of this Metadata. Valid values: `Monitor`, `Heartbeat`, `Incident`, `WebhookIntegration`, `EmailIntegration`, `IncomingWebhook`, `CallRouting`",
+		Type:         schema.TypeString,
+		ValidateFunc: validation.StringInSlice([]string{"Monitor", "Heartbeat, Incident", "WebhookIntegration", "EmailIntegration", "IncomingWebhook", "CallRouting"}, false),
+		Required:     true,
 	},
 	"owner_id": {
 		Description: "The ID of the owner of this Metadata.",
