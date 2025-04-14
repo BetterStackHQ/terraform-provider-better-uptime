@@ -20,7 +20,7 @@ import (
 
 var metadataSchema = map[string]*schema.Schema{
 	"team_name": {
-		Description: "Used to specify the team the resource should be created in when using global tokens.",
+		Description: "Used to specify the team the resource should be created in when using global tokens. This field is deprecated, team name doesn't have to be specified for this resource anymore.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Default:     nil,

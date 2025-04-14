@@ -24,7 +24,7 @@ https://betterstack.com/docs/uptime/api/metadata/
 ### Optional
 
 - `metadata_value` (Block List) An array of typed metadata values of this Metadata. (see [below for nested schema](#nestedblock--metadata_value))
-- `team_name` (String, Deprecated) Used to specify the team the resource should be created in when using global tokens.
+- `team_name` (String, Deprecated) Used to specify the team the resource should be created in when using global tokens. This field is deprecated, team name doesn't have to be specified for this resource anymore.
 - `value` (String, Deprecated) The value of this Metadata. This field is deprecated, use repeatable block metadata_value to define values with types instead.
 
 ### Read-Only
