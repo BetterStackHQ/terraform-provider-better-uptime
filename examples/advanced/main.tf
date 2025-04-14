@@ -74,6 +74,15 @@ resource "betteruptime_monitor" "playwright" {
   }
 }
 
+resource "betteruptime_metadata" "monitor_playwright" {
+  owner_id   = betteruptime_monitor.playwright.id
+  owner_type = "Monitor"
+  key        = "E-mail"
+  metadata_value {
+    value = "hello@betterstack.com"
+  }
+}
+
 resource "betteruptime_status_page_resource" "monitor_status" {
   status_page_id         = betteruptime_status_page.this.id
   status_page_section_id = betteruptime_status_page_section.monitors.id
