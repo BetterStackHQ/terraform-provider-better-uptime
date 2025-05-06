@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var statusPageResourceSchema = map[string]*schema.Schema{
@@ -36,10 +37,10 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"resource_type": {
-		Description: "The type of the resource you are adding. Available values: Monitor, Heartbeat, WebhookIntegration, EmailIntegration, IncomingWebhook.",
-		Type:        schema.TypeString,
-		Required:    true,
-		// TODO: ValidateDiagFunc: validation.StringInSlice
+		Description:  "The type of the resource you are adding. Available values: Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, ResourceGroup, LogsChart, CatalogReference.",
+		Type:         schema.TypeString,
+		Required:     true,
+		ValidateFunc: validation.StringInSlice([]string{"Monitor", "MonitorGroup", "Heartbeat", "HeartbeatGroup", "WebhookIntegration", "EmailIntegration", "IncomingWebhook", "ResourceGroup", "LogsChart", "CatalogReference"}, false),
 	},
 	"public_name": {
 		Description: "The resource name displayed publicly on your status page.",
