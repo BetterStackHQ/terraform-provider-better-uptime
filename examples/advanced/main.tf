@@ -58,7 +58,7 @@ resource "betteruptime_monitor" "playwright" {
   monitor_type      = "playwright"
   monitor_group_id  = betteruptime_monitor_group.this.id
   playwright_script = <<-EOT
-    const { test, expect } = require('@playwright/test');
+    import { test, expect } from '@playwright/test';
 
     test('has title and e-mail', async ({ page }) => {
       await page.goto('https://betterstack.com/')
@@ -71,6 +71,15 @@ resource "betteruptime_monitor" "playwright" {
   request_timeout   = 60
   environment_variables = {
     EMAIL = "hello@betterstack.com"
+  }
+}
+
+resource "betteruptime_metadata" "monitor_playwright" {
+  owner_id   = betteruptime_monitor.playwright.id
+  owner_type = "Monitor"
+  key        = "E-mail"
+  metadata_value {
+    value = "hello@betterstack.com"
   }
 }
 
