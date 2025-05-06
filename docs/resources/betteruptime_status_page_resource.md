@@ -19,7 +19,7 @@ https://betterstack.com/docs/uptime/api/status-page-resources/
 
 - `public_name` (String) The resource name displayed publicly on your status page.
 - `resource_id` (Number) The ID of the resource you are adding.
-- `resource_type` (String) The type of the resource you are adding. Available values: Monitor, MonitorGroup, Heartbeat, WebhookIntegration, EmailIntegration, IncomingWebhook.
+- `resource_type` (String) The type of the resource you are adding. Available values: Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, ResourceGroup, LogsChart, CatalogReference.
 - `status_page_id` (String) The ID of the Status Page.
 
 ### Optional
