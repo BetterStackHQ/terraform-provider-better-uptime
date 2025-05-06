@@ -12,6 +12,7 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: '1.23.x'
+      - uses: hashicorp/setup-terraform@v3
       - run: make lint
   check_docs:
     runs-on: ubuntu-latest
@@ -20,6 +21,7 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: '1.23.x'
+      - uses: hashicorp/setup-terraform@v3
       - name: Generate docs automatically
         run: make gen
       - name: Check no versioned file has been updated
