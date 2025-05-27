@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -453,11 +454,62 @@ func newMonitorResource() *schema.Resource {
 	}
 }
 
+// NullableInt is a custom type that handles special JSON marshaling for nullable integer fields.
+// When the value is -1, it will be marshaled as null.
+// When the value is not set, the field will be omitted from JSON.
+type NullableInt struct {
+	Value *int
+	// Set to true when the field is explicitly set to -1
+	IsSet bool
+}
+
+func (n NullableInt) MarshalJSON() ([]byte, error) {
+	if n.Value == nil {
+		if n.IsSet {
+			return []byte("null"), nil
+		}
+		return []byte("null"), nil
+	}
+	return json.Marshal(*n.Value)
+}
+
+func (n *NullableInt) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		n.Value = nil
+		n.IsSet = true
+		return nil
+	}
+	var v int
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	n.Value = &v
+	n.IsSet = true
+	return nil
+}
+
+// loadNullableIntField handles loading a value into a NullableInt field.
+func loadNullableIntField(d *schema.ResourceData, fieldName string, receiver *NullableInt) {
+	if v, ok := d.GetOk(fieldName); ok {
+		t := v.(int)
+		if t == -1 {
+			receiver.Value = nil
+			receiver.IsSet = true
+		} else {
+			receiver.Value = &t
+			receiver.IsSet = true
+		}
+	} else {
+		receiver.Value = nil
+		receiver.IsSet = false
+	}
+}
+
 type monitor struct {
-	SSLExpiration        *int                      `json:"ssl_expiration"`
-	DomainExpiration     *int                      `json:"domain_expiration"`
+	SSLExpiration        *NullableInt              `json:"ssl_expiration,omitempty"`
+	DomainExpiration     *NullableInt              `json:"domain_expiration,omitempty"`
 	PolicyID             *string                   `json:"policy_id,omitempty"`
-	ExpirationPolicyID   *int                      `json:"expiration_policy_id"`
+	ExpirationPolicyID   *int                      `json:"expiration_policy_id,omitempty"`
 	URL                  *string                   `json:"url,omitempty"`
 	MonitorType          *string                   `json:"monitor_type,omitempty"`
 	RequiredKeyword      *string                   `json:"required_keyword,omitempty"`
@@ -586,12 +638,15 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 		} else if e.k == "expiration_policy_id" {
 			// Represent null value as 0 for expiration_policy_id
 			loadNullableInt(d, e.k, e.v.(**int), 0)
-		} else if e.k == "domain_expiration" {
-			// Represent null value as -1 for domain_expiration (0 would seem like 0 days)
-			loadNullableInt(d, e.k, e.v.(**int), -1)
-		} else if e.k == "ssl_expiration" {
-			// Represent null value as -1 for ssl_expiration (0 would seem like 0 days)
-			loadNullableInt(d, e.k, e.v.(**int), -1)
+		} else if e.k == "domain_expiration" || e.k == "ssl_expiration" {
+			var ni NullableInt
+			loadNullableIntField(d, e.k, &ni)
+			if ni.IsSet {
+				*e.v.(**NullableInt) = &ni
+			} else {
+				*e.v.(**NullableInt) = nil
+			}
+			continue
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -619,6 +674,22 @@ func monitorRead(ctx context.Context, d *schema.ResourceData, meta interface{}) 
 func monitorCopyAttrs(d *schema.ResourceData, in *monitor) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range monitorRef(in) {
+		if e.k == "ssl_expiration" {
+			if in.SSLExpiration == nil || in.SSLExpiration.Value == nil {
+				d.Set("ssl_expiration", -1)
+			} else {
+				d.Set("ssl_expiration", *in.SSLExpiration.Value)
+			}
+			continue
+		}
+		if e.k == "domain_expiration" {
+			if in.DomainExpiration == nil || in.DomainExpiration.Value == nil {
+				d.Set("domain_expiration", -1)
+			} else {
+				d.Set("domain_expiration", *in.DomainExpiration.Value)
+			}
+			continue
+		}
 		if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
@@ -633,9 +704,15 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 		if e.k == "expiration_policy_id" {
 			// Represent null value as 0 for expiration_policy_id
 			loadNullableInt(d, e.k, e.v.(**int), 0)
-		} else if e.k == "domain_expiration" || e.k == "ssl_expiration" {
-			// Represent null value as -1 for domain_expiration and ssl_expiration (0 would seem like 0 days)
-			loadNullableInt(d, e.k, e.v.(**int), -1)
+		} else if (e.k == "domain_expiration" || e.k == "ssl_expiration") && d.HasChange(e.k) {
+			var ni NullableInt
+			loadNullableIntField(d, e.k, &ni)
+			if ni.IsSet {
+				*e.v.(**NullableInt) = &ni
+			} else {
+				*e.v.(**NullableInt) = nil
+			}
+			continue
 		} else if d.HasChange(e.k) {
 			if e.k == "request_headers" {
 				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
