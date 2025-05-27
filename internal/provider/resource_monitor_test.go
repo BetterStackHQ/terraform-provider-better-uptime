@@ -428,6 +428,7 @@ func TestResourceMonitorWithExpirationPolicyId(t *testing.T) {
 		},
 	})
 }
+
 func TestResourceMonitorWithVariables(t *testing.T) {
 	server := createTestServer(t)
 	defer server.Close()
@@ -605,6 +606,252 @@ func TestExpectedStatusCodeMonitor(t *testing.T) {
 	})
 }
 
+func TestResourceMonitorWithDomainExpiration(t *testing.T) {
+	server := createTestServer(t)
+	defer server.Close()
+
+	var url = "http://example.com"
+	var monitorType = "status"
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					server.TestCheckCalledRequest("POST", "/api/v2/monitors", `{"url":"http://example.com","monitor_type":"status","request_headers":null}`),
+				),
+			},
+			// Step 2 - update (set to non-null value).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url              = "%s"
+					monitor_type     = "%s"
+					domain_expiration = 7
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "domain_expiration", "7"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"domain_expiration":7}`),
+				),
+			},
+			// Step 3 - update (set to null).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url              = "%s"
+					monitor_type     = "%s"
+					domain_expiration = -1
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "domain_expiration", "-1"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"domain_expiration":null}`),
+				),
+			},
+			// Step 4 - update (set to non-null value again).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url              = "%s"
+					monitor_type     = "%s"
+					domain_expiration = 14
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "domain_expiration", "14"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"domain_expiration":14}`),
+				),
+			},
+			// Step 5 - update (unset).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					// TODO: Should not plan anything
+				),
+			},
+			// Step 6 - destroy.
+			{
+				ResourceName:      "betteruptime_monitor.this",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestResourceMonitorWithSSLExpiration(t *testing.T) {
+	server := createTestServer(t)
+	defer server.Close()
+
+	var url = "http://example.com"
+	var monitorType = "status"
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					server.TestCheckCalledRequest("POST", "/api/v2/monitors", `{"url":"http://example.com","monitor_type":"status","request_headers":null}`),
+				),
+			},
+			// Step 2 - update (set to non-null value).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url           = "%s"
+					monitor_type  = "%s"
+					ssl_expiration = 7
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "ssl_expiration", "7"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"ssl_expiration":7}`),
+				),
+			},
+			// Step 3 - update (set to null).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url           = "%s"
+					monitor_type  = "%s"
+					ssl_expiration = -1
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "ssl_expiration", "-1"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"ssl_expiration":null}`),
+				),
+			},
+			// Step 4 - update (set to non-null value again).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url           = "%s"
+					monitor_type  = "%s"
+					ssl_expiration = 14
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "ssl_expiration", "14"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"ssl_expiration":14}`),
+				),
+			},
+			// Step 5 - update (unset).
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url          = "%s"
+					monitor_type = "%s"
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					// TODO: Should not plan anything
+				),
+			},
+			// Step 6 - destroy.
+			{
+				ResourceName:      "betteruptime_monitor.this",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func createTestServer(t *testing.T) *TestServer {
 	ts := &TestServer{}
 	ts.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -617,7 +864,7 @@ func createTestServer(t *testing.T) *TestServer {
 		ts.CalledRequests = append(ts.CalledRequests, CalledRequest{Method: r.Method, URL: r.RequestURI, Body: string(body)})
 		ts.mu.Unlock()
 
-		t.Log("Received " + r.Method + " " + r.RequestURI)
+		t.Log("Received " + r.Method + " " + r.RequestURI + " " + string(body))
 
 		if r.Header.Get("Authorization") != "Bearer foo" {
 			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))

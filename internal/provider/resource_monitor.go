@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // TODO: change to map<name, description> and then use to gen monitor_type description
@@ -33,19 +34,19 @@ var monitorSchema = map[string]*schema.Schema{
 	},
 	"ssl_expiration": {
 		Description: "How many days before the SSL certificate expires do you want to be alerted?" +
-			" Valid values are 1, 2, 3, 7, 14, 30, and 60.",
-		Type:     schema.TypeInt,
-		Optional: true,
-		Computed: true,
-		// TODO: ValidateDiagFunc: validation.IntInSlice
+			" Valid values are 1, 2, 3, 7, 14, 30, and 60. Set to -1 to disable SSL expiration check.",
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.IntInSlice([]int{1, 2, 3, 7, 14, 30, 60, -1}),
 	},
 	"domain_expiration": {
 		Description: "How many days before the domain expires do you want to be alerted?" +
-			" Valid values are 1, 2, 3, 7, 14, 30, and 60.",
-		Type:     schema.TypeInt,
-		Optional: true,
-		Computed: true,
-		// TODO: ValidateDiagFunc: validation.IntInSlice
+			" Valid values are 1, 2, 3, 7, 14, 30, and 60. Set to -1 to disable domain expiration check.",
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.IntInSlice([]int{1, 2, 3, 7, 14, 30, 60, -1}),
 	},
 	"policy_id": {
 		Description: "Set the escalation policy for the monitor.",
@@ -453,8 +454,8 @@ func newMonitorResource() *schema.Resource {
 }
 
 type monitor struct {
-	SSLExpiration        *int                      `json:"ssl_expiration,omitempty"`
-	DomainExpiration     *int                      `json:"domain_expiration,omitempty"`
+	SSLExpiration        *int                      `json:"ssl_expiration"`
+	DomainExpiration     *int                      `json:"domain_expiration"`
 	PolicyID             *string                   `json:"policy_id,omitempty"`
 	ExpirationPolicyID   *int                      `json:"expiration_policy_id"`
 	URL                  *string                   `json:"url,omitempty"`
@@ -563,6 +564,18 @@ func monitorRef(in *monitor) []struct {
 	}
 }
 
+// loadNullableInt handles conversion of special values to nil for various fields.
+func loadNullableInt(d *schema.ResourceData, fieldName string, receiver **int, nullValue int) {
+	if v, ok := d.GetOk(fieldName); ok {
+		t := v.(int)
+		if t == nullValue {
+			*receiver = nil
+		} else {
+			*receiver = &t
+		}
+	}
+}
+
 func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in monitor
 	for _, e := range monitorRef(&in) {
@@ -571,8 +584,14 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 				return diag.FromErr(err)
 			}
 		} else if e.k == "expiration_policy_id" {
-			// Work around the fact that Terraform represents null value as 0
-			loadExpirationPolicy(d, e.v.(**int))
+			// Represent null value as 0 for expiration_policy_id
+			loadNullableInt(d, e.k, e.v.(**int), 0)
+		} else if e.k == "domain_expiration" {
+			// Represent null value as -1 for domain_expiration (0 would seem like 0 days)
+			loadNullableInt(d, e.k, e.v.(**int), -1)
+		} else if e.k == "ssl_expiration" {
+			// Represent null value as -1 for ssl_expiration (0 would seem like 0 days)
+			loadNullableInt(d, e.k, e.v.(**int), -1)
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -612,8 +631,11 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 	var out policyHTTPResponse
 	for _, e := range monitorRef(&in) {
 		if e.k == "expiration_policy_id" {
-			// Work around the fact that Terraform represents null value as 0
-			loadExpirationPolicy(d, e.v.(**int))
+			// Represent null value as 0 for expiration_policy_id
+			loadNullableInt(d, e.k, e.v.(**int), 0)
+		} else if e.k == "domain_expiration" || e.k == "ssl_expiration" {
+			// Represent null value as -1 for domain_expiration and ssl_expiration (0 would seem like 0 days)
+			loadNullableInt(d, e.k, e.v.(**int), -1)
 		} else if d.HasChange(e.k) {
 			if e.k == "request_headers" {
 				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
@@ -727,15 +749,4 @@ func findRequestHeader(headers *[]map[string]interface{}, header *map[string]int
 		}
 	}
 	return nil
-}
-
-func loadExpirationPolicy(d *schema.ResourceData, receiver **int) {
-	if v, ok := d.GetOk("expiration_policy_id"); ok {
-		t := v.(int)
-		if t == 0 {
-			*receiver = nil
-		} else {
-			*receiver = &t
-		}
-	}
 }
