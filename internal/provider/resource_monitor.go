@@ -564,18 +564,6 @@ func monitorRef(in *monitor) []struct {
 	}
 }
 
-// loadNullableInt handles conversion of special values to nil for various fields.
-func loadNullableInt(d *schema.ResourceData, fieldName string, receiver **int, nullValue int) {
-	if v, ok := d.GetOk(fieldName); ok {
-		t := v.(int)
-		if t == nullValue {
-			*receiver = nil
-		} else {
-			*receiver = &t
-		}
-	}
-}
-
 func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in monitor
 	for _, e := range monitorRef(&in) {
