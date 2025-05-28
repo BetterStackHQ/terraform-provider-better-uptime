@@ -852,6 +852,48 @@ func TestResourceMonitorWithSSLExpiration(t *testing.T) {
 	})
 }
 
+func TestResourceMonitorWithDisabledExpirationChecks(t *testing.T) {
+	server := createTestServer(t)
+	defer server.Close()
+
+	var url = "http://example.com"
+	var monitorType = "status"
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create with disabled checks.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					url               = "%s"
+					monitor_type      = "%s"
+					ssl_expiration    = -1
+					domain_expiration = -1
+				}
+				`, url, monitorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "ssl_expiration", "-1"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "domain_expiration", "-1"),
+					server.TestCheckCalledRequest("POST", "/api/v2/monitors", `{"ssl_expiration":null,"domain_expiration":null,"expiration_policy_id":null,"url":"http://example.com","monitor_type":"status","request_headers":null}`),
+				),
+			},
+		},
+	})
+}
+
 func createTestServer(t *testing.T) *TestServer {
 	ts := &TestServer{}
 	ts.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

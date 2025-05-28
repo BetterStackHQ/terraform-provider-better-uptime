@@ -606,9 +606,13 @@ func monitorCopyAttrs(d *schema.ResourceData, in *monitor) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range monitorRef(in) {
 		if e.k == "ssl_expiration" {
-			SetNullableIntResourceData(d, "ssl_expiration", -1, in.SSLExpiration)
+			if err := SetNullableIntResourceData(d, "ssl_expiration", -1, in.SSLExpiration); err != nil {
+				derr = append(derr, diag.FromErr(err)[0])
+			}
 		} else if e.k == "domain_expiration" {
-			SetNullableIntResourceData(d, "domain_expiration", -1, in.DomainExpiration)
+			if err := SetNullableIntResourceData(d, "domain_expiration", -1, in.DomainExpiration); err != nil {
+				derr = append(derr, diag.FromErr(err)[0])
+			}
 		} else if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}

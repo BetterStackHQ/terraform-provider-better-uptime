@@ -96,10 +96,9 @@ func NullableIntFromResourceData(d *schema.ResourceData, key string, terraformNu
 // Example from resource_monitor.go:
 //
 //	SetNullableIntResourceData(d, "ssl_expiration", -1, in.SSLExpiration)
-func SetNullableIntResourceData(d *schema.ResourceData, key string, terraformNullValue int, nullableInt *NullableInt) {
+func SetNullableIntResourceData(d *schema.ResourceData, key string, terraformNullValue int, nullableInt *NullableInt) error {
 	if nullableInt == nil || nullableInt.ExplicitNull {
-		d.Set(key, terraformNullValue)
-	} else if nullableInt.Value != nil {
-		d.Set(key, *nullableInt.Value)
+		return d.Set(key, terraformNullValue)
 	}
+	return d.Set(key, *nullableInt.Value)
 }
