@@ -574,9 +574,10 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 		} else if e.k == "expiration_policy_id" {
 			// Work around the fact that Terraform represents null value as 0
 			loadExpirationPolicy(d, e.v.(**int))
-		} else if e.k == "domain_expiration" || e.k == "ssl_expiration" {
-			*e.v.(**NullableInt) = NullableIntFromResource(d, e.k)
-			continue
+		} else if e.k == "domain_expiration" {
+			in.DomainExpiration = NullableIntFromResourceData(d, e.k, -1)
+		} else if e.k == "ssl_expiration" {
+			in.SSLExpiration = NullableIntFromResourceData(d, e.k, -1)
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -605,22 +606,10 @@ func monitorCopyAttrs(d *schema.ResourceData, in *monitor) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range monitorRef(in) {
 		if e.k == "ssl_expiration" {
-			if in.SSLExpiration == nil {
-				d.Set("ssl_expiration", -1)
-			} else {
-				d.Set("ssl_expiration", in.SSLExpiration.ToTerraform())
-			}
-			continue
-		}
-		if e.k == "domain_expiration" {
-			if in.DomainExpiration == nil {
-				d.Set("domain_expiration", -1)
-			} else {
-				d.Set("domain_expiration", in.DomainExpiration.ToTerraform())
-			}
-			continue
-		}
-		if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
+			SetNullableIntResourceData(d, "ssl_expiration", -1, in.SSLExpiration)
+		} else if e.k == "domain_expiration" {
+			SetNullableIntResourceData(d, "domain_expiration", -1, in.DomainExpiration)
+		} else if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}
@@ -634,14 +623,15 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 		if e.k == "expiration_policy_id" {
 			// Work around the fact that Terraform represents null value as 0
 			loadExpirationPolicy(d, e.v.(**int))
-		} else if (e.k == "domain_expiration" || e.k == "ssl_expiration") && d.HasChange(e.k) {
-			*e.v.(**NullableInt) = NullableIntFromResource(d, e.k)
-			continue
 		} else if d.HasChange(e.k) {
 			if e.k == "request_headers" {
 				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
 					return diag.FromErr(err)
 				}
+			} else if e.k == "domain_expiration" {
+				in.DomainExpiration = NullableIntFromResourceData(d, "domain_expiration", -1)
+			} else if e.k == "ssl_expiration" {
+				in.SSLExpiration = NullableIntFromResourceData(d, "ssl_expiration", -1)
 			} else {
 				load(d, e.k, e.v)
 			}
