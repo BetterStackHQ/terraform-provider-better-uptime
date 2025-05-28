@@ -637,7 +637,7 @@ func TestResourceMonitorWithDomainExpiration(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
-					server.TestCheckCalledRequest("POST", "/api/v2/monitors", `{"url":"http://example.com","monitor_type":"status","request_headers":null}`),
+					server.TestCheckCalledRequest("POST", "/api/v2/monitors", `{"expiration_policy_id":null,"url":"http://example.com","monitor_type":"status","request_headers":null}`),
 				),
 			},
 			// Step 2 - update (set to non-null value).
@@ -657,7 +657,7 @@ func TestResourceMonitorWithDomainExpiration(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "domain_expiration", "7"),
-					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"domain_expiration":7}`),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"domain_expiration":7,"expiration_policy_id":null}`),
 				),
 			},
 			// Step 3 - update (set to null).
@@ -678,7 +678,7 @@ func TestResourceMonitorWithDomainExpiration(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "domain_expiration", "-1"),
-					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"domain_expiration":null}`),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"domain_expiration":null,"expiration_policy_id":null}`),
 				),
 			},
 			// Step 4 - update (set to non-null value again).
@@ -698,7 +698,7 @@ func TestResourceMonitorWithDomainExpiration(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "domain_expiration", "14"),
-					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"domain_expiration":14}`),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"domain_expiration":14,"expiration_policy_id":null}`),
 				),
 			},
 			// Step 5 - update (unset).
@@ -760,7 +760,7 @@ func TestResourceMonitorWithSSLExpiration(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
-					server.TestCheckCalledRequest("POST", "/api/v2/monitors", `{"url":"http://example.com","monitor_type":"status","request_headers":null}`),
+					server.TestCheckCalledRequest("POST", "/api/v2/monitors", `{"expiration_policy_id":null,"url":"http://example.com","monitor_type":"status","request_headers":null}`),
 				),
 			},
 			// Step 2 - update (set to non-null value).
@@ -780,7 +780,7 @@ func TestResourceMonitorWithSSLExpiration(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "ssl_expiration", "7"),
-					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"ssl_expiration":7}`),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"ssl_expiration":7,"expiration_policy_id":null}`),
 				),
 			},
 			// Step 3 - update (set to null).
@@ -801,7 +801,7 @@ func TestResourceMonitorWithSSLExpiration(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", monitorType),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "ssl_expiration", "-1"),
-					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"ssl_expiration":null}`),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"ssl_expiration":null,"expiration_policy_id":null}`),
 				),
 			},
 			// Step 4 - update (set to non-null value again).
@@ -821,7 +821,7 @@ func TestResourceMonitorWithSSLExpiration(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", url),
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "ssl_expiration", "14"),
-					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"ssl_expiration":14}`),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/monitors/1", `{"ssl_expiration":14,"expiration_policy_id":null}`),
 				),
 			},
 			// Step 5 - update (unset).
