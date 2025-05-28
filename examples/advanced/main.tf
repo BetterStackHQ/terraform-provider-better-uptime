@@ -38,6 +38,8 @@ resource "betteruptime_monitor" "status" {
   monitor_type         = "status"
   monitor_group_id     = betteruptime_monitor_group.this.id
   expiration_policy_id = betteruptime_policy.this.id
+  domain_expiration    = -1 # Disable domain expiration check
+  ssl_expiration       = -1 # Disable SSL expiration check
   request_headers = [
     {
       "name" : "X-For-Status-Page",

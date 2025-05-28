@@ -58,7 +58,7 @@ https://betterstack.com/docs/uptime/api/monitors/
 - `check_frequency` (Number) How often should we check your website? In seconds.
 - `confirmation_period` (Number) How long should we wait after observing a failure before we start a new incident? In seconds.
 - `critical_alert` (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
-- `domain_expiration` (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
+- `domain_expiration` (Number) How many days before the domain expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60. Set to -1 to disable domain expiration check.
 - `email` (Boolean) Whether to send an email when a new incident is created.
 - `environment_variables` (Map of String, Sensitive) For Playwright monitors, the environment variables that can be used in the scenario. Example: `{ "PASSWORD" = "passw0rd" }`.
 - `expected_status_codes` (List of Number) Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.
@@ -93,7 +93,7 @@ https://betterstack.com/docs/uptime/api/monitors/
 - `required_keyword` (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
 - `scenario_name` (String) For Playwright monitors, the scenario name identifying the monitor in the UI.
 - `sms` (Boolean) Whether to send an SMS when a new incident is created.
-- `ssl_expiration` (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60.
+- `ssl_expiration` (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60. Set to -1 to disable SSL expiration check.
 - `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 - `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.
 - `verify_ssl` (Boolean) Should we verify SSL certificate validity?

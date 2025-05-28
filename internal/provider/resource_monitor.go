@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // TODO: change to map<name, description> and then use to gen monitor_type description
@@ -33,19 +34,19 @@ var monitorSchema = map[string]*schema.Schema{
 	},
 	"ssl_expiration": {
 		Description: "How many days before the SSL certificate expires do you want to be alerted?" +
-			" Valid values are 1, 2, 3, 7, 14, 30, and 60.",
-		Type:     schema.TypeInt,
-		Optional: true,
-		Computed: true,
-		// TODO: ValidateDiagFunc: validation.IntInSlice
+			" Valid values are 1, 2, 3, 7, 14, 30, and 60. Set to -1 to disable SSL expiration check.",
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.IntInSlice([]int{1, 2, 3, 7, 14, 30, 60, -1}),
 	},
 	"domain_expiration": {
 		Description: "How many days before the domain expires do you want to be alerted?" +
-			" Valid values are 1, 2, 3, 7, 14, 30, and 60.",
-		Type:     schema.TypeInt,
-		Optional: true,
-		Computed: true,
-		// TODO: ValidateDiagFunc: validation.IntInSlice
+			" Valid values are 1, 2, 3, 7, 14, 30, and 60. Set to -1 to disable domain expiration check.",
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.IntInSlice([]int{1, 2, 3, 7, 14, 30, 60, -1}),
 	},
 	"policy_id": {
 		Description: "Set the escalation policy for the monitor.",
@@ -453,8 +454,8 @@ func newMonitorResource() *schema.Resource {
 }
 
 type monitor struct {
-	SSLExpiration        *int                      `json:"ssl_expiration,omitempty"`
-	DomainExpiration     *int                      `json:"domain_expiration,omitempty"`
+	SSLExpiration        *NullableInt              `json:"ssl_expiration,omitempty"`
+	DomainExpiration     *NullableInt              `json:"domain_expiration,omitempty"`
 	PolicyID             *string                   `json:"policy_id,omitempty"`
 	ExpirationPolicyID   *int                      `json:"expiration_policy_id"`
 	URL                  *string                   `json:"url,omitempty"`
@@ -573,6 +574,10 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 		} else if e.k == "expiration_policy_id" {
 			// Work around the fact that Terraform represents null value as 0
 			loadExpirationPolicy(d, e.v.(**int))
+		} else if e.k == "domain_expiration" {
+			in.DomainExpiration = NullableIntFromResourceData(d, e.k, -1)
+		} else if e.k == "ssl_expiration" {
+			in.SSLExpiration = NullableIntFromResourceData(d, e.k, -1)
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -600,7 +605,15 @@ func monitorRead(ctx context.Context, d *schema.ResourceData, meta interface{}) 
 func monitorCopyAttrs(d *schema.ResourceData, in *monitor) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range monitorRef(in) {
-		if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
+		if e.k == "ssl_expiration" {
+			if err := SetNullableIntResourceData(d, "ssl_expiration", -1, in.SSLExpiration); err != nil {
+				derr = append(derr, diag.FromErr(err)[0])
+			}
+		} else if e.k == "domain_expiration" {
+			if err := SetNullableIntResourceData(d, "domain_expiration", -1, in.DomainExpiration); err != nil {
+				derr = append(derr, diag.FromErr(err)[0])
+			}
+		} else if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}
@@ -619,6 +632,10 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
 					return diag.FromErr(err)
 				}
+			} else if e.k == "domain_expiration" {
+				in.DomainExpiration = NullableIntFromResourceData(d, "domain_expiration", -1)
+			} else if e.k == "ssl_expiration" {
+				in.SSLExpiration = NullableIntFromResourceData(d, "ssl_expiration", -1)
 			} else {
 				load(d, e.k, e.v)
 			}
