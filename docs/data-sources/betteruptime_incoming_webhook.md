@@ -21,11 +21,11 @@ Incoming Webhook lookup.
 
 ### Read-Only
 
-- `acknowledged_alert_id_field` (Set of Object) When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--acknowledged_alert_id_field))
+- `acknowledged_alert_id_field` (List of Object) When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--acknowledged_alert_id_field))
 - `acknowledged_rule_type` (String) Should an incident be acknowledged for all webhooks, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any
 - `acknowledged_rules` (List of Object) An array of rules to match to acknowledge an incident. (see [below for nested schema](#nestedatt--acknowledged_rules))
 - `call` (Boolean) Whether to call when a new incident is created.
-- `cause_field` (Set of Object) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedatt--cause_field))
+- `cause_field` (List of Object) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedatt--cause_field))
 - `created_at` (String) The time when this incoming webhook was created.
 - `critical_alert` (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
 - `email` (Boolean) Whether to send an email when a new incident is created.
@@ -37,18 +37,18 @@ Incoming Webhook lookup.
 - `policy_id` (String) ID of the escalation policy associated with the incoming webhook.
 - `push` (Boolean) Whether to send a push notification when a new incident is created.
 - `recovery_period` (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
-- `resolved_alert_id_field` (Set of Object) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--resolved_alert_id_field))
+- `resolved_alert_id_field` (List of Object) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--resolved_alert_id_field))
 - `resolved_rule_type` (String) Should an incident be resolved for all webhooks, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any
 - `resolved_rules` (List of Object) An array of rules to match to resolved an incident. (see [below for nested schema](#nestedatt--resolved_rules))
 - `sample_body` (String) Sample request body the webhook. Used only to make the configuration easier.
 - `sample_headers` (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
 - `sample_query_string` (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
 - `sms` (Boolean) Whether to send an SMS when a new incident is created.
-- `started_alert_id_field` (Set of Object) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--started_alert_id_field))
+- `started_alert_id_field` (List of Object) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--started_alert_id_field))
 - `started_rule_type` (String) Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
 - `started_rules` (List of Object) An array of rules to match to start a new incident. (see [below for nested schema](#nestedatt--started_rules))
 - `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
-- `title_field` (Set of Object) An optional field describing how to extract a customized incident title. (see [below for nested schema](#nestedatt--title_field))
+- `title_field` (List of Object) An optional field describing how to extract a customized incident title. (see [below for nested schema](#nestedatt--title_field))
 - `updated_at` (String) The time when this incoming webhook was updated.
 - `url` (String) The url at which we expect to receive the webhook.
 
