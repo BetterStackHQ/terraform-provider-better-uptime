@@ -153,7 +153,7 @@ func loadIntegrationRules(d *schema.ResourceData, key string, receiver **[]integ
 }
 
 func loadIntegrationField(d *schema.ResourceData, key string, receiver **integrationField) {
-	fieldValues := d.Get(key).(*schema.Set).List()
+	fieldValues := d.Get(key).([]interface{})
 	if len(fieldValues) > 0 {
 		x := receiver
 
