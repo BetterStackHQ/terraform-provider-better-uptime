@@ -351,11 +351,17 @@ func incomingWebhookRead(ctx context.Context, d *schema.ResourceData, meta inter
 func incomingWebhookCopyAttrs(d *schema.ResourceData, in *incomingWebhook) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range incomingWebhookRef(in) {
-		if !isFieldAttribute(e.k) {
-			value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
-			if err := d.Set(e.k, value); err != nil {
-				derr = append(derr, diag.FromErr(err)[0])
+		value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
+		// Handle field attributes that need special formatting (null or set of 1 element)
+		if isFieldAttribute(e.k) {
+			if reflect.ValueOf(value).IsNil() {
+				value = nil
+			} else {
+				value = []interface{}{value}
 			}
+		}
+		if err := d.Set(e.k, value); err != nil {
+			derr = append(derr, diag.FromErr(err)...)
 		}
 	}
 	return derr
