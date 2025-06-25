@@ -199,11 +199,9 @@ func onCallCalendarRef(cal *onCallCalendar) []struct {
 func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel onCallRelationships, inc []onCallIncluded, rot *onCallRotation) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range onCallCalendarRef(cal) {
-		if !isFieldAttribute(e.k) {
-			value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
-			if err := d.Set(e.k, value); err != nil {
-				derr = append(derr, diag.FromErr(err)[0])
-			}
+		value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
+		if err := d.Set(e.k, value); err != nil {
+			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}
 	// Enrich relationships data from included values
@@ -217,10 +215,8 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 			}
 		}
 	}
-	if !isFieldAttribute("on_call_users") {
-		if err := d.Set("on_call_users", rel.OnCallUsers.Data); err != nil {
-			derr = append(derr, diag.FromErr(err)[0])
-		}
+	if err := d.Set("on_call_users", rel.OnCallUsers.Data); err != nil {
+		derr = append(derr, diag.FromErr(err)[0])
 	}
 
 	// Only set rotation if it exists

@@ -101,11 +101,9 @@ func slackIntegrationRef(in *slackIntegration) []struct {
 func slackIntegrationCopyAttrs(d *schema.ResourceData, in *slackIntegration) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range slackIntegrationRef(in) {
-		if !isFieldAttribute(e.k) {
-			value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
-			if err := d.Set(e.k, value); err != nil {
-				derr = append(derr, diag.FromErr(err)[0])
-			}
+		value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
+		if err := d.Set(e.k, value); err != nil {
+			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}
 	return derr
