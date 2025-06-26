@@ -23,10 +23,10 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 
 ### Optional
 
-- `acknowledged_alert_id_field` (Block Set) When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--acknowledged_alert_id_field))
+- `acknowledged_alert_id_field` (Block List, Max: 1) When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--acknowledged_alert_id_field))
 - `acknowledged_rules` (Block List) An array of rules to match to acknowledge an incident. (see [below for nested schema](#nestedblock--acknowledged_rules))
 - `call` (Boolean) Whether to call when a new incident is created.
-- `cause_field` (Block Set) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedblock--cause_field))
+- `cause_field` (Block List, Max: 1) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedblock--cause_field))
 - `critical_alert` (Boolean) Whether to send a critical push notification that ignores the mute switch and Do not Disturb mode when a new incident is created.
 - `email` (Boolean) Whether to send an email when a new incident is created.
 - `name` (String) The name of this incoming webhook.
@@ -37,14 +37,14 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 - `policy_id` (String) ID of the escalation policy associated with the incoming webhook.
 - `push` (Boolean) Whether to send a push notification when a new incident is created.
 - `recovery_period` (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
-- `resolved_alert_id_field` (Block Set) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--resolved_alert_id_field))
+- `resolved_alert_id_field` (Block List, Max: 1) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--resolved_alert_id_field))
 - `resolved_rules` (Block List) An array of rules to match to resolved an incident. (see [below for nested schema](#nestedblock--resolved_rules))
 - `sms` (Boolean) Whether to send an SMS when a new incident is created.
-- `started_alert_id_field` (Block Set) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--started_alert_id_field))
+- `started_alert_id_field` (Block List, Max: 1) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedblock--started_alert_id_field))
 - `started_rules` (Block List) An array of rules to match to start a new incident. (see [below for nested schema](#nestedblock--started_rules))
 - `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 - `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
-- `title_field` (Block Set) An optional field describing how to extract a customized incident title. (see [below for nested schema](#nestedblock--title_field))
+- `title_field` (Block List, Max: 1) An optional field describing how to extract a customized incident title. (see [below for nested schema](#nestedblock--title_field))
 
 ### Read-Only
 

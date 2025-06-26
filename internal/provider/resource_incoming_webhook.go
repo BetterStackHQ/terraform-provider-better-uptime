@@ -148,38 +148,43 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	},
 	"cause_field": {
 		Description: "A field describing how to extract an incident cause, used as a short description shared with the team member on-call.",
-		Type:        schema.TypeSet,
+		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
+		MaxItems:    1,
 	},
 	"title_field": {
 		Description: "An optional field describing how to extract a customized incident title.",
-		Type:        schema.TypeSet,
+		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 		Computed:    false,
+		MaxItems:    1,
 	},
 	"started_alert_id_field": {
 		Description: "When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
-		Type:        schema.TypeSet,
+		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
+		MaxItems:    1,
 	},
 	"acknowledged_alert_id_field": {
 		Description: "When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
-		Type:        schema.TypeSet,
+		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
+		MaxItems:    1,
 	},
 	"resolved_alert_id_field": {
 		Description: "When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
-		Type:        schema.TypeSet,
+		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
+		MaxItems:    1,
 	},
 	"other_started_fields": {
 		Description: "An array of additional fields, which will be extracted when starting an incident.",
@@ -351,11 +356,17 @@ func incomingWebhookRead(ctx context.Context, d *schema.ResourceData, meta inter
 func incomingWebhookCopyAttrs(d *schema.ResourceData, in *incomingWebhook) diag.Diagnostics {
 	var derr diag.Diagnostics
 	for _, e := range incomingWebhookRef(in) {
-		if !isFieldAttribute(e.k) {
-			value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
-			if err := d.Set(e.k, value); err != nil {
-				derr = append(derr, diag.FromErr(err)[0])
+		value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
+		// Handle field attributes that need special formatting (null or set of 1 element)
+		if isFieldAttribute(e.k) {
+			if reflect.ValueOf(value).IsNil() {
+				value = nil
+			} else {
+				value = []interface{}{value}
 			}
+		}
+		if err := d.Set(e.k, value); err != nil {
+			derr = append(derr, diag.FromErr(err)...)
 		}
 	}
 	return derr

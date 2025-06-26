@@ -28,6 +28,7 @@ func newIncomingWebhookDataSource() *schema.Resource {
 			cp.Default = nil
 			cp.DefaultFunc = nil
 			cp.DiffSuppressFunc = nil
+			cp.MaxItems = 0
 		}
 		s[k] = &cp
 	}
