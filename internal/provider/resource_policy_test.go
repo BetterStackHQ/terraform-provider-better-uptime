@@ -361,6 +361,66 @@ EOT
 					t.Log("test valid instructions step")
 				},
 			},
+			// Test change instructions step into simple escalation
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Regular escalation"
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					urgency_id  = 123
+					step_members { type = "current_on_call" }
+					step_members {
+                      type = "slack_integration"
+                      id = 123
+                    }
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.type", "escalation"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.urgency_id", "123"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.type", "current_on_call"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.1.type", "slack_integration"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.1.id", "123"),
+				),
+				PreConfig: func() {
+					t.Log("test change instructions into escalation step")
+				},
+			},
+			// Test keeping the escalation step unchanged after it was changed from instructions
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Regular escalation"
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					urgency_id  = 123
+					step_members { type = "current_on_call" }
+					step_members {
+                      type = "slack_integration"
+                      id = 123
+                    }
+				  }
+				}
+				`,
+				PlanOnly: true,
+				PreConfig: func() {
+					t.Log("test keeping escalation step unchanged")
+				},
+			},
 		},
 	})
 

@@ -385,6 +385,13 @@ func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) error {
 
 	for _, stepValues := range stepsValues.([]interface{}) {
 		stepValuesObject := stepValues.(map[string]interface{})
+		stepType := stepValuesObject["type"].(string)
+
+		// Clear instruction-specific computed fields when step type is not instructions
+		if stepType != "instructions" {
+			stepValuesObject["reminder_enabled"] = nil
+			stepValuesObject["reminder_interval_hours"] = nil
+		}
 
 		// Remove default values ("" or 0) from step
 		for k, v := range stepValuesObject {
@@ -481,11 +488,15 @@ func validatePolicy(ctx context.Context, d *schema.ResourceDiff, m interface{}) 
 			if comment, ok := stepMap["comment"].(string); ok && comment != "" {
 				return fmt.Errorf("steps.%d: comment can only be used with instructions step", i)
 			}
-			if reminderEnabled, ok := stepMap["reminder_enabled"].(bool); ok && reminderEnabled {
-				return fmt.Errorf("steps.%d: reminder_enabled can only be used with instructions step", i)
-			}
-			if reminderHours, ok := stepMap["reminder_interval_hours"].(int); ok && reminderHours > 0 {
-				return fmt.Errorf("steps.%d: reminder_interval_hours can only be used with instructions step", i)
+
+			if !d.HasChange(fmt.Sprintf("steps.%d.type", i)) {
+				// Validate computed fields only if the type is not changing
+				if reminderEnabled, ok := stepMap["reminder_enabled"].(bool); ok && reminderEnabled {
+					return fmt.Errorf("steps.%d: reminder_enabled can only be used with instructions step", i)
+				}
+				if reminderHours, ok := stepMap["reminder_interval_hours"].(int); ok && reminderHours > 0 {
+					return fmt.Errorf("steps.%d: reminder_interval_hours can only be used with instructions step", i)
+				}
 			}
 		}
 	}
