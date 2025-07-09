@@ -281,7 +281,7 @@ resource "betteruptime_policy_group" "this" {
 }
 
 resource "betteruptime_policy" "this" {
-  name            = "Standard Escalation Policy"
+  name            = "Low-Priority Escalation Policy"
   repeat_count    = 3
   repeat_delay    = 60
   policy_group_id = betteruptime_policy_group.this.id
@@ -293,6 +293,31 @@ resource "betteruptime_policy" "this" {
     step_members { type = "all_slack_integrations" }
     step_members { type = "all_webhook_integrations" }
     step_members { type = "current_on_call" }
+  }
+  steps {
+    type             = "instructions"
+    wait_before      = 0
+    reminder_enabled = false
+    comment          = <<EOT
+# Low-Priority Incident Handling Instructions
+
+This is a low-priority escalation. Please follow these steps:
+
+- [ ] Acknowledge the alert within business hours
+- [ ] Review the incident details and assess impact
+- [ ] Check if this can be scheduled for the next maintenance window
+- [ ] Document any findings in the incident notes
+- [ ] If the issue persists beyond 24 hours, escalate to standard priority
+
+## Note
+Low-priority incidents typically include:
+- Non-critical monitoring alerts
+- Performance degradations that don't impact users
+- Maintenance reminders
+- Informational alerts
+
+**Please alert the Ops team in case this should have been escalated with higher priority!**
+EOT
   }
   steps {
     type        = "time_branching"
