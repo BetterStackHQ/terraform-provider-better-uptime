@@ -37,16 +37,19 @@ https://betterstack.com/docs/uptime/api/policies/
 
 Required:
 
-- `type` (String) The type of the step. Can be either escalation, time_branching, or metadata_branching.
+- `type` (String) The type of the step. Can be either escalation, time_branching, metadata_branching, or instructions.
 
 Optional:
 
+- `comment` (String) Post instructions as a comment into the incident timeline. You can use Markdown, reference metadata as `{server_region}`, and interactive checkboxes like `- [ ] Step 1`. Used when step type is instructions.
 - `days` (List of String) An array of days during which the branching rule will be executed. Valid values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]. Used when step type is branching.
 - `metadata_key` (String) A metadata field key to check. Used when step type is metadata_branching.
 - `metadata_value` (Block List) An array of typed metadata values which will cause the branching rule to be executed. Used when step type is metadata_branching. (see [below for nested schema](#nestedblock--steps--metadata_value))
 - `metadata_values` (List of String, Deprecated) An array of metadata String values which will cause the branching rule to be executed. Used when step type is metadata_branching.
 - `policy_id` (Number) A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.
 - `policy_metadata_key` (String) A metadata key from which to extract the policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.
+- `reminder_enabled` (Boolean) Whether we should followup periodically unless all checkboxes are checked. Used when step type is instructions.
+- `reminder_interval_hours` (Number) Time interval in hours we should use for periodical follow-ups. Used when step type is instructions.
 - `step_members` (Block List) An array of escalation policy steps members. Used when step type is escalation. (see [below for nested schema](#nestedblock--steps--step_members))
 - `time_from` (String) A time from which the branching rule will be executed. Use HH:MM format. Used when step type is time_branching.
 - `time_to` (String) A time at which the branching rule will step being executed. Use HH:MM format. Used when step type is time_branching.

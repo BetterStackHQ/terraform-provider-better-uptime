@@ -33,12 +33,15 @@ Policy lookup.
 
 Read-Only:
 
+- `comment` (String)
 - `days` (List of String)
 - `metadata_key` (String)
 - `metadata_value` (List of Object) (see [below for nested schema](#nestedobjatt--steps--metadata_value))
 - `metadata_values` (List of String)
 - `policy_id` (Number)
 - `policy_metadata_key` (String)
+- `reminder_enabled` (Boolean)
+- `reminder_interval_hours` (Number)
 - `step_members` (List of Object) (see [below for nested schema](#nestedobjatt--steps--step_members))
 - `time_from` (String)
 - `time_to` (String)
