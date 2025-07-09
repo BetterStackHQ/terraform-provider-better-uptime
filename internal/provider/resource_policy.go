@@ -42,9 +42,10 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 
 var policyStepSchema = map[string]*schema.Schema{
 	"type": {
-		Description: "The type of the step. Can be either escalation, time_branching, or metadata_branching.",
-		Type:        schema.TypeString,
-		Required:    true,
+		Description:  "The type of the step. Can be either escalation, time_branching, metadata_branching, or instructions.",
+		Type:         schema.TypeString,
+		Required:     true,
+		ValidateFunc: validation.StringInSlice([]string{"escalation", "time_branching", "metadata_branching", "instructions"}, false),
 	},
 	"wait_before": {
 		Description: "How long to wait in seconds before executing this step since previous step. Omit if wait_until_time is set.",
@@ -135,6 +136,25 @@ var policyStepSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Default:     nil,
 	},
+	"comment": {
+		Description: "Post instructions as a comment into the incident timeline. You can use Markdown, reference metadata as `{server_region}`, and interactive checkboxes like `- [ ] Step 1`. Used when step type is instructions.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Default:     nil,
+	},
+	"reminder_enabled": {
+		Description: "Whether we should followup periodically unless all checkboxes are checked. Used when step type is instructions.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
+	"reminder_interval_hours": {
+		Description:  "Time interval in hours we should use for periodical follow-ups. Used when step type is instructions.",
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.IntAtLeast(1),
+	},
 }
 
 var policySchema = map[string]*schema.Schema{
@@ -213,21 +233,24 @@ type policyStepMember struct {
 }
 
 type policyStep struct {
-	Type                 *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
-	WaitBefore           *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
-	WaitUntilTime        *string             `mapstructure:"wait_until_time,omitempty" json:"wait_until_time,omitempty"`
-	WaitUntilTimezone    *string             `mapstructure:"wait_until_timezone,omitempty" json:"wait_until_timezone,omitempty"`
-	UrgencyId            *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
-	Members              *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
-	Timezone             *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
-	Days                 *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
-	TimeFrom             *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
-	TimeTo               *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
-	MetadataKey          *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
-	MetadataValues       *[]metadataValue    `mapstructure:"metadata_value" json:"metadata_values,omitempty"`
-	LegacyMetadataValues *[]string           `mapstructure:"metadata_values" json:"-"`
-	PolicyId             *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
-	PolicyMetadataKey    *string             `mapstructure:"policy_metadata_key,omitempty" json:"policy_metadata_key,omitempty"`
+	Type                  *string             `mapstructure:"type,omitempty" json:"type,omitempty"`
+	WaitBefore            *int                `mapstructure:"wait_before,omitempty" json:"wait_before,omitempty"`
+	WaitUntilTime         *string             `mapstructure:"wait_until_time,omitempty" json:"wait_until_time,omitempty"`
+	WaitUntilTimezone     *string             `mapstructure:"wait_until_timezone,omitempty" json:"wait_until_timezone,omitempty"`
+	UrgencyId             *int                `mapstructure:"urgency_id,omitempty" json:"urgency_id,omitempty"`
+	Members               *[]policyStepMember `mapstructure:"step_members" json:"step_members"`
+	Timezone              *string             `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
+	Days                  *[]string           `mapstructure:"days,omitempty" json:"days,omitempty"`
+	TimeFrom              *string             `mapstructure:"time_from,omitempty" json:"time_from,omitempty"`
+	TimeTo                *string             `mapstructure:"time_to,omitempty" json:"time_to,omitempty"`
+	MetadataKey           *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
+	MetadataValues        *[]metadataValue    `mapstructure:"metadata_value" json:"metadata_values,omitempty"`
+	LegacyMetadataValues  *[]string           `mapstructure:"metadata_values" json:"-"`
+	PolicyId              *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
+	PolicyMetadataKey     *string             `mapstructure:"policy_metadata_key,omitempty" json:"policy_metadata_key,omitempty"`
+	Comment               *string             `mapstructure:"comment,omitempty" json:"instructions_comment,omitempty"`
+	ReminderEnabled       *bool               `mapstructure:"reminder_enabled,omitempty" json:"instructions_reminder_enabled,omitempty"`
+	ReminderIntervalHours *int                `mapstructure:"reminder_interval_hours,omitempty" json:"instructions_reminder_interval_hours,omitempty"`
 }
 
 type policy struct {
@@ -427,8 +450,10 @@ func validatePolicy(ctx context.Context, d *schema.ResourceDiff, m interface{}) 
 	steps := d.Get("steps").([]interface{})
 	for i, step := range steps {
 		stepMap := step.(map[string]interface{})
+		stepType := stepMap["type"].(string)
 
-		if stepMap["type"].(string) == "metadata_branching" {
+		// Validate metadata_branching specific attributes
+		if stepType == "metadata_branching" {
 			if stepMap["metadata_key"].(string) == "" {
 				return fmt.Errorf("steps.%d: missing metadata_key for metadata_branching step", i)
 			}
@@ -444,6 +469,23 @@ func validatePolicy(ctx context.Context, d *schema.ResourceDiff, m interface{}) 
 		} else {
 			if len(stepMap["metadata_value"].([]interface{})) > 0 {
 				return fmt.Errorf("steps.%d: metadata_value must be empty for non-metadata_branching steps", i)
+			}
+		}
+
+		// Validate instructions specific attributes
+		if stepType == "instructions" {
+			if stepMap["comment"].(string) == "" {
+				return fmt.Errorf("steps.%d: missing comment for instructions step", i)
+			}
+		} else {
+			if comment, ok := stepMap["comment"].(string); ok && comment != "" {
+				return fmt.Errorf("steps.%d: comment can only be used with instructions step", i)
+			}
+			if reminderEnabled, ok := stepMap["reminder_enabled"].(bool); ok && reminderEnabled {
+				return fmt.Errorf("steps.%d: reminder_enabled can only be used with instructions step", i)
+			}
+			if reminderHours, ok := stepMap["reminder_interval_hours"].(int); ok && reminderHours > 0 {
+				return fmt.Errorf("steps.%d: reminder_interval_hours can only be used with instructions step", i)
 			}
 		}
 	}

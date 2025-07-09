@@ -288,6 +288,210 @@ func TestResourcePolicy(t *testing.T) {
 		},
 	})
 
+	// Test instructions step type
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Test instructions step without reminder
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Instructions without reminder"
+
+				  steps {
+					type        = "instructions"
+					wait_before = 60
+					comment = "Simple instructions without reminder"
+					reminder_enabled = false
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.type", "instructions"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.wait_before", "60"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.comment", "Simple instructions without reminder"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.reminder_enabled", "false"),
+				),
+				PreConfig: func() {
+					t.Log("test instructions without reminder")
+				},
+			},
+			// Test instructions step with reminder
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Instructions with reminder"
+
+				  steps {
+					type        = "instructions"
+					wait_before = 0
+					comment = <<EOT
+# Incident Instructions
+
+Please follow these steps:
+- [ ] Check the error logs
+- [ ] Verify system status
+- [ ] Contact on-call engineer if needed
+EOT
+					reminder_enabled = true
+					reminder_interval_hours = 2
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.type", "instructions"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.comment", "# Incident Instructions\n\nPlease follow these steps:\n- [ ] Check the error logs\n- [ ] Verify system status\n- [ ] Contact on-call engineer if needed\n"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.reminder_enabled", "true"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.reminder_interval_hours", "2"),
+				),
+				PreConfig: func() {
+					t.Log("test valid instructions step")
+				},
+			},
+		},
+	})
+
+	// Test instructions step validation
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Test instructions step without comment
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+				  steps {
+					type        = "instructions"
+					wait_before = 0
+				  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`steps\.0: missing comment for instructions step`),
+				PreConfig: func() {
+					t.Log("test validation: instructions without comment")
+				},
+			},
+			// Test comment on non-instructions step
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					comment     = "This should not be allowed"
+				  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`steps\.0: comment can only be used with instructions step`),
+				PreConfig: func() {
+					t.Log("test validation: comment on non-instructions step")
+				},
+			},
+			// Test reminder_enabled on non-instructions step
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+				  steps {
+					type             = "escalation"
+					wait_before      = 0
+					reminder_enabled = true
+				  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`steps\.0: reminder_enabled can only be used with instructions step`),
+				PreConfig: func() {
+					t.Log("test validation: reminder_enabled on non-instructions step")
+				},
+			},
+			// Test reminder_interval_hours validation (must be > 0)
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+				  steps {
+					type                    = "instructions"
+					wait_before             = 0
+					comment                 = "Test instructions"
+					reminder_enabled        = true
+					reminder_interval_hours = 0
+				  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`expected steps\.0\.reminder_interval_hours to be at least \(1\), got 0`),
+				PreConfig: func() {
+					t.Log("test validation: reminder_interval_hours must be > 0")
+				},
+			},
+			// Test reminder_interval_hours on non-instructions step
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Test"
+
+				  steps {
+					type                    = "escalation"
+					wait_before             = 0
+					reminder_interval_hours = 2
+				  }
+				}
+				`,
+				Check:       resource.ComposeTestCheckFunc(),
+				ExpectError: regexp.MustCompile(`steps\.0: reminder_interval_hours can only be used with instructions step`),
+				PreConfig: func() {
+					t.Log("test validation: reminder_interval_hours on non-instructions step")
+				},
+			},
+		},
+	})
+
 	resource.Test(t, resource.TestCase{
 		IsUnitTest: true,
 		ProviderFactories: map[string]func() (*schema.Provider, error){
