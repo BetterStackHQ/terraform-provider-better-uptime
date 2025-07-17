@@ -44,6 +44,30 @@ func New(opts ...Option) *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("BETTERUPTIME_API_TOKEN", nil),
 				Description: "Better Stack Uptime API token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token on how to obtain the API token for your team.",
 			},
+			"api_retry_max": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     4,
+				Description: "Maximum number of retries for API requests.",
+			},
+			"api_retry_wait_min": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     10,
+				Description: "Minimum time to wait between retries in seconds.",
+			},
+			"api_retry_wait_max": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     300,
+				Description: "Maximum time to wait between retries in seconds.",
+			},
+			"api_timeout": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     60,
+				Description: "Timeout for individual HTTP requests in seconds.",
+			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"betteruptime_monitor":           newMonitorDataSource(),
@@ -92,11 +116,18 @@ func New(opts ...Option) *schema.Provider {
 			if spec.version != "" {
 				userAgent = "terraform-provider-better-uptime/" + spec.version
 			}
-			c, err := newClient(spec.url, r.Get("api_token").(string),
-				withHTTPClient(&http.Client{
-					Timeout: time.Second * 60,
-				}),
-				withUserAgent(userAgent))
+
+			timeout := time.Duration(r.Get("api_timeout").(int)) * time.Second
+
+			c, err := newClient(ClientConfig{
+				BaseURL:      spec.url,
+				Token:        r.Get("api_token").(string),
+				UserAgent:    userAgent,
+				HTTPClient:   &http.Client{Timeout: timeout},
+				RetryMax:     r.Get("api_retry_max").(int),
+				RetryWaitMin: time.Duration(r.Get("api_retry_wait_min").(int)) * time.Second,
+				RetryWaitMax: time.Duration(r.Get("api_retry_wait_max").(int)) * time.Second,
+			})
 			return c, diag.FromErr(err)
 		},
 	}

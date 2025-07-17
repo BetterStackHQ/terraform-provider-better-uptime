@@ -1,5 +1,9 @@
 provider "betteruptime" {
-  api_token = var.betteruptime_api_token
+  api_token           = var.betteruptime_api_token
+  api_retry_max       = 2
+  api_retry_wait_min  = 10
+  api_retry_wait_max  = 600
+  api_timeout         = 10
 }
 
 resource "random_id" "status_page_subdomain" {
