@@ -20,12 +20,12 @@ func TestClientRateLimiting(t *testing.T) {
 
 		if count <= 2 {
 			w.WriteHeader(http.StatusTooManyRequests)
-			w.Write([]byte("Rate limited"))
+			_, _ = w.Write([]byte("Rate limited"))
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"data": "success"}`))
+		_, _ = w.Write([]byte(`{"data": "success"}`))
 	}))
 	defer server.Close()
 
@@ -70,7 +70,7 @@ func TestClientNoRetryOnSuccess(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&requestCount, 1)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"data": "success"}`))
+		_, _ = w.Write([]byte(`{"data": "success"}`))
 	}))
 	defer server.Close()
 
@@ -148,7 +148,7 @@ func TestClientTimeout(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(200 * time.Millisecond)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"data": "success"}`))
+		_, _ = w.Write([]byte(`{"data": "success"}`))
 	}))
 	defer server.Close()
 
@@ -189,15 +189,17 @@ func TestClientThrottling(t *testing.T) {
 		mu.Unlock()
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"data": "success"}`))
+		_, _ = w.Write([]byte(`{"data": "success"}`))
 	}))
 	defer server.Close()
 
-	// Create client with rate limit of 2 requests per second
+	// Create client with rate limit of 2 requests per second and burst of 1
+	// This enforces strict rate limiting without burst
 	client, err := newClient(ClientConfig{
 		BaseURL:   server.URL,
 		Token:     "test-token",
 		RateLimit: 2, // 2 requests per second
+		RateBurst: 1, // No burst capacity
 	})
 
 	if err != nil {
@@ -243,7 +245,7 @@ func TestClientBurstBehavior(t *testing.T) {
 		mu.Unlock()
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"data": "success"}`))
+		_, _ = w.Write([]byte(`{"data": "success"}`))
 	}))
 	defer server.Close()
 
