@@ -5,41 +5,97 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
-	"golang.org/x/net/context/ctxhttp"
+	"github.com/hashicorp/go-retryablehttp"
+	"golang.org/x/time/rate"
 )
 
+func rateLimitRetryPolicy(ctx context.Context, resp *http.Response, err error) (bool, error) {
+	if err != nil {
+		return retryablehttp.DefaultRetryPolicy(ctx, resp, err)
+	}
+
+	if resp.StatusCode == 429 {
+		return true, nil
+	}
+
+	return retryablehttp.DefaultRetryPolicy(ctx, resp, err)
+}
+
 type client struct {
-	baseURL    string
-	token      string
-	httpClient *http.Client
-	userAgent  string
+	baseURL     string
+	token       string
+	retryClient *retryablehttp.Client
+	userAgent   string
+	rateLimiter *rate.Limiter
 }
 
-type option func(c *client)
-
-func withHTTPClient(httpClient *http.Client) option {
-	return func(c *client) {
-		c.httpClient = httpClient
-	}
+type ClientConfig struct {
+	BaseURL      string
+	Token        string
+	UserAgent    string
+	HTTPClient   *http.Client
+	RetryMax     int
+	RetryWaitMin time.Duration
+	RetryWaitMax time.Duration
+	RateLimit    int // requests per second, 0 = no limit
+	RateBurst    int // burst size for rate limiter, 0 = use default
 }
 
-func withUserAgent(userAgent string) option {
-	return func(c *client) {
-		c.userAgent = userAgent
+func newClient(config ClientConfig) (*client, error) {
+	// Set reasonable bounds for max retries
+	if config.RetryMax < 0 || config.RetryMax > 10 {
+		config.RetryMax = 10
 	}
-}
+	// Set default wait times
+	if config.RetryWaitMin == 0 {
+		config.RetryWaitMin = 1 * time.Second
+	}
+	if config.RetryWaitMax == 0 {
+		config.RetryWaitMax = 30 * time.Second
+	}
 
-func newClient(baseURL, token string, opts ...option) (*client, error) {
-	c := client{
-		baseURL:    baseURL,
-		token:      token,
-		httpClient: http.DefaultClient,
+	// Create retry client
+	retryClient := retryablehttp.NewClient()
+	retryClient.RetryMax = config.RetryMax
+	retryClient.RetryWaitMin = config.RetryWaitMin
+	retryClient.RetryWaitMax = config.RetryWaitMax
+	retryClient.CheckRetry = rateLimitRetryPolicy
+	retryClient.Backoff = retryablehttp.DefaultBackoff
+
+	// Use custom HTTP client if provided
+	if config.HTTPClient != nil {
+		retryClient.HTTPClient = config.HTTPClient
 	}
-	for _, opt := range opts {
-		opt(&c)
+
+	// Disable default logging
+	retryClient.RequestLogHook = nil
+	retryClient.ResponseLogHook = nil
+	retryClient.ErrorHandler = nil
+
+	// Create rate limiter if specified
+	var rateLimiter *rate.Limiter
+	if config.RateLimit > 0 {
+		burst := config.RateBurst
+		if burst <= 0 {
+			// Default burst: allow accumulating up to 2 seconds worth of requests
+			// This handles Terraform's pattern of idle-then-busy well
+			burst = config.RateLimit * 2
+			if burst < 10 {
+				burst = 10 // Minimum burst of 10 for reasonable performance
+			}
+		}
+		rateLimiter = rate.NewLimiter(rate.Limit(config.RateLimit), burst)
 	}
-	return &c, nil
+
+	return &client{
+		baseURL:     config.BaseURL,
+		token:       config.Token,
+		retryClient: retryClient,
+		userAgent:   config.UserAgent,
+		rateLimiter: rateLimiter,
+	}, nil
 }
 
 func (c *client) Get(ctx context.Context, path string) (*http.Response, error) {
@@ -59,7 +115,14 @@ func (c *client) Delete(ctx context.Context, path string) (*http.Response, error
 }
 
 func (c *client) do(ctx context.Context, method, path string, body io.Reader) (*http.Response, error) {
-	req, err := http.NewRequest(method, fmt.Sprintf("%s%s", c.baseURL, path), body)
+	// Apply rate limiting if configured
+	if c.rateLimiter != nil {
+		if err := c.rateLimiter.Wait(ctx); err != nil {
+			return nil, fmt.Errorf("rate limiter: %w", err)
+		}
+	}
+
+	req, err := retryablehttp.NewRequest(method, fmt.Sprintf("%s%s", c.baseURL, path), body)
 	if err != nil {
 		return nil, err
 	}
@@ -70,5 +133,5 @@ func (c *client) do(ctx context.Context, method, path string, body io.Reader) (*
 	if method == http.MethodPost || method == http.MethodPatch {
 		req.Header.Set("Content-Type", "application/json")
 	}
-	return ctxhttp.Do(ctx, c.httpClient, req)
+	return c.retryClient.Do(req.WithContext(ctx))
 }

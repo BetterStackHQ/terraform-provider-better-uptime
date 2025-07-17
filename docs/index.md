@@ -60,3 +60,12 @@ resource "betteruptime_status_page_resource" "monitor" {
 ### Required
 
 - `api_token` (String, Sensitive) Better Stack Uptime API token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token on how to obtain the API token for your team.
+
+### Optional
+
+- `api_rate_burst` (Number) Burst size for rate limiter, allows temporary bursts above the rate limit. 0 means use automatic default (2x rate limit, minimum 10).
+- `api_rate_limit` (Number) Maximum number of API requests per second. 0 means no limit.
+- `api_retry_max` (Number) Maximum number of retries for API requests.
+- `api_retry_wait_max` (Number) Maximum time to wait between retries in seconds.
+- `api_retry_wait_min` (Number) Minimum time to wait between retries in seconds.
+- `api_timeout` (Number) Timeout for individual HTTP requests in seconds.
