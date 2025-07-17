@@ -1,9 +1,13 @@
 provider "betteruptime" {
-  api_token          = var.betteruptime_api_token
-  api_retry_max      = 2
+  api_token = var.betteruptime_api_token
+  # Defaults are already set to work nicely with Uptime API
+  # If needed, you can customize the configuration to better suit your use case
+  api_retry_max      = 4
   api_retry_wait_min = 10
-  api_retry_wait_max = 600
-  api_timeout        = 10
+  api_retry_wait_max = 300
+  api_timeout        = 20
+  api_rate_limit     = 10
+  api_rate_burst     = 20
 }
 
 resource "random_id" "status_page_subdomain" {

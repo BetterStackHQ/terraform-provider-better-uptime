@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -174,5 +175,118 @@ func TestClientTimeout(t *testing.T) {
 	// Verify it's a timeout error
 	if !strings.Contains(err.Error(), "timeout") && !strings.Contains(err.Error(), "deadline exceeded") {
 		t.Errorf("Expected timeout error, got: %v", err)
+	}
+}
+
+func TestClientThrottling(t *testing.T) {
+	var requestTimes []time.Time
+	var mu sync.Mutex
+
+	// Create a test server that records request times
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		requestTimes = append(requestTimes, time.Now())
+		mu.Unlock()
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"data": "success"}`))
+	}))
+	defer server.Close()
+
+	// Create client with rate limit of 2 requests per second
+	client, err := newClient(ClientConfig{
+		BaseURL:   server.URL,
+		Token:     "test-token",
+		RateLimit: 2, // 2 requests per second
+	})
+
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	// Make 5 requests
+	ctx := context.Background()
+	for i := 0; i < 5; i++ {
+		resp, err := client.Get(ctx, "/test")
+		if err != nil {
+			t.Fatalf("Request %d failed: %v", i+1, err)
+		}
+		resp.Body.Close()
+	}
+
+	// Verify timing between requests
+	mu.Lock()
+	defer mu.Unlock()
+
+	if len(requestTimes) != 5 {
+		t.Fatalf("Expected 5 requests, got %d", len(requestTimes))
+	}
+
+	// Check that requests are properly spaced (at least 450ms apart for 2 req/s)
+	for i := 1; i < len(requestTimes); i++ {
+		gap := requestTimes[i].Sub(requestTimes[i-1])
+		if gap < 450*time.Millisecond {
+			t.Errorf("Requests %d and %d are too close: %v apart (expected at least 450ms)",
+				i, i+1, gap)
+		}
+	}
+}
+
+func TestClientBurstBehavior(t *testing.T) {
+	var requestTimes []time.Time
+	var mu sync.Mutex
+
+	// Create a test server that records request times
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		requestTimes = append(requestTimes, time.Now())
+		mu.Unlock()
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"data": "success"}`))
+	}))
+	defer server.Close()
+
+	// Create client with rate limit and burst
+	client, err := newClient(ClientConfig{
+		BaseURL:   server.URL,
+		Token:     "test-token",
+		RateLimit: 2, // 2 requests per second
+		RateBurst: 5, // Allow burst of 5
+	})
+
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	// Make 5 rapid requests (should use burst capacity)
+	ctx := context.Background()
+	start := time.Now()
+	for i := 0; i < 5; i++ {
+		resp, err := client.Get(ctx, "/test")
+		if err != nil {
+			t.Fatalf("Request %d failed: %v", i+1, err)
+		}
+		resp.Body.Close()
+	}
+	duration := time.Since(start)
+
+	// First 5 requests should complete quickly due to burst
+	if duration > 200*time.Millisecond {
+		t.Errorf("Burst requests took too long: %v (expected < 200ms)", duration)
+	}
+
+	// Make one more request - should be rate limited
+	beforeLimited := time.Now()
+	resp, err := client.Get(ctx, "/test")
+	if err != nil {
+		t.Fatalf("Request 6 failed: %v", err)
+	}
+	resp.Body.Close()
+	limitedDuration := time.Since(beforeLimited)
+
+	// This request should wait ~500ms (rate limit of 2/sec)
+	if limitedDuration < 400*time.Millisecond {
+		t.Errorf("Rate limited request completed too quickly: %v (expected >= 400ms)", limitedDuration)
 	}
 }

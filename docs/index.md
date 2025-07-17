@@ -63,6 +63,8 @@ resource "betteruptime_status_page_resource" "monitor" {
 
 ### Optional
 
+- `api_rate_burst` (Number) Burst size for rate limiter, allows temporary bursts above the rate limit. 0 means use automatic default (2x rate limit, minimum 10).
+- `api_rate_limit` (Number) Maximum number of API requests per second. 0 means no limit.
 - `api_retry_max` (Number) Maximum number of retries for API requests.
 - `api_retry_wait_max` (Number) Maximum time to wait between retries in seconds.
 - `api_retry_wait_min` (Number) Minimum time to wait between retries in seconds.

@@ -68,6 +68,18 @@ func New(opts ...Option) *schema.Provider {
 				Default:     60,
 				Description: "Timeout for individual HTTP requests in seconds.",
 			},
+			"api_rate_limit": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     8,
+				Description: "Maximum number of API requests per second. 0 means no limit.",
+			},
+			"api_rate_burst": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     0,
+				Description: "Burst size for rate limiter, allows temporary bursts above the rate limit. 0 means use automatic default (2x rate limit, minimum 10).",
+			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"betteruptime_monitor":           newMonitorDataSource(),
@@ -127,6 +139,8 @@ func New(opts ...Option) *schema.Provider {
 				RetryMax:     r.Get("api_retry_max").(int),
 				RetryWaitMin: time.Duration(r.Get("api_retry_wait_min").(int)) * time.Second,
 				RetryWaitMax: time.Duration(r.Get("api_retry_wait_max").(int)) * time.Second,
+				RateLimit:    r.Get("api_rate_limit").(int),
+				RateBurst:    r.Get("api_rate_burst").(int),
 			})
 			return c, diag.FromErr(err)
 		},

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
+	"golang.org/x/time/rate"
 )
 
 func rateLimitRetryPolicy(ctx context.Context, resp *http.Response, err error) (bool, error) {
@@ -27,6 +28,7 @@ type client struct {
 	token       string
 	retryClient *retryablehttp.Client
 	userAgent   string
+	rateLimiter *rate.Limiter
 }
 
 type ClientConfig struct {
@@ -37,6 +39,8 @@ type ClientConfig struct {
 	RetryMax     int
 	RetryWaitMin time.Duration
 	RetryWaitMax time.Duration
+	RateLimit    int // requests per second, 0 = no limit
+	RateBurst    int // burst size for rate limiter, 0 = use default
 }
 
 func newClient(config ClientConfig) (*client, error) {
@@ -70,11 +74,27 @@ func newClient(config ClientConfig) (*client, error) {
 	retryClient.ResponseLogHook = nil
 	retryClient.ErrorHandler = nil
 
+	// Create rate limiter if specified
+	var rateLimiter *rate.Limiter
+	if config.RateLimit > 0 {
+		burst := config.RateBurst
+		if burst <= 0 {
+			// Default burst: allow accumulating up to 2 seconds worth of requests
+			// This handles Terraform's pattern of idle-then-busy well
+			burst = config.RateLimit * 2
+			if burst < 10 {
+				burst = 10 // Minimum burst of 10 for reasonable performance
+			}
+		}
+		rateLimiter = rate.NewLimiter(rate.Limit(config.RateLimit), burst)
+	}
+
 	return &client{
 		baseURL:     config.BaseURL,
 		token:       config.Token,
 		retryClient: retryClient,
 		userAgent:   config.UserAgent,
+		rateLimiter: rateLimiter,
 	}, nil
 }
 
@@ -95,6 +115,13 @@ func (c *client) Delete(ctx context.Context, path string) (*http.Response, error
 }
 
 func (c *client) do(ctx context.Context, method, path string, body io.Reader) (*http.Response, error) {
+	// Apply rate limiting if configured
+	if c.rateLimiter != nil {
+		if err := c.rateLimiter.Wait(ctx); err != nil {
+			return nil, fmt.Errorf("rate limiter: %w", err)
+		}
+	}
+
 	req, err := retryablehttp.NewRequest(method, fmt.Sprintf("%s%s", c.baseURL, path), body)
 	if err != nil {
 		return nil, err
