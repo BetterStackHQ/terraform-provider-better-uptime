@@ -94,7 +94,7 @@ func TestResourceStatusPage(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.1.href", "/status"),
 				),
 			},
-			// Step 3 - make no changes, check plan is empty.
+			// Step 3 - add IP allowlist.
 			{
 				Config: fmt.Sprintf(`
 				provider "betteruptime" {
@@ -115,11 +115,90 @@ func TestResourceStatusPage(t *testing.T) {
 						text = "Status"
 						href = "/status"
 					}
+					ip_allowlist = [
+						"192.168.1.0/24",
+						"10.0.0.1",
+						"# Office network",
+						"172.16.0.0/16"
+					]
 				}
 				`, subdomain),
-				PlanOnly: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_status_page.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "timezone", "America/Los_Angeles"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "ip_allowlist.0", "192.168.1.0/24"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "ip_allowlist.1", "10.0.0.1"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "ip_allowlist.2", "# Office network"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "ip_allowlist.3", "172.16.0.0/16"),
+				),
 			},
-			// Step 4 - destroy.
+			// Step 4 - update IP allowlist.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_status_page" "this" {
+					company_name = "Example, Inc"
+					company_url  = "https://example.com"
+					timezone     = "America/Los_Angeles"
+					subdomain    = "%s"
+					password     = "secret1234"
+					navigation_links {
+						text = "Example2"
+						href = "https://example.com/test"
+					}
+					navigation_links {
+						text = "Status"
+						href = "/status"
+					}
+					ip_allowlist = [
+						"1.1.1.1",
+						"2.2.2.2"
+					]
+				}
+				`, subdomain),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_status_page.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "ip_allowlist.0", "1.1.1.1"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "ip_allowlist.1", "2.2.2.2"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "ip_allowlist.#", "2"),
+				),
+			},
+			// Step 5 - clear IP allowlist.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_status_page" "this" {
+					company_name = "Example, Inc"
+					company_url  = "https://example.com"
+					timezone     = "America/Los_Angeles"
+					subdomain    = "%s"
+					password     = "secret1234"
+					navigation_links {
+						text = "Example2"
+						href = "https://example.com/test"
+					}
+					navigation_links {
+						text = "Status"
+						href = "/status"
+					}
+					ip_allowlist = []
+				}
+				`, subdomain),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_status_page.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "ip_allowlist.#", "0"),
+				),
+			},
+			// Step 6 - import.
 			{
 				ResourceName:      "betteruptime_status_page.this",
 				ImportState:       true,
