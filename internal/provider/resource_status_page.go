@@ -460,19 +460,16 @@ func flattenNavigationLinks(links *[]navigationLink) []interface{} {
 }
 
 func loadIPAllowlist(d *schema.ResourceData, target **[]string) {
-	v, ok := d.GetOkExists("ip_allowlist")
-	if !ok {
-		return
+	if v, ok := d.GetOk("ip_allowlist"); ok || d.HasChange("ip_allowlist") {
+		items := v.([]interface{})
+		result := make([]string, len(items))
+
+		for i, item := range items {
+			result[i] = item.(string)
+		}
+
+		*target = &result
 	}
-
-	items := v.([]interface{})
-	result := make([]string, len(items))
-
-	for i, item := range items {
-		result[i] = item.(string)
-	}
-
-	*target = &result
 }
 
 func flattenIPAllowlist(ips *[]string) []interface{} {
