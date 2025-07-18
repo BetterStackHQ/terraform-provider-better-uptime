@@ -209,6 +209,14 @@ var statusPageSchema = map[string]*schema.Schema{
 			},
 		},
 	},
+	"ip_allowlist": {
+		Description: "List of IP addresses or CIDR ranges that are allowed to access the status page. Accepts IPv4, IPv6, CIDR ranges, and comments starting with `#`. To remove all IP restrictions, set to an empty list `[]`. This is a [billable feature](https://betterstack.com/pricing#status-pages).",
+		Type:        schema.TypeList,
+		Optional:    true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	},
 }
 
 func newStatusPageResource() *schema.Resource {
@@ -260,6 +268,7 @@ type statusPage struct {
 	AutomaticReports         *bool             `json:"automatic_reports,omitempty"`
 	StatusPageGroupID        *int              `json:"status_page_group_id,omitempty"`
 	NavigationLinks          *[]navigationLink `json:"navigation_links,omitempty"`
+	IPAllowlist              *[]string         `json:"ip_allowlist,omitempty"`
 }
 
 type statusPageHTTPResponse struct {
@@ -307,6 +316,7 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "automatic_reports", v: &in.AutomaticReports},
 		{k: "status_page_group_id", v: &in.StatusPageGroupID},
 		{k: "navigation_links", v: &in.NavigationLinks},
+		{k: "ip_allowlist", v: &in.IPAllowlist},
 	}
 }
 func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -316,6 +326,8 @@ func statusPageCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 			if err := loadNavigationLinks(d, e.v.(**[]navigationLink)); err != nil {
 				return diag.FromErr(err)
 			}
+		} else if e.k == "ip_allowlist" {
+			loadIPAllowlist(d, e.v.(**[]string))
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -363,6 +375,12 @@ func statusPageCopyAttrs(d *schema.ResourceData, in *statusPage, derr diag.Diagn
 			}
 			continue
 		}
+		if e.k == "ip_allowlist" {
+			if err := d.Set("ip_allowlist", flattenIPAllowlist(in.IPAllowlist)); err != nil {
+				derr = append(derr, diag.FromErr(err)[0])
+			}
+			continue
+		}
 		if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
@@ -377,6 +395,10 @@ func statusPageUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 		if e.k == "navigation_links" {
 			if err := loadNavigationLinks(d, e.v.(**[]navigationLink)); err != nil {
 				return diag.FromErr(err)
+			}
+		} else if e.k == "ip_allowlist" {
+			if d.HasChange(e.k) {
+				loadIPAllowlist(d, e.v.(**[]string))
 			}
 		} else {
 			if d.HasChange(e.k) {
@@ -433,6 +455,34 @@ func flattenNavigationLinks(links *[]navigationLink) []interface{} {
 		}
 
 		result[i] = m
+	}
+	return result
+}
+
+func loadIPAllowlist(d *schema.ResourceData, target **[]string) {
+	v, ok := d.GetOkExists("ip_allowlist")
+	if !ok {
+		return
+	}
+
+	items := v.([]interface{})
+	result := make([]string, len(items))
+
+	for i, item := range items {
+		result[i] = item.(string)
+	}
+
+	*target = &result
+}
+
+func flattenIPAllowlist(ips *[]string) []interface{} {
+	if ips == nil {
+		return nil
+	}
+
+	result := make([]interface{}, len(*ips))
+	for i, ip := range *ips {
+		result[i] = ip
 	}
 	return result
 }
