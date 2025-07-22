@@ -48,7 +48,6 @@ https://betterstack.com/docs/uptime/api/monitors/
 (request_body is required, and should contain the domain to query the DNS server with).
 
     `playwright` We will run the scenario defined by playwright_script, identified in the UI by scenario_name
-- `url` (String) URL of your website or the host you want to ping (see monitor_type below).
 
 ### Optional
 
@@ -91,11 +90,12 @@ https://betterstack.com/docs/uptime/api/monitors/
   - For Playwright monitors (type `playwright`), this determines the Playwright scenario timeout instead in *seconds*. Valid options: 15, 30, 45, 60.
   - For all other monitors, the timeout is specified in *seconds*. Valid options: 2, 3, 5, 10, 15, 30, 45, 60.
 - `required_keyword` (String) Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.
-- `scenario_name` (String) For Playwright monitors, the scenario name identifying the monitor in the UI.
+- `scenario_name` (String) For Playwright monitors, the scenario name identifying the monitor in the UI. For Playwright monitors, either `url` or `scenario_name` must be provided.
 - `sms` (Boolean) Whether to send an SMS when a new incident is created.
 - `ssl_expiration` (Number) How many days before the SSL certificate expires do you want to be alerted? Valid values are 1, 2, 3, 7, 14, 30, and 60. Set to -1 to disable SSL expiration check.
 - `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 - `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team. In seconds.
+- `url` (String) URL of your website or the host you want to ping (see monitor_type below). Required for all monitor types except Playwright. For Playwright monitors, either `url` or `scenario_name` must be provided.
 - `verify_ssl` (Boolean) Should we verify SSL certificate validity?
 
 ### Read-Only

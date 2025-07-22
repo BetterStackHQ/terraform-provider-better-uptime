@@ -17,7 +17,8 @@ func newMonitorDataSource() *schema.Resource {
 		cp := *v
 		switch k {
 		case "url":
-			// keep required
+			cp.Optional = false
+			cp.Required = true
 		default:
 			cp.Computed = true
 			cp.Optional = false
