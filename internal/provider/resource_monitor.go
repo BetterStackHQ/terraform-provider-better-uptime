@@ -61,9 +61,9 @@ var monitorSchema = map[string]*schema.Schema{
 		Default:     nil,
 	},
 	"url": {
-		Description: "URL of your website or the host you want to ping (see monitor_type below).",
+		Description: "URL of your website or the host you want to ping (see monitor_type below). Required for all monitor types except Playwright. For Playwright monitors, either `url` or `scenario_name` must be provided.",
 		Type:        schema.TypeString,
-		Required:    true,
+		Optional:    true,
 	},
 	"monitor_type": {
 		Description: strings.ReplaceAll(`Valid values:
@@ -397,10 +397,9 @@ var monitorSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"scenario_name": {
-		Description: "For Playwright monitors, the scenario name identifying the monitor in the UI.",
+		Description: "For Playwright monitors, the scenario name identifying the monitor in the UI. For Playwright monitors, either `url` or `scenario_name` must be provided.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 	},
 	"environment_variables": {
 		Description: "For Playwright monitors, the environment variables that can be used in the scenario. Example: `{ \"PASSWORD\" = \"passw0rd\" }`.",
@@ -447,7 +446,7 @@ func newMonitorResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CustomizeDiff: validateRequestHeaders,
+		CustomizeDiff: validateMonitor,
 		Description:   "https://betterstack.com/docs/uptime/api/monitors/",
 		Schema:        monitorSchema,
 	}
@@ -658,6 +657,30 @@ func validateRequestHeaders(ctx context.Context, diff *schema.ResourceDiff, v in
 			}
 		}
 	}
+	return nil
+}
+
+func validateMonitor(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	// Validate request headers
+	if err := validateRequestHeaders(ctx, diff, v); err != nil {
+		return err
+	}
+
+	// Validate URL requirement based on monitor type
+	monitorType := diff.Get("monitor_type").(string)
+	if monitorType == "playwright" {
+		monitorUrl := diff.Get("url").(string)
+		scenarioName := diff.Get("scenario_name").(string)
+		if monitorUrl == "" && scenarioName == "" {
+			return fmt.Errorf("'scenario_name' (alternatively, you can use 'url') is required for monitor type '%s'", monitorType)
+		}
+	} else {
+		monitorUrl := diff.Get("url").(string)
+		if monitorUrl == "" {
+			return fmt.Errorf("'url' is required for monitor type '%s'", monitorType)
+		}
+	}
+
 	return nil
 }
 

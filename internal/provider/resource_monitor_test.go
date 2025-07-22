@@ -852,6 +852,124 @@ func TestResourceMonitorWithSSLExpiration(t *testing.T) {
 	})
 }
 
+func TestResourceMonitorPlaywrightValidation(t *testing.T) {
+	server := createTestServer(t)
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Test playwright monitor with scenario_name only (should succeed)
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					monitor_type      = "playwright"
+					scenario_name     = "test-scenario"
+					playwright_script = "console.log('test')"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", "playwright"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "scenario_name", "test-scenario"),
+				),
+			},
+			// Test playwright monitor with URL only (should succeed)
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					monitor_type      = "playwright"
+					url               = "https://example.com"
+					playwright_script = "console.log('test')"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", "playwright"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", "https://example.com"),
+				),
+			},
+			// Test playwright monitor with both URL and scenario_name (should succeed)
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					monitor_type      = "playwright"
+					url               = "https://example.com"
+					scenario_name     = "test-scenario"
+					playwright_script = "console.log('test')"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", "playwright"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", "https://example.com"),
+					resource.TestCheckResourceAttr("betteruptime_monitor.this", "scenario_name", "test-scenario"),
+				),
+			},
+		},
+	})
+}
+
+func TestResourceMonitorValidationErrors(t *testing.T) {
+	server := createTestServer(t)
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Test playwright monitor without URL or scenario_name (should fail)
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					monitor_type      = "playwright"
+					playwright_script = "console.log('test')"
+				}
+				`,
+				ExpectError: regexp.MustCompile(`'scenario_name' \(alternatively, you can use 'url'\) is required for monitor type 'playwright'`),
+			},
+			// Test non-playwright monitor without URL (should fail)
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					monitor_type = "status"
+				}
+				`,
+				ExpectError: regexp.MustCompile("'url' is required for monitor type 'status'"),
+			},
+		},
+	})
+}
+
 func TestResourceMonitorWithDisabledExpirationChecks(t *testing.T) {
 	server := createTestServer(t)
 	defer server.Close()
