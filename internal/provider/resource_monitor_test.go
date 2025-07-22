@@ -951,7 +951,7 @@ func TestResourceMonitorValidationErrors(t *testing.T) {
 					playwright_script = "console.log('test')"
 				}
 				`,
-				ExpectError: regexp.MustCompile("'scenario_name' \\(alternatively, you can use 'url'\\) is required for monitor type 'playwright'"),
+				ExpectError: regexp.MustCompile(`'scenario_name' \(alternatively, you can use 'url'\) is required for monitor type 'playwright'`),
 			},
 			// Test non-playwright monitor without URL (should fail)
 			{
