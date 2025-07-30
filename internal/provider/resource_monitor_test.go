@@ -902,27 +902,6 @@ func TestResourceMonitorPlaywrightValidation(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", "https://example.com"),
 				),
 			},
-			// Test playwright monitor with both URL and scenario_name (should succeed)
-			{
-				Config: `
-				provider "betteruptime" {
-					api_token = "foo"
-				}
-
-				resource "betteruptime_monitor" "this" {
-					monitor_type      = "playwright"
-					url               = "https://example.com"
-					scenario_name     = "test-scenario"
-					playwright_script = "console.log('test')"
-				}
-				`,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("betteruptime_monitor.this", "id"),
-					resource.TestCheckResourceAttr("betteruptime_monitor.this", "monitor_type", "playwright"),
-					resource.TestCheckResourceAttr("betteruptime_monitor.this", "url", "https://example.com"),
-					resource.TestCheckResourceAttr("betteruptime_monitor.this", "scenario_name", "test-scenario"),
-				),
-			},
 		},
 	})
 }
@@ -953,6 +932,21 @@ func TestResourceMonitorValidationErrors(t *testing.T) {
 				`,
 				ExpectError: regexp.MustCompile(`'scenario_name' \(alternatively, you can use 'url'\) is required for monitor type 'playwright'`),
 			},
+			// Test playwright monitor with different URL and scenario_name (should fail)
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+				resource "betteruptime_monitor" "this" {
+					monitor_type      = "playwright"
+					url               = "Different URL"
+					scenario_name     = "Different Scenario Name"
+					playwright_script = "console.log('test')"
+				}
+				`,
+				ExpectError: regexp.MustCompile(`when both 'url' and 'scenario_name' are set, they must be equal`),
+			},
 			// Test non-playwright monitor without URL (should fail)
 			{
 				Config: `
@@ -965,6 +959,21 @@ func TestResourceMonitorValidationErrors(t *testing.T) {
 				}
 				`,
 				ExpectError: regexp.MustCompile("'url' is required for monitor type 'status'"),
+			},
+			// Test non-playwright monitor with scenario_name (should fail)
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_monitor" "this" {
+					monitor_type  = "status"
+					url           = "https://example.com"
+					scenario_name = "should not be allowed"
+				}
+				`,
+				ExpectError: regexp.MustCompile("'scenario_name' can only be set for monitor type 'playwright', not 'status'"),
 			},
 		},
 	})

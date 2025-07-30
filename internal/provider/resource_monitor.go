@@ -558,7 +558,7 @@ func monitorRef(in *monitor) []struct {
 		{k: "created_at", v: &in.CreatedAt},
 		{k: "updated_at", v: &in.UpdatedAt},
 		{k: "playwright_script", v: &in.PlaywrightScript},
-		{k: "scenario_name", v: &in.ScenarioName},
+		// intentionally omitting scenario_name, the value is dependent on URL and needs special handling
 		{k: "environment_variables", v: &in.EnvironmentVariables},
 	}
 }
@@ -577,6 +577,15 @@ func monitorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}
 			in.DomainExpiration = NullableIntFromResourceData(d, e.k, -1)
 		} else if e.k == "ssl_expiration" {
 			in.SSLExpiration = NullableIntFromResourceData(d, e.k, -1)
+		} else if e.k == "url" {
+			// During creation, we can always send URL
+			monitorUrl := d.Get("url").(string)
+			in.URL = &monitorUrl
+			// During creation, send scenario_name only if set explicitly
+			scenarioName := d.Get("scenario_name").(string)
+			if scenarioName != "" {
+				in.ScenarioName = &scenarioName
+			}
 		} else {
 			load(d, e.k, e.v)
 		}
@@ -612,6 +621,22 @@ func monitorCopyAttrs(d *schema.ResourceData, in *monitor) diag.Diagnostics {
 			if err := SetNullableIntResourceData(d, "domain_expiration", -1, in.DomainExpiration); err != nil {
 				derr = append(derr, diag.FromErr(err)[0])
 			}
+		} else if e.k == "url" {
+			// Special handling for URL and scenario name
+			currentUrl := d.Get("url").(string)
+			currentScenarioName := d.Get("scenario_name").(string)
+			if currentScenarioName != "" {
+				// Read scenario name from API only if we have it defined
+				if err := d.Set("scenario_name", *in.ScenarioName); err != nil {
+					derr = append(derr, diag.FromErr(err)[0])
+				}
+			}
+			if currentUrl != "" || currentScenarioName == "" {
+				// Read URL from API if we have it defined, or if we're missing scenario name
+				if err := d.Set("url", *in.URL); err != nil {
+					derr = append(derr, diag.FromErr(err)[0])
+				}
+			}
 		} else if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 			derr = append(derr, diag.FromErr(err)[0])
 		}
@@ -626,6 +651,17 @@ func monitorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}
 		if e.k == "expiration_policy_id" {
 			// Work around the fact that Terraform represents null value as 0
 			loadExpirationPolicy(d, e.v.(**int))
+		} else if e.k == "url" {
+			// During update, we can always send URL when changed
+			if d.HasChange("url") {
+				monitorUrl := d.Get("url").(string)
+				in.URL = &monitorUrl
+			}
+			// During update, send scenario_name only if set - validation ensures URL must be set in such case, sending null would overwrite it
+			scenarioName := d.Get("scenario_name").(string)
+			if d.HasChange("scenario_name") && scenarioName != "" {
+				in.ScenarioName = &scenarioName
+			}
 		} else if d.HasChange(e.k) {
 			if e.k == "request_headers" {
 				if err := loadRequestHeaders(d, e.v.(**[]map[string]interface{})); err != nil {
@@ -667,17 +703,22 @@ func validateMonitor(ctx context.Context, diff *schema.ResourceDiff, v interface
 	}
 
 	// Validate URL requirement based on monitor type
+	monitorUrl := diff.Get("url").(string)
+	scenarioName := diff.Get("scenario_name").(string)
 	monitorType := diff.Get("monitor_type").(string)
 	if monitorType == "playwright" {
-		monitorUrl := diff.Get("url").(string)
-		scenarioName := diff.Get("scenario_name").(string)
 		if monitorUrl == "" && scenarioName == "" {
 			return fmt.Errorf("'scenario_name' (alternatively, you can use 'url') is required for monitor type '%s'", monitorType)
 		}
+		if monitorUrl != "" && scenarioName != "" && monitorUrl != scenarioName {
+			return fmt.Errorf("when both 'url' and 'scenario_name' are set, they must be equal (got url=%q, scenario_name=%q)", monitorUrl, scenarioName)
+		}
 	} else {
-		monitorUrl := diff.Get("url").(string)
 		if monitorUrl == "" {
 			return fmt.Errorf("'url' is required for monitor type '%s'", monitorType)
+		}
+		if scenarioName != "" {
+			return fmt.Errorf("'scenario_name' can only be set for monitor type 'playwright', not '%s'", monitorType)
 		}
 	}
 
