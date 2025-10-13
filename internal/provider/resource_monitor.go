@@ -120,7 +120,6 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Required if monitor_type is set to keyword  or udp. We will create a new incident if this keyword is missing on your page.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 	},
 	"expected_status_codes": {
 		Description: "Required if monitor_type is set to expected_status_code. We will create a new incident if the status code returned from the server is not in the list of expected status codes.",
@@ -129,7 +128,6 @@ var monitorSchema = map[string]*schema.Schema{
 			Type: schema.TypeInt,
 		},
 		Optional: true,
-		Computed: true,
 	},
 	"call": {
 		Description: "Whether to call when a new incident is created.",
@@ -190,7 +188,6 @@ var monitorSchema = map[string]*schema.Schema{
 			" tcp and udp monitors accept any ports, while smtp, pop, and imap accept only the specified ports corresponding with their servers (e.g. \"25,465,587\" for smtp).",
 		Type:     schema.TypeString,
 		Optional: true,
-		Computed: true,
 	},
 	"regions": {
 		Description: "An array of regions to set. Allowed values are [\"us\", \"eu\", \"as\", \"au\"] or any subset of these regions.",
@@ -245,7 +242,7 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "HTTP Method used to make a request. Valid options: GET, HEAD, POST, PUT, PATCH",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
+		Default:     "GET",
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return strings.EqualFold(old, new)
 		},
@@ -264,7 +261,6 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Request body for POST, PUT, PATCH requests. Required if monitor_type is set to dns (domain to query the DNS server with).",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 	},
 	"request_headers": {
 		Description: "An array of request headers, consisting of name and value pairs",
@@ -276,7 +272,6 @@ var monitorSchema = map[string]*schema.Schema{
 			},
 		},
 		Optional: true,
-		Computed: true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			// Ignore ID changes
 			attribute := strings.Split(k, ".")
@@ -291,14 +286,12 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "Basic HTTP authentication username to include with the request.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 		Sensitive:   true,
 	},
 	"auth_password": {
 		Description: "Basic HTTP authentication password to include with the request.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 		Sensitive:   true,
 	},
 
@@ -394,7 +387,6 @@ var monitorSchema = map[string]*schema.Schema{
 		Description: "For Playwright monitors, the JavaScript source code of the scenario.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
 	},
 	"scenario_name": {
 		Description: "For Playwright monitors, the scenario name identifying the monitor in the UI. For Playwright monitors, either `url` or `scenario_name` must be provided.",
