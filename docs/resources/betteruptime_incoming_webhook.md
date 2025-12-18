@@ -3,12 +3,12 @@
 page_title: "betteruptime_incoming_webhook Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
+  Create incidents automatically from any tool that can send a payload, even from your custom scripts. The incoming webhook integration allows you to parse custom data, set creation rules, and map fields to create detailed, actionable incidents. Learn more https://betterstack.com/docs/uptime/incoming-webhooks/ or see API docs https://betterstack.com/docs/uptime/api/incoming-webhooks-response-params/.
 ---
 
 # betteruptime_incoming_webhook (Resource)
 
-https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
+Create incidents automatically from any tool that can send a payload, even from your custom scripts. The incoming webhook integration allows you to parse custom data, set creation rules, and map fields to create detailed, actionable incidents. [Learn more](https://betterstack.com/docs/uptime/incoming-webhooks/) or see [API docs](https://betterstack.com/docs/uptime/api/incoming-webhooks-response-params/).
 
 
 

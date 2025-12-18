@@ -3,12 +3,12 @@
 page_title: "betteruptime_policy Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/policies/
+  Define custom escalation rules for incident alerting, specifying who gets notified and in what order when incidents occur. Supports time-based rules, delays, and metadata-based routing. Learn more https://betterstack.com/docs/uptime/escalation-policies/ or see API docs https://betterstack.com/docs/uptime/api/escalation-policies-api-response-params/.
 ---
 
 # betteruptime_policy (Resource)
 
-https://betterstack.com/docs/uptime/api/policies/
+Define custom escalation rules for incident alerting, specifying who gets notified and in what order when incidents occur. Supports time-based rules, delays, and metadata-based routing. [Learn more](https://betterstack.com/docs/uptime/escalation-policies/) or see [API docs](https://betterstack.com/docs/uptime/api/escalation-policies-api-response-params/).
 
 
 

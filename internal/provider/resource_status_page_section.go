@@ -58,7 +58,7 @@ func newStatusPageSectionResource() *schema.Resource {
 				return []*schema.ResourceData{d}, nil
 			},
 		},
-		Description: "https://betterstack.com/docs/uptime/api/status-page-sections/",
+		Description: "Organize status page content into sections. Group related services, APIs, or infrastructure components into logical sections for better user experience and clearer communication. See [API docs](https://betterstack.com/docs/uptime/api/status-pages-sections-api-response-params/).",
 		Schema:      statusPageSectionSchema,
 	}
 }

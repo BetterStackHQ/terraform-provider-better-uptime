@@ -3,12 +3,12 @@
 page_title: "betteruptime_heartbeat Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/heartbeats/
+  Monitor periodic tasks and cron jobs by expecting regular HTTP requests to a unique URL. Triggers incidents when expected heartbeats are not received within the specified frequency and grace period. Learn more https://betterstack.com/docs/uptime/cron-and-heartbeat-monitor/ or see API docs https://betterstack.com/docs/uptime/api/heartbeats-api-response-params/.
 ---
 
 # betteruptime_heartbeat (Resource)
 
-https://betterstack.com/docs/uptime/api/heartbeats/
+Monitor periodic tasks and cron jobs by expecting regular HTTP requests to a unique URL. Triggers incidents when expected heartbeats are not received within the specified frequency and grace period. [Learn more](https://betterstack.com/docs/uptime/cron-and-heartbeat-monitor/) or see [API docs](https://betterstack.com/docs/uptime/api/heartbeats-api-response-params/).
 
 
 

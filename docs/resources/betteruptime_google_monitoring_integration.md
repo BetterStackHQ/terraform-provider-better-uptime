@@ -3,12 +3,12 @@
 page_title: "betteruptime_google_monitoring_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/google-monitoring-integrations/
+  Create incidents from Google Cloud Monitoring alerts. Automatically trigger Better Stack incidents when your GCP monitoring policies alert, bridging Google Cloud observability with incident management. Learn more https://betterstack.com/docs/uptime/google-cloud/.
 ---
 
 # betteruptime_google_monitoring_integration (Resource)
 
-https://betterstack.com/docs/uptime/api/google-monitoring-integrations/
+Create incidents from Google Cloud Monitoring alerts. Automatically trigger Better Stack incidents when your GCP monitoring policies alert, bridging Google Cloud observability with incident management. [Learn more](https://betterstack.com/docs/uptime/google-cloud/).
 
 
 

@@ -3,12 +3,12 @@
 page_title: "betteruptime_severity_group Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/urgency-groups/
+  Organize severity levels into logical groups. Group related severities together for better management and to apply consistent notification strategies across similar alert types. See API docs https://betterstack.com/docs/uptime/api/severity-groups-api-response-params/.
 ---
 
 # betteruptime_severity_group (Resource)
 
-https://betterstack.com/docs/uptime/api/urgency-groups/
+Organize severity levels into logical groups. Group related severities together for better management and to apply consistent notification strategies across similar alert types. See [API docs](https://betterstack.com/docs/uptime/api/severity-groups-api-response-params/).
 
 
 

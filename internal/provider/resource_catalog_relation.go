@@ -37,7 +37,7 @@ func newCatalogRelationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/catalog-integrations-relations/",
+		Description: "Define relationships between catalog records. Create connections between services, applications, and infrastructure components to understand dependencies and impact during incidents. [Learn more](https://betterstack.com/docs/uptime/incident-metadata/#catalog).",
 		Schema:      catalogRelationSchema,
 	}
 }

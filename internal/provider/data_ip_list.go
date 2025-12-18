@@ -16,7 +16,7 @@ import (
 func newIpListDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: ipListLookup,
-		Description: "Monitoring IPs lookup.",
+		Description: "Retrieve details of Better Stack's monitoring IP addresses. Useful for configuring firewalls or security groups to allow Better Stack's monitoring requests to reach your services.",
 		Schema:      ipListSchema,
 	}
 }

@@ -34,7 +34,7 @@ func newMonitorDataSource() *schema.Resource {
 	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: monitorLookup,
-		Description: "Monitor lookup.",
+		Description: "Retrieve details of an existing monitor by name. Useful for referencing monitor configurations in other resources or for programmatic access to monitor settings and status.",
 		Schema:      s,
 	}
 }

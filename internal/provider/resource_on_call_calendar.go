@@ -140,7 +140,7 @@ func newOnCallCalendarResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema:      onCallCalendarSchema,
-		Description: "https://betterstack.com/docs/uptime/api/on-call-calendar/",
+		Description: "Create and manage on-call schedules that define who should be notified when incidents occur. Configure shift rotations, time zones, and team member assignments for reliable incident response. [Learn more](https://betterstack.com/docs/uptime/getting-started-with-oncall-v2/) or see [API docs](https://betterstack.com/docs/uptime/api/on-call-calendar-api-response-params/).",
 	}
 }
 

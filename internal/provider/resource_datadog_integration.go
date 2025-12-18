@@ -110,7 +110,7 @@ func newDatadogIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateRequestHeaders,
-		Description:   "https://betterstack.com/docs/uptime/api/datadog-integrations/",
+		Description:   "Create incidents from Datadog monitors. Automatically trigger Better Stack incidents when your Datadog monitors alert, bridging your observability stack for unified incident management. [Learn more](https://betterstack.com/docs/uptime/datadog/) or see [API docs](https://betterstack.com/docs/uptime/api/datadog-integrations-response-params/).",
 		Schema:        datadogIntegrationSchema,
 	}
 }

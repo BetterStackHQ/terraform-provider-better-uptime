@@ -3,12 +3,12 @@
 page_title: "betteruptime_policy_group Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/policy-groups/
+  Organize escalation policies into logical groups. Group related policies together for better management and to apply consistent alerting strategies across similar services or teams. See API docs https://betterstack.com/docs/uptime/api/escalation-policy-groups-api-response-params/.
 ---
 
 # betteruptime_policy_group (Resource)
 
-https://betterstack.com/docs/uptime/api/policy-groups/
+Organize escalation policies into logical groups. Group related policies together for better management and to apply consistent alerting strategies across similar services or teams. See [API docs](https://betterstack.com/docs/uptime/api/escalation-policy-groups-api-response-params/).
 
 
 

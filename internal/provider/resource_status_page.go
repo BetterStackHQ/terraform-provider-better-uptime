@@ -228,7 +228,7 @@ func newStatusPageResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/status-pages/",
+		Description: "Create public or private status pages to communicate service health and incident information to users. Display monitor statuses, maintenance windows, and incident updates in a branded, customizable interface. [Learn more](https://betterstack.com/docs/uptime/getting-started-with-status-pages/) or see [API docs](https://betterstack.com/docs/uptime/api/status-pages-api-response-params/).",
 		Schema:      statusPageSchema,
 	}
 }

@@ -3,12 +3,12 @@
 page_title: "betteruptime_elastic_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/elastic-integrations/
+  Create incidents from Elasticsearch Watcher alerts. Automatically trigger Better Stack incidents when your Elasticsearch monitoring alerts fire, connecting your search infrastructure to incident management. Learn more https://betterstack.com/docs/uptime/integrations/.
 ---
 
 # betteruptime_elastic_integration (Resource)
 
-https://betterstack.com/docs/uptime/api/elastic-integrations/
+Create incidents from Elasticsearch Watcher alerts. Automatically trigger Better Stack incidents when your Elasticsearch monitoring alerts fire, connecting your search infrastructure to incident management. [Learn more](https://betterstack.com/docs/uptime/integrations/).
 
 
 

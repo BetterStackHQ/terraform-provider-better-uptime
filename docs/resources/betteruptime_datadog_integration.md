@@ -3,12 +3,12 @@
 page_title: "betteruptime_datadog_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/datadog-integrations/
+  Create incidents from Datadog monitors. Automatically trigger Better Stack incidents when your Datadog monitors alert, bridging your observability stack for unified incident management. Learn more https://betterstack.com/docs/uptime/datadog/ or see API docs https://betterstack.com/docs/uptime/api/datadog-integrations-response-params/.
 ---
 
 # betteruptime_datadog_integration (Resource)
 
-https://betterstack.com/docs/uptime/api/datadog-integrations/
+Create incidents from Datadog monitors. Automatically trigger Better Stack incidents when your Datadog monitors alert, bridging your observability stack for unified incident management. [Learn more](https://betterstack.com/docs/uptime/datadog/) or see [API docs](https://betterstack.com/docs/uptime/api/datadog-integrations-response-params/).
 
 
 

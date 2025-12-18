@@ -32,7 +32,7 @@ func newPolicyDataSource() *schema.Resource {
 	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: policyLookup,
-		Description: "Policy lookup.",
+		Description: "Retrieve details of an existing escalation policy by name. Useful for referencing policy configurations in other resources or for programmatic access to escalation rules.",
 		Schema:      s,
 	}
 }

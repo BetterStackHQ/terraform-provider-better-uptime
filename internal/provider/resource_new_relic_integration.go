@@ -110,7 +110,7 @@ func newNewRelicIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateRequestHeaders,
-		Description:   "https://betterstack.com/docs/uptime/api/new-relic-integrations/",
+		Description:   "Create incidents from New Relic alerts. Automatically trigger Better Stack incidents when your New Relic monitors detect issues, unifying your APM and uptime monitoring workflows. [Learn more](https://betterstack.com/docs/uptime/new-relic/) or see [API docs](https://betterstack.com/docs/uptime/api/new-relic-integrations-response-params/).",
 		Schema:        newRelicIntegrationSchema,
 	}
 }

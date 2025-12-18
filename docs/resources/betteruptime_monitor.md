@@ -3,12 +3,12 @@
 page_title: "betteruptime_monitor Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/monitors/
+  Monitor URLs, endpoints, or services for uptime and response codes. Creates incidents and alerts the on-call person when monitored targets fail to return expected status codes or responses. Learn more https://betterstack.com/docs/uptime/monitoring-start/ or see API docs https://betterstack.com/docs/uptime/api/monitors-api-response-params/.
 ---
 
 # betteruptime_monitor (Resource)
 
-https://betterstack.com/docs/uptime/api/monitors/
+Monitor URLs, endpoints, or services for uptime and response codes. Creates incidents and alerts the on-call person when monitored targets fail to return expected status codes or responses. [Learn more](https://betterstack.com/docs/uptime/monitoring-start/) or see [API docs](https://betterstack.com/docs/uptime/api/monitors-api-response-params/).
 
 
 

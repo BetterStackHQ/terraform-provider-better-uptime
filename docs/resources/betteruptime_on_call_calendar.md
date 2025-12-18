@@ -3,12 +3,12 @@
 page_title: "betteruptime_on_call_calendar Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/on-call-calendar/
+  Create and manage on-call schedules that define who should be notified when incidents occur. Configure shift rotations, time zones, and team member assignments for reliable incident response. Learn more https://betterstack.com/docs/uptime/getting-started-with-oncall-v2/ or see API docs https://betterstack.com/docs/uptime/api/on-call-calendar-api-response-params/.
 ---
 
 # betteruptime_on_call_calendar (Resource)
 
-https://betterstack.com/docs/uptime/api/on-call-calendar/
+Create and manage on-call schedules that define who should be notified when incidents occur. Configure shift rotations, time zones, and team member assignments for reliable incident response. [Learn more](https://betterstack.com/docs/uptime/getting-started-with-oncall-v2/) or see [API docs](https://betterstack.com/docs/uptime/api/on-call-calendar-api-response-params/).
 
 
 

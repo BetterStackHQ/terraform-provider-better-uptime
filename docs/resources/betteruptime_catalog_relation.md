@@ -3,12 +3,12 @@
 page_title: "betteruptime_catalog_relation Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/catalog-integrations-relations/
+  Define relationships between catalog records. Create connections between services, applications, and infrastructure components to understand dependencies and impact during incidents. Learn more https://betterstack.com/docs/uptime/incident-metadata/#catalog.
 ---
 
 # betteruptime_catalog_relation (Resource)
 
-https://betterstack.com/docs/uptime/api/catalog-integrations-relations/
+Define relationships between catalog records. Create connections between services, applications, and infrastructure components to understand dependencies and impact during incidents. [Learn more](https://betterstack.com/docs/uptime/incident-metadata/#catalog).
 
 
 

@@ -3,12 +3,12 @@
 page_title: "betteruptime_new_relic_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/new-relic-integrations/
+  Create incidents from New Relic alerts. Automatically trigger Better Stack incidents when your New Relic monitors detect issues, unifying your APM and uptime monitoring workflows. Learn more https://betterstack.com/docs/uptime/new-relic/ or see API docs https://betterstack.com/docs/uptime/api/new-relic-integrations-response-params/.
 ---
 
 # betteruptime_new_relic_integration (Resource)
 
-https://betterstack.com/docs/uptime/api/new-relic-integrations/
+Create incidents from New Relic alerts. Automatically trigger Better Stack incidents when your New Relic monitors detect issues, unifying your APM and uptime monitoring workflows. [Learn more](https://betterstack.com/docs/uptime/new-relic/) or see [API docs](https://betterstack.com/docs/uptime/api/new-relic-integrations-response-params/).
 
 
 

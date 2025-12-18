@@ -63,7 +63,7 @@ func newSeverityGroupResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/urgency-groups/",
+		Description: "Organize severity levels into logical groups. Group related severities together for better management and to apply consistent notification strategies across similar alert types. See [API docs](https://betterstack.com/docs/uptime/api/severity-groups-api-response-params/).",
 		Schema:      severityGroupSchema,
 	}
 }

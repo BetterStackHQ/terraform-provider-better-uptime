@@ -3,12 +3,12 @@
 page_title: "betteruptime_monitor Data Source - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  Monitor lookup.
+  Retrieve details of an existing monitor by name. Useful for referencing monitor configurations in other resources or for programmatic access to monitor settings and status.
 ---
 
 # betteruptime_monitor (Data Source)
 
-Monitor lookup.
+Retrieve details of an existing monitor by name. Useful for referencing monitor configurations in other resources or for programmatic access to monitor settings and status.
 
 
 

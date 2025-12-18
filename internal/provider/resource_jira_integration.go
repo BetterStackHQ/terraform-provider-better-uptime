@@ -65,7 +65,7 @@ func newJiraIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/jira-integrations/",
+		Description: "Create Jira issues from Better Stack incidents. Automatically generate tickets in Jira when incidents occur, streamlining your incident response workflow and ensuring proper documentation. [Learn more](https://betterstack.com/docs/uptime/jira/better-uptime-to-jira/) or see [API docs](https://betterstack.com/docs/uptime/api/jira-integrations-response-params/).",
 		Schema:      jiraIntegrationSchema,
 	}
 }

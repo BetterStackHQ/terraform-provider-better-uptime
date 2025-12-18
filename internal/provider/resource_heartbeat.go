@@ -175,7 +175,7 @@ func newHeartbeatResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/heartbeats/",
+		Description: "Monitor periodic tasks and cron jobs by expecting regular HTTP requests to a unique URL. Triggers incidents when expected heartbeats are not received within the specified frequency and grace period. [Learn more](https://betterstack.com/docs/uptime/cron-and-heartbeat-monitor/) or see [API docs](https://betterstack.com/docs/uptime/api/heartbeats-api-response-params/).",
 		Schema:      heartbeatSchema,
 	}
 }

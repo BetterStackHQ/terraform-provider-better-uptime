@@ -3,12 +3,12 @@
 page_title: "betteruptime_status_page_section Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/status-page-sections/
+  Organize status page content into sections. Group related services, APIs, or infrastructure components into logical sections for better user experience and clearer communication. See API docs https://betterstack.com/docs/uptime/api/status-pages-sections-api-response-params/.
 ---
 
 # betteruptime_status_page_section (Resource)
 
-https://betterstack.com/docs/uptime/api/status-page-sections/
+Organize status page content into sections. Group related services, APIs, or infrastructure components into logical sections for better user experience and clearer communication. See [API docs](https://betterstack.com/docs/uptime/api/status-pages-sections-api-response-params/).
 
 
 

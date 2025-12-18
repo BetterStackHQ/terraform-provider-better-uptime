@@ -56,7 +56,7 @@ func newPagerdutyIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateRequestHeaders,
-		Description:   "https://betterstack.com/docs/uptime/api/pagerduty-integrations/",
+		Description:   "Bidirectional integration with PagerDuty. Sync incidents between Better Stack and PagerDuty, ensuring your on-call teams stay coordinated across both platforms. [Learn more](https://betterstack.com/docs/uptime/integrations/).",
 		Schema:        pagerdutyIntegrationSchema,
 	}
 }

@@ -3,12 +3,12 @@
 page_title: "betteruptime_prometheus_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/prometheus-integrations/
+  Create incidents from Prometheus alerts. Automatically trigger Better Stack incidents when your Prometheus alerting rules fire, bridging your metrics monitoring with incident management. Learn more https://betterstack.com/docs/uptime/prometheus/ or see API docs https://betterstack.com/docs/uptime/api/prometheus-integrations-response-params/.
 ---
 
 # betteruptime_prometheus_integration (Resource)
 
-https://betterstack.com/docs/uptime/api/prometheus-integrations/
+Create incidents from Prometheus alerts. Automatically trigger Better Stack incidents when your Prometheus alerting rules fire, bridging your metrics monitoring with incident management. [Learn more](https://betterstack.com/docs/uptime/prometheus/) or see [API docs](https://betterstack.com/docs/uptime/api/prometheus-integrations-response-params/).
 
 
 

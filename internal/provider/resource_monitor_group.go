@@ -69,7 +69,7 @@ func newMonitorGroupResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/monitor-groups/",
+		Description: "Organize monitors into logical groups for better management. Group related services, applications, or infrastructure components together for easier bulk operations and reporting. [Learn more](https://betterstack.com/docs/uptime/grouping-and-ordering-monitors/) or see [API docs](https://betterstack.com/docs/uptime/api/monitor-groups-api-response-params/).",
 		Schema:      monitorGroupSchema,
 	}
 }

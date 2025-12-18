@@ -150,7 +150,7 @@ func newMetadataResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateMetadata,
-		Description:   "https://betterstack.com/docs/uptime/api/metadata/",
+		Description:   "Attach custom key-value metadata pairs to incidents for advanced filtering, routing, and reporting. Use metadata in escalation policies to route incidents based on severity, ownership, or other attributes. [Learn more](https://betterstack.com/docs/uptime/incident-metadata/) or see [API docs](https://betterstack.com/docs/uptime/api/metadata-api-response-params/).",
 		Schema:        metadataSchema,
 	}
 }

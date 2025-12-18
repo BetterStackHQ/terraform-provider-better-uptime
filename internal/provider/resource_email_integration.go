@@ -204,7 +204,7 @@ func newEmailIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/email-integrations/",
+		Description:   "Create incidents from email alerts. Parse incoming emails and automatically create Better Stack incidents, allowing any email-based monitoring system to trigger incident response workflows. [Learn more](https://betterstack.com/docs/uptime/integrations/).",
 		Schema:      emailIntegrationSchema,
 	}
 }

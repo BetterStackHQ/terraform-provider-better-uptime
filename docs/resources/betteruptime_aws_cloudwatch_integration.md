@@ -3,12 +3,12 @@
 page_title: "betteruptime_aws_cloudwatch_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/
+  Create incidents from AWS CloudWatch alarms. Automatically trigger Better Stack incidents when your CloudWatch alarms fire, ensuring critical AWS infrastructure issues are promptly escalated to your on-call team. Learn more https://betterstack.com/docs/uptime/aws-cloudwatch/ or see API docs https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations-response-params/.
 ---
 
 # betteruptime_aws_cloudwatch_integration (Resource)
 
-https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/
+Create incidents from AWS CloudWatch alarms. Automatically trigger Better Stack incidents when your CloudWatch alarms fire, ensuring critical AWS infrastructure issues are promptly escalated to your on-call team. [Learn more](https://betterstack.com/docs/uptime/aws-cloudwatch/) or see [API docs](https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations-response-params/).
 
 
 

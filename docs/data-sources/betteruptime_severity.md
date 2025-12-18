@@ -3,12 +3,12 @@
 page_title: "betteruptime_severity Data Source - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  Severity lookup.
+  Retrieve details of an existing severity level by name. Useful for referencing severity configurations in other resources or for programmatic access to notification settings.
 ---
 
 # betteruptime_severity (Data Source)
 
-Severity lookup.
+Retrieve details of an existing severity level by name. Useful for referencing severity configurations in other resources or for programmatic access to notification settings.
 
 
 

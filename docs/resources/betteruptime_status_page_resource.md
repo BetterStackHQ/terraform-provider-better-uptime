@@ -3,12 +3,12 @@
 page_title: "betteruptime_status_page_resource Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/status-page-resources/
+  Add monitors and services to status pages. Define which components should be displayed on your status pages and how their health status should be communicated to users. See API docs https://betterstack.com/docs/uptime/api/status-page-resources-api-response-params/.
 ---
 
 # betteruptime_status_page_resource (Resource)
 
-https://betterstack.com/docs/uptime/api/status-page-resources/
+Add monitors and services to status pages. Define which components should be displayed on your status pages and how their health status should be communicated to users. See [API docs](https://betterstack.com/docs/uptime/api/status-page-resources-api-response-params/).
 
 
 

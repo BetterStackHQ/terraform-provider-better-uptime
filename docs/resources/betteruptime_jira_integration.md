@@ -3,12 +3,12 @@
 page_title: "betteruptime_jira_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/jira-integrations/
+  Create Jira issues from Better Stack incidents. Automatically generate tickets in Jira when incidents occur, streamlining your incident response workflow and ensuring proper documentation. Learn more https://betterstack.com/docs/uptime/jira/better-uptime-to-jira/ or see API docs https://betterstack.com/docs/uptime/api/jira-integrations-response-params/.
 ---
 
 # betteruptime_jira_integration (Resource)
 
-https://betterstack.com/docs/uptime/api/jira-integrations/
+Create Jira issues from Better Stack incidents. Automatically generate tickets in Jira when incidents occur, streamlining your incident response workflow and ensuring proper documentation. [Learn more](https://betterstack.com/docs/uptime/jira/better-uptime-to-jira/) or see [API docs](https://betterstack.com/docs/uptime/api/jira-integrations-response-params/).
 
 
 

@@ -3,12 +3,12 @@
 page_title: "betteruptime_catalog_attribute Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/catalog-integrations-attributes/
+  Define custom attributes for your catalog records. Create typed fields (string, number, boolean) to store additional metadata about your services and infrastructure components for enhanced filtering and reporting. Learn more https://betterstack.com/docs/uptime/incident-metadata/#catalog.
 ---
 
 # betteruptime_catalog_attribute (Resource)
 
-https://betterstack.com/docs/uptime/api/catalog-integrations-attributes/
+Define custom attributes for your catalog records. Create typed fields (string, number, boolean) to store additional metadata about your services and infrastructure components for enhanced filtering and reporting. [Learn more](https://betterstack.com/docs/uptime/incident-metadata/#catalog).
 
 
 

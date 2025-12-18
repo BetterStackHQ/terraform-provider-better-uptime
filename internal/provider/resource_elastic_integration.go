@@ -104,7 +104,7 @@ func newElasticIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateRequestHeaders,
-		Description:   "https://betterstack.com/docs/uptime/api/elastic-integrations/",
+		Description:   "Create incidents from Elasticsearch Watcher alerts. Automatically trigger Better Stack incidents when your Elasticsearch monitoring alerts fire, connecting your search infrastructure to incident management. [Learn more](https://betterstack.com/docs/uptime/integrations/).",
 		Schema:        elasticIntegrationSchema,
 	}
 }

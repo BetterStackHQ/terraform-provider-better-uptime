@@ -49,7 +49,7 @@ func newSplunkOnCallIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateRequestHeaders,
-		Description:   "https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/",
+		Description:   "Bidirectional integration with Splunk On-Call (VictorOps). Sync incidents between Better Stack and Splunk On-Call, ensuring your on-call teams stay coordinated across both platforms. [Learn more](https://betterstack.com/docs/uptime/integrations/).",
 		Schema:        splunkOnCallIntegrationSchema,
 	}
 }

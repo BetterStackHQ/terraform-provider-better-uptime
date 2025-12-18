@@ -3,12 +3,12 @@
 page_title: "betteruptime_heartbeat_group Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/heartbeat-groups/
+  Organize heartbeats into logical groups for better management. Group related cron jobs, background tasks, or periodic processes together for easier monitoring and alerting configuration. See API docs https://betterstack.com/docs/uptime/api/heartbeat-groups-api-response-params/.
 ---
 
 # betteruptime_heartbeat_group (Resource)
 
-https://betterstack.com/docs/uptime/api/heartbeat-groups/
+Organize heartbeats into logical groups for better management. Group related cron jobs, background tasks, or periodic processes together for easier monitoring and alerting configuration. See [API docs](https://betterstack.com/docs/uptime/api/heartbeat-groups-api-response-params/).
 
 
 

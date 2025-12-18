@@ -63,7 +63,7 @@ func newStatusPageGroupResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/status-page-groups/",
+		Description: "Organize status page resources into logical groups. Group related services or components together to manage their visibility and status reporting on your status pages. See [API docs](https://betterstack.com/docs/uptime/api/status-page-groups-response-params/).",
 		Schema:      statusPageGroupSchema,
 	}
 }

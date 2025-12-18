@@ -104,7 +104,7 @@ func newGrafanaIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateRequestHeaders,
-		Description:   "https://betterstack.com/docs/uptime/api/grafana-integrations/",
+		Description:   "Create incidents from Grafana alerts. Automatically trigger Better Stack incidents when your Grafana alert rules fire, connecting your dashboard alerts to incident management. [Learn more](https://betterstack.com/docs/uptime/grafana/) or see [API docs](https://betterstack.com/docs/uptime/api/grafana-integrations-response-params/).",
 		Schema:        grafanaIntegrationSchema,
 	}
 }

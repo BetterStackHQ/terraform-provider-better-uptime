@@ -32,7 +32,7 @@ func newSeverityDataSource() *schema.Resource {
 	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: severityLookup,
-		Description: "Severity lookup.",
+		Description: "Retrieve details of an existing severity level by name. Useful for referencing severity configurations in other resources or for programmatic access to notification settings.",
 		Schema:      s,
 	}
 }

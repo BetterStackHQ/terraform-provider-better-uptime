@@ -34,7 +34,7 @@ func newSlackIntegrationDataSource() *schema.Resource {
 	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: slackIntegrationLookup,
-		Description: "Slack integration lookup.",
+		Description: "Retrieve details of an existing Slack integration by channel name. Useful for referencing Slack integration configurations in other resources or for programmatic access to Slack settings.",
 		Schema:      s,
 	}
 }

@@ -3,12 +3,12 @@
 page_title: "betteruptime_slack_integration Data Source - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  Slack integration lookup.
+  Retrieve details of an existing Slack integration by channel name. Useful for referencing Slack integration configurations in other resources or for programmatic access to Slack settings.
 ---
 
 # betteruptime_slack_integration (Data Source)
 
-Slack integration lookup.
+Retrieve details of an existing Slack integration by channel name. Useful for referencing Slack integration configurations in other resources or for programmatic access to Slack settings.
 
 
 

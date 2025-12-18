@@ -3,12 +3,12 @@
 page_title: "betteruptime_incoming_webhook Data Source - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  Incoming Webhook lookup.
+  Retrieve details of an existing incoming webhook integration by name. Useful for referencing webhook configurations in other resources or for programmatic access to webhook settings.
 ---
 
 # betteruptime_incoming_webhook (Data Source)
 
-Incoming Webhook lookup.
+Retrieve details of an existing incoming webhook integration by name. Useful for referencing webhook configurations in other resources or for programmatic access to webhook settings.
 
 
 

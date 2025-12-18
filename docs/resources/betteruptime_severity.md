@@ -3,12 +3,12 @@
 page_title: "betteruptime_severity Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/list-all-severities/
+  Define customizable alert severity levels with preset notification methods (calls, SMS, email, push notifications, critical alerts) that can be reused across multiple escalation policies. Learn more https://betterstack.com/docs/uptime/severities/ or see API docs https://betterstack.com/docs/uptime/api/severities-api-response-params/.
 ---
 
 # betteruptime_severity (Resource)
 
-https://betterstack.com/docs/uptime/api/list-all-severities/
+Define customizable alert severity levels with preset notification methods (calls, SMS, email, push notifications, critical alerts) that can be reused across multiple escalation policies. [Learn more](https://betterstack.com/docs/uptime/severities/) or see [API docs](https://betterstack.com/docs/uptime/api/severities-api-response-params/).
 
 
 

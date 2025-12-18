@@ -3,12 +3,12 @@
 page_title: "betteruptime_on_call_calendar Data Source - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  On-call calendar lookup.
+  Retrieve details of an existing on-call calendar by name. Useful for referencing on-call schedules in other resources or for programmatic access to calendar configurations.
 ---
 
 # betteruptime_on_call_calendar (Data Source)
 
-On-call calendar lookup.
+Retrieve details of an existing on-call calendar by name. Useful for referencing on-call schedules in other resources or for programmatic access to calendar configurations.
 
 
 

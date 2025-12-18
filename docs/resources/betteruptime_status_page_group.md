@@ -3,12 +3,12 @@
 page_title: "betteruptime_status_page_group Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/status-page-groups/
+  Organize status page resources into logical groups. Group related services or components together to manage their visibility and status reporting on your status pages. See API docs https://betterstack.com/docs/uptime/api/status-page-groups-response-params/.
 ---
 
 # betteruptime_status_page_group (Resource)
 
-https://betterstack.com/docs/uptime/api/status-page-groups/
+Organize status page resources into logical groups. Group related services or components together to manage their visibility and status reporting on your status pages. See [API docs](https://betterstack.com/docs/uptime/api/status-page-groups-response-params/).
 
 
 

@@ -63,7 +63,7 @@ func newPolicyGroupResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/policy-groups/",
+		Description: "Organize escalation policies into logical groups. Group related policies together for better management and to apply consistent alerting strategies across similar services or teams. See [API docs](https://betterstack.com/docs/uptime/api/escalation-policy-groups-api-response-params/).",
 		Schema:      policyGroupSchema,
 	}
 }

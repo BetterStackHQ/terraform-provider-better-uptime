@@ -3,12 +3,12 @@
 page_title: "betteruptime_splunk_oncall_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/
+  Bidirectional integration with Splunk On-Call (VictorOps). Sync incidents between Better Stack and Splunk On-Call, ensuring your on-call teams stay coordinated across both platforms. Learn more https://betterstack.com/docs/uptime/integrations/.
 ---
 
 # betteruptime_splunk_oncall_integration (Resource)
 
-https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/
+Bidirectional integration with Splunk On-Call (VictorOps). Sync incidents between Better Stack and Splunk On-Call, ensuring your on-call teams stay coordinated across both platforms. [Learn more](https://betterstack.com/docs/uptime/integrations/).
 
 
 

@@ -439,7 +439,7 @@ func newMonitorResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateMonitor,
-		Description:   "https://betterstack.com/docs/uptime/api/monitors/",
+		Description:   "Monitor URLs, endpoints, or services for uptime and response codes. Creates incidents and alerts the on-call person when monitored targets fail to return expected status codes or responses. [Learn more](https://betterstack.com/docs/uptime/monitoring-start/) or see [API docs](https://betterstack.com/docs/uptime/api/monitors-api-response-params/).",
 		Schema:        monitorSchema,
 	}
 }

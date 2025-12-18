@@ -230,7 +230,7 @@ func newIncomingWebhookResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/",
+		Description: "Create incidents automatically from any tool that can send a payload, even from your custom scripts. The incoming webhook integration allows you to parse custom data, set creation rules, and map fields to create detailed, actionable incidents. [Learn more](https://betterstack.com/docs/uptime/incoming-webhooks/) or see [API docs](https://betterstack.com/docs/uptime/api/incoming-webhooks-response-params/).",
 		Schema:      incomingWebhookSchema,
 	}
 }

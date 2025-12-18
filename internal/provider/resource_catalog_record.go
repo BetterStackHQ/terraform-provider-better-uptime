@@ -71,7 +71,7 @@ func newCatalogRecordResource() *schema.Resource {
 			},
 		},
 		CustomizeDiff: validateCatalogRecordAttributes,
-		Description:   "https://betterstack.com/docs/uptime/api/catalog-integrations-records/",
+		Description:   "Create catalog records to organize and track your infrastructure components. Define services, applications, or resources with custom attributes for better incident correlation and service mapping. [Learn more](https://betterstack.com/docs/uptime/incident-metadata/#catalog).",
 		Schema:        catalogRecordSchema,
 	}
 }

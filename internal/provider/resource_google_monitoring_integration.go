@@ -104,7 +104,7 @@ func newGoogleMonitoringIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateRequestHeaders,
-		Description:   "https://betterstack.com/docs/uptime/api/google-monitoring-integrations/",
+		Description:   "Create incidents from Google Cloud Monitoring alerts. Automatically trigger Better Stack incidents when your GCP monitoring policies alert, bridging Google Cloud observability with incident management. [Learn more](https://betterstack.com/docs/uptime/google-cloud/).",
 		Schema:        googleMonitoringIntegrationSchema,
 	}
 }

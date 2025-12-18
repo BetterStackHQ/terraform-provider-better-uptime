@@ -180,7 +180,7 @@ func newOutgoingWebhookResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description:   "https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/",
+		Description:   "Send webhook notifications to external services when incidents are created/acknowledged/resolved, monitors change state, or on-call contacts change. Choose from incident, monitor, or on-call contact webhook types. [Learn more](https://betterstack.com/docs/uptime/webhooks/) or see [API docs](https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations-response-params/).",
 		CustomizeDiff: validateOutgoingWebhook,
 		Schema:        outgoingWebhookSchema,
 	}

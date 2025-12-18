@@ -36,7 +36,7 @@ func newOnCallCalendarDataSource() *schema.Resource {
 	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: onCallCalendarDefaultOrLookup,
-		Description: "On-call calendar lookup.",
+		Description: "Retrieve details of an existing on-call calendar by name. Useful for referencing on-call schedules in other resources or for programmatic access to calendar configurations.",
 		Schema:      s,
 	}
 }

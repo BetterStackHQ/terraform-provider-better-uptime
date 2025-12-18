@@ -62,7 +62,7 @@ func newCatalogAttributeResource() *schema.Resource {
 				return []*schema.ResourceData{d}, nil
 			},
 		},
-		Description: "https://betterstack.com/docs/uptime/api/catalog-integrations-attributes/",
+		Description: "Define custom attributes for your catalog records. Create typed fields (string, number, boolean) to store additional metadata about your services and infrastructure components for enhanced filtering and reporting. [Learn more](https://betterstack.com/docs/uptime/incident-metadata/#catalog).",
 		Schema:      catalogAttributeSchema,
 	}
 }

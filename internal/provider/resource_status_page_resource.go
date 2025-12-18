@@ -145,7 +145,7 @@ func newStatusPageResourceResource() *schema.Resource {
 				return []*schema.ResourceData{d}, nil
 			},
 		},
-		Description: "https://betterstack.com/docs/uptime/api/status-page-resources/",
+		Description: "Add monitors and services to status pages. Define which components should be displayed on your status pages and how their health status should be communicated to users. See [API docs](https://betterstack.com/docs/uptime/api/status-page-resources-api-response-params/).",
 		Schema:      statusPageResourceSchema,
 	}
 }

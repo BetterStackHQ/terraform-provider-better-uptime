@@ -221,7 +221,7 @@ func newPolicyResource() *schema.Resource {
 		},
 		CustomizeDiff: validatePolicy,
 		Schema:        policySchema,
-		Description:   "https://betterstack.com/docs/uptime/api/policies/",
+		Description:   "Define custom escalation rules for incident alerting, specifying who gets notified and in what order when incidents occur. Supports time-based rules, delays, and metadata-based routing. [Learn more](https://betterstack.com/docs/uptime/escalation-policies/) or see [API docs](https://betterstack.com/docs/uptime/api/escalation-policies-api-response-params/).",
 	}
 }
 

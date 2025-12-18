@@ -104,7 +104,7 @@ func newAzureIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: validateRequestHeaders,
-		Description:   "https://betterstack.com/docs/uptime/api/azure-integrations/",
+		Description:   "Create incidents from Azure Monitor alerts. Automatically trigger Better Stack incidents when your Azure monitoring alerts fire, ensuring Azure infrastructure issues reach your on-call team. [Learn more](https://betterstack.com/docs/uptime/integrations/).",
 		Schema:        azureIntegrationSchema,
 	}
 }

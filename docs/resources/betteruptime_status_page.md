@@ -3,12 +3,12 @@
 page_title: "betteruptime_status_page Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/status-pages/
+  Create public or private status pages to communicate service health and incident information to users. Display monitor statuses, maintenance windows, and incident updates in a branded, customizable interface. Learn more https://betterstack.com/docs/uptime/getting-started-with-status-pages/ or see API docs https://betterstack.com/docs/uptime/api/status-pages-api-response-params/.
 ---
 
 # betteruptime_status_page (Resource)
 
-https://betterstack.com/docs/uptime/api/status-pages/
+Create public or private status pages to communicate service health and incident information to users. Display monitor statuses, maintenance windows, and incident updates in a branded, customizable interface. [Learn more](https://betterstack.com/docs/uptime/getting-started-with-status-pages/) or see [API docs](https://betterstack.com/docs/uptime/api/status-pages-api-response-params/).
 
 
 

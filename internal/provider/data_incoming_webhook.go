@@ -35,7 +35,7 @@ func newIncomingWebhookDataSource() *schema.Resource {
 	delete(s, "team_name")
 	return &schema.Resource{
 		ReadContext: incomingWebhookLookup,
-		Description: "Incoming Webhook lookup.",
+		Description: "Retrieve details of an existing incoming webhook integration by name. Useful for referencing webhook configurations in other resources or for programmatic access to webhook settings.",
 		Schema:      s,
 	}
 }

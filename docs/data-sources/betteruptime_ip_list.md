@@ -3,12 +3,12 @@
 page_title: "betteruptime_ip_list Data Source - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  Monitoring IPs lookup.
+  Retrieve details of Better Stack's monitoring IP addresses. Useful for configuring firewalls or security groups to allow Better Stack's monitoring requests to reach your services.
 ---
 
 # betteruptime_ip_list (Data Source)
 
-Monitoring IPs lookup.
+Retrieve details of Better Stack's monitoring IP addresses. Useful for configuring firewalls or security groups to allow Better Stack's monitoring requests to reach your services.
 
 
 

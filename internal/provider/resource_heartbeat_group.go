@@ -69,7 +69,7 @@ func newHeartbeatGroupResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/heartbeat-groups/",
+		Description: "Organize heartbeats into logical groups for better management. Group related cron jobs, background tasks, or periodic processes together for easier monitoring and alerting configuration. See [API docs](https://betterstack.com/docs/uptime/api/heartbeat-groups-api-response-params/).",
 		Schema:      heartbeatGroupSchema,
 	}
 }

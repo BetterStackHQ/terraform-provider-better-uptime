@@ -3,12 +3,12 @@
 page_title: "betteruptime_email_integration Resource - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  https://betterstack.com/docs/uptime/api/email-integrations/
+  Create incidents from email alerts. Parse incoming emails and automatically create Better Stack incidents, allowing any email-based monitoring system to trigger incident response workflows. Learn more https://betterstack.com/docs/uptime/integrations/.
 ---
 
 # betteruptime_email_integration (Resource)
 
-https://betterstack.com/docs/uptime/api/email-integrations/
+Create incidents from email alerts. Parse incoming emails and automatically create Better Stack incidents, allowing any email-based monitoring system to trigger incident response workflows. [Learn more](https://betterstack.com/docs/uptime/integrations/).
 
 
 
