@@ -22,13 +22,13 @@ resource "betteruptime_status_page" "this" {
   timezone     = "Eastern Time (US & Canada)"
   subdomain    = coalesce(var.betteruptime_status_page_subdomain, random_id.status_page_subdomain.hex)
   subscribable = true
-  # ip_allowlist = [
-  #   "# Office network",
-  #   "192.168.1.0/24",
-  #   "# Production servers",
-  #   "172.16.0.0/16",
-  #   "2001:0db8:85a3::/64",
-  # ]
+  ip_allowlist = [
+    "# Office network",
+    "192.168.1.0/24",
+    "# Production servers",
+    "172.16.0.0/16",
+    "2001:0db8:85a3::/64",
+  ]
 }
 
 resource "betteruptime_status_page_section" "monitors" {
