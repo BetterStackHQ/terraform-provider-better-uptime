@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -358,12 +359,59 @@ func validateMetadata(ctx context.Context, d *schema.ResourceDiff, m interface{}
 		return fmt.Errorf("there cannot be metadata_value defined, when the deprecated field value is used")
 	}
 
+	// Get raw config to check what was actually configured
+	rawConfig := d.GetRawConfig()
+
 	for i, v := range metadataValues {
 		value := v.(map[string]interface{})
-		if err := validateMetadataValue(value, fmt.Sprintf("metadata_value.%d", i)); err != nil {
+		if err := validateMetadataValueWithRawConfig(value, rawConfig.GetAttr("metadata_value").AsValueSlice()[i], fmt.Sprintf("metadata_value.%d", i)); err != nil {
 			return err
 		}
 	}
+	return nil
+}
+
+func validateMetadataValueWithRawConfig(attrMap map[string]interface{}, rawConfig cty.Value, path string) error {
+	attrType := attrMap["type"].(string)
+
+	// Validation for String type
+	if attrType == "String" {
+		if value, ok := attrMap["value"].(string); !ok || value == "" {
+			return fmt.Errorf("%s: value must be set for String type", path)
+		}
+		if itemID, ok := attrMap["item_id"].(string); ok && itemID != "" {
+			return fmt.Errorf("%s: item_id must not be set for String type", path)
+		}
+		if email, ok := attrMap["email"].(string); ok && email != "" {
+			return fmt.Errorf("%s: email must not be set for String type", path)
+		}
+		if name, ok := attrMap["name"].(string); ok && name != "" {
+			return fmt.Errorf("%s: name must not be set for String type", path)
+		}
+		return nil
+	}
+
+	// Validation for non-String types
+	if value, ok := attrMap["value"].(string); ok && value != "" {
+		return fmt.Errorf("%s: value must not be set for %s type", path, attrType)
+	}
+
+	// Check if any identifier fields are configured in the raw config
+	hasConfiguredIdentifier := false
+	if rawConfig.GetAttr("item_id").IsNull() == false {
+		hasConfiguredIdentifier = true
+	}
+	if rawConfig.GetAttr("email").IsNull() == false {
+		hasConfiguredIdentifier = true
+	}
+	if rawConfig.GetAttr("name").IsNull() == false {
+		hasConfiguredIdentifier = true
+	}
+
+	if !hasConfiguredIdentifier {
+		return fmt.Errorf("%s: at least one of item_id, email, or name must be set for %s type", path, attrType)
+	}
+
 	return nil
 }
 
