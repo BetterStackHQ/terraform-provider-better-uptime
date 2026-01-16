@@ -222,6 +222,18 @@ resource "betteruptime_metadata" "assigned_user" {
   }
 }
 
+resource "betteruptime_metadata" "assigned_policy" {
+  owner_type = "EmailIntegration"
+  owner_id   = betteruptime_email_integration.this.id
+  key        = "Assigned Policy"
+  metadata_value {
+    type    = "Policy"
+    item_id = betteruptime_policy.this.id
+    # Alternatively, you can use name to find the escalation policy:
+    # name = "Low-Priority Escalation Policy"
+  }
+}
+
 resource "betteruptime_status_page_resource" "email" {
   status_page_id         = betteruptime_status_page.this.id
   status_page_section_id = betteruptime_status_page_section.monitors.id
