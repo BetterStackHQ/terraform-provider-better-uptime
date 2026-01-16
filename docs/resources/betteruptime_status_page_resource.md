@@ -26,6 +26,10 @@ https://betterstack.com/docs/uptime/api/status-page-resources/
 
 - `explanation` (String) A detailed text displayed as a help icon.
 - `history` (Boolean, Deprecated) Do you want to display detailed historical status for this item? This field is deprecated, use widget_type instead.
+- `mark_as_degraded_for` (String) How to mark this resource as degraded. Can be one of `no_incident`, `any_incident`, or `incident_matching_metadata`.
+- `mark_as_degraded_metadata_rule` (Block List, Max: 1) Metadata rule for marking resource as degraded. Only applicable when mark_as_degraded_for is 'incident_matching_metadata'. (see [below for nested schema](#nestedblock--mark_as_degraded_metadata_rule))
+- `mark_as_down_for` (String) How to mark this resource as down. Can be one of `no_incident`, `any_incident`, or `incident_matching_metadata`.
+- `mark_as_down_metadata_rule` (Block List, Max: 1) Metadata rule for marking resource as down. Only applicable when mark_as_down_for is 'incident_matching_metadata'. (see [below for nested schema](#nestedblock--mark_as_down_metadata_rule))
 - `position` (Number) The position of this resource on your status page, indexed from zero. If you don't specify a position, we add the resource to the end of the status page. When you specify a position of an existing resource, we add the resource to this position and shift resources below to accommodate.
 - `status_page_section_id` (Number) The ID of the Status Page Section. If you don't specify a status_page_section_id, we add the resource to the first section. If there are no sections in the status page yet, one will be automatically created for you.
 - `widget_type` (String) What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type). This takes preference over history when both parameters are present.
@@ -36,6 +40,70 @@ https://betterstack.com/docs/uptime/api/status-page-resources/
 - `id` (String) The ID of this Status Page Resource.
 - `status` (String) The current status of the resource. Can be one of `not_monitored` (when the underlying monitor is paused), `operational`, `maintenance`, `degraded`, or `downtime`
 - `status_history` (List of Object) History of a single status page resource history (see [below for nested schema](#nestedatt--status_history))
+
+<a id="nestedblock--mark_as_degraded_metadata_rule"></a>
+### Nested Schema for `mark_as_degraded_metadata_rule`
+
+Required:
+
+- `key` (String) The metadata key to match against.
+- `metadata_value` (Block List, Min: 1) List of metadata values that should trigger the degraded status. (see [below for nested schema](#nestedblock--mark_as_degraded_metadata_rule--metadata_value))
+
+<a id="nestedblock--mark_as_degraded_metadata_rule--metadata_value"></a>
+### Nested Schema for `mark_as_degraded_metadata_rule.metadata_value`
+
+Optional:
+
+- `email` (String) Email of the referenced user when type is `User`.
+- `item_id` (String) ID of the referenced item when type is different than `String`.
+- `name` (String) Name of the referenced item when type is different than `String`.
+- `type` (String) Value types can be grouped into 2 main categories:
+  - **Scalar**: `String`
+  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
+  
+  The value of a **Scalar** type is defined using the value field.
+  
+  The value of a **Reference** type is defined using one of the following fields:
+  - `item_id` - great choice when you know the ID of the target item.
+  - `email` - your go-to choice when you're referencing users.
+  - `name` - can be used to reference other items like teams, policies, etc.
+  
+  **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
+- `value` (String) Value when type is String.
+
+
+
+<a id="nestedblock--mark_as_down_metadata_rule"></a>
+### Nested Schema for `mark_as_down_metadata_rule`
+
+Required:
+
+- `key` (String) The metadata key to match against.
+- `metadata_value` (Block List, Min: 1) List of metadata values that should trigger the down status. (see [below for nested schema](#nestedblock--mark_as_down_metadata_rule--metadata_value))
+
+<a id="nestedblock--mark_as_down_metadata_rule--metadata_value"></a>
+### Nested Schema for `mark_as_down_metadata_rule.metadata_value`
+
+Optional:
+
+- `email` (String) Email of the referenced user when type is `User`.
+- `item_id` (String) ID of the referenced item when type is different than `String`.
+- `name` (String) Name of the referenced item when type is different than `String`.
+- `type` (String) Value types can be grouped into 2 main categories:
+  - **Scalar**: `String`
+  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
+  
+  The value of a **Scalar** type is defined using the value field.
+  
+  The value of a **Reference** type is defined using one of the following fields:
+  - `item_id` - great choice when you know the ID of the target item.
+  - `email` - your go-to choice when you're referencing users.
+  - `name` - can be used to reference other items like teams, policies, etc.
+  
+  **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
+- `value` (String) Value when type is String.
+
+
 
 <a id="nestedatt--status_history"></a>
 ### Nested Schema for `status_history`
