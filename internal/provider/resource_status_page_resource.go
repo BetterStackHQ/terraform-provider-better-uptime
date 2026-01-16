@@ -455,6 +455,19 @@ func statusPageResourceCopyAttrs(d *schema.ResourceData, in *statusPageResource)
 			}
 		}
 	}
+
+	// Clear metadata rules if they are not active, they would be missing in the API request
+	if d.Get("mark_as_down_for").(string) != "incident_matching_metadata" {
+		if err := d.Set("mark_as_down_metadata_rule", []interface{}{}); err != nil {
+			derr = append(derr, diag.FromErr(err)[0])
+		}
+	}
+	if d.Get("mark_as_degraded_for").(string) != "incident_matching_metadata" {
+		if err := d.Set("mark_as_degraded_metadata_rule", []interface{}{}); err != nil {
+			derr = append(derr, diag.FromErr(err)[0])
+		}
+	}
+
 	return derr
 }
 

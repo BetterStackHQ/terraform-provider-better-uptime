@@ -108,6 +108,7 @@ func TestResourceStatusPageResource(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "mark_as_down_metadata_rule.0.metadata_value.1.type", "Policy"),
 					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "mark_as_down_metadata_rule.0.metadata_value.1.item_id", "89964"),
 					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "mark_as_degraded_for", "any_incident"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "mark_as_degraded_metadata_rule.#", "0"),
 				),
 				PreConfig: func() {
 					t.Log("step 3")
@@ -145,14 +146,40 @@ func TestResourceStatusPageResource(t *testing.T) {
 					t.Log("step 4")
 				},
 			},
-			// Step 5 - destroy.
+			// Step 5 - remove metadata
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_status_page_resource" "this" {
+					status_page_id = "0"
+					resource_id    = "3"
+					resource_type  = "Monitor"
+					public_name    = "%s"
+					mark_as_down_for = "any_incident"
+					mark_as_degraded_for = "no_incident"
+				}
+				`, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "mark_as_down_for", "any_incident"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "mark_as_down_metadata_rule.#", "0"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "mark_as_degraded_for", "no_incident"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "mark_as_degraded_metadata_rule.#", "0"),
+				),
+				PreConfig: func() {
+					t.Log("step 3")
+				},
+			},
+			// Step 6 - destroy.
 			{
 				ResourceName:      "betteruptime_status_page_resource.this",
 				ImportState:       true,
 				ImportStateId:     "0/1",
-				ImportStateVerify: false,
+				ImportStateVerify: true,
 				PreConfig: func() {
-					t.Log("step 5")
+					t.Log("step 6")
 				},
 			},
 		},
