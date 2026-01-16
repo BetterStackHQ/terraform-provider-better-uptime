@@ -253,8 +253,15 @@ resource "betteruptime_status_page_resource" "email" {
     }
   }
 
-  # Mark as degraded for any incident
-  mark_as_degraded_for = "any_incident"
+  # Mark as degraded based on User-type metadata
+  mark_as_degraded_for = "incident_matching_metadata"
+  mark_as_degraded_metadata_rule {
+    key        = "Assigned User"
+    metadata_value {
+      type  = "User"
+      email = "petr@betterstack.com"
+    }
+  }
 }
 
 resource "betteruptime_status_page_resource" "email_api" {
