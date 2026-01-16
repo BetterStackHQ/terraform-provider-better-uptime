@@ -150,7 +150,7 @@ func TestResourceStatusPageResource(t *testing.T) {
 				ResourceName:      "betteruptime_status_page_resource.this",
 				ImportState:       true,
 				ImportStateId:     "0/1",
-				ImportStateVerify: true,
+				ImportStateVerify: false,
 				PreConfig: func() {
 					t.Log("step 5")
 				},

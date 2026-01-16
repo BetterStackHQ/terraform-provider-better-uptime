@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -184,196 +185,142 @@ var statusPageStatusHistorySchema = map[string]*schema.Schema{
 	},
 }
 
-func validateMetadataRule(v interface{}, k string) (ws []string, errors []error) {
-	ruleList := v.([]interface{})
-	if len(ruleList) == 0 {
+func loadStatusPageResourceMetadataRule(d *schema.ResourceData, ruleKey string) *map[string]interface{} {
+	metadataRules := d.Get(ruleKey).([]interface{})
+	if len(metadataRules) == 0 {
+		return nil
+	}
+
+	rule := metadataRules[0].(map[string]interface{})
+	metadataRule := make(map[string]interface{})
+
+	if key, ok := rule["key"].(string); ok && key != "" {
+		metadataRule["key"] = key
+	}
+
+	if metadataValues, ok := rule["metadata_value"].([]interface{}); ok && len(metadataValues) > 0 {
+		values := make([]metadataValue, 0, len(metadataValues))
+		for _, v := range metadataValues {
+			valueMap := v.(map[string]interface{})
+			value := metadataValue{}
+
+			if v, ok := valueMap["type"].(string); ok && v != "" {
+				value.Type = v
+			}
+			if v, ok := valueMap["value"].(string); ok && v != "" {
+				value.Value = &v
+			}
+			if v, ok := valueMap["item_id"].(string); ok && v != "" {
+				value.ItemID = json.Number(v)
+			}
+			if v, ok := valueMap["email"].(string); ok && v != "" {
+				value.Email = &v
+			}
+			if v, ok := valueMap["name"].(string); ok && v != "" {
+				value.Name = &v
+			}
+
+			values = append(values, value)
+		}
+		metadataRule["values"] = values
+	}
+
+	return &metadataRule
+}
+
+func statusPageResourceMetadataRuleCopyAttrs(d *schema.ResourceData, rule *map[string]interface{}, ruleKey string) {
+	if rule == nil {
+		d.Set(ruleKey, []interface{}{})
 		return
 	}
 
-	rule := ruleList[0].(map[string]interface{})
+	metadataRule := make(map[string]interface{})
 
-	// Check if key exists and is not empty
-	if key, ok := rule["key"]; !ok || key.(string) == "" {
-		errors = append(errors, fmt.Errorf("%s: key is required and cannot be empty", k))
+	if key, ok := (*rule)["key"].(string); ok {
+		metadataRule["key"] = key
 	}
 
-	// Check if metadata_value exists and has at least one item
-	if metadataValues, ok := rule["metadata_value"]; !ok {
-		errors = append(errors, fmt.Errorf("%s: metadata_value is required", k))
-	} else {
-		metadataValueList := metadataValues.([]interface{})
-		if len(metadataValueList) == 0 {
-			errors = append(errors, fmt.Errorf("%s: at least one metadata_value is required", k))
-		}
-
-		// Validate each metadata value
-		for i, value := range metadataValueList {
-			valueMap := value.(map[string]interface{})
-			if itemID, ok := valueMap["item_id"]; !ok || itemID.(string) == "" {
-				errors = append(errors, fmt.Errorf("%s: metadata_value[%d]: item_id is required and cannot be empty", k, i))
+	if values, ok := (*rule)["values"].([]interface{}); ok && len(values) > 0 {
+		metadataValues := make([]interface{}, 0, len(values))
+		for i, v := range values {
+			valueMap, ok := v.(map[string]interface{})
+			if !ok {
+				continue
 			}
-			// The type field from metadataValueSchema should be present
-			if valueType, ok := valueMap["type"]; !ok || valueType.(string) == "" {
-				errors = append(errors, fmt.Errorf("%s: metadata_value[%d]: type is required and cannot be empty", k, i))
+			metadataValue := make(map[string]interface{})
+
+			if valueType, ok := valueMap["type"].(string); ok {
+				metadataValue["type"] = valueType
 			}
-		}
-	}
-
-	return
-}
-
-// Helper functions to convert between Terraform schema format and API format for metadata rules
-
-func convertMetadataRuleToAPI(tfRule []interface{}) map[string]interface{} {
-	if len(tfRule) == 0 {
-		return nil
-	}
-
-	rule := tfRule[0].(map[string]interface{})
-	key := rule["key"].(string)
-	metadataValues := rule["metadata_value"].([]interface{})
-
-	apiValues := make([]interface{}, len(metadataValues))
-	for i, v := range metadataValues {
-		valueMap := v.(map[string]interface{})
-		valueType := valueMap["type"].(string)
-
-		if valueType == "String" {
-			// For string values, only send the value field
 			if value, ok := valueMap["value"].(string); ok {
-				apiValues[i] = map[string]interface{}{
-					"value": value,
+				metadataValue["value"] = value
+			}
+
+			// Only include item_id, email, name if they were configured in Terraform
+			configPrefix := fmt.Sprintf("%s.0.metadata_value.%d", ruleKey, i)
+			if _, ok := d.GetOk(configPrefix + ".item_id"); ok {
+				if id, ok := valueMap["item_id"]; ok && id != nil {
+					switch typedId := id.(type) {
+					case json.Number:
+						metadataValue["item_id"] = typedId.String()
+					case float64:
+						metadataValue["item_id"] = fmt.Sprintf("%.0f", typedId)
+					}
 				}
 			}
-		} else {
-			// For reference values, send type and one of item_id/name/email
-			apiValue := map[string]interface{}{
-				"type": valueType,
+			if _, ok := d.GetOk(configPrefix + ".email"); ok {
+				if email, ok := valueMap["email"].(string); ok {
+					metadataValue["email"] = email
+				}
+			}
+			if _, ok := d.GetOk(configPrefix + ".name"); ok {
+				if name, ok := valueMap["name"].(string); ok {
+					metadataValue["name"] = name
+				}
 			}
 
-			if itemID, ok := valueMap["item_id"].(string); ok && itemID != "" {
-				apiValue["item_id"] = itemID
-			}
-			if name, ok := valueMap["name"].(string); ok && name != "" {
-				apiValue["name"] = name
-			}
-			if email, ok := valueMap["email"].(string); ok && email != "" {
-				apiValue["email"] = email
-			}
-
-			apiValues[i] = apiValue
+			metadataValues = append(metadataValues, metadataValue)
 		}
+		metadataRule["metadata_value"] = metadataValues
 	}
 
-	return map[string]interface{}{
-		"key":    key,
-		"values": apiValues,
+	if len(metadataRule) > 0 {
+		d.Set(ruleKey, []interface{}{metadataRule})
+	} else {
+		d.Set(ruleKey, []interface{}{})
 	}
 }
 
-func convertMetadataRuleFromAPI(apiRule map[string]interface{}) []interface{} {
-	if apiRule == nil {
-		return nil
-	}
+func validateStatusPageResource(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	degradedRuleError := validateMetadataRule(d, "mark_as_degraded_for", "mark_as_degraded_metadata_rule")
+	downRuleError := validateMetadataRule(d, "mark_as_down_for", "mark_as_down_metadata_rule")
 
-	key, ok := apiRule["key"]
-	if !ok {
-		return nil
-	}
-	keyStr, ok := key.(string)
-	if !ok {
-		return nil
-	}
-
-	values, ok := apiRule["values"]
-	if !ok {
-		return nil
-	}
-	valuesArr, ok := values.([]interface{})
-	if !ok {
-		return nil
-	}
-
-	tfMetadataValues := make([]interface{}, len(valuesArr))
-
-	for i, v := range valuesArr {
-		valueMap, ok := v.(map[string]interface{})
-		if !ok {
-			continue
-		}
-
-		tfValue := map[string]interface{}{}
-
-		// Handle type (always present in API response)
-		if itemType, ok := valueMap["type"]; ok {
-			if itemTypeStr, ok := itemType.(string); ok {
-				tfValue["type"] = itemTypeStr
-			}
-		}
-
-		// For string values, handle the value field
-		if value, ok := valueMap["value"]; ok {
-			if valueStr, ok := value.(string); ok {
-				tfValue["value"] = valueStr
-			}
-		}
-
-		// For reference values, handle item_id, name, email
-		if itemID, ok := valueMap["item_id"]; ok {
-			if itemIDStr, ok := itemID.(string); ok {
-				tfValue["item_id"] = itemIDStr
-			}
-		}
-
-		if name, ok := valueMap["name"]; ok {
-			if nameStr, ok := name.(string); ok {
-				tfValue["name"] = nameStr
-			}
-		}
-
-		if email, ok := valueMap["email"]; ok {
-			if emailStr, ok := email.(string); ok {
-				tfValue["email"] = emailStr
-			}
-		}
-
-		tfMetadataValues[i] = tfValue
-	}
-
-	return []interface{}{
-		map[string]interface{}{
-			"key":            keyStr,
-			"metadata_value": tfMetadataValues,
-		},
-	}
+	return errors.Join(degradedRuleError, downRuleError)
 }
 
-func statusPageResourceCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	// Validate mark_as_down_for and mark_as_down_metadata_rule relationship
-	markAsDownFor, hasMarkAsDownFor := d.GetOk("mark_as_down_for")
-	markAsDownMetadataRule := d.Get("mark_as_down_metadata_rule").([]interface{})
-
-	if hasMarkAsDownFor && markAsDownFor.(string) == "incident_matching_metadata" {
-		if len(markAsDownMetadataRule) == 0 {
-			return fmt.Errorf("mark_as_down_metadata_rule is required when mark_as_down_for is 'incident_matching_metadata'")
-		}
-	} else if hasMarkAsDownFor && markAsDownFor.(string) != "incident_matching_metadata" {
-		if len(markAsDownMetadataRule) > 0 {
-			return fmt.Errorf("mark_as_down_metadata_rule can only be used when mark_as_down_for is 'incident_matching_metadata'")
-		}
-	}
-
+func validateMetadataRule(d *schema.ResourceDiff, keyFor string, keyMetadataRule string) error {
 	// Validate mark_as_degraded_for and mark_as_degraded_metadata_rule relationship
-	markAsDegradedFor, hasMarkAsDegradedFor := d.GetOk("mark_as_degraded_for")
-	markAsDegradedMetadataRule := d.Get("mark_as_degraded_metadata_rule").([]interface{})
+	markFor, hasMarkFor := d.GetOk(keyFor)
+	metadataRule := d.Get(keyMetadataRule).([]interface{})
 
-	if hasMarkAsDegradedFor && markAsDegradedFor.(string) == "incident_matching_metadata" {
-		if len(markAsDegradedMetadataRule) == 0 {
-			return fmt.Errorf("mark_as_degraded_metadata_rule is required when mark_as_degraded_for is 'incident_matching_metadata'")
+	if hasMarkFor && markFor.(string) == "incident_matching_metadata" {
+		if len(metadataRule) == 0 {
+			return fmt.Errorf("%s is required when %s is 'incident_matching_metadata'", keyMetadataRule, keyFor)
 		}
-	} else if hasMarkAsDegradedFor && markAsDegradedFor.(string) != "incident_matching_metadata" {
-		if len(markAsDegradedMetadataRule) > 0 {
-			return fmt.Errorf("mark_as_degraded_metadata_rule can only be used when mark_as_degraded_for is 'incident_matching_metadata'")
+		// Validate metadata rule structure
+		if len(metadataRule) > 0 {
+			rule := metadataRule[0].(map[string]interface{})
+			metadataValues := rule["metadata_value"].([]interface{})
+			for i, v := range metadataValues {
+				value := v.(map[string]interface{})
+				if err := validateMetadataValue(value, fmt.Sprintf("%s.metadata_value.%d", keyMetadataRule, i)); err != nil {
+					return err
+				}
+			}
+		}
+	} else if hasMarkFor && markFor.(string) != "incident_matching_metadata" {
+		if len(metadataRule) > 0 {
+			return fmt.Errorf("%s can only be used when %s is 'incident_matching_metadata'", keyMetadataRule, keyFor)
 		}
 	}
 
@@ -386,7 +333,7 @@ func newStatusPageResourceResource() *schema.Resource {
 		ReadContext:   statusPageResourceRead,
 		UpdateContext: statusPageResourceUpdate,
 		DeleteContext: statusPageResourceDelete,
-		CustomizeDiff: statusPageResourceCustomizeDiff,
+		CustomizeDiff: validateStatusPageResource,
 		Importer: &schema.ResourceImporter{
 			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				split := strings.SplitN(d.Id(), "/", 2)
@@ -435,7 +382,6 @@ func statusPageResourceRef(in *statusPageResource) []struct {
 	k string
 	v interface{}
 } {
-	// TODO:  if reflect.TypeOf(in).NumField() != len([]struct)
 	return []struct {
 		k string
 		v interface{}
@@ -461,21 +407,14 @@ func statusPageResourceRef(in *statusPageResource) []struct {
 func statusPageResourceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in statusPageResource
 	for _, e := range statusPageResourceRef(&in) {
-		// Skip loading status history when preparing to send the request
-		if e.k != "status_history" {
-			if e.k == "mark_as_down_metadata_rule" {
-				if tfRule := d.Get(e.k).([]interface{}); len(tfRule) > 0 {
-					apiRule := convertMetadataRuleToAPI(tfRule)
-					in.MarkAsDownMetadataRule = &apiRule
-				}
-			} else if e.k == "mark_as_degraded_metadata_rule" {
-				if tfRule := d.Get(e.k).([]interface{}); len(tfRule) > 0 {
-					apiRule := convertMetadataRuleToAPI(tfRule)
-					in.MarkAsDegradedMetadataRule = &apiRule
-				}
-			} else {
-				load(d, e.k, e.v)
-			}
+		if e.k == "status_history" {
+			// Skip loading status history when preparing to send the request
+		} else if e.k == "mark_as_down_metadata_rule" {
+			in.MarkAsDownMetadataRule = loadStatusPageResourceMetadataRule(d, "mark_as_down_metadata_rule")
+		} else if e.k == "mark_as_degraded_metadata_rule" {
+			in.MarkAsDegradedMetadataRule = loadStatusPageResourceMetadataRule(d, "mark_as_degraded_metadata_rule")
+		} else {
+			load(d, e.k, e.v)
 		}
 	}
 	in.FixedPosition = truePtr()
@@ -504,23 +443,9 @@ func statusPageResourceCopyAttrs(d *schema.ResourceData, in *statusPageResource)
 	var derr diag.Diagnostics
 	for _, e := range statusPageResourceRef(in) {
 		if e.k == "mark_as_down_metadata_rule" {
-			if in.MarkAsDownMetadataRule != nil && *in.MarkAsDownMetadataRule != nil {
-				tfRule := convertMetadataRuleFromAPI(*in.MarkAsDownMetadataRule)
-				if tfRule != nil {
-					if err := d.Set(e.k, tfRule); err != nil {
-						derr = append(derr, diag.FromErr(err)[0])
-					}
-				}
-			}
+			statusPageResourceMetadataRuleCopyAttrs(d, in.MarkAsDownMetadataRule, "mark_as_down_metadata_rule")
 		} else if e.k == "mark_as_degraded_metadata_rule" {
-			if in.MarkAsDegradedMetadataRule != nil && *in.MarkAsDegradedMetadataRule != nil {
-				tfRule := convertMetadataRuleFromAPI(*in.MarkAsDegradedMetadataRule)
-				if tfRule != nil {
-					if err := d.Set(e.k, tfRule); err != nil {
-						derr = append(derr, diag.FromErr(err)[0])
-					}
-				}
-			}
+			statusPageResourceMetadataRuleCopyAttrs(d, in.MarkAsDegradedMetadataRule, "mark_as_degraded_metadata_rule")
 		} else {
 			if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 				derr = append(derr, diag.FromErr(err)[0])
@@ -536,15 +461,9 @@ func statusPageResourceUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	for _, e := range statusPageResourceRef(&in) {
 		if d.HasChange(e.k) {
 			if e.k == "mark_as_down_metadata_rule" {
-				if tfRule := d.Get(e.k).([]interface{}); len(tfRule) > 0 {
-					apiRule := convertMetadataRuleToAPI(tfRule)
-					in.MarkAsDownMetadataRule = &apiRule
-				}
+				in.MarkAsDownMetadataRule = loadStatusPageResourceMetadataRule(d, "mark_as_down_metadata_rule")
 			} else if e.k == "mark_as_degraded_metadata_rule" {
-				if tfRule := d.Get(e.k).([]interface{}); len(tfRule) > 0 {
-					apiRule := convertMetadataRuleToAPI(tfRule)
-					in.MarkAsDegradedMetadataRule = &apiRule
-				}
+				in.MarkAsDegradedMetadataRule = loadStatusPageResourceMetadataRule(d, "mark_as_degraded_metadata_rule")
 			} else {
 				load(d, e.k, e.v)
 				// When updating resource ID, we need to update resource type as well (and vice-versa)
