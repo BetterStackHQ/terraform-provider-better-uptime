@@ -256,7 +256,7 @@ resource "betteruptime_status_page_resource" "email" {
   # Mark as degraded based on User-type metadata
   mark_as_degraded_for = "incident_matching_metadata"
   mark_as_degraded_metadata_rule {
-    key        = "Assigned User"
+    key = "Assigned User"
     metadata_value {
       type  = "User"
       email = "petr@betterstack.com"
@@ -269,9 +269,9 @@ resource "betteruptime_status_page_resource" "email_api" {
   status_page_section_id = betteruptime_status_page_section.monitors.id
 
   # Link the same resource as in betteruptime_status_page_resource.email, with different rules
-  resource_id            = betteruptime_email_integration.this.id
-  resource_type          = "EmailIntegration"
-  public_name            = "API"
+  resource_id   = betteruptime_email_integration.this.id
+  resource_type = "EmailIntegration"
+  public_name   = "API"
 
   # Mark as down only for incidents matching specific metadata
   mark_as_down_for = "incident_matching_metadata"

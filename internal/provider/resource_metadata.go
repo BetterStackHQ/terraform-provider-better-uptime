@@ -398,13 +398,13 @@ func validateMetadataValueWithRawConfig(attrMap map[string]interface{}, rawConfi
 
 	// Check if any identifier fields are configured in the raw config
 	hasConfiguredIdentifier := false
-	if rawConfig.GetAttr("item_id").IsNull() == false {
+	if !rawConfig.GetAttr("item_id").IsNull() {
 		hasConfiguredIdentifier = true
 	}
-	if rawConfig.GetAttr("email").IsNull() == false {
+	if !rawConfig.GetAttr("email").IsNull() {
 		hasConfiguredIdentifier = true
 	}
-	if rawConfig.GetAttr("name").IsNull() == false {
+	if !rawConfig.GetAttr("name").IsNull() {
 		hasConfiguredIdentifier = true
 	}
 

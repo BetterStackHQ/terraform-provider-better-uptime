@@ -228,10 +228,9 @@ func loadStatusPageResourceMetadataRule(d *schema.ResourceData, ruleKey string) 
 	return &metadataRule
 }
 
-func statusPageResourceMetadataRuleCopyAttrs(d *schema.ResourceData, rule *map[string]interface{}, ruleKey string) {
+func statusPageResourceMetadataRuleCopyAttrs(d *schema.ResourceData, rule *map[string]interface{}, ruleKey string) error {
 	if rule == nil {
-		d.Set(ruleKey, []interface{}{})
-		return
+		return d.Set(ruleKey, []interface{}{})
 	}
 
 	metadataRule := make(map[string]interface{})
@@ -284,11 +283,11 @@ func statusPageResourceMetadataRuleCopyAttrs(d *schema.ResourceData, rule *map[s
 		metadataRule["metadata_value"] = metadataValues
 	}
 
-	if len(metadataRule) > 0 {
-		d.Set(ruleKey, []interface{}{metadataRule})
-	} else {
-		d.Set(ruleKey, []interface{}{})
+	if len(metadataRule) == 0 {
+		return d.Set(ruleKey, []interface{}{})
 	}
+
+	return d.Set(ruleKey, []interface{}{metadataRule})
 }
 
 func validateStatusPageResource(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
@@ -443,9 +442,13 @@ func statusPageResourceCopyAttrs(d *schema.ResourceData, in *statusPageResource)
 	var derr diag.Diagnostics
 	for _, e := range statusPageResourceRef(in) {
 		if e.k == "mark_as_down_metadata_rule" {
-			statusPageResourceMetadataRuleCopyAttrs(d, in.MarkAsDownMetadataRule, "mark_as_down_metadata_rule")
+			if err := statusPageResourceMetadataRuleCopyAttrs(d, in.MarkAsDownMetadataRule, "mark_as_down_metadata_rule"); err != nil {
+				derr = append(derr, diag.FromErr(err)[0])
+			}
 		} else if e.k == "mark_as_degraded_metadata_rule" {
-			statusPageResourceMetadataRuleCopyAttrs(d, in.MarkAsDegradedMetadataRule, "mark_as_degraded_metadata_rule")
+			if err := statusPageResourceMetadataRuleCopyAttrs(d, in.MarkAsDegradedMetadataRule, "mark_as_degraded_metadata_rule"); err != nil {
+				derr = append(derr, diag.FromErr(err)[0])
+			}
 		} else {
 			if err := d.Set(e.k, reflect.Indirect(reflect.ValueOf(e.v)).Interface()); err != nil {
 				derr = append(derr, diag.FromErr(err)[0])
