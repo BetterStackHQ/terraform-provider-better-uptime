@@ -203,6 +203,84 @@ resource "betteruptime_email_integration" "this" {
     content_before = "Description:"
     content_after  = "\n"
   }
+  other_started_fields {
+    name           = "Severity"
+    field_target   = "body"
+    match_type     = "match_between"
+    content_before = "Severity:"
+    content_after  = "\n"
+  }
+}
+
+resource "betteruptime_metadata" "assigned_user" {
+  owner_type = "EmailIntegration"
+  owner_id   = betteruptime_email_integration.this.id
+  key        = "Assigned User"
+  metadata_value {
+    type  = "User"
+    email = "petr@betterstack.com"
+  }
+}
+
+resource "betteruptime_metadata" "assigned_policy" {
+  owner_type = "EmailIntegration"
+  owner_id   = betteruptime_email_integration.this.id
+  key        = "Assigned Policy"
+  metadata_value {
+    type    = "Policy"
+    item_id = betteruptime_policy.this.id
+    # Alternatively, you can use name to find the escalation policy:
+    # name = "Low-Priority Escalation Policy"
+  }
+}
+
+resource "betteruptime_status_page_resource" "email" {
+  status_page_id         = betteruptime_status_page.this.id
+  status_page_section_id = betteruptime_status_page_section.monitors.id
+  resource_id            = betteruptime_email_integration.this.id
+  resource_type          = "EmailIntegration"
+  public_name            = "General status"
+
+  # Mark as down only for incidents matching specific metadata
+  mark_as_down_for = "incident_matching_metadata"
+  mark_as_down_metadata_rule {
+    key = "Severity"
+    metadata_value {
+      value = "high"
+    }
+    metadata_value {
+      value = "urgent"
+    }
+  }
+
+  # Mark as degraded based on User-type metadata
+  mark_as_degraded_for = "incident_matching_metadata"
+  mark_as_degraded_metadata_rule {
+    key = "Assigned User"
+    metadata_value {
+      type  = "User"
+      email = "petr@betterstack.com"
+    }
+  }
+}
+
+resource "betteruptime_status_page_resource" "email_api" {
+  status_page_id         = betteruptime_status_page.this.id
+  status_page_section_id = betteruptime_status_page_section.monitors.id
+
+  # Link the same resource as in betteruptime_status_page_resource.email, with different rules
+  resource_id   = betteruptime_email_integration.this.id
+  resource_type = "EmailIntegration"
+  public_name   = "API"
+
+  # Mark as down only for incidents matching specific metadata
+  mark_as_down_for = "incident_matching_metadata"
+  mark_as_down_metadata_rule {
+    key = "Caused by"
+    metadata_value {
+      value = "API"
+    }
+  }
 }
 
 resource "betteruptime_incoming_webhook" "this" {
