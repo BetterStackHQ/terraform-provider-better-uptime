@@ -251,7 +251,7 @@ var monitorSchema = map[string]*schema.Schema{
 	"request_timeout": {
 		Description: "How long to wait before timing out the request?\n" +
 			"  - For Server and Port monitors (types `ping`, `tcp`, `udp`, `smtp`, `pop`, `imap` and `dns`) the timeout is specified in *milliseconds*. Valid options: 500, 1000, 2000, 3000, 5000.\n" +
-			"  - For Playwright monitors (type `playwright`), this determines the Playwright scenario timeout instead in *seconds*. Valid options: 15, 30, 45, 60.\n" +
+			"  - For Playwright monitors (type `playwright`), this determines the Playwright scenario timeout instead in *seconds*. Valid options: 15, 30, 45, 60, 120, 180, 240, 300, 360, 480, 600, 900.\n" +
 			"  - For all other monitors, the timeout is specified in *seconds*. Valid options: 2, 3, 5, 10, 15, 30, 45, 60.\n",
 		Type:     schema.TypeInt,
 		Optional: true,
