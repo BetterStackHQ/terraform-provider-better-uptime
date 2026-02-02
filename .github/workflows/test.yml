@@ -32,6 +32,10 @@ jobs:
         config: [examples/basic, examples/advanced, examples/catalog, examples/ips, examples/on_call_calendars]
       fail-fast: false
     runs-on: ubuntu-latest
+    concurrency:
+      # Avoid running the same config concurrently
+      # Otherwise unique constraints on API might cause 422 errors
+      group: e2e-${{ matrix.config }}
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
