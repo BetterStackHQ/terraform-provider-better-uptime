@@ -32,11 +32,50 @@ jobs:
         config: [examples/basic, examples/advanced, examples/catalog, examples/ips, examples/on_call_calendars]
       fail-fast: false
     runs-on: ubuntu-latest
-    concurrency:
-      # Avoid running the same config concurrently
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.23.x'
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ matrix.terraform-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Add resources via Terraform
+        run: make terraform CONFIGURATION="${{ matrix.config }}" ARGS="apply --auto-approve --input=false"
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+      - name: Plan resources via Terraform - must be empty
+        run: |
+          make terraform CONFIGURATION="${{ matrix.config }}" ARGS="plan --input=false --out=tfplan"
+          make terraform CONFIGURATION="${{ matrix.config }}" ARGS="show --json tfplan > tfplan.json"
+          CHANGES="$(jq "[.resource_changes[]? | select(.change.actions != [\"no-op\"])] | length" "${{ matrix.config }}/tfplan.json")"
+          if [ "$CHANGES" == "0" ]; then
+            echo "No planned changes detected after first apply. Success!"
+          else
+            echo "$CHANGES planned changes detected after first apply. Failure!"
+            exit 1
+          fi
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+      - name: Destroy resources via Terraform
+        if: always()
+        run: make terraform CONFIGURATION="${{ matrix.config }}" ARGS="destroy --auto-approve --input=false"
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+
+  e2e_test_seq:
+    strategy:
+      matrix:
+        terraform-version: ["0.14", "1.0", "1.8", "latest"]
+        config: [examples/advanced]
+      fail-fast: false
+      # Avoid running the examples/advanced config concurrently
       # Otherwise unique constraints on API might cause 422 errors
-      group: e2e-${{ matrix.config }}
-      cancel-in-progress: false
+      max-parallel: 1
+    runs-on: ubuntu-latest
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
