@@ -15,6 +15,10 @@ resource "random_id" "status_page_subdomain" {
   prefix      = "tf-status-"
 }
 
+resource "random_pet" "unique" {
+  length = 2
+}
+
 resource "betteruptime_status_page" "this" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
@@ -374,7 +378,7 @@ resource "betteruptime_policy_group" "this" {
 }
 
 resource "betteruptime_policy" "this" {
-  name            = "Low-Priority Escalation Policy"
+  name            = coalesce(var.betteruptime_policy_name, "Terraform Escalation Policy ${random_pet.unique.id}")
   repeat_count    = 3
   repeat_delay    = 60
   policy_group_id = betteruptime_policy_group.this.id
@@ -459,7 +463,7 @@ resource "betteruptime_severity_group" "this" {
 }
 
 resource "betteruptime_severity" "this" {
-  name           = var.betteruptime_severity_name
+  name           = coalesce(var.betteruptime_severity_name, "Terraform Severity ${random_pet.unique.id}")
   call           = false
   sms            = false
   email          = false
