@@ -36,6 +36,7 @@ jobs:
       # Avoid running the same config concurrently
       # Otherwise unique constraints on API might cause 422 errors
       group: e2e-${{ matrix.config }}
+      cancel-in-progress: false
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
