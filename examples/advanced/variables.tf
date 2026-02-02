@@ -19,8 +19,16 @@ EOF
   default = null
 }
 
+variable "betteruptime_policy_name" {
+  type        = string
+  description = "Name of the escalation policy you want to create in Better Stack"
+  # The value can be omitted and unique escalation policy name will be provided.
+  default = null
+}
+
 variable "betteruptime_severity_name" {
   type        = string
-  description = "Name of the severity from Better Stack Uptime you want to use with Escalation policies created using Terraform"
-  default     = "Terraform Severity"
+  description = "Name of the severity you want to use with the Escalation policies"
+  # The value can be omitted and unique severity name will be provided.
+  default = null
 }
