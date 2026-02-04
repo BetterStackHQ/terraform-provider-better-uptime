@@ -481,6 +481,7 @@ resource "betteruptime_outgoing_webhook" "outgoing_webhook_1" {
   on_incident_started      = true
   on_incident_acknowledged = false
   on_incident_resolved     = false
+  on_incident_reopened     = false
 
   custom_webhook_template_attributes {
     http_method = "get"

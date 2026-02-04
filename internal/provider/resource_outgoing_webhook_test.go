@@ -37,6 +37,7 @@ func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 					on_incident_started = true
 					on_incident_acknowledged = true
 					on_incident_resolved = true
+					on_incident_reopened = true
 				}
 				`, name, url),
 				Check: resource.ComposeTestCheckFunc(
@@ -47,6 +48,7 @@ func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "on_incident_started", "true"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "on_incident_acknowledged", "true"),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "on_incident_resolved", "true"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "on_incident_reopened", "true"),
 				),
 			},
 			// Step 2 - update
@@ -63,6 +65,7 @@ func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 					on_incident_started = false
 					on_incident_acknowledged = true
 					on_incident_resolved = true
+					on_incident_reopened = true
 				}
 				`, name, url),
 				Check: resource.ComposeTestCheckFunc(
@@ -70,6 +73,7 @@ func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "name", fmt.Sprintf("%s1", name)),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "url", fmt.Sprintf("%s?different=true", url)),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "on_incident_started", "false"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "on_incident_reopened", "true"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty
@@ -86,6 +90,7 @@ func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 					on_incident_started = false
 					on_incident_acknowledged = true
 					on_incident_resolved = true
+					on_incident_reopened = true
 				}
 				`, name, url),
 				PlanOnly: true,
