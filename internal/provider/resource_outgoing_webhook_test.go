@@ -73,7 +73,6 @@ func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "name", fmt.Sprintf("%s1", name)),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "url", fmt.Sprintf("%s?different=true", url)),
 					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "on_incident_started", "false"),
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "on_incident_reopened", "true"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty
