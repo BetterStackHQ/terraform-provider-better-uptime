@@ -695,21 +695,23 @@ func validateMonitor(ctx context.Context, diff *schema.ResourceDiff, v interface
 	}
 
 	// Validate URL requirement based on monitor type
+	monitorUrlIsKnown := diff.NewValueKnown("url")
 	monitorUrl := diff.Get("url").(string)
+	scenarioNameIsKnown := diff.NewValueKnown("scenario_name")
 	scenarioName := diff.Get("scenario_name").(string)
 	monitorType := diff.Get("monitor_type").(string)
 	if monitorType == "playwright" {
-		if monitorUrl == "" && scenarioName == "" {
+		if (monitorUrlIsKnown && monitorUrl == "") && (scenarioNameIsKnown && scenarioName == "") {
 			return fmt.Errorf("'scenario_name' (alternatively, you can use 'url') is required for monitor type '%s'", monitorType)
 		}
 		if monitorUrl != "" && scenarioName != "" && monitorUrl != scenarioName {
 			return fmt.Errorf("when both 'url' and 'scenario_name' are set, they must be equal (got url=%q, scenario_name=%q)", monitorUrl, scenarioName)
 		}
 	} else {
-		if monitorUrl == "" {
+		if monitorUrlIsKnown && monitorUrl == "" {
 			return fmt.Errorf("'url' is required for monitor type '%s'", monitorType)
 		}
-		if scenarioName != "" {
+		if scenarioNameIsKnown && scenarioName != "" {
 			return fmt.Errorf("'scenario_name' can only be set for monitor type 'playwright', not '%s'", monitorType)
 		}
 	}
