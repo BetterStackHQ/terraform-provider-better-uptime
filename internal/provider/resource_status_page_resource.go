@@ -72,7 +72,7 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		},
 	},
 	"widget_type": {
-		Description: "What widget to display for this resource. Expects one of three values: plain - only display status, history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type). This takes preference over history when both parameters are present.",
+		Description: "What widget to display for this resource. Available values: plain - only display status, history - display historical status, intraday_history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type). This takes preference over history when both parameters are present.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
