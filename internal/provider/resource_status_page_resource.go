@@ -302,7 +302,7 @@ func validateStatusPageResource(ctx context.Context, d *schema.ResourceDiff, met
 func validateResourceTypeID(d *schema.ResourceDiff) error {
 	resourceType := d.Get("resource_type").(string)
 	_, hasResourceID := d.GetOk("resource_id")
-	if resourceType != "ManuallyTrackedItem" && !hasResourceID {
+	if resourceType != "ManuallyTrackedItem" && !hasResourceID && d.NewValueKnown("resource_id") {
 		return fmt.Errorf("resource_id is required when resource_type is %s", resourceType)
 	}
 	return nil
