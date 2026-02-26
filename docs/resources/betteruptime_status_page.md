@@ -40,6 +40,7 @@ https://betterstack.com/docs/uptime/api/status-pages/
 - `ip_allowlist` (List of String) List of IP addresses or CIDR ranges that are allowed to access the status page. Accepts IPv4, IPv6, CIDR ranges, and comments starting with `#`. To remove all IP restrictions, set to an empty list `[]`. This is a [billable feature](https://betterstack.com/pricing#status-pages).
 - `layout` (String) Choose usual vertical layout or space-saving horizontal layout. Only applicable when design: v2. Possible values: 'vertical', 'horizontal'.
 - `logo_url` (String) A direct link to your company's logo. The image should be under 20MB in size.
+- `dark_logo_url` (String) A direct link to a dark version of your company's logo. The image should be under 20MB in size.
 - `min_incident_length` (Number) If you don't want to display short incidents on your status page, this attribute is for you.
 - `navigation_links` (Block List) Adjust the navigation links on your status page. Only applicable when design: v2. Only first 4 links considered. (see [below for nested schema](#nestedblock--navigation_links))
 - `password` (String, Sensitive) Set a password of your status page (we won't store it as plaintext, promise). Required when password_enabled: true. We will set password_enabled: false automatically when you send us an empty password.
@@ -62,5 +63,3 @@ Required:
 
 - `href` (String) Href of the link. Use full URL for external links. Use `/`, `/maintenance` and `/incidents` for built-in links.
 - `text` (String) Label of the link.
-
-
