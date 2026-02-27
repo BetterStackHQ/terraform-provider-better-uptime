@@ -47,6 +47,12 @@ resource "betteruptime_status_page_section" "heartbeats" {
   position       = 1
 }
 
+resource "betteruptime_status_page_section" "manually_tracked_items" {
+  status_page_id = betteruptime_status_page.this.id
+  name           = "Manually tracked items"
+  position       = 2
+}
+
 resource "betteruptime_monitor_group" "this" {
   name       = "example"
   sort_index = 0
@@ -138,6 +144,13 @@ resource "betteruptime_status_page_resource" "heartbeat" {
   resource_id            = betteruptime_heartbeat.this.id
   resource_type          = "Heartbeat"
   public_name            = "example.com site (heartbeat)"
+}
+
+resource "betteruptime_status_page_resource" "manually_tracked_item" {
+  status_page_id         = betteruptime_status_page.this.id
+  status_page_section_id = betteruptime_status_page_section.manually_tracked_items.id
+  resource_type          = "ManuallyTrackedItem"
+  public_name            = "example.com manual item"
 }
 
 resource "betteruptime_email_integration" "this" {
