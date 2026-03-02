@@ -18,8 +18,7 @@ https://betterstack.com/docs/uptime/api/status-page-resources/
 ### Required
 
 - `public_name` (String) The resource name displayed publicly on your status page.
-- `resource_id` (Number) The ID of the resource you are adding.
-- `resource_type` (String) The type of the resource you are adding. Available values: Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, ResourceGroup, LogsChart, CatalogReference.
+- `resource_type` (String) The type of the resource you are adding. Available values: ManuallyTrackedItem, Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, ResourceGroup, LogsChart, CatalogReference.
 - `status_page_id` (String) The ID of the Status Page.
 
 ### Optional
@@ -31,6 +30,7 @@ https://betterstack.com/docs/uptime/api/status-page-resources/
 - `mark_as_down_for` (String) How to mark this resource as down. Can be one of `no_incident`, `any_incident`, or `incident_matching_metadata`.
 - `mark_as_down_metadata_rule` (Block List, Max: 1) Metadata rule for marking resource as down. Only applicable when mark_as_down_for is 'incident_matching_metadata'. (see [below for nested schema](#nestedblock--mark_as_down_metadata_rule))
 - `position` (Number) The position of this resource on your status page, indexed from zero. If you don't specify a position, we add the resource to the end of the status page. When you specify a position of an existing resource, we add the resource to this position and shift resources below to accommodate.
+- `resource_id` (Number) The ID of the resource you are adding. Omit when resource_type is ManuallyTrackedItem.
 - `status_page_section_id` (Number) The ID of the Status Page Section. If you don't specify a status_page_section_id, we add the resource to the first section. If there are no sections in the status page yet, one will be automatically created for you.
 - `widget_type` (String) What widget to display for this resource. Available values: plain - only display status, history - display historical status, intraday_history - display detailed historical status, response_times - add a response times chart (only for Monitor resource type). This takes preference over history when both parameters are present.
 

@@ -33,15 +33,16 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"resource_id": {
-		Description: "The ID of the resource you are adding.",
+		Description: "The ID of the resource you are adding. Omit when resource_type is ManuallyTrackedItem.",
 		Type:        schema.TypeInt,
-		Required:    true,
+		Optional:    true,
+		Computed:    true,
 	},
 	"resource_type": {
-		Description:  "The type of the resource you are adding. Available values: Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, ResourceGroup, LogsChart, CatalogReference.",
+		Description:  "The type of the resource you are adding. Available values: ManuallyTrackedItem, Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, ResourceGroup, LogsChart, CatalogReference.",
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"Monitor", "MonitorGroup", "Heartbeat", "HeartbeatGroup", "WebhookIntegration", "EmailIntegration", "IncomingWebhook", "ResourceGroup", "LogsChart", "CatalogReference"}, false),
+		ValidateFunc: validation.StringInSlice([]string{"ManuallyTrackedItem", "Monitor", "MonitorGroup", "Heartbeat", "HeartbeatGroup", "WebhookIntegration", "EmailIntegration", "IncomingWebhook", "ResourceGroup", "LogsChart", "CatalogReference"}, false),
 	},
 	"public_name": {
 		Description: "The resource name displayed publicly on your status page.",
@@ -293,8 +294,18 @@ func statusPageResourceMetadataRuleCopyAttrs(d *schema.ResourceData, rule *map[s
 func validateStatusPageResource(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	degradedRuleError := validateMetadataRule(d, "mark_as_degraded_for", "mark_as_degraded_metadata_rule")
 	downRuleError := validateMetadataRule(d, "mark_as_down_for", "mark_as_down_metadata_rule")
+	resourceIDError := validateResourceTypeID(d)
 
-	return errors.Join(degradedRuleError, downRuleError)
+	return errors.Join(degradedRuleError, downRuleError, resourceIDError)
+}
+
+func validateResourceTypeID(d *schema.ResourceDiff) error {
+	resourceType := d.Get("resource_type").(string)
+	_, hasResourceID := d.GetOk("resource_id")
+	if resourceType != "ManuallyTrackedItem" && !hasResourceID && d.NewValueKnown("resource_id") {
+		return fmt.Errorf("resource_id is required when resource_type is %s", resourceType)
+	}
+	return nil
 }
 
 func validateMetadataRule(d *schema.ResourceDiff, keyFor string, keyMetadataRule string) error {

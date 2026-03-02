@@ -1,6 +1,6 @@
 This directory contains a sample Terraform configuration for a status page with
-a monitor and a heartbeat. The monitor and the heartbeat are placed into dedicated
-groups and two different status page sections.
+a monitor, a heartbeat and a manually tracked item. These are placed into dedicated
+groups and three different status page sections.
 
 ## Usage
 
