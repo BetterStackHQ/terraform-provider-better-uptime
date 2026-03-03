@@ -294,7 +294,16 @@ var monitorSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Sensitive:   true,
 	},
-
+	"proxy_host": {
+		Description: "A proxy to be used for routing HTTP checks. Use user:pass@hostname format for proxy authentication.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
+	"proxy_port": {
+		Description: "The port to be used with `proxy_host`.",
+		Type:        schema.TypeInt,
+		Optional:    true,
+	},
 	"ip_version": {
 		Description: strings.ReplaceAll(`Valid values:
 
@@ -476,6 +485,8 @@ type monitor struct {
 	RequestHeaders       *[]map[string]interface{} `json:"request_headers,omitempty"`
 	AuthUsername         *string                   `json:"auth_username,omitempty"`
 	AuthPassword         *string                   `json:"auth_password,omitempty"`
+	ProxyHost            *string                   `json:"proxy_host,omitempty"`
+	ProxyPort            *int                      `json:"proxy_port,omitempty"`
 	IpVersion            *string                   `json:"ip_version,omitempty"`
 	MaintenanceFrom      *string                   `json:"maintenance_from,omitempty"`
 	MaintenanceTo        *string                   `json:"maintenance_to,omitempty"`
@@ -539,6 +550,8 @@ func monitorRef(in *monitor) []struct {
 		{k: "request_headers", v: &in.RequestHeaders},
 		{k: "auth_username", v: &in.AuthUsername},
 		{k: "auth_password", v: &in.AuthPassword},
+		{k: "proxy_host", v: &in.ProxyHost},
+		{k: "proxy_port", v: &in.ProxyPort},
 		{k: "ip_version", v: &in.IpVersion},
 		{k: "maintenance_from", v: &in.MaintenanceFrom},
 		{k: "maintenance_to", v: &in.MaintenanceTo},
