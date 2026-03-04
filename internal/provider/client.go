@@ -24,11 +24,12 @@ func rateLimitRetryPolicy(ctx context.Context, resp *http.Response, err error) (
 }
 
 type client struct {
-	baseURL     string
-	token       string
-	retryClient *retryablehttp.Client
-	userAgent   string
-	rateLimiter *rate.Limiter
+	baseURL            string
+	betterStackBaseURL string
+	token              string
+	retryClient        *retryablehttp.Client
+	userAgent          string
+	rateLimiter        *rate.Limiter
 }
 
 type ClientConfig struct {
@@ -89,32 +90,63 @@ func newClient(config ClientConfig) (*client, error) {
 		rateLimiter = rate.NewLimiter(rate.Limit(config.RateLimit), burst)
 	}
 
+	betterStackBaseURL := "https://betterstack.com"
+	// Override with test URL if baseURL is not the production URL
+	if config.BaseURL != "https://uptime.betterstack.com" {
+		betterStackBaseURL = config.BaseURL
+	}
+
 	return &client{
-		baseURL:     config.BaseURL,
-		token:       config.Token,
-		retryClient: retryClient,
-		userAgent:   config.UserAgent,
-		rateLimiter: rateLimiter,
+		baseURL:            config.BaseURL,
+		betterStackBaseURL: betterStackBaseURL,
+		token:              config.Token,
+		retryClient:        retryClient,
+		userAgent:          config.UserAgent,
+		rateLimiter:        rateLimiter,
 	}, nil
 }
 
+func (c *client) UptimeBaseURL() string {
+	return c.baseURL
+}
+
+func (c *client) BetterStackBaseURL() string {
+	return c.betterStackBaseURL
+}
+
 func (c *client) Get(ctx context.Context, path string) (*http.Response, error) {
-	return c.do(ctx, http.MethodGet, path, nil)
+	return c.doWithBase(ctx, http.MethodGet, c.baseURL, path, nil)
 }
 
 func (c *client) Post(ctx context.Context, path string, body io.Reader) (*http.Response, error) {
-	return c.do(ctx, http.MethodPost, path, body)
+	return c.doWithBase(ctx, http.MethodPost, c.baseURL, path, body)
 }
 
 func (c *client) Patch(ctx context.Context, path string, body io.Reader) (*http.Response, error) {
-	return c.do(ctx, http.MethodPatch, path, body)
+	return c.doWithBase(ctx, http.MethodPatch, c.baseURL, path, body)
 }
 
 func (c *client) Delete(ctx context.Context, path string) (*http.Response, error) {
-	return c.do(ctx, http.MethodDelete, path, nil)
+	return c.doWithBase(ctx, http.MethodDelete, c.baseURL, path, nil)
+}
+
+func (c *client) GetWithBaseURL(ctx context.Context, baseURL, path string) (*http.Response, error) {
+	return c.doWithBase(ctx, http.MethodGet, baseURL, path, nil)
+}
+
+func (c *client) PostWithBaseURL(ctx context.Context, baseURL, path string, body io.Reader) (*http.Response, error) {
+	return c.doWithBase(ctx, http.MethodPost, baseURL, path, body)
+}
+
+func (c *client) DeleteWithBaseURL(ctx context.Context, baseURL, path string) (*http.Response, error) {
+	return c.doWithBase(ctx, http.MethodDelete, baseURL, path, nil)
 }
 
 func (c *client) do(ctx context.Context, method, path string, body io.Reader) (*http.Response, error) {
+	return c.doWithBase(ctx, method, c.baseURL, path, body)
+}
+
+func (c *client) doWithBase(ctx context.Context, method, baseURL, path string, body io.Reader) (*http.Response, error) {
 	// Apply rate limiting if configured
 	if c.rateLimiter != nil {
 		if err := c.rateLimiter.Wait(ctx); err != nil {
@@ -122,7 +154,7 @@ func (c *client) do(ctx context.Context, method, path string, body io.Reader) (*
 		}
 	}
 
-	req, err := retryablehttp.NewRequest(method, fmt.Sprintf("%s%s", c.baseURL, path), body)
+	req, err := retryablehttp.NewRequest(method, fmt.Sprintf("%s%s", baseURL, path), body)
 	if err != nil {
 		return nil, err
 	}

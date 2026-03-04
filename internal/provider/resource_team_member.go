@@ -110,8 +110,9 @@ func teamMemberCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	log.Printf("POST /api/v2/team-members: %s", string(reqBody))
-	res, err := meta.(*client).Post(ctx, "/api/v2/team-members", bytes.NewReader(reqBody))
+	baseURL := meta.(*client).BetterStackBaseURL()
+	log.Printf("POST %s/api/v2/team-members: %s", baseURL, string(reqBody))
+	res, err := meta.(*client).PostWithBaseURL(ctx, baseURL, "/api/v2/team-members", bytes.NewReader(reqBody))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -152,23 +153,24 @@ func teamMemberRead(ctx context.Context, d *schema.ResourceData, meta interface{
 
 func teamMemberDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Id()
-	u := fmt.Sprintf("/api/v2/team-members/%s", url.PathEscape(email))
+	path := fmt.Sprintf("/api/v2/team-members/%s", url.PathEscape(email))
 	if v, ok := d.GetOk("team_name"); ok {
-		u += fmt.Sprintf("?team_name=%s", url.QueryEscape(v.(string)))
+		path += fmt.Sprintf("?team_name=%s", url.QueryEscape(v.(string)))
 	}
 
-	return resourceDelete(ctx, meta, u)
+	return resourceDeleteWithBaseURL(ctx, meta, meta.(*client).BetterStackBaseURL(), path)
 }
 
 func teamMemberReadByEmail(ctx context.Context, d *schema.ResourceData, meta interface{}) (*teamMemberHTTPResponse, diag.Diagnostics, bool) {
 	email := d.Id()
-	u := fmt.Sprintf("/api/v2/team-members?email=%s", url.QueryEscape(email))
+	path := fmt.Sprintf("/api/v2/team-members?email=%s", url.QueryEscape(email))
 	if v, ok := d.GetOk("team_name"); ok {
-		u += fmt.Sprintf("&team_name=%s", url.QueryEscape(v.(string)))
+		path += fmt.Sprintf("&team_name=%s", url.QueryEscape(v.(string)))
 	}
 
-	log.Printf("GET %s", u)
-	res, err := meta.(*client).Get(ctx, u)
+	baseURL := meta.(*client).BetterStackBaseURL()
+	log.Printf("GET %s%s", baseURL, path)
+	res, err := meta.(*client).GetWithBaseURL(ctx, baseURL, path)
 	if err != nil {
 		return nil, diag.FromErr(err), false
 	}

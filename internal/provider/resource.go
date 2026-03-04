@@ -112,3 +112,21 @@ func resourceDelete(ctx context.Context, meta interface{}, url string) diag.Diag
 	log.Printf("DELETE %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
 	return nil
 }
+
+func resourceDeleteWithBaseURL(ctx context.Context, meta interface{}, baseURL, path string) diag.Diagnostics {
+	log.Printf("DELETE %s%s", baseURL, path)
+	res, err := meta.(*client).DeleteWithBaseURL(ctx, baseURL, path)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer func() {
+		_, _ = io.Copy(io.Discard, res.Body)
+		_ = res.Body.Close()
+	}()
+	body, _ := io.ReadAll(res.Body)
+	if res.StatusCode != http.StatusNoContent && res.StatusCode != http.StatusNotFound {
+		return diag.Errorf("DELETE %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
+	}
+	log.Printf("DELETE %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
+	return nil
+}
