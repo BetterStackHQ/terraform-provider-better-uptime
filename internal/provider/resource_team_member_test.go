@@ -32,7 +32,7 @@ func TestResourceTeamMember(t *testing.T) {
 				return
 			}
 			_, _ = w.Write([]byte(`{"data":{"id":null,"type":"team_member_invitation","attributes":{"email":"test@example.com","first_name":null,"last_name":null,"invited_at":"2026-01-01T00:00:00Z","role":"responder"}}}`))
-		case r.Method == http.MethodDelete && strings.HasPrefix(r.RequestURI, "/api/v2/team-members/"):
+		case r.Method == http.MethodDelete && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
 			created = false
 			w.WriteHeader(http.StatusNoContent)
 		default:
@@ -100,7 +100,7 @@ func TestResourceTeamMemberExistingUser(t *testing.T) {
 			_, _ = w.Write([]byte(`{"message":"User is already a member of the team","data":{"id":"42","type":"team_member","attributes":{"email":"existing@example.com","first_name":"Jane","last_name":"Doe","created_at":"2025-06-15T10:30:00Z","role":"admin"}}}`))
 		case r.Method == http.MethodGet && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
 			_, _ = w.Write([]byte(`{"data":{"id":"42","type":"team_member","attributes":{"email":"existing@example.com","first_name":"Jane","last_name":"Doe","created_at":"2025-06-15T10:30:00Z","role":"admin"}}}`))
-		case r.Method == http.MethodDelete && strings.HasPrefix(r.RequestURI, "/api/v2/team-members/"):
+		case r.Method == http.MethodDelete && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
 			w.WriteHeader(http.StatusNoContent)
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
@@ -161,7 +161,7 @@ func TestResourceTeamMemberImport(t *testing.T) {
 				return
 			}
 			_, _ = w.Write([]byte(`{"data":{"id":null,"type":"team_member_invitation","attributes":{"email":"import@example.com","first_name":null,"last_name":null,"invited_at":"2026-02-01T00:00:00Z","role":"member"}}}`))
-		case r.Method == http.MethodDelete && strings.HasPrefix(r.RequestURI, "/api/v2/team-members/"):
+		case r.Method == http.MethodDelete && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
 			created = false
 			w.WriteHeader(http.StatusNoContent)
 		default:
