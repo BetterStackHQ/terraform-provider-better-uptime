@@ -153,9 +153,9 @@ func teamMemberRead(ctx context.Context, d *schema.ResourceData, meta interface{
 
 func teamMemberDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Id()
-	path := fmt.Sprintf("/api/v2/team-members/%s", url.PathEscape(email))
+	path := fmt.Sprintf("/api/v2/team-members?email=%s", url.QueryEscape(email))
 	if v, ok := d.GetOk("team_name"); ok {
-		path += fmt.Sprintf("?team_name=%s", url.QueryEscape(v.(string)))
+		path += fmt.Sprintf("&team_name=%s", url.QueryEscape(v.(string)))
 	}
 
 	return resourceDeleteWithBaseURL(ctx, meta, meta.(*client).BetterStackBaseURL(), path)
