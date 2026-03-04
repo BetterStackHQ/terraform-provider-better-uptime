@@ -142,10 +142,6 @@ func (c *client) DeleteWithBaseURL(ctx context.Context, baseURL, path string) (*
 	return c.doWithBase(ctx, http.MethodDelete, baseURL, path, nil)
 }
 
-func (c *client) do(ctx context.Context, method, path string, body io.Reader) (*http.Response, error) {
-	return c.doWithBase(ctx, method, c.baseURL, path, body)
-}
-
 func (c *client) doWithBase(ctx context.Context, method, baseURL, path string, body io.Reader) (*http.Response, error) {
 	// Apply rate limiting if configured
 	if c.rateLimiter != nil {
