@@ -65,3 +65,20 @@ jobs:
         run: make terraform CONFIGURATION="${{ matrix.config }}" ARGS="destroy --auto-approve --input=false"
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+
+  notify-slack:
+    if: ${{ failure() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'schedule') }}
+    needs: [e2e_test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "{
+              \"username\": \"E2E tests in Uptime Terraform\",
+              \"icon_emoji\": \":warning:\",
+              \"text\": \":red_circle: *${{ github.workflow }}* failed on \`${{ github.ref_name }}\`\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failing run>\"
+            }"
