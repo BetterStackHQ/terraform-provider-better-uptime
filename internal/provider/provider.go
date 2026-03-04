@@ -89,6 +89,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_slack_integration": newSlackIntegrationDataSource(),
 			"betteruptime_incoming_webhook":  newIncomingWebhookDataSource(),
 			"betteruptime_ip_list":           newIpListDataSource(),
+			"betteruptime_team_member":       newTeamMemberDataSource(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"betteruptime_email_integration":             newEmailIntegrationResource(),
@@ -122,6 +123,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_catalog_relation":              newCatalogRelationResource(),
 			"betteruptime_catalog_attribute":             newCatalogAttributeResource(),
 			"betteruptime_catalog_record":                newCatalogRecordResource(),
+			"betteruptime_team_member":                   newTeamMemberResource(),
 		},
 		ConfigureContextFunc: func(ctx context.Context, r *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			var userAgent string
