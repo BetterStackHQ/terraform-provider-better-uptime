@@ -203,7 +203,11 @@ func teamMemberCopyAttrs(d *schema.ResourceData, out *teamMemberHTTPResponse) di
 			derr = append(derr, diag.FromErr(err)[0])
 		}
 	}
-	set("member_id", out.Data.ID)
+	if out.Data.Type == "team_member" {
+		set("member_id", out.Data.ID)
+	} else {
+		set("member_id", nil)
+	}
 	a := out.Data.Attributes
 	if a.Email != nil {
 		set("email", *a.Email)
