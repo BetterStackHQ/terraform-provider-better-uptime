@@ -33,6 +33,7 @@ resource "betteruptime_status_page" "this" {
   company_name  = "Example, Inc"
   logo_url      = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/master/examples/advanced/logo_black_text.png"
   dark_logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/master/examples/advanced/logo_white_text.png"
+  whitelabeled  = true
   company_url   = "https://example.com"
   contact_url   = "mailto:support@example.com"
   timezone      = "Eastern Time (US & Canada)"
