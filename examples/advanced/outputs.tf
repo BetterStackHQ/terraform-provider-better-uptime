@@ -13,3 +13,7 @@ output "betteruptime_incoming_webhook_url" { value = betteruptime_incoming_webho
 output "betteruptime_elastic_integration_webhook_url" { value = betteruptime_elastic_integration.this.webhook_url }
 
 output "betteruptime_datadog_integration_webhook_url" { value = betteruptime_datadog_integration.this.webhook_url }
+
+output "team_member_existing_role" { value = data.betteruptime_team_member.existing.role }
+
+output "team_member_new_invited_at" { value = betteruptime_team_member.new.invited_at }
