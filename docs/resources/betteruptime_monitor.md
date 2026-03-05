@@ -79,6 +79,8 @@ https://betterstack.com/docs/uptime/api/monitors/
 - `policy_id` (String) Set the escalation policy for the monitor.
 - `port` (String) Required if monitor_type is set to tcp, udp, smtp, pop, or imap. tcp and udp monitors accept any ports, while smtp, pop, and imap accept only the specified ports corresponding with their servers (e.g. "25,465,587" for smtp).
 - `pronounceable_name` (String) Pronounceable name of the monitor. We will use this when we call you. Try to make it tongue-friendly, please?
+- `proxy_host` (String) A proxy to be used for routing HTTP checks. Use user:pass@hostname format for proxy authentication.
+- `proxy_port` (Number) The port to be used with `proxy_host`.
 - `push` (Boolean) Whether to send a push notification when a new incident is created.
 - `recovery_period` (Number) How long the monitor must be up to automatically mark an incident as resolved after being down. In seconds.
 - `regions` (List of String) An array of regions to set. Allowed values are ["us", "eu", "as", "au"] or any subset of these regions.

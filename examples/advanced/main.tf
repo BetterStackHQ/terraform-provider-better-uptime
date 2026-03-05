@@ -67,6 +67,8 @@ resource "betteruptime_monitor" "status" {
   expiration_policy_id = betteruptime_policy.this.id
   domain_expiration    = -1 # Disable domain expiration check
   ssl_expiration       = -1 # Disable SSL expiration check
+  proxy_host           = "user:pass@proxy.example.com"
+  proxy_port           = 8080
   request_headers = [
     {
       "name" : "X-For-Status-Page",
