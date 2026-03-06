@@ -61,16 +61,23 @@ var teamMemberSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
+	"mobile_app_platforms": {
+		Description: "The mobile app platforms the team member has installed (e.g. ios, android).",
+		Type:        schema.TypeList,
+		Computed:    true,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+	},
 }
 
 type teamMember struct {
-	Email     *string `json:"email,omitempty"`
-	Role      *string `json:"role,omitempty"`
-	TeamName  *string `json:"team_name,omitempty"`
-	FirstName *string `json:"first_name,omitempty"`
-	LastName  *string `json:"last_name,omitempty"`
-	CreatedAt *string `json:"created_at,omitempty"`
-	InvitedAt *string `json:"invited_at,omitempty"`
+	Email              *string  `json:"email,omitempty"`
+	Role               *string  `json:"role,omitempty"`
+	TeamName           *string  `json:"team_name,omitempty"`
+	FirstName          *string  `json:"first_name,omitempty"`
+	LastName           *string  `json:"last_name,omitempty"`
+	CreatedAt          *string  `json:"created_at,omitempty"`
+	InvitedAt          *string  `json:"invited_at,omitempty"`
+	MobileAppPlatforms []string `json:"mobile_app_platforms,omitempty"`
 }
 
 type teamMemberHTTPResponse struct {
@@ -221,6 +228,7 @@ func teamMemberCopyAttrs(d *schema.ResourceData, out *teamMemberHTTPResponse) di
 	set("last_name", ptrToStr(a.LastName))
 	set("created_at", ptrToStr(a.CreatedAt))
 	set("invited_at", ptrToStr(a.InvitedAt))
+	set("mobile_app_platforms", a.MobileAppPlatforms)
 	return derr
 }
 

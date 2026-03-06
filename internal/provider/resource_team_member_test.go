@@ -24,14 +24,14 @@ func TestResourceTeamMember(t *testing.T) {
 		case r.Method == http.MethodPost && r.RequestURI == "/api/v2/team-members":
 			created = true
 			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"message":"Invitation sent","data":{"id":null,"type":"team_member_invitation","attributes":{"email":"test@example.com","first_name":null,"last_name":null,"invited_at":"2026-01-01T00:00:00Z","role":"responder"}}}`))
+			_, _ = w.Write([]byte(`{"message":"Invitation sent","data":{"id":null,"type":"team_member_invitation","attributes":{"email":"test@example.com","first_name":null,"last_name":null,"invited_at":"2026-01-01T00:00:00Z","role":"responder","mobile_app_platforms":[]}}}`))
 		case r.Method == http.MethodGet && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
 			if !created {
 				w.WriteHeader(http.StatusNotFound)
 				_, _ = w.Write([]byte(`{"errors":"Team member with email \"test@example.com\" not found"}`))
 				return
 			}
-			_, _ = w.Write([]byte(`{"data":{"id":null,"type":"team_member_invitation","attributes":{"email":"test@example.com","first_name":null,"last_name":null,"invited_at":"2026-01-01T00:00:00Z","role":"responder"}}}`))
+			_, _ = w.Write([]byte(`{"data":{"id":null,"type":"team_member_invitation","attributes":{"email":"test@example.com","first_name":null,"last_name":null,"invited_at":"2026-01-01T00:00:00Z","role":"responder","mobile_app_platforms":[]}}}`))
 		case r.Method == http.MethodDelete && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
 			created = false
 			w.WriteHeader(http.StatusNoContent)
@@ -66,6 +66,7 @@ func TestResourceTeamMember(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_team_member.this", "role", "responder"),
 					resource.TestCheckResourceAttr("betteruptime_team_member.this", "invited_at", "2026-01-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("betteruptime_team_member.this", "member_id", ""),
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "mobile_app_platforms.#", "0"),
 				),
 			},
 			// No changes — plan should be empty.
@@ -97,9 +98,9 @@ func TestResourceTeamMemberExistingUser(t *testing.T) {
 		switch {
 		case r.Method == http.MethodPost && r.RequestURI == "/api/v2/team-members":
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"message":"User is already a member of the team","data":{"id":"42","type":"team_member","attributes":{"email":"existing@example.com","first_name":"Jane","last_name":"Doe","created_at":"2025-06-15T10:30:00Z","role":"admin"}}}`))
+			_, _ = w.Write([]byte(`{"message":"User is already a member of the team","data":{"id":"42","type":"team_member","attributes":{"email":"existing@example.com","first_name":"Jane","last_name":"Doe","created_at":"2025-06-15T10:30:00Z","role":"admin","mobile_app_platforms":["ios"]}}}`))
 		case r.Method == http.MethodGet && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
-			_, _ = w.Write([]byte(`{"data":{"id":"42","type":"team_member","attributes":{"email":"existing@example.com","first_name":"Jane","last_name":"Doe","created_at":"2025-06-15T10:30:00Z","role":"admin"}}}`))
+			_, _ = w.Write([]byte(`{"data":{"id":"42","type":"team_member","attributes":{"email":"existing@example.com","first_name":"Jane","last_name":"Doe","created_at":"2025-06-15T10:30:00Z","role":"admin","mobile_app_platforms":["ios"]}}}`))
 		case r.Method == http.MethodDelete && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
 			w.WriteHeader(http.StatusNoContent)
 		default:
@@ -134,6 +135,8 @@ func TestResourceTeamMemberExistingUser(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_team_member.this", "last_name", "Doe"),
 					resource.TestCheckResourceAttr("betteruptime_team_member.this", "member_id", "42"),
 					resource.TestCheckResourceAttr("betteruptime_team_member.this", "created_at", "2025-06-15T10:30:00Z"),
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "mobile_app_platforms.#", "1"),
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "mobile_app_platforms.0", "ios"),
 				),
 			},
 		},
@@ -154,13 +157,13 @@ func TestResourceTeamMemberImport(t *testing.T) {
 		case r.Method == http.MethodPost && r.RequestURI == "/api/v2/team-members":
 			created = true
 			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"message":"Invitation sent","data":{"id":null,"type":"team_member_invitation","attributes":{"email":"import@example.com","first_name":null,"last_name":null,"invited_at":"2026-02-01T00:00:00Z","role":"member"}}}`))
+			_, _ = w.Write([]byte(`{"message":"Invitation sent","data":{"id":null,"type":"team_member_invitation","attributes":{"email":"import@example.com","first_name":null,"last_name":null,"invited_at":"2026-02-01T00:00:00Z","role":"member","mobile_app_platforms":[]}}}`))
 		case r.Method == http.MethodGet && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
 			if !created {
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
-			_, _ = w.Write([]byte(`{"data":{"id":null,"type":"team_member_invitation","attributes":{"email":"import@example.com","first_name":null,"last_name":null,"invited_at":"2026-02-01T00:00:00Z","role":"member"}}}`))
+			_, _ = w.Write([]byte(`{"data":{"id":null,"type":"team_member_invitation","attributes":{"email":"import@example.com","first_name":null,"last_name":null,"invited_at":"2026-02-01T00:00:00Z","role":"member","mobile_app_platforms":[]}}}`))
 		case r.Method == http.MethodDelete && strings.HasPrefix(r.RequestURI, "/api/v2/team-members?email="):
 			created = false
 			w.WriteHeader(http.StatusNoContent)
