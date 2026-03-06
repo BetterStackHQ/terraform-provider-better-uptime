@@ -20,7 +20,7 @@ func TestDataTeamMember(t *testing.T) {
 
 		switch {
 		case r.Method == http.MethodGet && r.RequestURI == "/api/v2/team-members?email=petr%40betterstack.com":
-			_, _ = w.Write([]byte(`{"data":{"id":"7","type":"team_member","attributes":{"email":"petr@betterstack.com","first_name":"Petr","last_name":"Heinz","created_at":"2024-01-15T08:00:00Z","role":"admin"}}}`))
+			_, _ = w.Write([]byte(`{"data":{"id":"7","type":"team_member","attributes":{"email":"petr@betterstack.com","first_name":"Petr","last_name":"Heinz","created_at":"2024-01-15T08:00:00Z","role":"admin","mobile_app_platforms":["ios","android"]}}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 		}
@@ -53,6 +53,9 @@ func TestDataTeamMember(t *testing.T) {
 					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "role", "admin"),
 					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "member_id", "7"),
 					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "created_at", "2024-01-15T08:00:00Z"),
+					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "mobile_app_platforms.#", "2"),
+					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "mobile_app_platforms.0", "ios"),
+					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "mobile_app_platforms.1", "android"),
 				),
 			},
 		},
@@ -69,7 +72,7 @@ func TestDataTeamMemberInvitation(t *testing.T) {
 
 		switch {
 		case r.Method == http.MethodGet && r.RequestURI == "/api/v2/team-members?email=invited%40example.com":
-			_, _ = w.Write([]byte(`{"data":{"id":null,"type":"team_member_invitation","attributes":{"email":"invited@example.com","first_name":null,"last_name":null,"invited_at":"2026-03-01T12:00:00Z","role":"responder"}}}`))
+			_, _ = w.Write([]byte(`{"data":{"id":null,"type":"team_member_invitation","attributes":{"email":"invited@example.com","first_name":null,"last_name":null,"invited_at":"2026-03-01T12:00:00Z","role":"responder","mobile_app_platforms":[]}}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 		}
@@ -102,6 +105,7 @@ func TestDataTeamMemberInvitation(t *testing.T) {
 					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "first_name", ""),
 					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "last_name", ""),
 					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "invited_at", "2026-03-01T12:00:00Z"),
+					resource.TestCheckResourceAttr("data.betteruptime_team_member.this", "mobile_app_platforms.#", "0"),
 				),
 			},
 		},
