@@ -48,6 +48,7 @@ https://betterstack.com/docs/uptime/api/status-pages/
 - `status_page_group_id` (Number) Set this attribute if you want to add this status page to a status page group.
 - `subscribable` (Boolean) Do you want to allow users to subscribe to your status page changes?
 - `theme` (String) Choose theme of your status page. Only applicable when design: v2. Possible values: 'light', 'dark'.
+- `whitelabeled` (Boolean) Whether the 'Powered by Better Stack' footer should be removed.
 
 ### Read-Only
 
