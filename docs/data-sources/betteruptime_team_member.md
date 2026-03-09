@@ -31,6 +31,7 @@ Team member lookup by email.
 - `invited_at` (String) The timestamp when the invitation was sent.
 - `last_name` (String) The last name of the team member (available after invitation is accepted).
 - `member_id` (String) The numeric ID of the team member. Empty for pending invitations.
+- `mobile_app_platforms` (List of String) The mobile app platforms the team member has installed (e.g. ios, android).
 - `role` (String) The role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder.
 
 
