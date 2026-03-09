@@ -59,6 +59,12 @@ var statusPageSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"whitelabeled": {
+		Description: "Whether the 'Powered by Better Stack' footer should be removed.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
 	"timezone": {
 		Description: "What timezone should we display your status page in? The accepted values can be found in the Rails TimeZone documentation. https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html",
 		Type:        schema.TypeString,
@@ -251,6 +257,7 @@ type statusPage struct {
 	ContactURL               *string           `json:"contact_url,omitempty"`
 	LogoURL                  *string           `json:"logo_remote_url,omitempty"`
 	DarkLogoURL              *string           `json:"dark_logo_remote_url,omitempty"`
+	Whitelabeled             *bool             `json:"whitelabeled,omitempty"`
 	Timezone                 *string           `json:"timezone,omitempty"`
 	Subdomain                *string           `json:"subdomain,omitempty"`
 	CustomDomain             *string           `json:"custom_domain,omitempty"`
@@ -300,6 +307,7 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "contact_url", v: &in.ContactURL},
 		{k: "logo_url", v: &in.LogoURL},
 		{k: "dark_logo_url", v: &in.DarkLogoURL},
+		{k: "whitelabeled", v: &in.Whitelabeled},
 		{k: "timezone", v: &in.Timezone},
 		{k: "subdomain", v: &in.Subdomain},
 		{k: "custom_domain", v: &in.CustomDomain},
