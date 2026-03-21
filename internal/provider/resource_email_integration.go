@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var emailIntegrationSchema = map[string]*schema.Schema{
@@ -75,10 +76,11 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"recovery_period": {
-		Description: "How long the integration must be up to automatically mark an incident as resolved after being down.",
-		Type:        schema.TypeInt,
-		Optional:    true,
-		Computed:    true,
+		Description:  "How long the integration must be up to automatically mark an incident as resolved after being down. Valid values are: [0, 60, 180, 300, 900, 1800, 3600, 7200].",
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.IntInSlice([]int{0, 60, 180, 300, 900, 1800, 3600, 7200}),
 	},
 	"paused": {
 		Description: "Set to true to pause monitoring - we won't notify you about downtime. Set to false to resume monitoring.",
