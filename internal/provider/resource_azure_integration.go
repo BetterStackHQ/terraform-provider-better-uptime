@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var azureIntegrationSchema = map[string]*schema.Schema{
@@ -75,10 +76,11 @@ var azureIntegrationSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"recovery_period": {
-		Description: "How long the alert must be up to automatically mark an incident as resolved. In seconds.",
-		Type:        schema.TypeInt,
-		Optional:    true,
-		Computed:    true,
+		Description:  "How long the alert must be up to automatically mark an incident as resolved. In seconds. Valid values are: [0, 60, 180, 300, 900, 1800, 3600, 7200].",
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.IntInSlice([]int{0, 60, 180, 300, 900, 1800, 3600, 7200}),
 	},
 	"paused": {
 		Description: "Is the Azure integration paused.",
