@@ -66,19 +66,46 @@ jobs:
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
 
-  notify-slack:
+  notify-linear:
     if: ${{ failure() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'schedule') }}
     needs: [e2e_test]
     runs-on: ubuntu-latest
     steps:
-      - name: Notify Slack
+      - name: "Create Linear issue"
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
+          LINEAR_STATUS_ID: ${{ secrets.LINEAR_STATUS_PLAN_ID }}
+          LINEAR_PROJECT_ID: ${{ secrets.LINEAR_PROJECT_ID }}
+          LINEAR_ASSIGNEE_ID: ${{ secrets.LINEAR_ASSIGNEE_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          curl -X POST "$SLACK_WEBHOOK_URL" \
+          PAYLOAD=$(jq -n \
+            --arg query 'mutation IssueCreate($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { identifier url } } }' \
+            --arg title "E2E failure: ${{ github.workflow }} (${{ github.repository }})" \
+            --arg description "**${{ github.workflow }}** failed on \`${{ github.ref_name }}\` in \`${{ github.repository }}\`
+
+          [View failing run]($RUN_URL)" \
+            --arg teamId "$LINEAR_TEAM_ID" \
+            --arg assigneeId "$LINEAR_ASSIGNEE_ID" \
+            --arg stateId "$LINEAR_STATUS_ID" \
+            --arg projectId "$LINEAR_PROJECT_ID" \
+            '{
+              query: $query,
+              variables: {
+                input: {
+                  title: $title,
+                  description: $description,
+                  teamId: $teamId,
+                  assigneeId: $assigneeId,
+                  stateId: $stateId,
+                  projectId: $projectId,
+                  priority: 2
+                }
+              }
+            }')
+
+          curl -sSf -X POST https://api.linear.app/graphql \
+            -H "Authorization: $LINEAR_API_KEY" \
             -H 'Content-Type: application/json' \
-            -d "{
-              \"username\": \"E2E tests in Uptime Terraform\",
-              \"icon_emoji\": \":warning:\",
-              \"text\": \":red_circle: *${{ github.workflow }}* failed on \`${{ github.ref_name }}\`\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failing run>\"
-            }"
+            -d "$PAYLOAD"
