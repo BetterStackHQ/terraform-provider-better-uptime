@@ -70,7 +70,32 @@ jobs:
     if: ${{ failure() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'schedule') }}
     needs: [e2e_test]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
+      - name: "Gather failure context"
+        id: ctx
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FAILED=$(gh api \
+            "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs" \
+            --paginate \
+            --jq '[.jobs[]
+                    | select(.conclusion == "failure")
+                    | "- **\(.name)** — failed at _\([.steps[] | select(.conclusion == "failure") | .name] | join(", "))_"]
+                  | join("\n")')
+
+          if [ -z "$FAILED" ]; then
+            FAILED="_(no failed jobs reported by the API yet)_"
+          fi
+
+          {
+            echo "failed_jobs<<CTXEOF"
+            echo "$FAILED"
+            echo "CTXEOF"
+          } >> "$GITHUB_OUTPUT"
       - name: "Create Linear issue"
         env:
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
@@ -79,13 +104,43 @@ jobs:
           LINEAR_PROJECT_ID: ${{ secrets.LINEAR_PROJECT_ID }}
           LINEAR_ASSIGNEE_ID: ${{ secrets.LINEAR_ASSIGNEE_ID }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          EVENT_NAME: ${{ github.event_name }}
+          SHA: ${{ github.sha }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          FAILED_JOBS: ${{ steps.ctx.outputs.failed_jobs }}
         run: |
+          SHORT_SHA="${SHA:0:7}"
+
+          # head_commit is only populated on push events; skip the line otherwise
+          COMMIT_LINE="**Commit:** \`$SHORT_SHA\`"
+          if [ -n "$COMMIT_MESSAGE" ]; then
+            COMMIT_SUBJECT="$(printf '%s' "$COMMIT_MESSAGE" | head -n1)"
+            COMMIT_LINE="**Commit:** \`$SHORT_SHA\` — $COMMIT_SUBJECT"
+          fi
+
+          ATTEMPT_NOTE=""
+          if [ "$RUN_ATTEMPT" != "1" ]; then
+            ATTEMPT_NOTE=" (attempt #$RUN_ATTEMPT)"
+          fi
+
+          TITLE="E2E failure: ${{ github.workflow }} (${{ github.repository }})"
+          DESCRIPTION=$(cat <<EOF
+          **${{ github.workflow }}** failed on \`${{ github.ref_name }}\` in \`${{ github.repository }}\` via \`$EVENT_NAME\`$ATTEMPT_NOTE
+
+          **Failing jobs:**
+          $FAILED_JOBS
+
+          $COMMIT_LINE
+
+          [View failing run]($RUN_URL)
+          EOF
+          )
+
           PAYLOAD=$(jq -n \
             --arg query 'mutation IssueCreate($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { identifier url } } }' \
-            --arg title "E2E failure: ${{ github.workflow }} (${{ github.repository }})" \
-            --arg description "**${{ github.workflow }}** failed on \`${{ github.ref_name }}\` in \`${{ github.repository }}\`
-
-          [View failing run]($RUN_URL)" \
+            --arg title "$TITLE" \
+            --arg description "$DESCRIPTION" \
             --arg teamId "$LINEAR_TEAM_ID" \
             --arg assigneeId "$LINEAR_ASSIGNEE_ID" \
             --arg stateId "$LINEAR_STATUS_ID" \
