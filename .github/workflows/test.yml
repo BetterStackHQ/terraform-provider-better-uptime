@@ -20,6 +20,14 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go-version }}
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 'latest'
+        # Disable the wrapper: on Windows it creates a `terraform` file with
+        # no extension that is not discoverable via PATHEXT, so go test falls
+        # back to hc-install and trips the expired GPG check.
+        terraform_wrapper: false
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Test
