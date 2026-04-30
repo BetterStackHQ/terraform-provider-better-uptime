@@ -198,7 +198,64 @@ func TestResourceStatusPage(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "ip_allowlist.#", "0"),
 				),
 			},
-			// Step 6 - import.
+			// Step 6 - require_sso enabled.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_status_page" "this" {
+					company_name = "Example, Inc"
+					company_url  = "https://example.com"
+					timezone     = "America/Los_Angeles"
+					subdomain    = "%s"
+					require_sso  = true
+					navigation_links {
+						text = "Example2"
+						href = "https://example.com/test"
+					}
+					navigation_links {
+						text = "Status"
+						href = "/status"
+					}
+				}
+				`, subdomain),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_status_page.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "subdomain", subdomain),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "require_sso", "true"),
+				),
+			},
+			// Step 7 - require_sso back to false.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_status_page" "this" {
+					company_name = "Example, Inc"
+					company_url  = "https://example.com"
+					timezone     = "America/Los_Angeles"
+					subdomain    = "%s"
+					require_sso  = false
+					navigation_links {
+						text = "Example2"
+						href = "https://example.com/test"
+					}
+					navigation_links {
+						text = "Status"
+						href = "/status"
+					}
+				}
+				`, subdomain),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_status_page.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "require_sso", "false"),
+				),
+			},
+			// Step 8 - import.
 			{
 				ResourceName:      "betteruptime_status_page.this",
 				ImportState:       true,

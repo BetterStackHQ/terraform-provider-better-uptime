@@ -154,6 +154,12 @@ var statusPageSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Sensitive:   true,
 	},
+	"require_sso": {
+		Description: "Require SSO sign-in to access your status page. Requires SSO to be configured for your organization and is mutually exclusive with password protection.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
 	"aggregate_state": {
 		Description: "The overall status of this status page.",
 		Type:        schema.TypeString,
@@ -273,6 +279,7 @@ type statusPage struct {
 	AnnouncementEmbedCSS     *string           `json:"announcement_embed_css,omitempty"`
 	PasswordEnabled          *bool             `json:"password_enabled,omitempty"`
 	Password                 *string           `json:"password,omitempty"`
+	RequireSSO               *bool             `json:"require_sso,omitempty"`
 	AggregateState           *string           `json:"aggregate_state,omitempty"`
 	CreatedAt                *string           `json:"created_at,omitempty"`
 	UpdatedAt                *string           `json:"updated_at,omitempty"`
@@ -323,6 +330,7 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "announcement_embed_css", v: &in.AnnouncementEmbedCSS},
 		{k: "password_enabled", v: &in.PasswordEnabled},
 		{k: "password", v: &in.Password},
+		{k: "require_sso", v: &in.RequireSSO},
 		{k: "aggregate_state", v: &in.AggregateState},
 		{k: "created_at", v: &in.CreatedAt},
 		{k: "updated_at", v: &in.UpdatedAt},
