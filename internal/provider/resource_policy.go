@@ -15,7 +15,7 @@ import (
 
 var policyStepMemberSchema = map[string]*schema.Schema{
 	"type": {
-		Description: "Type type of the member to notify during an incident. Can be one of current_on_call, entire_team, all_slack_integrations, all_microsoft_teams_integrations, all_zapier_integrations, all_webhook_integrations, all_splunk_on_call_integrations, incident_metadata, user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook, pagerduty_integration or policy (a chained escalation policy).",
+		Description: "Type type of the member to notify during an incident. Can be one of current_on_call, entire_team, all_slack_integrations, all_microsoft_teams_integrations, all_zapier_integrations, all_webhook_integrations, all_splunk_on_call_integrations, incident_metadata, user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook, pagerduty_integration or policy.",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
