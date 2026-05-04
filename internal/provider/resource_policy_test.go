@@ -658,6 +658,59 @@ EOT
 		},
 	})
 }
+
+func TestResourcePolicyChainedPolicyMember(t *testing.T) {
+	server := newResourceServer(t, "/api/v3/policies", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name        = "Terraform - Chained policy"
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					urgency_id  = 123
+					step_members { type = "current_on_call" }
+					step_members {
+					  type = "policy"
+					  id   = 456
+					}
+					step_members {
+					  type = "policy"
+					  id   = 789
+					}
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_policy.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.1.type", "policy"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.1.id", "456"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.2.type", "policy"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.2.id", "789"),
+				),
+				PreConfig: func() {
+					t.Log("test chained policy step members (parallel fan-out)")
+				},
+			},
+		},
+	})
+}
+
 func TestResourcePolicyMetadataValidation(t *testing.T) {
 	server := newResourceServer(t, "/api/v3/policies", "1")
 	defer server.Close()
