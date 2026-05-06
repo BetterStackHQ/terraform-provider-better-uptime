@@ -71,6 +71,12 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Default:     false,
 	},
+	"on_incident_comment": {
+		Description: "Whether to trigger webhook when a comment is posted on an incident. Only when `trigger_type=incident_change`.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+	},
 	"custom_webhook_template_attributes": {
 		Description: "Custom webhook template configuration.",
 		Type:        schema.TypeList,
@@ -150,6 +156,7 @@ type outgoingWebhook struct {
 	OnIncidentAcknowledged          *bool                            `json:"on_incident_acknowledged,omitempty"`
 	OnIncidentResolved              *bool                            `json:"on_incident_resolved,omitempty"`
 	OnIncidentReopened              *bool                            `json:"on_incident_reopened,omitempty"`
+	OnIncidentComment               *bool                            `json:"on_incident_comment,omitempty"`
 	CustomWebhookTemplateAttributes *customWebhookTemplateAttributes `json:"custom_webhook_template_attributes,omitempty"`
 	TeamName                        *string                          `json:"team_name,omitempty"`
 }
@@ -165,7 +172,7 @@ func validateOutgoingWebhook(ctx context.Context, d *schema.ResourceDiff, m inte
 	triggerType := d.Get("trigger_type").(string)
 
 	// Validate incident_change specific fields
-	incidentFields := []string{"on_incident_started", "on_incident_acknowledged", "on_incident_resolved", "on_incident_reopened"}
+	incidentFields := []string{"on_incident_started", "on_incident_acknowledged", "on_incident_resolved", "on_incident_reopened", "on_incident_comment"}
 
 	for _, field := range incidentFields {
 		if value, ok := d.GetOk(field); ok && value.(bool) {
@@ -217,6 +224,7 @@ func outgoingWebhookRef(in *outgoingWebhook, triggerType string) []struct {
 			{k: "on_incident_acknowledged", v: &in.OnIncidentAcknowledged},
 			{k: "on_incident_resolved", v: &in.OnIncidentResolved},
 			{k: "on_incident_reopened", v: &in.OnIncidentReopened},
+			{k: "on_incident_comment", v: &in.OnIncidentComment},
 		}...)
 	}
 	return refs
