@@ -204,6 +204,14 @@ resource "betteruptime_email_integration" "this" {
     field_target = "subject"
     match_type   = "match_everything"
   }
+  title_field {
+    name           = "Title"
+    special_type   = "title"
+    field_target   = "subject"
+    match_type     = "match_between"
+    content_before = "["
+    content_after  = "]"
+  }
   started_alert_id_field {
     name           = "Alert ID"
     special_type   = "alert_id"
