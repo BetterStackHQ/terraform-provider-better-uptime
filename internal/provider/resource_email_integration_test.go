@@ -62,6 +62,14 @@ func TestResourceEmailIntegration(t *testing.T) {
 					field_target = "subject"
 					match_type = "match_everything"
 				  }
+				  title_field {
+					name = "Title"
+					special_type = "title"
+					field_target = "subject"
+					match_type = "match_between"
+					content_before = "["
+					content_after = "]"
+				  }
 				  started_alert_id_field {
 					name = "Alert ID"
 					special_type = "alert_id"
@@ -102,6 +110,9 @@ func TestResourceEmailIntegration(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_email_integration.this", "resolved_rules.0.match_type", "contains"),
 					resource.TestCheckResourceAttr("betteruptime_email_integration.this", "resolved_rules.0.content", "[Resolved Alert]"),
 					resource.TestCheckResourceAttr("betteruptime_email_integration.this", "cause_field.0.match_type", "match_everything"),
+					resource.TestCheckResourceAttr("betteruptime_email_integration.this", "title_field.0.special_type", "title"),
+					resource.TestCheckResourceAttr("betteruptime_email_integration.this", "title_field.0.content_before", "["),
+					resource.TestCheckResourceAttr("betteruptime_email_integration.this", "title_field.0.content_after", "]"),
 					resource.TestCheckResourceAttr("betteruptime_email_integration.this", "started_alert_id_field.0.content_before", "]"),
 					resource.TestCheckResourceAttr("betteruptime_email_integration.this", "resolved_alert_id_field.0.content_after", ")"),
 					resource.TestCheckResourceAttr("betteruptime_email_integration.this", "other_started_fields.0.content_before", "by:"),
@@ -153,6 +164,14 @@ func TestResourceEmailIntegration(t *testing.T) {
 					special_type = "cause"
 					field_target = "subject"
 					match_type = "match_everything"
+				  }
+				  title_field {
+					name = "Title"
+					special_type = "title"
+					field_target = "subject"
+					match_type = "match_between"
+					content_before = "["
+					content_after = "]"
 				  }
 				  started_alert_id_field {
 					name = "Alert ID"
@@ -239,6 +258,14 @@ func TestResourceEmailIntegration(t *testing.T) {
 					special_type = "cause"
 					field_target = "subject"
 					match_type = "match_everything"
+				  }
+				  title_field {
+					name = "Title"
+					special_type = "title"
+					field_target = "subject"
+					match_type = "match_between"
+					content_before = "["
+					content_after = "]"
 				  }
 				  started_alert_id_field {
 					name = "Alert ID"
