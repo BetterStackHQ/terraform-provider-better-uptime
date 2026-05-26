@@ -163,7 +163,7 @@ type outgoingWebhook struct {
 	OnIncidentResolved              *bool                            `json:"on_incident_resolved,omitempty"`
 	OnIncidentReopened              *bool                            `json:"on_incident_reopened,omitempty"`
 	OnIncidentComment               *bool                            `json:"on_incident_comment,omitempty"`
-	NotifyAlongsidePrimaryOnCall      *bool                            `json:"notify_alongside_primary_on_call,omitempty"`
+	NotifyAlongsidePrimaryOnCall    *bool                            `json:"notify_alongside_primary_on_call,omitempty"`
 	CustomWebhookTemplateAttributes *customWebhookTemplateAttributes `json:"custom_webhook_template_attributes,omitempty"`
 	TeamName                        *string                          `json:"team_name,omitempty"`
 }

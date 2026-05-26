@@ -68,11 +68,11 @@ func newPagerdutyIntegrationResource() *schema.Resource {
 }
 
 type pagerdutyIntegration struct {
-	ID                         *string `json:"id,omitempty"`
-	Name                       *string `json:"name,omitempty"`
-	Key                        *string `json:"key,omitempty"`
-	TeamName                   *string `json:"team_name,omitempty"`
-	Severity                   *string `json:"severity,omitempty"`
+	ID                           *string `json:"id,omitempty"`
+	Name                         *string `json:"name,omitempty"`
+	Key                          *string `json:"key,omitempty"`
+	TeamName                     *string `json:"team_name,omitempty"`
+	Severity                     *string `json:"severity,omitempty"`
 	NotifyAlongsidePrimaryOnCall *bool   `json:"notify_alongside_primary_on_call,omitempty"`
 }
 

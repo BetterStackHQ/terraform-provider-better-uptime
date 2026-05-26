@@ -61,10 +61,10 @@ func newSplunkOnCallIntegrationResource() *schema.Resource {
 }
 
 type splunkOnCallIntegration struct {
-	ID                         *string `json:"id,omitempty"`
-	Name                       *string `json:"name,omitempty"`
-	URL                        *string `json:"url,omitempty"`
-	TeamName                   *string `json:"team_name,omitempty"`
+	ID                           *string `json:"id,omitempty"`
+	Name                         *string `json:"name,omitempty"`
+	URL                          *string `json:"url,omitempty"`
+	TeamName                     *string `json:"team_name,omitempty"`
 	NotifyAlongsidePrimaryOnCall *bool   `json:"notify_alongside_primary_on_call,omitempty"`
 }
 

@@ -74,16 +74,16 @@ var slackIntegrationSchema = map[string]*schema.Schema{
 }
 
 type slackIntegration struct {
-	Id                         *string `json:"id,omitempty"`
-	SlackTeamId                *string `json:"slack_team_id,omitempty"`
-	SlackTeamName              *string `json:"slack_team_name,omitempty"`
-	SlackChannelId             *string `json:"slack_channel_id,omitempty"`
-	SlackChannelName           *string `json:"slack_channel_name,omitempty"`
-	SlackStatus                *string `json:"slack_status,omitempty"`
-	IntegrationTyp             *string `json:"integration_type,omitempty"`
-	OnCallNotifications        *bool   `json:"on_call_notifications,omitempty"`
+	Id                           *string `json:"id,omitempty"`
+	SlackTeamId                  *string `json:"slack_team_id,omitempty"`
+	SlackTeamName                *string `json:"slack_team_name,omitempty"`
+	SlackChannelId               *string `json:"slack_channel_id,omitempty"`
+	SlackChannelName             *string `json:"slack_channel_name,omitempty"`
+	SlackStatus                  *string `json:"slack_status,omitempty"`
+	IntegrationTyp               *string `json:"integration_type,omitempty"`
+	OnCallNotifications          *bool   `json:"on_call_notifications,omitempty"`
 	NotifyAlongsidePrimaryOnCall *bool   `json:"notify_alongside_primary_on_call,omitempty"`
-	TeamName                   *string `json:"team_name,omitempty"`
+	TeamName                     *string `json:"team_name,omitempty"`
 }
 
 func slackIntegrationRef(in *slackIntegration) []struct {
