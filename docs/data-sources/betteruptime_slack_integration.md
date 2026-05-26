@@ -23,7 +23,7 @@ Slack integration lookup.
 
 - `id` (String) The ID of this Slack integration.
 - `integration_type` (String) Type of the Slack integration. Possible values: legacy, verbose, thread, channel
-- `notify_alongside_primary_on_call` (Boolean) Whether this integration is notified alongside the primary on-call person when an incident is created on a monitor without an escalation policy configured.
+- `notify_alongside_primary_on_call` (Boolean) Whether this integration should be notified alongside the primary on-call schedule when no escalation policy is configured.
 - `on_call_notifications` (Boolean) Whether to post a notification when the current on-call person changes.
 - `slack_channel_id` (String) Slack ID of the connected channel.
 - `slack_status` (String) Status of the connected Slack account. Possible values: active, account_inactive

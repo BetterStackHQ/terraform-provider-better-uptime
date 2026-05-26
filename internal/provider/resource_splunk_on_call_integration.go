@@ -38,7 +38,7 @@ var splunkOnCallIntegrationSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"notify_alongside_primary_on_call": {
-		Description: "Whether this integration is notified alongside the primary on-call person when an incident is created on a monitor without an escalation policy configured. Defaults to `true`.",
+		Description: "Whether this integration should be notified alongside the primary on-call schedule when no escalation policy is configured. Defaults to `true`.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     true,

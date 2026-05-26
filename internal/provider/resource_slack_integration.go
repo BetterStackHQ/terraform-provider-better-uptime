@@ -66,7 +66,7 @@ var slackIntegrationSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"notify_alongside_primary_on_call": {
-		Description: "Whether this integration is notified alongside the primary on-call person when an incident is created on a monitor without an escalation policy configured.",
+		Description: "Whether this integration should be notified alongside the primary on-call schedule when no escalation policy is configured.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,

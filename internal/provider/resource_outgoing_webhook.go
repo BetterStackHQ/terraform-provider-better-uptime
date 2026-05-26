@@ -78,7 +78,7 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 		Default:     false,
 	},
 	"notify_alongside_primary_on_call": {
-		Description: "Whether this integration is notified alongside the primary on-call person when an incident is created on a monitor without an escalation policy configured. Only applies to `incident_change` webhooks. Defaults to `true`.",
+		Description: "Whether this integration should be notified alongside the primary on-call schedule when no escalation policy is configured. Only applies to `incident_change` webhooks. Defaults to `true`.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     true,
