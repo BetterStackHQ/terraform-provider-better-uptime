@@ -98,7 +98,7 @@ func TestResourceSplunkOnCallIntegrationSimpleEscalationOptOut(t *testing.T) {
 			},
 		},
 		Steps: []resource.TestStep{
-			// Step 1 - create, included in simple escalations by default.
+			// Step 1 - create, notified alongside the primary on-call by default.
 			{
 				Config: fmt.Sprintf(`
 				provider "betteruptime" {
@@ -111,10 +111,10 @@ func TestResourceSplunkOnCallIntegrationSimpleEscalationOptOut(t *testing.T) {
 				}
 				`, url),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_splunk_oncall_integration.this", "included_in_simple_escalation", "true"),
+					resource.TestCheckResourceAttr("betteruptime_splunk_oncall_integration.this", "notify_alongside_primary_on_call", "true"),
 				),
 			},
-			// Step 2 - opt out of simple escalations.
+			// Step 2 - opt out of primary on-call notification.
 			{
 				Config: fmt.Sprintf(`
 				provider "betteruptime" {
@@ -124,11 +124,11 @@ func TestResourceSplunkOnCallIntegrationSimpleEscalationOptOut(t *testing.T) {
 				resource "betteruptime_splunk_oncall_integration" "this" {
 					name                          = "test"
 					url                           = "%s"
-					included_in_simple_escalation = false
+					notify_alongside_primary_on_call = false
 				}
 				`, url),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_splunk_oncall_integration.this", "included_in_simple_escalation", "false"),
+					resource.TestCheckResourceAttr("betteruptime_splunk_oncall_integration.this", "notify_alongside_primary_on_call", "false"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty.
@@ -141,7 +141,7 @@ func TestResourceSplunkOnCallIntegrationSimpleEscalationOptOut(t *testing.T) {
 				resource "betteruptime_splunk_oncall_integration" "this" {
 					name                          = "test"
 					url                           = "%s"
-					included_in_simple_escalation = false
+					notify_alongside_primary_on_call = false
 				}
 				`, url),
 				PlanOnly: true,

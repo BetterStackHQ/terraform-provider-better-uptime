@@ -37,8 +37,8 @@ var splunkOnCallIntegrationSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 	},
-	"included_in_simple_escalation": {
-		Description: "Whether this integration is notified during simple escalations, i.e. when an incident is created on a monitor without an escalation policy configured. Defaults to `true`.",
+	"notify_alongside_primary_on_call": {
+		Description: "Whether this integration is notified alongside the primary on-call person when an incident is created on a monitor without an escalation policy configured. Defaults to `true`.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     true,
@@ -65,7 +65,7 @@ type splunkOnCallIntegration struct {
 	Name                       *string `json:"name,omitempty"`
 	URL                        *string `json:"url,omitempty"`
 	TeamName                   *string `json:"team_name,omitempty"`
-	IncludedInSimpleEscalation *bool   `json:"included_in_simple_escalation,omitempty"`
+	NotifyAlongsidePrimaryOnCall *bool   `json:"notify_alongside_primary_on_call,omitempty"`
 }
 
 type splunkOnCallIntegrationHTTPResponse struct {
@@ -87,7 +87,7 @@ func splunkOnCallIntegrationRef(in *splunkOnCallIntegration) []struct {
 		{k: "id", v: &in.ID},
 		{k: "name", v: &in.Name},
 		{k: "url", v: &in.URL},
-		{k: "included_in_simple_escalation", v: &in.IncludedInSimpleEscalation},
+		{k: "notify_alongside_primary_on_call", v: &in.NotifyAlongsidePrimaryOnCall},
 	}
 }
 

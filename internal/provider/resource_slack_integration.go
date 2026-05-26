@@ -65,8 +65,8 @@ var slackIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
-	"included_in_simple_escalation": {
-		Description: "Whether this integration is notified during simple escalations, i.e. when an incident is created on a monitor without an escalation policy configured.",
+	"notify_alongside_primary_on_call": {
+		Description: "Whether this integration is notified alongside the primary on-call person when an incident is created on a monitor without an escalation policy configured.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
@@ -82,7 +82,7 @@ type slackIntegration struct {
 	SlackStatus                *string `json:"slack_status,omitempty"`
 	IntegrationTyp             *string `json:"integration_type,omitempty"`
 	OnCallNotifications        *bool   `json:"on_call_notifications,omitempty"`
-	IncludedInSimpleEscalation *bool   `json:"included_in_simple_escalation,omitempty"`
+	NotifyAlongsidePrimaryOnCall *bool   `json:"notify_alongside_primary_on_call,omitempty"`
 	TeamName                   *string `json:"team_name,omitempty"`
 }
 
@@ -102,7 +102,7 @@ func slackIntegrationRef(in *slackIntegration) []struct {
 		{k: "slack_status", v: &in.SlackStatus},
 		{k: "integration_type", v: &in.IntegrationTyp},
 		{k: "on_call_notifications", v: &in.OnCallNotifications},
-		{k: "included_in_simple_escalation", v: &in.IncludedInSimpleEscalation},
+		{k: "notify_alongside_primary_on_call", v: &in.NotifyAlongsidePrimaryOnCall},
 	}
 }
 

@@ -255,7 +255,7 @@ func TestResourceOutgoingWebhookSimpleEscalationOptOut(t *testing.T) {
 			},
 		},
 		Steps: []resource.TestStep{
-			// Step 1 - create, included in simple escalations by default.
+			// Step 1 - create, notified alongside the primary on-call by default.
 			{
 				Config: fmt.Sprintf(`
 				provider "betteruptime" {
@@ -270,10 +270,10 @@ func TestResourceOutgoingWebhookSimpleEscalationOptOut(t *testing.T) {
 				}
 				`, name, url),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "included_in_simple_escalation", "true"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "notify_alongside_primary_on_call", "true"),
 				),
 			},
-			// Step 2 - opt out of simple escalations.
+			// Step 2 - opt out of primary on-call notification.
 			{
 				Config: fmt.Sprintf(`
 				provider "betteruptime" {
@@ -285,11 +285,11 @@ func TestResourceOutgoingWebhookSimpleEscalationOptOut(t *testing.T) {
 					url                           = "%s"
 					trigger_type                  = "incident_change"
 					on_incident_started           = true
-					included_in_simple_escalation = false
+					notify_alongside_primary_on_call = false
 				}
 				`, name, url),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "included_in_simple_escalation", "false"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "notify_alongside_primary_on_call", "false"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty.
@@ -304,7 +304,7 @@ func TestResourceOutgoingWebhookSimpleEscalationOptOut(t *testing.T) {
 					url                           = "%s"
 					trigger_type                  = "incident_change"
 					on_incident_started           = true
-					included_in_simple_escalation = false
+					notify_alongside_primary_on_call = false
 				}
 				`, name, url),
 				PlanOnly: true,

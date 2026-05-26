@@ -102,7 +102,7 @@ func TestResourcePagerDutyIntegrationSimpleEscalationOptOut(t *testing.T) {
 			},
 		},
 		Steps: []resource.TestStep{
-			// Step 1 - create, included in simple escalations by default.
+			// Step 1 - create, notified alongside the primary on-call by default.
 			{
 				Config: `
 				provider "betteruptime" {
@@ -116,10 +116,10 @@ func TestResourcePagerDutyIntegrationSimpleEscalationOptOut(t *testing.T) {
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_pagerduty_integration.this", "included_in_simple_escalation", "true"),
+					resource.TestCheckResourceAttr("betteruptime_pagerduty_integration.this", "notify_alongside_primary_on_call", "true"),
 				),
 			},
-			// Step 2 - opt out of simple escalations.
+			// Step 2 - opt out of primary on-call notification.
 			{
 				Config: `
 				provider "betteruptime" {
@@ -130,11 +130,11 @@ func TestResourcePagerDutyIntegrationSimpleEscalationOptOut(t *testing.T) {
 					name                          = "test"
 					key                           = "keykeykeykey"
 					severity                      = "critical"
-					included_in_simple_escalation = false
+					notify_alongside_primary_on_call = false
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_pagerduty_integration.this", "included_in_simple_escalation", "false"),
+					resource.TestCheckResourceAttr("betteruptime_pagerduty_integration.this", "notify_alongside_primary_on_call", "false"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty.
@@ -148,7 +148,7 @@ func TestResourcePagerDutyIntegrationSimpleEscalationOptOut(t *testing.T) {
 					name                          = "test"
 					key                           = "keykeykeykey"
 					severity                      = "critical"
-					included_in_simple_escalation = false
+					notify_alongside_primary_on_call = false
 				}
 				`,
 				PlanOnly: true,
