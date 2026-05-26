@@ -520,6 +520,8 @@ resource "betteruptime_outgoing_webhook" "outgoing_webhook_1" {
   on_incident_reopened     = false
   on_incident_comment      = false
 
+  included_in_simple_escalation = false
+
   custom_webhook_template_attributes {
     http_method = "get"
 

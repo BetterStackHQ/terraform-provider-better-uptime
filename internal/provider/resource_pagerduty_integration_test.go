@@ -89,3 +89,76 @@ func TestResourcePagerDutyIntegration(t *testing.T) {
 		},
 	})
 }
+
+func TestResourcePagerDutyIntegrationSimpleEscalationOptOut(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/pager-duty-webhooks", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create, included in simple escalations by default.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_pagerduty_integration" "this" {
+					name     = "test"
+					key      = "keykeykeykey"
+					severity = "critical"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_pagerduty_integration.this", "included_in_simple_escalation", "true"),
+				),
+			},
+			// Step 2 - opt out of simple escalations.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_pagerduty_integration" "this" {
+					name                          = "test"
+					key                           = "keykeykeykey"
+					severity                      = "critical"
+					included_in_simple_escalation = false
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_pagerduty_integration.this", "included_in_simple_escalation", "false"),
+				),
+			},
+			// Step 3 - make no changes, check plan is empty.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_pagerduty_integration" "this" {
+					name                          = "test"
+					key                           = "keykeykeykey"
+					severity                      = "critical"
+					included_in_simple_escalation = false
+				}
+				`,
+				PlanOnly: true,
+			},
+			// Step 4 - import, verify the opt-out round-trips.
+			{
+				ResourceName:      "betteruptime_pagerduty_integration.this",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}

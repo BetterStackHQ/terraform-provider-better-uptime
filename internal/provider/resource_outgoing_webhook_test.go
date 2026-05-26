@@ -239,3 +239,82 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 		},
 	})
 }
+
+func TestResourceOutgoingWebhookSimpleEscalationOptOut(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/outgoing-webhooks", "1")
+	defer server.Close()
+
+	var name = "test"
+	var url = "https://example.com/webhook"
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create, included in simple escalations by default.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name                = "%s"
+					url                 = "%s"
+					trigger_type        = "incident_change"
+					on_incident_started = true
+				}
+				`, name, url),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "included_in_simple_escalation", "true"),
+				),
+			},
+			// Step 2 - opt out of simple escalations.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name                          = "%s"
+					url                           = "%s"
+					trigger_type                  = "incident_change"
+					on_incident_started           = true
+					included_in_simple_escalation = false
+				}
+				`, name, url),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "included_in_simple_escalation", "false"),
+				),
+			},
+			// Step 3 - make no changes, check plan is empty.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name                          = "%s"
+					url                           = "%s"
+					trigger_type                  = "incident_change"
+					on_incident_started           = true
+					included_in_simple_escalation = false
+				}
+				`, name, url),
+				PlanOnly: true,
+			},
+			// Step 4 - import, verify the opt-out round-trips.
+			{
+				ResourceName:      "betteruptime_outgoing_webhook.this",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}

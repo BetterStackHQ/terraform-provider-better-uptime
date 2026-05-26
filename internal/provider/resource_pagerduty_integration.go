@@ -44,6 +44,12 @@ var pagerdutyIntegrationSchema = map[string]*schema.Schema{
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"info", "warning", "error", "critical"}, false),
 	},
+	"included_in_simple_escalation": {
+		Description: "Whether this integration is notified during simple escalations, i.e. when an incident is created on a monitor without an escalation policy configured. Defaults to `true`.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     true,
+	},
 }
 
 func newPagerdutyIntegrationResource() *schema.Resource {
@@ -62,11 +68,12 @@ func newPagerdutyIntegrationResource() *schema.Resource {
 }
 
 type pagerdutyIntegration struct {
-	ID       *string `json:"id,omitempty"`
-	Name     *string `json:"name,omitempty"`
-	Key      *string `json:"key,omitempty"`
-	TeamName *string `json:"team_name,omitempty"`
-	Severity *string `json:"severity,omitempty"`
+	ID                         *string `json:"id,omitempty"`
+	Name                       *string `json:"name,omitempty"`
+	Key                        *string `json:"key,omitempty"`
+	TeamName                   *string `json:"team_name,omitempty"`
+	Severity                   *string `json:"severity,omitempty"`
+	IncludedInSimpleEscalation *bool   `json:"included_in_simple_escalation,omitempty"`
 }
 
 type pagerdutyIntegrationHTTPResponse struct {
@@ -89,6 +96,7 @@ func pagerdutyIntegrationRef(in *pagerdutyIntegration) []struct {
 		{k: "name", v: &in.Name},
 		{k: "key", v: &in.Key},
 		{k: "severity", v: &in.Severity},
+		{k: "included_in_simple_escalation", v: &in.IncludedInSimpleEscalation},
 	}
 }
 
