@@ -65,18 +65,25 @@ var slackIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"included_in_simple_escalation": {
+		Description: "Whether this integration is notified during simple escalations, i.e. when an incident is created on a monitor without an escalation policy configured.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
 }
 
 type slackIntegration struct {
-	Id                  *string `json:"id,omitempty"`
-	SlackTeamId         *string `json:"slack_team_id,omitempty"`
-	SlackTeamName       *string `json:"slack_team_name,omitempty"`
-	SlackChannelId      *string `json:"slack_channel_id,omitempty"`
-	SlackChannelName    *string `json:"slack_channel_name,omitempty"`
-	SlackStatus         *string `json:"slack_status,omitempty"`
-	IntegrationTyp      *string `json:"integration_type,omitempty"`
-	OnCallNotifications *bool   `json:"on_call_notifications,omitempty"`
-	TeamName            *string `json:"team_name,omitempty"`
+	Id                         *string `json:"id,omitempty"`
+	SlackTeamId                *string `json:"slack_team_id,omitempty"`
+	SlackTeamName              *string `json:"slack_team_name,omitempty"`
+	SlackChannelId             *string `json:"slack_channel_id,omitempty"`
+	SlackChannelName           *string `json:"slack_channel_name,omitempty"`
+	SlackStatus                *string `json:"slack_status,omitempty"`
+	IntegrationTyp             *string `json:"integration_type,omitempty"`
+	OnCallNotifications        *bool   `json:"on_call_notifications,omitempty"`
+	IncludedInSimpleEscalation *bool   `json:"included_in_simple_escalation,omitempty"`
+	TeamName                   *string `json:"team_name,omitempty"`
 }
 
 func slackIntegrationRef(in *slackIntegration) []struct {
@@ -95,6 +102,7 @@ func slackIntegrationRef(in *slackIntegration) []struct {
 		{k: "slack_status", v: &in.SlackStatus},
 		{k: "integration_type", v: &in.IntegrationTyp},
 		{k: "on_call_notifications", v: &in.OnCallNotifications},
+		{k: "included_in_simple_escalation", v: &in.IncludedInSimpleEscalation},
 	}
 }
 
