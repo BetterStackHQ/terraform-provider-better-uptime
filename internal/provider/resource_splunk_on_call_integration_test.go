@@ -98,7 +98,7 @@ func TestResourceSplunkOnCallIntegrationSimpleEscalationOptOut(t *testing.T) {
 			},
 		},
 		Steps: []resource.TestStep{
-			// Step 1 - create, notified alongside the primary on-call by default.
+			// Step 1 - create, notified alongside the primary responder by default.
 			{
 				Config: fmt.Sprintf(`
 				provider "betteruptime" {
@@ -111,10 +111,10 @@ func TestResourceSplunkOnCallIntegrationSimpleEscalationOptOut(t *testing.T) {
 				}
 				`, url),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_splunk_oncall_integration.this", "notify_alongside_primary_on_call", "true"),
+					resource.TestCheckResourceAttr("betteruptime_splunk_oncall_integration.this", "notify_alongside_primary_responder", "true"),
 				),
 			},
-			// Step 2 - opt out of primary on-call notification.
+			// Step 2 - opt out of primary responder notification.
 			{
 				Config: fmt.Sprintf(`
 				provider "betteruptime" {
@@ -124,11 +124,11 @@ func TestResourceSplunkOnCallIntegrationSimpleEscalationOptOut(t *testing.T) {
 				resource "betteruptime_splunk_oncall_integration" "this" {
 					name                          = "test"
 					url                           = "%s"
-					notify_alongside_primary_on_call = false
+					notify_alongside_primary_responder = false
 				}
 				`, url),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_splunk_oncall_integration.this", "notify_alongside_primary_on_call", "false"),
+					resource.TestCheckResourceAttr("betteruptime_splunk_oncall_integration.this", "notify_alongside_primary_responder", "false"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty.
@@ -141,7 +141,7 @@ func TestResourceSplunkOnCallIntegrationSimpleEscalationOptOut(t *testing.T) {
 				resource "betteruptime_splunk_oncall_integration" "this" {
 					name                          = "test"
 					url                           = "%s"
-					notify_alongside_primary_on_call = false
+					notify_alongside_primary_responder = false
 				}
 				`, url),
 				PlanOnly: true,

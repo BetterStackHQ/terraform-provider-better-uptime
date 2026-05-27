@@ -37,8 +37,8 @@ var splunkOnCallIntegrationSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 	},
-	"notify_alongside_primary_on_call": {
-		Description: "Whether this integration should be notified alongside the primary on-call schedule when no escalation policy is configured. Defaults to `true`.",
+	"notify_alongside_primary_responder": {
+		Description: "Whether this integration should be notified alongside the primary responder when no escalation policy is configured. Defaults to `true`.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     true,
@@ -61,11 +61,11 @@ func newSplunkOnCallIntegrationResource() *schema.Resource {
 }
 
 type splunkOnCallIntegration struct {
-	ID                           *string `json:"id,omitempty"`
-	Name                         *string `json:"name,omitempty"`
-	URL                          *string `json:"url,omitempty"`
-	TeamName                     *string `json:"team_name,omitempty"`
-	NotifyAlongsidePrimaryOnCall *bool   `json:"notify_alongside_primary_on_call,omitempty"`
+	ID                              *string `json:"id,omitempty"`
+	Name                            *string `json:"name,omitempty"`
+	URL                             *string `json:"url,omitempty"`
+	TeamName                        *string `json:"team_name,omitempty"`
+	NotifyAlongsidePrimaryResponder *bool   `json:"notify_alongside_primary_responder,omitempty"`
 }
 
 type splunkOnCallIntegrationHTTPResponse struct {
@@ -87,7 +87,7 @@ func splunkOnCallIntegrationRef(in *splunkOnCallIntegration) []struct {
 		{k: "id", v: &in.ID},
 		{k: "name", v: &in.Name},
 		{k: "url", v: &in.URL},
-		{k: "notify_alongside_primary_on_call", v: &in.NotifyAlongsidePrimaryOnCall},
+		{k: "notify_alongside_primary_responder", v: &in.NotifyAlongsidePrimaryResponder},
 	}
 }
 

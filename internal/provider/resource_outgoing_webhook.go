@@ -77,8 +77,8 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Default:     false,
 	},
-	"notify_alongside_primary_on_call": {
-		Description: "Whether this integration should be notified alongside the primary on-call schedule when no escalation policy is configured. Only applies to `incident_change` webhooks. Defaults to `true`.",
+	"notify_alongside_primary_responder": {
+		Description: "Whether this integration should be notified alongside the primary responder when no escalation policy is configured. Only applies to `incident_change` webhooks. Defaults to `true`.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     true,
@@ -163,7 +163,7 @@ type outgoingWebhook struct {
 	OnIncidentResolved              *bool                            `json:"on_incident_resolved,omitempty"`
 	OnIncidentReopened              *bool                            `json:"on_incident_reopened,omitempty"`
 	OnIncidentComment               *bool                            `json:"on_incident_comment,omitempty"`
-	NotifyAlongsidePrimaryOnCall    *bool                            `json:"notify_alongside_primary_on_call,omitempty"`
+	NotifyAlongsidePrimaryResponder *bool                            `json:"notify_alongside_primary_responder,omitempty"`
 	CustomWebhookTemplateAttributes *customWebhookTemplateAttributes `json:"custom_webhook_template_attributes,omitempty"`
 	TeamName                        *string                          `json:"team_name,omitempty"`
 }
@@ -219,7 +219,7 @@ func outgoingWebhookRef(in *outgoingWebhook, triggerType string) []struct {
 		{k: "name", v: &in.Name},
 		{k: "url", v: &in.URL},
 		{k: "trigger_type", v: &in.TriggerType},
-		{k: "notify_alongside_primary_on_call", v: &in.NotifyAlongsidePrimaryOnCall},
+		{k: "notify_alongside_primary_responder", v: &in.NotifyAlongsidePrimaryResponder},
 	}
 
 	// Only include incident-related fields if trigger_type is incident_change

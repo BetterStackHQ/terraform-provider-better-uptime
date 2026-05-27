@@ -25,7 +25,7 @@ func TestDataSlackIntegration(t *testing.T) {
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=1":
 			_, _ = w.Write([]byte(`{"data":[{"id":"1","attributes":{"slack_team_id":"T123456","slack_team_name":"Team1","slack_channel_id":"C123456","slack_channel_name":"#channel1","slack_status":"active","integration_type":"verbose","on_call_notifications":true}}],"pagination":{"next":"..."}}`))
 		case r.Method == http.MethodGet && r.RequestURI == prefix+"?page=2":
-			_, _ = w.Write([]byte(`{"data":[{"id":"2","attributes":{"slack_team_id":"T456789","slack_team_name":"Team2","slack_channel_id":"C456789","slack_channel_name":"#channel2","slack_status":"active","integration_type":"verbose","on_call_notifications":true,"notify_alongside_primary_on_call":false}}],"pagination":{"next":null}}`))
+			_, _ = w.Write([]byte(`{"data":[{"id":"2","attributes":{"slack_team_id":"T456789","slack_team_name":"Team2","slack_channel_id":"C456789","slack_channel_name":"#channel2","slack_status":"active","integration_type":"verbose","on_call_notifications":true,"notify_alongside_primary_responder":false}}],"pagination":{"next":null}}`))
 		default:
 			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
 			t.Fail()
@@ -62,7 +62,7 @@ func TestDataSlackIntegration(t *testing.T) {
 					resource.TestCheckResourceAttr("data.betteruptime_slack_integration.this", "slack_status", "active"),
 					resource.TestCheckResourceAttr("data.betteruptime_slack_integration.this", "integration_type", "verbose"),
 					resource.TestCheckResourceAttr("data.betteruptime_slack_integration.this", "on_call_notifications", "true"),
-					resource.TestCheckResourceAttr("data.betteruptime_slack_integration.this", "notify_alongside_primary_on_call", "false"),
+					resource.TestCheckResourceAttr("data.betteruptime_slack_integration.this", "notify_alongside_primary_responder", "false"),
 				),
 			},
 		},
