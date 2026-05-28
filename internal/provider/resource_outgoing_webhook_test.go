@@ -8,6 +8,41 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func TestResourceOutgoingWebhookNonIncidentChange(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/outgoing-webhooks", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// notify_alongside_primary_responder defaults to true but only applies to
+			// incident_change webhooks; a non-incident webhook must still create without it.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name         = "test"
+					url          = "https://example.com/webhook"
+					trigger_type = "on_call_change"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_outgoing_webhook.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "trigger_type", "on_call_change"),
+				),
+			},
+		},
+	})
+}
+
 func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 	server := newResourceServer(t, "/api/v2/outgoing-webhooks", "1")
 	defer server.Close()
@@ -233,6 +268,85 @@ func TestResourceOutgoingWebhookIntegrationCustomTemplate(t *testing.T) {
 			// Step 4 - import
 			{
 				ResourceName:      "betteruptime_outgoing_webhook.custom",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestResourceOutgoingWebhookSimpleEscalationOptOut(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/outgoing-webhooks", "1")
+	defer server.Close()
+
+	var name = "test"
+	var url = "https://example.com/webhook"
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create, notified alongside the primary responder by default.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name                = "%s"
+					url                 = "%s"
+					trigger_type        = "incident_change"
+					on_incident_started = true
+				}
+				`, name, url),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "notify_alongside_primary_responder", "true"),
+				),
+			},
+			// Step 2 - opt out of primary responder notification.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name                          = "%s"
+					url                           = "%s"
+					trigger_type                  = "incident_change"
+					on_incident_started           = true
+					notify_alongside_primary_responder = false
+				}
+				`, name, url),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "notify_alongside_primary_responder", "false"),
+				),
+			},
+			// Step 3 - make no changes, check plan is empty.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name                          = "%s"
+					url                           = "%s"
+					trigger_type                  = "incident_change"
+					on_incident_started           = true
+					notify_alongside_primary_responder = false
+				}
+				`, name, url),
+				PlanOnly: true,
+			},
+			// Step 4 - import, verify the opt-out round-trips.
+			{
+				ResourceName:      "betteruptime_outgoing_webhook.this",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

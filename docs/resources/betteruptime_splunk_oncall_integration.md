@@ -22,6 +22,7 @@ https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/
 ### Optional
 
 - `name` (String) The name of the Splunk On-Call Integration.
+- `notify_alongside_primary_responder` (Boolean) Whether this integration should be notified alongside the primary responder when no escalation policy is configured. Defaults to `true`.
 - `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only

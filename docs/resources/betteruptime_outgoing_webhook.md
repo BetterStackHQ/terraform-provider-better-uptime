@@ -24,6 +24,7 @@ https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/
 
 - `custom_webhook_template_attributes` (Block List, Max: 1) Custom webhook template configuration. (see [below for nested schema](#nestedblock--custom_webhook_template_attributes))
 - `name` (String) The name of the outgoing webhook.
+- `notify_alongside_primary_responder` (Boolean) Whether this integration should be notified alongside the primary responder when no escalation policy is configured. Only applies to `incident_change` webhooks. Defaults to `true`.
 - `on_incident_acknowledged` (Boolean) Whether to trigger webhook when incident is acknowledged. Only when `trigger_type=incident_change`.
 - `on_incident_comment` (Boolean) Whether to trigger webhook when a comment is posted on an incident. Only when `trigger_type=incident_change`.
 - `on_incident_reopened` (Boolean) Whether to trigger webhook when incident is reopened. Only when `trigger_type=incident_change`.
