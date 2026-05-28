@@ -219,7 +219,6 @@ func outgoingWebhookRef(in *outgoingWebhook, triggerType string) []struct {
 		{k: "name", v: &in.Name},
 		{k: "url", v: &in.URL},
 		{k: "trigger_type", v: &in.TriggerType},
-		{k: "notify_alongside_primary_responder", v: &in.NotifyAlongsidePrimaryResponder},
 	}
 
 	// Only include incident-related fields if trigger_type is incident_change
@@ -228,6 +227,7 @@ func outgoingWebhookRef(in *outgoingWebhook, triggerType string) []struct {
 			k string
 			v interface{}
 		}{
+			{k: "notify_alongside_primary_responder", v: &in.NotifyAlongsidePrimaryResponder},
 			{k: "on_incident_started", v: &in.OnIncidentStarted},
 			{k: "on_incident_acknowledged", v: &in.OnIncidentAcknowledged},
 			{k: "on_incident_resolved", v: &in.OnIncidentResolved},

@@ -8,6 +8,41 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func TestResourceOutgoingWebhookNonIncidentChange(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/outgoing-webhooks", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// notify_alongside_primary_responder defaults to true but only applies to
+			// incident_change webhooks; a non-incident webhook must still create without it.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name         = "test"
+					url          = "https://example.com/webhook"
+					trigger_type = "on_call_change"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_outgoing_webhook.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "trigger_type", "on_call_change"),
+				),
+			},
+		},
+	})
+}
+
 func TestResourceOutgoingWebhookIntegration(t *testing.T) {
 	server := newResourceServer(t, "/api/v2/outgoing-webhooks", "1")
 	defer server.Close()
