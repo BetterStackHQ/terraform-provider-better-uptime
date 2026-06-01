@@ -55,6 +55,88 @@ func TestResourceCatalogRecord(t *testing.T) {
 	})
 }
 
+// TestResourceCatalogRecordAttributeOrderStable guards against U-7076: the catalog API may
+// return a record's attributes in a different order than they were configured. Because
+// `attribute` is an ordered TypeList, the provider must reorder the API response back to the
+// configured order so that an order-only difference never surfaces as a (non-empty) plan.
+func TestResourceCatalogRecordAttributeOrderStable(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/catalog/relations/123/records", "2")
+	defer server.Close()
+
+	// On read, return the two attributes in the reverse of the configured order.
+	server.ExpectRequest("GET", "/api/v2/catalog/relations/123/records/2", "", 200,
+		`{"data":{"id":"2","attributes":{"attributes":[`+
+			`{"attribute":{"id":"790"},"values":[{"type":"String","value":"Beta"}]},`+
+			`{"attribute":{"id":"789"},"values":[{"type":"String","value":"Alpha"}]}`+
+			`]}}}`)
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_catalog_record" "test" {
+					relation_id = "123"
+
+					attribute {
+						attribute_id = "789"
+						type        = "String"
+						value       = "Alpha"
+					}
+
+					attribute {
+						attribute_id = "790"
+						type        = "String"
+						value       = "Beta"
+					}
+				}
+				`,
+				// The post-apply refresh reads the reversed order; without reordering this step
+				// fails with a non-empty plan. The explicit checks document the expected order.
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_catalog_record.test", "attribute.#", "2"),
+					resource.TestCheckResourceAttr("betteruptime_catalog_record.test", "attribute.0.attribute_id", "789"),
+					resource.TestCheckResourceAttr("betteruptime_catalog_record.test", "attribute.1.attribute_id", "790"),
+				),
+			},
+			// Plan again against the reversed read: must be empty.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_catalog_record" "test" {
+					relation_id = "123"
+
+					attribute {
+						attribute_id = "789"
+						type        = "String"
+						value       = "Alpha"
+					}
+
+					attribute {
+						attribute_id = "790"
+						type        = "String"
+						value       = "Beta"
+					}
+				}
+				`,
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
 func TestResourceCatalogRecordValidation(t *testing.T) {
 	server := newResourceServer(t, "/api/v2/catalog/relations/123/records", "2")
 	defer server.Close()

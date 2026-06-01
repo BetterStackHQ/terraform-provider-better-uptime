@@ -208,6 +208,12 @@ func catalogRecordDelete(ctx context.Context, d *schema.ResourceData, meta inter
 func catalogRecordCopyAttrs(d *schema.ResourceData, in *catalogRecord) diag.Diagnostics {
 	attributes := flattenCatalogRecordAttributes(in.Attributes)
 
+	// The catalog API does not guarantee a stable attribute order. Because `attribute` is an
+	// ordered TypeList, a reordered API response would otherwise show up as a spurious plan diff
+	// (U-7076). Reorder to match the configured/prior-state order before storing. This also keeps
+	// the index-based cleanup below aligned with the configuration.
+	attributes = reorderCatalogRecordAttributes(d, attributes)
+
 	// Remove item_id, name, and email from attributes if they were not configured, avoid loading them from API
 	for attributeIndex, attribute := range attributes {
 		attributeMap := attribute.(map[string]interface{})
@@ -222,6 +228,88 @@ func catalogRecordCopyAttrs(d *schema.ResourceData, in *catalogRecord) diag.Diag
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+// reorderCatalogRecordAttributes reorders the flattened attributes returned by the API to
+// match the order they appear in the configuration (or prior state). The catalog API does not
+// guarantee a stable order, and because `attribute` is an ordered TypeList an order-only change
+// would otherwise produce a spurious plan diff (U-7076). Each existing block is matched to an
+// API attribute by attribute_id, preferring an exact value-signature match so that multiple
+// values sharing an attribute_id are paired correctly; any attributes the API returns that are
+// not present in the configuration are appended at the end.
+func reorderCatalogRecordAttributes(d *schema.ResourceData, attributes []interface{}) []interface{} {
+	existing, ok := d.Get("attribute").([]interface{})
+	if !ok || len(existing) == 0 {
+		return attributes
+	}
+
+	used := make([]bool, len(attributes))
+	ordered := make([]interface{}, 0, len(attributes))
+
+	findMatch := func(match func(map[string]interface{}) bool) int {
+		for i, attr := range attributes {
+			if used[i] {
+				continue
+			}
+			if match(attr.(map[string]interface{})) {
+				return i
+			}
+		}
+		return -1
+	}
+
+	for _, e := range existing {
+		em, ok := e.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		wantID := catalogAttributeID(em)
+		wantSig := catalogAttributeSignature(em)
+
+		// Prefer an exact value-signature match to disambiguate multiple values that share an
+		// attribute_id; fall back to matching on attribute_id alone.
+		idx := findMatch(func(m map[string]interface{}) bool {
+			return catalogAttributeSignature(m) == wantSig
+		})
+		if idx == -1 {
+			idx = findMatch(func(m map[string]interface{}) bool {
+				return catalogAttributeID(m) == wantID
+			})
+		}
+		if idx >= 0 {
+			used[idx] = true
+			ordered = append(ordered, attributes[idx])
+		}
+	}
+
+	// Append any attributes the API returned that weren't matched to the config/prior state.
+	for i, attr := range attributes {
+		if !used[i] {
+			ordered = append(ordered, attr)
+		}
+	}
+
+	return ordered
+}
+
+func catalogAttributeID(m map[string]interface{}) string {
+	id, _ := m["attribute_id"].(string)
+	return id
+}
+
+func catalogAttributeSignature(m map[string]interface{}) string {
+	field := func(k string) string {
+		v, _ := m[k].(string)
+		return v
+	}
+	return strings.Join([]string{
+		field("attribute_id"),
+		field("type"),
+		field("value"),
+		field("item_id"),
+		field("name"),
+		field("email"),
+	}, "\x00")
 }
 
 func validateCatalogRecordAttributes(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
