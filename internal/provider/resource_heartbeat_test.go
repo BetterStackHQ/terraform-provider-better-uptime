@@ -179,3 +179,112 @@ func TestResourceHeartbeat(t *testing.T) {
 		},
 	})
 }
+
+func TestResourceHeartbeatServerTimezone(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/heartbeats", "1")
+	defer server.Close()
+
+	var name = "example"
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create with a server timezone. Period is >= 1h, below which the API drops server_timezone.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_heartbeat" "this" {
+					name            = "%s"
+					period          = 3600
+					grace           = 0
+					call            = false
+					sms             = true
+					email           = true
+					push            = true
+					critical_alert  = false
+					server_timezone = "Europe/Berlin"
+				}
+				`, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_heartbeat.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "server_timezone", "Europe/Berlin"),
+				),
+			},
+			// Step 2 - change only the timezone, expect only it to be patched.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_heartbeat" "this" {
+					name            = "%s"
+					period          = 3600
+					grace           = 0
+					call            = false
+					sms             = true
+					email           = true
+					push            = true
+					critical_alert  = false
+					server_timezone = "America/New_York"
+				}
+				`, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "server_timezone", "America/New_York"),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/heartbeats/1", `{"server_timezone":"America/New_York"}`),
+				),
+			},
+			// Step 3 - drop the timezone, expect only it to be cleared.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_heartbeat" "this" {
+					name           = "%s"
+					period         = 3600
+					grace          = 0
+					call           = false
+					sms            = true
+					email          = true
+					push           = true
+					critical_alert = false
+				}
+				`, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_heartbeat.this", "server_timezone", ""),
+					server.TestCheckCalledRequest("PATCH", "/api/v2/heartbeats/1", `{"server_timezone":""}`), // Understood as null by API
+				),
+			},
+			// Step 4 - make no changes, check plan is empty.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_heartbeat" "this" {
+					name           = "%s"
+					period         = 3600
+					grace          = 0
+					call           = false
+					sms            = true
+					email          = true
+					push           = true
+					critical_alert = false
+				}
+				`, name),
+				PlanOnly: true,
+			},
+		},
+	})
+}

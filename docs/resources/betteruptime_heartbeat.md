@@ -34,6 +34,7 @@ https://betterstack.com/docs/uptime/api/heartbeats/
 - `paused` (Boolean) Set to true to pause monitoring — we won't notify you about downtime. Set to false to resume monitoring.
 - `policy_id` (String) Set the escalation policy for the heartbeat.
 - `push` (Boolean) Whether to send a push notification when a new incident is created.
+- `server_timezone` (String) The IANA timezone (e.g. "Europe/Berlin") used to evaluate this heartbeat's period against wall-clock time, keeping daily and cron-style schedules aligned across daylight saving time changes. Only applies to periods of 1 hour or longer; it is cleared for shorter periods.
 - `sms` (Boolean) Whether to send an SMS when a new incident is created.
 - `sort_index` (Number) An index controlling the position of a heartbeat in the heartbeat group.
 - `team_name` (String) Used to specify the team the resource should be created in when using global tokens.

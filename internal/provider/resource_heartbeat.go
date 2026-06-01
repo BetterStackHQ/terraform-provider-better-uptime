@@ -49,6 +49,11 @@ var heartbeatSchema = map[string]*schema.Schema{
 		Required:    true,
 		// TODO: ValidateDiagFunc
 	},
+	"server_timezone": {
+		Description: "The IANA timezone (e.g. \"Europe/Berlin\") used to evaluate this heartbeat's period against wall-clock time, keeping daily and cron-style schedules aligned across daylight saving time changes. Only applies to periods of 1 hour or longer; it is cleared for shorter periods.",
+		Type:        schema.TypeString,
+		Optional:    true,
+	},
 	"call": {
 		Description: "Whether to call when a new incident is created.",
 		Type:        schema.TypeBool,
@@ -185,6 +190,7 @@ type heartbeat struct {
 	Url                 *string   `json:"url,omitempty"`
 	Period              *int      `json:"period,omitempty"`
 	Grace               *int      `json:"grace,omitempty"`
+	ServerTimezone      *string   `json:"server_timezone,omitempty"`
 	Call                *bool     `json:"call,omitempty"`
 	SMS                 *bool     `json:"sms,omitempty"`
 	Email               *bool     `json:"email,omitempty"`
@@ -226,6 +232,7 @@ func heartbeatRef(in *heartbeat) []struct {
 		{k: "url", v: &in.Url},
 		{k: "period", v: &in.Period},
 		{k: "grace", v: &in.Grace},
+		{k: "server_timezone", v: &in.ServerTimezone},
 		{k: "call", v: &in.Call},
 		{k: "sms", v: &in.SMS},
 		{k: "email", v: &in.Email},
