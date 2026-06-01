@@ -209,8 +209,8 @@ func catalogRecordCopyAttrs(d *schema.ResourceData, in *catalogRecord) diag.Diag
 	attributes := flattenCatalogRecordAttributes(in.Attributes)
 
 	// The catalog API does not guarantee a stable attribute order. Because `attribute` is an
-	// ordered TypeList, a reordered API response would otherwise show up as a spurious plan diff
-	// (U-7076). Reorder to match the configured/prior-state order before storing. This also keeps
+	// ordered TypeList, a reordered API response would otherwise show up as a spurious plan diff.
+	// Reorder to match the configured/prior-state order before storing. This also keeps
 	// the index-based cleanup below aligned with the configuration.
 	attributes = reorderCatalogRecordAttributes(d, attributes)
 
@@ -233,7 +233,7 @@ func catalogRecordCopyAttrs(d *schema.ResourceData, in *catalogRecord) diag.Diag
 // reorderCatalogRecordAttributes reorders the flattened attributes returned by the API to
 // match the order they appear in the configuration (or prior state). The catalog API does not
 // guarantee a stable order, and because `attribute` is an ordered TypeList an order-only change
-// would otherwise produce a spurious plan diff (U-7076). Each existing block is matched to an
+// would otherwise produce a spurious plan diff. Each existing block is matched to an
 // API attribute by attribute_id, preferring an exact value-signature match so that multiple
 // values sharing an attribute_id are paired correctly; any attributes the API returns that are
 // not present in the configuration are appended at the end.
