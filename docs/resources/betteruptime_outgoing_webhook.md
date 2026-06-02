@@ -30,7 +30,7 @@ https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/
 - `on_incident_reopened` (Boolean) Whether to trigger webhook when incident is reopened. Only when `trigger_type=incident_change`.
 - `on_incident_resolved` (Boolean) Whether to trigger webhook when incident is resolved. Only when `trigger_type=incident_change`.
 - `on_incident_started` (Boolean) Whether to trigger webhook when incident starts. Only when `trigger_type=incident_change`.
-- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens. You can't update this value later.
 
 ### Read-Only
 

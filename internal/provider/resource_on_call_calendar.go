@@ -15,15 +15,7 @@ import (
 )
 
 var onCallCalendarSchema = map[string]*schema.Schema{
-	"team_name": {
-		Description: "Used to specify the team the resource should be created in when using global tokens.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Default:     nil,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return d.Id() != ""
-		},
-	},
+	"team_name": teamNameSchema(),
 	"id": {
 		Description: "The ID of the on-call calendar.",
 		Type:        schema.TypeString,
@@ -139,8 +131,9 @@ func newOnCallCalendarResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Schema:      onCallCalendarSchema,
-		Description: "https://betterstack.com/docs/uptime/api/on-call-calendar/",
+		CustomizeDiff: validateTeamNameNotChanged,
+		Schema:        onCallCalendarSchema,
+		Description:   "https://betterstack.com/docs/uptime/api/on-call-calendar/",
 	}
 }
 

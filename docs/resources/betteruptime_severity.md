@@ -27,7 +27,7 @@ https://betterstack.com/docs/uptime/api/list-all-severities/
 - `push` (Boolean) Whether to send a push notification when a new incident is created.
 - `severity_group_id` (Number) Set this attribute if you want to add this severity to a severity group.
 - `sms` (Boolean) Whether to send an SMS when a new incident is created.
-- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens. You can't update this value later.
 
 ### Read-Only
 

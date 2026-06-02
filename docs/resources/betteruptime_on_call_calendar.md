@@ -22,7 +22,7 @@ https://betterstack.com/docs/uptime/api/on-call-calendar/
 ### Optional
 
 - `on_call_rotation` (Block List, Max: 1) Configuration block for the on-call rotation schedule. Ignored when omitted - on-call can be controlled in Better Stack. (see [below for nested schema](#nestedblock--on_call_rotation))
-- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens. You can't update this value later.
 
 ### Read-Only
 

@@ -11,15 +11,7 @@ import (
 )
 
 var severitySchema = map[string]*schema.Schema{
-	"team_name": {
-		Description: "Used to specify the team the resource should be created in when using global tokens.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Default:     nil,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return d.Id() != ""
-		},
-	},
+	"team_name": teamNameSchema(),
 	"id": {
 		Description: "The ID of this Severity.",
 		Type:        schema.TypeString,
@@ -78,8 +70,9 @@ func newSeverityResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/list-all-severities/",
-		Schema:      severitySchema,
+		Description:   "https://betterstack.com/docs/uptime/api/list-all-severities/",
+		CustomizeDiff: validateTeamNameNotChanged,
+		Schema:        severitySchema,
 	}
 }
 

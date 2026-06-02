@@ -37,7 +37,7 @@ https://betterstack.com/docs/uptime/api/heartbeats/
 - `server_timezone` (String) The IANA timezone (e.g. "Europe/Berlin") used to evaluate this heartbeat's period against wall-clock time, keeping daily and cron-style schedules aligned across daylight saving time changes. Only applies to periods of 1 hour or longer; it is cleared for shorter periods.
 - `sms` (Boolean) Whether to send an SMS when a new incident is created.
 - `sort_index` (Number) An index controlling the position of a heartbeat in the heartbeat group.
-- `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
+- `team_name` (String) Used to specify the team the resource should be created in when using global tokens. You can't update this value later.
 - `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
 
 ### Read-Only

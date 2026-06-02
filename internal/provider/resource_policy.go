@@ -8,6 +8,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
@@ -158,15 +159,7 @@ var policyStepSchema = map[string]*schema.Schema{
 }
 
 var policySchema = map[string]*schema.Schema{
-	"team_name": {
-		Description: "Used to specify the team the resource should be created in when using global tokens.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Default:     nil,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return d.Id() != ""
-		},
-	},
+	"team_name": teamNameSchema(),
 	"id": {
 		Description: "The ID of this Policy.",
 		Type:        schema.TypeString,
@@ -219,7 +212,7 @@ func newPolicyResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CustomizeDiff: validatePolicy,
+		CustomizeDiff: customdiff.Sequence(validateTeamNameNotChanged, validatePolicy),
 		Schema:        policySchema,
 		Description:   "https://betterstack.com/docs/uptime/api/policies/",
 	}

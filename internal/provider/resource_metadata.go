@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,7 +22,7 @@ import (
 
 var metadataSchema = map[string]*schema.Schema{
 	"team_name": {
-		Description: "Used to specify the team the resource should be created in when using global tokens. This field is deprecated, team name doesn't have to be specified for this resource anymore.",
+		Description: "Used to specify the team the resource should be created in when using global tokens. This field is deprecated, team name doesn't have to be specified for this resource anymore. You can't update this value later.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Default:     nil,
@@ -150,7 +151,7 @@ func newMetadataResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CustomizeDiff: validateMetadata,
+		CustomizeDiff: customdiff.Sequence(validateTeamNameNotChanged, validateMetadata),
 		Description:   "https://betterstack.com/docs/uptime/api/metadata/",
 		Schema:        metadataSchema,
 	}
