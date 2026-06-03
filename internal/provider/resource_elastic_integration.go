@@ -7,19 +7,12 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var elasticIntegrationSchema = map[string]*schema.Schema{
-	"team_name": {
-		Description: "Used to specify the team the resource should be created in when using global tokens.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Default:     nil,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return d.Id() != ""
-		},
-	},
+	"team_name": teamNameSchema(),
 	"id": {
 		Description: "The ID of the Elastic Integration.",
 		Type:        schema.TypeString,
@@ -103,7 +96,7 @@ func newElasticIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CustomizeDiff: validateRequestHeaders,
+		CustomizeDiff: customdiff.Sequence(validateTeamNameNotChanged, validateRequestHeaders),
 		Description:   "https://betterstack.com/docs/uptime/api/elastic-integrations/",
 		Schema:        elasticIntegrationSchema,
 	}

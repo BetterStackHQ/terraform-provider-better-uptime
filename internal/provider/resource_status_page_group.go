@@ -11,15 +11,7 @@ import (
 )
 
 var statusPageGroupSchema = map[string]*schema.Schema{
-	"team_name": {
-		Description: "Used to specify the team the resource should be created in when using global tokens.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Default:     nil,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return d.Id() != ""
-		},
-	},
+	"team_name": teamNameSchema(),
 	"id": {
 		Description: "The ID of this status page group.",
 		Type:        schema.TypeString,
@@ -63,8 +55,9 @@ func newStatusPageGroupResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/status-page-groups/",
-		Schema:      statusPageGroupSchema,
+		Description:   "https://betterstack.com/docs/uptime/api/status-page-groups/",
+		CustomizeDiff: validateTeamNameNotChanged,
+		Schema:        statusPageGroupSchema,
 	}
 }
 
