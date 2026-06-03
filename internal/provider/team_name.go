@@ -57,7 +57,7 @@ func validateTeamNameNotChanged(ctx context.Context, diff *schema.ResourceDiff, 
 		}
 	}
 	if newName != oldName {
-		return fmt.Errorf("team_name cannot be changed after resource is created - it's only used to specify the team when creating it using a global token")
+		return fmt.Errorf("team_name cannot be changed after resource is created - it's only used to specify the team when creating it using a global token, you can safely remove it from your configuration now")
 	}
 	return nil
 }
