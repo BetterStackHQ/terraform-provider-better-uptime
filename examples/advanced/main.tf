@@ -421,6 +421,11 @@ resource "betteruptime_policy" "this" {
   repeat_delay    = 60
   policy_group_id = betteruptime_policy_group.this.id
 
+  # After all steps and the 3 repeats (every 60s) pass unacknowledged, escalation
+  # continues with the fallback policy below instead of stopping — the supported way
+  # to keep re-notifying once a policy is exhausted, without escalation loops.
+  fallback_policy_id = betteruptime_policy.fallback.id
+
   steps {
     type        = "escalation"
     wait_before = 0
@@ -491,6 +496,23 @@ EOT
   steps {
     type        = "escalation"
     wait_before = 180
+    urgency_id  = betteruptime_severity.this.id
+    step_members { type = "entire_team" }
+  }
+}
+
+# Fallback policy: invoked only after "this" exhausts its 3 repeats unacknowledged.
+# It repeats on its own cadence and widens the blast radius to the whole team —
+# illustrating how to chain repeated notifications across policies via fallback_policy_id.
+resource "betteruptime_policy" "fallback" {
+  name            = "Terraform Fallback Policy ${random_pet.unique.id}"
+  repeat_count    = 5
+  repeat_delay    = 120
+  policy_group_id = betteruptime_policy_group.this.id
+
+  steps {
+    type        = "escalation"
+    wait_before = 0
     urgency_id  = betteruptime_severity.this.id
     step_members { type = "entire_team" }
   }

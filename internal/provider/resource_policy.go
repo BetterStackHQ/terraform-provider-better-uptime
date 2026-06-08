@@ -183,6 +183,12 @@ var policySchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"fallback_policy_id": {
+		Description: "Set this to escalate to another escalation policy once this policy has run all its steps and repeats without being acknowledged. The fallback policy must belong to the same organization.",
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Computed:    true,
+	},
 	"incident_token": {
 		Description: "Incident token that can be used for manually reporting incidents.",
 		Type:        schema.TypeString,
@@ -247,14 +253,15 @@ type policyStep struct {
 }
 
 type policy struct {
-	Id            *int          `json:"id,omitempty"`
-	Name          *string       `json:"name,omitempty"`
-	RepeatCount   *int          `json:"repeat_count,omitempty"`
-	RepeatDelay   *int          `json:"repeat_delay,omitempty"`
-	IncidentToken *string       `json:"incident_token,omitempty"`
-	Steps         *[]policyStep `json:"steps"`
-	TeamName      *string       `json:"team_name,omitempty"`
-	PolicyGroupID *int          `json:"policy_group_id,omitempty"`
+	Id               *int          `json:"id,omitempty"`
+	Name             *string       `json:"name,omitempty"`
+	RepeatCount      *int          `json:"repeat_count,omitempty"`
+	RepeatDelay      *int          `json:"repeat_delay,omitempty"`
+	FallbackPolicyID *int          `json:"fallback_policy_id,omitempty"`
+	IncidentToken    *string       `json:"incident_token,omitempty"`
+	Steps            *[]policyStep `json:"steps"`
+	TeamName         *string       `json:"team_name,omitempty"`
+	PolicyGroupID    *int          `json:"policy_group_id,omitempty"`
 }
 
 type policyHTTPResponse struct {
@@ -276,6 +283,7 @@ func policyRef(in *policy) []struct {
 		{k: "name", v: &in.Name},
 		{k: "repeat_count", v: &in.RepeatCount},
 		{k: "repeat_delay", v: &in.RepeatDelay},
+		{k: "fallback_policy_id", v: &in.FallbackPolicyID},
 		{k: "incident_token", v: &in.IncidentToken},
 		{k: "steps", v: &in.Steps},
 		{k: "policy_group_id", v: &in.PolicyGroupID},

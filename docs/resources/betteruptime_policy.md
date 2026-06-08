@@ -22,6 +22,7 @@ https://betterstack.com/docs/uptime/api/policies/
 
 ### Optional
 
+- `fallback_policy_id` (Number) Set this to escalate to another escalation policy once this policy has run all its steps and repeats without being acknowledged. The fallback policy must belong to the same organization.
 - `policy_group_id` (Number) Set this attribute if you want to add this policy to a policy group.
 - `repeat_count` (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
 - `repeat_delay` (Number) How long in seconds to wait before each repetition.

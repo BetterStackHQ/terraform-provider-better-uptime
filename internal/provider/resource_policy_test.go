@@ -33,6 +33,7 @@ func TestResourcePolicy(t *testing.T) {
 				  name         = "Terraform - Test"
 				  repeat_count = 3
 				  repeat_delay = 60
+				  fallback_policy_id = 456
 
 				  steps {
 					type        = "escalation"
@@ -62,6 +63,7 @@ func TestResourcePolicy(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_policy.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "name", "Terraform - Test"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "fallback_policy_id", "456"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.urgency_id", "123"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.urgency_id", "123"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.type", "current_on_call"),

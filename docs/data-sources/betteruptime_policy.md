@@ -21,6 +21,7 @@ Policy lookup.
 
 ### Read-Only
 
+- `fallback_policy_id` (Number) Set this to escalate to another escalation policy once this policy has run all its steps and repeats without being acknowledged. The fallback policy must belong to the same organization.
 - `id` (String) The ID of this Policy.
 - `incident_token` (String) Incident token that can be used for manually reporting incidents.
 - `policy_group_id` (Number) Set this attribute if you want to add this policy to a policy group.
