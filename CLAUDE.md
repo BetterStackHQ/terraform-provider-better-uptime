@@ -6,13 +6,13 @@ Guidance for Claude Code (claude.ai/code) when working in this repository (the B
 
 When you add a resource, data source, attribute, or any new provider capability, use it in at least one config under `examples/` — new provider features generally go into `examples/advanced/`. The E2E matrix applies, re-plans (expecting no diff), and destroys every example config against the live API, so a feature that appears in no example is never covered end-to-end.
 
-## Bump the version when an example requires it
+## Versioning: git tags ship releases; keep the `Makefile` in sync
 
-Using a brand-new capability in an example means that example now needs a newer provider than it pins. When that happens — and only then, not for every functional change — bump the version **in the same commit**, two files kept in sync:
+Published provider versions on the Terraform registry are **solely tag-based**: pushing a `vX.Y.Z` git tag fires `.github/workflows/release.yml`, which builds and publishes. **That tag push is the only step that actually ships a release** — the `Makefile`'s `VERSION` does not determine what's published.
 
-1. **`Makefile`** — bump the patch in `VERSION := X.Y.Z` (e.g. `0.20.17` → `0.20.18`).
-2. **that example's `versions.tf`** (usually `examples/advanced/versions.tf`) — set the required-provider `version = ">= X.Y.Z"` to the same value.
+`VERSION` still drives local `make terraform` and E2E: E2E builds the provider at `VERSION`, then runs `terraform init` against each example's `versions.tf` constraint, so **a constraint ahead of `VERSION` fails `init`**. Keep `VERSION` current with the release tags rather than letting it fall behind (it had drifted to `0.20.19` while `v0.21.1` was already tagged).
 
-Use the next patch above the current value on the default branch (it sits one ahead of the latest released git tag). Keep the two in sync: E2E builds the provider at `VERSION` and runs `terraform init` against the example's constraint, so a constraint ahead of `VERSION` fails init. Skipping the bump when it is needed means the published provider — and the example that pins it — won't pick up your change.
+So when an example starts using a brand-new capability, bump both in the same commit — anchored to the **latest git tag**, not the possibly-stale `Makefile` value:
 
-The bump rides in the feature commit (PRs are squash-merged). The release itself — the git tag plus a separate "Bump version to vX" commit — happens independently; you only bump these two files.
+1. **that example's `versions.tf`** (usually `examples/advanced/versions.tf`) — raise `version = ">= X.Y.Z"` to the release that introduces the feature (the next version above the latest tag), so registry users on an older provider get a clean "update your provider" error instead of a confusing "unsupported parameter" one.
+2. **`Makefile`** — set `VERSION` to that same version, so local builds and E2E `init` stay green.
