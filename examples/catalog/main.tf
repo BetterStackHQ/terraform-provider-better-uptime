@@ -96,16 +96,16 @@ resource "betteruptime_catalog_attribute" "service_on_call_team" {
   name        = betteruptime_catalog_attribute.on_call_team_name.name
 }
 
-resource "betteruptime_catalog_record" "homepage" {
+# API Services incidents in Production -> Backend team
+resource "betteruptime_catalog_record" "api_production" {
   relation_id = betteruptime_catalog_relation.service.id
 
   attribute {
     attribute_id = betteruptime_catalog_attribute.affected_service.id
     type         = "String"
-    value        = "Homepage"
+    value        = "API Services"
   }
 
-  # Matches only incidents with Environment: Production (other records leave Environment empty, matching any environment)
   attribute {
     attribute_id = betteruptime_catalog_attribute.service_environment.id
     type         = "String"
@@ -119,34 +119,36 @@ resource "betteruptime_catalog_record" "homepage" {
   }
 }
 
-resource "betteruptime_catalog_record" "api" {
+# Incidents from any service in Production -> Demo team (empty Affected service matches any value)
+resource "betteruptime_catalog_record" "any_service_production" {
   relation_id = betteruptime_catalog_relation.service.id
 
   attribute {
-    attribute_id = betteruptime_catalog_attribute.affected_service.id
+    attribute_id = betteruptime_catalog_attribute.service_environment.id
     type         = "String"
-    value        = "API Services"
-  }
-
-  attribute {
-    attribute_id = betteruptime_catalog_attribute.service_on_call_team.id
-    type         = "String"
-    value        = "Backend team"
-  }
-}
-
-resource "betteruptime_catalog_record" "landing_page" {
-  relation_id = betteruptime_catalog_relation.service.id
-
-  attribute {
-    attribute_id = betteruptime_catalog_attribute.affected_service.id
-    type         = "String"
-    value        = "Landing page"
+    value        = "Production"
   }
 
   attribute {
     attribute_id = betteruptime_catalog_attribute.service_on_call_team.id
     type         = "String"
     value        = "Demo team"
+  }
+}
+
+# Payment service incidents in any environment -> Backend team (empty Environment matches any value)
+resource "betteruptime_catalog_record" "payment_service" {
+  relation_id = betteruptime_catalog_relation.service.id
+
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.affected_service.id
+    type         = "String"
+    value        = "Payment service"
+  }
+
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.service_on_call_team.id
+    type         = "String"
+    value        = "Backend team"
   }
 }

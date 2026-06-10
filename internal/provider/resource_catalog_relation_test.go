@@ -34,13 +34,13 @@ func TestResourceCatalogRelation(t *testing.T) {
 				resource "betteruptime_catalog_relation" "this" {
 					name        = "%s"
 					description = "%s"
-					match_mode  = "any"
 				}
 				`, name, description),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_catalog_relation.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_catalog_relation.this", "name", name),
 					resource.TestCheckResourceAttr("betteruptime_catalog_relation.this", "description", description),
+					// match_mode defaults to "any" when omitted
 					resource.TestCheckResourceAttr("betteruptime_catalog_relation.this", "match_mode", "any"),
 				),
 			},

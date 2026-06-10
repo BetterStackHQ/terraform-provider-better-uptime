@@ -31,7 +31,7 @@ var catalogRelationSchema = map[string]*schema.Schema{
 		Description:  "Should a record enrich incidents matching any of its primary attribute values, or only incidents matching all of them (an empty primary value then matches any value). Possible values: any, all. Defaults to any.",
 		Type:         schema.TypeString,
 		Optional:     true,
-		Computed:     true,
+		Default:      "any",
 		ValidateFunc: validation.StringInSlice([]string{"any", "all"}, false),
 	},
 }
