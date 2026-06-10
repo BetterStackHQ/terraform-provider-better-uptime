@@ -22,6 +22,7 @@ https://betterstack.com/docs/uptime/api/catalog-integrations-relations/
 ### Optional
 
 - `description` (String) A description of the Catalog relation.
+- `match_mode` (String) Should a record enrich incidents matching any of its primary attribute values, or only incidents matching all of them (an empty primary value then matches any value). Possible values: any, all. Defaults to any.
 
 ### Read-Only
 

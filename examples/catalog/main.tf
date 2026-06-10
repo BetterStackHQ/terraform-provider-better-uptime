@@ -74,11 +74,19 @@ resource "betteruptime_catalog_record" "backend_team" {
 resource "betteruptime_catalog_relation" "service" {
   name        = "Service"
   description = "Services with responsible teams"
+  # Records enrich only incidents matching all primary attribute values; an empty primary value matches any value
+  match_mode = "all"
 }
 
 resource "betteruptime_catalog_attribute" "affected_service" {
   relation_id = betteruptime_catalog_relation.service.id
   name        = "Affected service"
+  primary     = true
+}
+
+resource "betteruptime_catalog_attribute" "service_environment" {
+  relation_id = betteruptime_catalog_relation.service.id
+  name        = "Environment"
   primary     = true
 }
 
@@ -95,6 +103,13 @@ resource "betteruptime_catalog_record" "homepage" {
     attribute_id = betteruptime_catalog_attribute.affected_service.id
     type         = "String"
     value        = "Homepage"
+  }
+
+  # Matches only incidents with Environment: Production (other records leave Environment empty, matching any environment)
+  attribute {
+    attribute_id = betteruptime_catalog_attribute.service_environment.id
+    type         = "String"
+    value        = "Production"
   }
 
   attribute {
