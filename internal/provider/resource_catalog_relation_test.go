@@ -40,6 +40,8 @@ func TestResourceCatalogRelation(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_catalog_relation.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_catalog_relation.this", "name", name),
 					resource.TestCheckResourceAttr("betteruptime_catalog_relation.this", "description", description),
+					// match_mode defaults to "any" when omitted
+					resource.TestCheckResourceAttr("betteruptime_catalog_relation.this", "match_mode", "any"),
 				),
 			},
 			// Step 2 - update
@@ -52,12 +54,14 @@ func TestResourceCatalogRelation(t *testing.T) {
 				resource "betteruptime_catalog_relation" "this" {
 					name        = "%s"
 					description = "%s"
+					match_mode  = "all"
 				}
 				`, name, updatedDescription),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_catalog_relation.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_catalog_relation.this", "name", name),
 					resource.TestCheckResourceAttr("betteruptime_catalog_relation.this", "description", updatedDescription),
+					resource.TestCheckResourceAttr("betteruptime_catalog_relation.this", "match_mode", "all"),
 				),
 			},
 			// Step 3 - make no changes, check plan is empty
@@ -70,6 +74,7 @@ func TestResourceCatalogRelation(t *testing.T) {
 				resource "betteruptime_catalog_relation" "this" {
 					name        = "%s"
 					description = "%s"
+					match_mode  = "all"
 				}
 				`, name, updatedDescription),
 				PlanOnly: true,
