@@ -6,13 +6,10 @@ Guidance for Claude Code (claude.ai/code) when working in this repository (the B
 
 When you add a resource, data source, attribute, or any new provider capability, use it in at least one config under `examples/` — new provider features generally go into `examples/advanced/`. The E2E matrix applies, re-plans (expecting no diff), and destroys every example config against the live API, so a feature that appears in no example is never covered end-to-end.
 
-## Bump the version when an example requires it
+## Versioning: bump `VERSION` to the intended release version
 
-Using a brand-new capability in an example means that example now needs a newer provider than it pins. When that happens — and only then, not for every functional change — bump the version **in the same commit**, two files kept in sync:
+**How releases work:** publishing to the Terraform registry is **solely tag-based** — pushing a `vX.Y.Z` git tag fires `.github/workflows/release.yml`, which builds and publishes that version. In practice the tag is pushed onto the squash-merged PR commit on master, so the PR itself is what gets released. The `Makefile`'s `VERSION` plays no part in publishing, but it drives local `make terraform` and E2E: the provider is built at `VERSION`, then `terraform init` runs against each example's `versions.tf` constraint, so **a constraint ahead of `VERSION` fails `init`**.
 
-1. **`Makefile`** — bump the patch in `VERSION := X.Y.Z` (e.g. `0.20.17` → `0.20.18`).
-2. **that example's `versions.tf`** (usually `examples/advanced/versions.tf`) — set the required-provider `version = ">= X.Y.Z"` to the same value.
+**The rule:** in every PR, set `VERSION` in the `Makefile` to the **intended release version** — the version of the **next git tag** this PR should be released in, so always **higher than the latest git tag** (`git describe --tags --abbrev=0`; usually its next patch, a minor bump for bigger changes). Never derive it from the current `VERSION` value, which may be stale — it had drifted to `0.20.19` while `v0.21.1` was already tagged. The only exception is a change unrelated to a release, such as a CI, instructions, or tests-only update — those don't bump anything.
 
-Use the next patch above the current value on the default branch (it sits one ahead of the latest released git tag). Keep the two in sync: E2E builds the provider at `VERSION` and runs `terraform init` against the example's constraint, so a constraint ahead of `VERSION` fails init. Skipping the bump when it is needed means the published provider — and the example that pins it — won't pick up your change.
-
-The bump rides in the feature commit (PRs are squash-merged). The release itself — the git tag plus a separate "Bump version to vX" commit — happens independently; you only bump these two files.
+**When an example starts using a brand-new capability**, also raise `version = ">= X.Y.Z"` in that example's `versions.tf` (usually `examples/advanced/versions.tf`) to the same intended release version, in the same commit as the `Makefile` bump. Registry users on an older provider then get a clean "update your provider" error instead of a confusing "unsupported parameter" one — and E2E `init` stays green because the constraint never gets ahead of `VERSION`.
