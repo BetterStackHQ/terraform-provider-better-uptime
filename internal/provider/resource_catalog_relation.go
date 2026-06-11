@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var catalogRelationSchema = map[string]*schema.Schema{
@@ -25,6 +26,13 @@ var catalogRelationSchema = map[string]*schema.Schema{
 		Description: "A description of the Catalog relation.",
 		Type:        schema.TypeString,
 		Optional:    true,
+	},
+	"match_mode": {
+		Description:  "Should a record enrich incidents matching any of its primary attribute values, or only incidents matching all of them (an empty primary value then matches any value). Possible values: any, all. Defaults to any.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      "any",
+		ValidateFunc: validation.StringInSlice([]string{"any", "all"}, false),
 	},
 }
 
@@ -46,6 +54,7 @@ type catalogRelation struct {
 	ID          *string `json:"id,omitempty"`
 	Name        *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
+	MatchMode   *string `json:"match_mode,omitempty"`
 }
 
 type catalogRelationHTTPResponse struct {
@@ -65,6 +74,7 @@ func catalogRelationRef(in *catalogRelation) []struct {
 	}{
 		{k: "name", v: &in.Name},
 		{k: "description", v: &in.Description},
+		{k: "match_mode", v: &in.MatchMode},
 	}
 }
 
