@@ -196,7 +196,7 @@ var policySchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"steps": {
-		Description: "An array of escalation policy steps. Omit it to create a policy with no steps (e.g. a silent policy that only collects incidents).",
+		Description: "An array of escalation policy steps. May be empty to create a silent policy that only collects incidents without alerting anyone.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: policyStepSchema},
 		Optional:    true,
