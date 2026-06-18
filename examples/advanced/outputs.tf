@@ -6,6 +6,10 @@ output "escalation_policy_id" {
   value = betteruptime_policy.this.id
 }
 
+output "silent_policy_id" {
+  value = betteruptime_policy.silent.id
+}
+
 output "betteruptime_email_integration_address" { value = betteruptime_email_integration.this.email_address }
 
 output "betteruptime_incoming_webhook_url" { value = betteruptime_incoming_webhook.this.url }

@@ -661,6 +661,72 @@ EOT
 	})
 }
 
+func TestResourcePolicyWithoutSteps(t *testing.T) {
+	server := newResourceServer(t, "/api/v3/policies", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create a silent policy with no steps.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Silent"
+				  repeat_count = 0
+				  repeat_delay = 0
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_policy.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "name", "Terraform - Silent"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.#", "0"),
+				),
+				PreConfig: func() {
+					t.Log("step 1")
+				},
+			},
+			// Step 2 - add a step to the previously empty policy.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name         = "Terraform - Silent"
+				  repeat_count = 0
+				  repeat_delay = 0
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					urgency_id  = 123
+					step_members { type = "current_on_call" }
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.#", "1"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.type", "escalation"),
+				),
+				PreConfig: func() {
+					t.Log("step 2")
+				},
+			},
+		},
+	})
+}
+
 func TestResourcePolicyChainedPolicyMember(t *testing.T) {
 	server := newResourceServer(t, "/api/v3/policies", "1")
 	defer server.Close()
