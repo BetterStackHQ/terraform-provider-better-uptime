@@ -27,7 +27,7 @@ Policy lookup.
 - `policy_group_id` (Number) Set this attribute if you want to add this policy to a policy group.
 - `repeat_count` (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
 - `repeat_delay` (Number) How long in seconds to wait before each repetition.
-- `steps` (List of Object) An array of escalation policy steps (see [below for nested schema](#nestedatt--steps))
+- `steps` (List of Object) An array of escalation policy steps. May be empty to create a silent policy that only collects incidents without alerting anyone. (see [below for nested schema](#nestedatt--steps))
 
 <a id="nestedatt--steps"></a>
 ### Nested Schema for `steps`

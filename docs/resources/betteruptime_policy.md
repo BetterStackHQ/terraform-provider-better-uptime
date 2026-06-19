@@ -18,7 +18,6 @@ https://betterstack.com/docs/uptime/api/policies/
 ### Required
 
 - `name` (String) The name of this Policy.
-- `steps` (Block List, Min: 1) An array of escalation policy steps (see [below for nested schema](#nestedblock--steps))
 
 ### Optional
 
@@ -26,6 +25,7 @@ https://betterstack.com/docs/uptime/api/policies/
 - `policy_group_id` (Number) Set this attribute if you want to add this policy to a policy group.
 - `repeat_count` (Number) How many times should the entire policy be repeated if no one acknowledges the incident.
 - `repeat_delay` (Number) How long in seconds to wait before each repetition.
+- `steps` (Block List) An array of escalation policy steps. May be empty to create a silent policy that only collects incidents without alerting anyone. (see [below for nested schema](#nestedblock--steps))
 - `team_name` (String) Used to specify the team the resource should be created in when using global tokens. You can't update this value later.
 
 ### Read-Only

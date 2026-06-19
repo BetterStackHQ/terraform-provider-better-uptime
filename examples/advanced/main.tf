@@ -518,6 +518,15 @@ resource "betteruptime_policy" "fallback" {
   }
 }
 
+# Silent policy: a policy with no steps. It never alerts anyone, incidents are
+# only collected. The "steps" block is optional, so omitting it stays silent.
+resource "betteruptime_policy" "silent" {
+  name            = "Terraform Silent Policy ${random_pet.unique.id}"
+  repeat_count    = 0
+  repeat_delay    = 0
+  policy_group_id = betteruptime_policy_group.this.id
+}
+
 resource "betteruptime_severity_group" "this" {
   name = "Severities from Terraform"
 }
