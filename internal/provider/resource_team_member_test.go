@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestResourceTeamMember(t *testing.T) {
@@ -137,6 +139,71 @@ func TestResourceTeamMemberExistingUser(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_team_member.this", "created_at", "2025-06-15T10:30:00Z"),
 					resource.TestCheckResourceAttr("betteruptime_team_member.this", "mobile_app_platforms.#", "1"),
 					resource.TestCheckResourceAttr("betteruptime_team_member.this", "mobile_app_platforms.0", "ios"),
+				),
+			},
+		},
+	})
+}
+
+func TestResourceTeamMemberRoleUpdate(t *testing.T) {
+	var changeRoleCalled bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members":
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"data":{"id":"7","type":"team_member","attributes":{"email":"x@example.com","role":"responder","role_id":11}}}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/team-members":
+			role := "responder"
+			if changeRoleCalled {
+				role = "team_lead"
+			}
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":"7","type":"team_member","attributes":{"email":"x@example.com","role":"%s","role_id":11}}}`, role)))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/roles":
+			_, _ = w.Write([]byte(`{"data":[{"id":"99","type":"role","attributes":{"name":"Team lead","system_role":"team_lead"}}]}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members/7/change-role/99":
+			changeRoleCalled = true
+			_, _ = w.Write([]byte(`{"data":{"id":"7","type":"team_member","attributes":{"email":"x@example.com","role":"team_lead","role_id":99}}}`))
+		case r.Method == http.MethodDelete && r.URL.Path == "/api/v2/team-members":
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			t.Errorf("Unexpected request: %s %s", r.Method, r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil }},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+				resource "betteruptime_team_member" "this" {
+					email = "x@example.com"
+					role  = "responder"
+				}`,
+				Check: resource.TestCheckResourceAttr("betteruptime_team_member.this", "role", "responder"),
+			},
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+				resource "betteruptime_team_member" "this" {
+					email = "x@example.com"
+					role  = "team_lead"
+				}`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "role", "team_lead"),
+					func(*terraform.State) error {
+						if !changeRoleCalled {
+							return fmt.Errorf("expected change-role endpoint to be called")
+						}
+						return nil
+					},
 				),
 			},
 		},

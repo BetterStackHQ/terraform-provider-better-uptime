@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var teamMemberSchema = map[string]*schema.Schema{
@@ -28,13 +29,11 @@ var teamMemberSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 	},
 	"role": {
-		Description: "The role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return d.Id() != ""
-		},
+		Description:      "The role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. For custom roles, use the change-role API directly.",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Computed:         true,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"responder", "member", "team_lead", "billing_admin"}, false)),
 	},
 	"first_name": {
 		Description: "The first name of the team member (available after invitation is accepted).",
@@ -93,6 +92,7 @@ func newTeamMemberResource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: teamMemberCreate,
 		ReadContext:   teamMemberRead,
+		UpdateContext: teamMemberUpdate,
 		DeleteContext: teamMemberDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -166,6 +166,51 @@ func teamMemberDelete(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	return resourceDeleteWithBaseURL(ctx, meta, meta.(*client).BetterStackBaseURL(), path)
+}
+
+func teamMemberUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if !d.HasChange("role") {
+		return teamMemberRead(ctx, d, meta)
+	}
+
+	memberID := d.Get("member_id").(string)
+	if memberID == "" {
+		return diag.Errorf("Cannot change the role of %q: the invitation hasn't been accepted yet. A pending invitation's role is fixed at invite time.", d.Id())
+	}
+
+	roleName := d.Get("role").(string)
+	roleID, _, err := findRoleByName(ctx, meta, roleName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if roleID == "" {
+		return diag.Errorf("No role found with name: %s", roleName)
+	}
+
+	baseURL := meta.(*client).BetterStackBaseURL()
+	path := fmt.Sprintf("/api/v2/team-members/%s/change-role/%s", url.PathEscape(memberID), url.PathEscape(roleID))
+	log.Printf("POST %s%s", baseURL, path)
+	res, err := meta.(*client).PostWithBaseURL(ctx, baseURL, path, nil)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer func() {
+		_, _ = io.Copy(io.Discard, res.Body)
+		_ = res.Body.Close()
+	}()
+	body, err := io.ReadAll(res.Body)
+	if res.StatusCode != http.StatusOK {
+		return diag.Errorf("POST %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
+	}
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var out teamMemberHTTPResponse
+	if err := json.Unmarshal(body, &out); err != nil {
+		return diag.FromErr(err)
+	}
+	return teamMemberCopyAttrs(d, &out)
 }
 
 func teamMemberReadByEmail(ctx context.Context, d *schema.ResourceData, meta interface{}) (*teamMemberHTTPResponse, diag.Diagnostics, bool) {
