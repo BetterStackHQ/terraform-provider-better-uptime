@@ -22,6 +22,6 @@ Look up a team role by name to obtain its ID (for use with `betteruptime_team_me
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `system_role` (String) The system role identifier (e.g. responder), or empty for a custom role.
+- `role` (String) The role identifier: a system role (admin, billing_admin, team_lead, responder, member) or 'custom' for a custom role.
 
 

@@ -160,7 +160,7 @@ func TestResourceTeamMemberRoleUpdate(t *testing.T) {
 			}
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":"7","type":"team_member","attributes":{"email":"x@example.com","role":"%s","role_id":11}}}`, role)))
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/roles":
-			_, _ = w.Write([]byte(`{"data":[{"id":"99","type":"role","attributes":{"name":"Team lead","system_role":"team_lead"}}]}`))
+			_, _ = w.Write([]byte(`{"data":[{"id":"99","type":"role","attributes":{"name":"Team lead","role":"team_lead"}}]}`))
 		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members/7/change-role/99":
 			changeRoleCalled = true
 			_, _ = w.Write([]byte(`{"data":{"id":"7","type":"team_member","attributes":{"email":"x@example.com","role":"team_lead","role_id":99}}}`))

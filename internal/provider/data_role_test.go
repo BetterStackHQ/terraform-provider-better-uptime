@@ -15,8 +15,8 @@ func TestRoleDataSource(t *testing.T) {
 		if r.Method == http.MethodGet && r.URL.Path == "/api/v2/roles" {
 			w.Header().Set("Content-Type", "application/json")
 			_, _ = w.Write([]byte(`{"data":[
-				{"id":"10","type":"role","attributes":{"name":"Team lead","system_role":"team_lead"}},
-				{"id":"42","type":"role","attributes":{"name":"On-call lead","system_role":null}}
+				{"id":"10","type":"role","attributes":{"name":"Team lead","role":"team_lead"}},
+				{"id":"42","type":"role","attributes":{"name":"On-call lead","role":"custom"}}
 			]}`))
 			return
 		}
@@ -39,7 +39,7 @@ func TestRoleDataSource(t *testing.T) {
 				`, "On-call lead"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.betteruptime_role.oncall", "id", "42"),
-					resource.TestCheckResourceAttr("data.betteruptime_role.oncall", "system_role", ""),
+					resource.TestCheckResourceAttr("data.betteruptime_role.oncall", "role", "custom"),
 				),
 			},
 		},

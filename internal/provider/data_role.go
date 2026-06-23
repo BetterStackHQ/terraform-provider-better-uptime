@@ -17,16 +17,16 @@ var roleSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 	},
-	"system_role": {
-		Description: "The system role identifier (e.g. responder), or empty for a custom role.",
+	"role": {
+		Description: "The role identifier: a system role (admin, billing_admin, team_lead, responder, member) or 'custom' for a custom role.",
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
 }
 
 type role struct {
-	Name       *string `json:"name,omitempty"`
-	SystemRole *string `json:"system_role,omitempty"`
+	Name *string `json:"name,omitempty"`
+	Role *string `json:"role,omitempty"`
 }
 
 type rolesPageHTTPResponse struct {
@@ -57,18 +57,19 @@ func roleLookup(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 		return diag.Errorf("No role found with name: %s", name)
 	}
 	d.SetId(id)
-	systemRole := ""
-	if attrs.SystemRole != nil {
-		systemRole = *attrs.SystemRole
+	roleValue := ""
+	if attrs.Role != nil {
+		roleValue = *attrs.Role
 	}
-	if err := d.Set("system_role", systemRole); err != nil {
+	if err := d.Set("role", roleValue); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
 }
 
 // findRoleByName paginates GET /api/v2/roles (served by betterstack) and returns
-// the id + attributes of the role whose system_role or name matches the argument.
+// the id + attributes of the role whose `role` value (the system-role identifier,
+// or "custom") or display name matches the argument.
 func findRoleByName(ctx context.Context, meta interface{}, name string) (string, *role, error) {
 	baseURL := meta.(*client).BetterStackBaseURL()
 	page := 1
@@ -90,7 +91,7 @@ func findRoleByName(ctx context.Context, meta interface{}, name string) (string,
 			return "", nil, err
 		}
 		for _, e := range pageResp.Data {
-			if (e.Attributes.SystemRole != nil && *e.Attributes.SystemRole == name) ||
+			if (e.Attributes.Role != nil && *e.Attributes.Role == name) ||
 				(e.Attributes.Name != nil && *e.Attributes.Name == name) {
 				attrs := e.Attributes
 				return e.ID, &attrs, nil
