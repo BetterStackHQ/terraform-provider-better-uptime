@@ -210,6 +210,54 @@ func TestResourceTeamMemberRoleUpdate(t *testing.T) {
 	})
 }
 
+func TestResourceTeamMemberCustomRoleNoDiff(t *testing.T) {
+	var changeRoleCalled bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members":
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"data":{"id":"5","type":"team_member","attributes":{"email":"custom@example.com","role":"custom","role_id":77}}}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/team-members":
+			_, _ = w.Write([]byte(`{"data":{"id":"5","type":"team_member","attributes":{"email":"custom@example.com","role":"custom","role_id":77}}}`))
+		case r.Method == http.MethodDelete && r.URL.Path == "/api/v2/team-members":
+			w.WriteHeader(http.StatusNoContent)
+		case strings.Contains(r.URL.Path, "/change-role/"):
+			changeRoleCalled = true
+			t.Errorf("change-role endpoint must not be called for a custom-role member")
+			w.WriteHeader(http.StatusBadRequest)
+		default:
+			t.Errorf("Unexpected request: %s %s", r.Method, r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil }},
+		Steps: []resource.TestStep{
+			{
+				// Config has a system role; API returns "custom". DiffSuppressFunc must
+				// prevent any perpetual diff and must not trigger a change-role call.
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+				resource "betteruptime_team_member" "this" {
+					email = "custom@example.com"
+					role  = "member"
+				}`,
+				Check: func(*terraform.State) error {
+					if changeRoleCalled {
+						return fmt.Errorf("change-role endpoint was called but must not be for a custom-role member")
+					}
+					return nil
+				},
+			},
+		},
+	})
+}
+
 func TestResourceTeamMemberImport(t *testing.T) {
 	var created bool
 

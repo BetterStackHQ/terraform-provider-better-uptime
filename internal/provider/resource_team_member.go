@@ -34,6 +34,12 @@ var teamMemberSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Computed:         true,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"responder", "member", "team_lead", "billing_admin"}, false)),
+		// A member who holds a custom role (the API reports role "custom") is left
+		// untouched: this resource manages only system roles, so suppress the diff
+		// rather than reset such a member to a system role.
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return old == "custom"
+		},
 	},
 	"first_name": {
 		Description: "The first name of the team member (available after invitation is accepted).",
