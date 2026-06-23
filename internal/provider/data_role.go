@@ -42,7 +42,7 @@ type rolesPageHTTPResponse struct {
 func newRoleDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: roleLookup,
-		Description: "Look up a team role by name to obtain its ID (for betteruptime_team_member or the change-role API).",
+		Description: "Look up a team role by name to obtain its ID (for use with `betteruptime_team_member` or the change-role API).",
 		Schema:      roleSchema,
 	}
 }
@@ -78,7 +78,6 @@ func findRoleByName(ctx context.Context, meta interface{}, name string) (string,
 			return "", nil, err
 		}
 		body, readErr := io.ReadAll(res.Body)
-		_, _ = io.Copy(io.Discard, res.Body)
 		_ = res.Body.Close()
 		if res.StatusCode != http.StatusOK {
 			return "", nil, fmt.Errorf("GET %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))

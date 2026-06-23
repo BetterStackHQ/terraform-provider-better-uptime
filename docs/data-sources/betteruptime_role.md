@@ -3,12 +3,12 @@
 page_title: "betteruptime_role Data Source - terraform-provider-better-uptime"
 subcategory: ""
 description: |-
-  Look up a team role by name to obtain its ID (for betteruptimeteammember or the change-role API).
+  Look up a team role by name to obtain its ID (for use with betteruptime_team_member or the change-role API).
 ---
 
 # betteruptime_role (Data Source)
 
-Look up a team role by name to obtain its ID (for betteruptime_team_member or the change-role API).
+Look up a team role by name to obtain its ID (for use with `betteruptime_team_member` or the change-role API).
 
 
 
