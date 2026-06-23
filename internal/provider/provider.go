@@ -85,6 +85,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_monitor":           newMonitorDataSource(),
 			"betteruptime_on_call_calendar":  newOnCallCalendarDataSource(),
 			"betteruptime_policy":            newPolicyDataSource(),
+			"betteruptime_role":              newRoleDataSource(),
 			"betteruptime_severity":          newSeverityDataSource(),
 			"betteruptime_slack_integration": newSlackIntegrationDataSource(),
 			"betteruptime_incoming_webhook":  newIncomingWebhookDataSource(),
