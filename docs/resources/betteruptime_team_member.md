@@ -21,7 +21,7 @@ Allows managing **non-admin team members** using Terraform. Learn more about [in
 
 ### Optional
 
-- `role` (String) The role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder.
+- `role` (String) The role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. For custom roles, use the change-role API directly.
 - `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 
 ### Read-Only

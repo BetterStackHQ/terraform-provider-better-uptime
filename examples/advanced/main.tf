@@ -24,6 +24,10 @@ data "betteruptime_team_member" "existing" {
   email = "petr@betterstack.com"
 }
 
+data "betteruptime_role" "team_lead" {
+  name = "team_lead"
+}
+
 resource "betteruptime_team_member" "new" {
   email = "invitation+${random_pet.unique.id}@betterstack.com"
   role  = "member"
