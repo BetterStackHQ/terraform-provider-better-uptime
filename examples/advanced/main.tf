@@ -33,6 +33,11 @@ resource "betteruptime_team_member" "new" {
   role  = "member"
 }
 
+resource "betteruptime_team_member" "by_role_id" {
+  email   = "invitation-by-id+${random_pet.unique.id}@betterstack.com"
+  role_id = data.betteruptime_role.team_lead.id
+}
+
 resource "betteruptime_status_page" "this" {
   company_name  = "Example, Inc"
   logo_url      = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/master/examples/advanced/logo_black_text.png"

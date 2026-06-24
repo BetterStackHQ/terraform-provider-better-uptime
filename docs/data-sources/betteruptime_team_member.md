@@ -32,6 +32,7 @@ Team member lookup by email.
 - `last_name` (String) The last name of the team member (available after invitation is accepted).
 - `member_id` (String) The numeric ID of the team member. Empty for pending invitations.
 - `mobile_app_platforms` (List of String) The mobile app platforms the team member has installed (e.g. ios, android).
-- `role` (String) The role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. For custom roles, use the change-role API directly.
+- `role` (String) The system role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. Use `role_id` to assign a custom role. Set only one of `role` or `role_id`.
+- `role_id` (String) The ID of the role to assign — for example from the betteruptime_role data source. Use this to assign a custom role (for built-in roles you can use `role` instead). Set only one of `role` or `role_id`.
 
 

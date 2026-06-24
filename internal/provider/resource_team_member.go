@@ -29,17 +29,22 @@ var teamMemberSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 	},
 	"role": {
-		Description:      "The role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. For custom roles, use the change-role API directly.",
+		Description:      "The system role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. Use `role_id` to assign a custom role. Set only one of `role` or `role_id`.",
 		Type:             schema.TypeString,
 		Optional:         true,
 		Computed:         true,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"responder", "member", "team_lead", "billing_admin"}, false)),
 		// A member who holds a custom role (the API reports role "custom") is left
-		// untouched: this resource manages only system roles, so suppress the diff
-		// rather than reset such a member to a system role.
+		// untouched when managed via `role`: suppress the diff rather than reset them.
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return old == "custom"
 		},
+	},
+	"role_id": {
+		Description: "The ID of the role to assign — for example from the betteruptime_role data source. Use this to assign a custom role (for built-in roles you can use `role` instead). Set only one of `role` or `role_id`.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
 	},
 	"first_name": {
 		Description: "The first name of the team member (available after invitation is accepted).",
@@ -75,14 +80,15 @@ var teamMemberSchema = map[string]*schema.Schema{
 }
 
 type teamMember struct {
-	Email              *string  `json:"email,omitempty"`
-	Role               *string  `json:"role,omitempty"`
-	TeamName           *string  `json:"team_name,omitempty"`
-	FirstName          *string  `json:"first_name,omitempty"`
-	LastName           *string  `json:"last_name,omitempty"`
-	CreatedAt          *string  `json:"created_at,omitempty"`
-	InvitedAt          *string  `json:"invited_at,omitempty"`
-	MobileAppPlatforms []string `json:"mobile_app_platforms,omitempty"`
+	Email              *string     `json:"email,omitempty"`
+	Role               *string     `json:"role,omitempty"`
+	RoleID             json.Number `json:"role_id,omitempty"`
+	TeamName           *string     `json:"team_name,omitempty"`
+	FirstName          *string     `json:"first_name,omitempty"`
+	LastName           *string     `json:"last_name,omitempty"`
+	CreatedAt          *string     `json:"created_at,omitempty"`
+	InvitedAt          *string     `json:"invited_at,omitempty"`
+	MobileAppPlatforms []string    `json:"mobile_app_platforms,omitempty"`
 }
 
 type teamMemberHTTPResponse struct {
@@ -114,10 +120,18 @@ func newTeamMemberResource() *schema.Resource {
 }
 
 func teamMemberCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if derr := teamMemberBothRolesError(d); derr != nil {
+		return derr
+	}
 	var in teamMember
 	load(d, "email", &in.Email)
-	load(d, "role", &in.Role)
 	load(d, "team_name", &in.TeamName)
+	// Prefer role_id (supports custom roles); otherwise fall back to the role name.
+	if v, ok := d.GetOk("role_id"); ok && v.(string) != "" {
+		in.RoleID = json.Number(v.(string))
+	} else {
+		load(d, "role", &in.Role)
+	}
 
 	reqBody, err := json.Marshal(&in)
 	if err != nil {
@@ -175,7 +189,10 @@ func teamMemberDelete(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func teamMemberUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if !d.HasChange("role") {
+	if derr := teamMemberBothRolesError(d); derr != nil {
+		return derr
+	}
+	if !d.HasChange("role") && !d.HasChange("role_id") {
 		return teamMemberRead(ctx, d, meta)
 	}
 
@@ -184,13 +201,13 @@ func teamMemberUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diag.Errorf("Cannot change the role of %q: the invitation hasn't been accepted yet. A pending invitation's role is fixed at invite time.", d.Id())
 	}
 
-	roleName := d.Get("role").(string)
-	roleID, _, err := findRoleByName(ctx, meta, roleName)
-	if err != nil {
-		return diag.FromErr(err)
+	roleID, derr := teamMemberConfiguredRoleID(ctx, d, meta)
+	if derr != nil {
+		return derr
 	}
 	if roleID == "" {
-		return diag.Errorf("No role found with name: %s", roleName)
+		// Neither role nor role_id is set in config — nothing to change.
+		return teamMemberRead(ctx, d, meta)
 	}
 
 	baseURL := meta.(*client).BetterStackBaseURL()
@@ -217,6 +234,47 @@ func teamMemberUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diag.FromErr(err)
 	}
 	return teamMemberCopyAttrs(d, &out)
+}
+
+// teamMemberBothRolesError errors when both `role` and `role_id` are set in config.
+// They're mutually exclusive; ConflictsWith can't be used because both fields are
+// Computed (and the data source clones them computed-only), so we check the raw config.
+func teamMemberBothRolesError(d *schema.ResourceData) diag.Diagnostics {
+	cfg := d.GetRawConfig()
+	if cfg.IsNull() {
+		return nil
+	}
+	role := cfg.GetAttr("role")
+	roleID := cfg.GetAttr("role_id")
+	if !role.IsNull() && role.AsString() != "" && !roleID.IsNull() && roleID.AsString() != "" {
+		return diag.Errorf("Only one of `role` or `role_id` may be set on betteruptime_team_member.")
+	}
+	return nil
+}
+
+// teamMemberConfiguredRoleID resolves the role id the user set in config — either
+// `role_id` directly, or `role` (a system role name) resolved via the roles API. It
+// reads the raw config (not merged state) so a computed counterpart value never leaks
+// in. Returns "" when neither is configured.
+func teamMemberConfiguredRoleID(ctx context.Context, d *schema.ResourceData, meta interface{}) (string, diag.Diagnostics) {
+	cfg := d.GetRawConfig()
+	if cfg.IsNull() {
+		return "", nil
+	}
+	if v := cfg.GetAttr("role_id"); !v.IsNull() && v.AsString() != "" {
+		return v.AsString(), nil
+	}
+	if v := cfg.GetAttr("role"); !v.IsNull() && v.AsString() != "" {
+		roleID, _, err := findRoleByName(ctx, meta, v.AsString())
+		if err != nil {
+			return "", diag.FromErr(err)
+		}
+		if roleID == "" {
+			return "", diag.Errorf("No role found with name: %s", v.AsString())
+		}
+		return roleID, nil
+	}
+	return "", nil
 }
 
 func teamMemberReadByEmail(ctx context.Context, d *schema.ResourceData, meta interface{}) (*teamMemberHTTPResponse, diag.Diagnostics, bool) {
@@ -274,6 +332,11 @@ func teamMemberCopyAttrs(d *schema.ResourceData, out *teamMemberHTTPResponse) di
 	}
 	if a.Role != nil {
 		set("role", *a.Role)
+	}
+	if a.RoleID != "" {
+		set("role_id", a.RoleID.String())
+	} else {
+		set("role_id", nil)
 	}
 	set("first_name", ptrToStr(a.FirstName))
 	set("last_name", ptrToStr(a.LastName))

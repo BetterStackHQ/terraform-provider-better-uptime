@@ -2,8 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -313,6 +315,73 @@ func TestResourceTeamMemberImport(t *testing.T) {
 				ImportState:       true,
 				ImportStateId:     "import@example.com",
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestResourceTeamMemberCustomRoleByID(t *testing.T) {
+	var createBody string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members":
+			b, _ := io.ReadAll(r.Body)
+			createBody = string(b)
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"data":{"id":"7","type":"team_member","attributes":{"email":"byid@example.com","role":"custom","role_id":206,"mobile_app_platforms":[]}}}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/team-members":
+			_, _ = w.Write([]byte(`{"data":{"id":"7","type":"team_member","attributes":{"email":"byid@example.com","role":"custom","role_id":206,"mobile_app_platforms":[]}}}`))
+		case r.Method == http.MethodDelete && r.URL.Path == "/api/v2/team-members":
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			t.Errorf("Unexpected request: %s %s", r.Method, r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil }},
+		Steps: []resource.TestStep{
+			{
+				// Assigning a custom role by id must round-trip without a perpetual diff
+				// (role comes back as "custom", role_id matches the configured value).
+				Config: `
+				provider "betteruptime" { api_token = "foo" }
+				resource "betteruptime_team_member" "this" {
+					email   = "byid@example.com"
+					role_id = "206"
+				}`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "role_id", "206"),
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "role", "custom"),
+					func(*terraform.State) error {
+						if !strings.Contains(createBody, `"role_id":206`) {
+							return fmt.Errorf("create body should send role_id, got: %s", createBody)
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
+func TestResourceTeamMemberRoleConflict(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){"betteruptime": func() (*schema.Provider, error) { return New(WithURL("https://betterstack.com")), nil }},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" { api_token = "foo" }
+				resource "betteruptime_team_member" "this" {
+					email   = "x@example.com"
+					role    = "member"
+					role_id = "206"
+				}`,
+				ExpectError: regexp.MustCompile(`(?i)only one of`),
 			},
 		},
 	})
