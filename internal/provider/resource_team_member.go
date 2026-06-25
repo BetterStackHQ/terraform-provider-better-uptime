@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -34,17 +35,20 @@ var teamMemberSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Computed:         true,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"responder", "member", "team_lead", "billing_admin"}, false)),
-		// A member who holds a custom role (the API reports role "custom") is left
-		// untouched when managed via `role`: suppress the diff rather than reset them.
+		// A member who already holds a custom role (API role "custom") or the admin role is
+		// left untouched when managed via `role`: suppress the diff rather than force a
+		// perpetual one. Reassign a custom-role member via `role_id`; admin roles can't be
+		// changed through the API at all (the change-role endpoint rejects them).
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return old == "custom"
+			return old == "custom" || old == "admin"
 		},
 	},
 	"role_id": {
-		Description: "The ID of the role to assign — for example from the betteruptime_role data source. Use this to assign a custom role (for built-in roles you can use `role` instead). Set only one of `role` or `role_id`.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Description:      "The ID of the role to assign — for example from the betteruptime_role data source. Use this to assign a custom role (for built-in roles you can use `role` instead). Set only one of `role` or `role_id`.",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Computed:         true,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`^[0-9]+$`), "role_id must be a numeric role ID (e.g. from the betteruptime_role data source)")),
 	},
 	"first_name": {
 		Description: "The first name of the team member (available after invitation is accepted).",

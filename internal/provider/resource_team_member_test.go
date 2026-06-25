@@ -386,3 +386,72 @@ func TestResourceTeamMemberRoleConflict(t *testing.T) {
 		},
 	})
 }
+
+func TestResourceTeamMemberRoleIDMustBeNumeric(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){"betteruptime": func() (*schema.Provider, error) { return New(WithURL("https://betterstack.com")), nil }},
+		Steps: []resource.TestStep{
+			{
+				// A non-numeric role_id must fail validation at plan time with a clear
+				// message, not a cryptic JSON marshal error at apply.
+				Config: `
+				provider "betteruptime" { api_token = "foo" }
+				resource "betteruptime_team_member" "this" {
+					email   = "x@example.com"
+					role_id = "team_lead"
+				}`,
+				ExpectError: regexp.MustCompile(`(?i)numeric`),
+			},
+		},
+	})
+}
+
+func TestResourceTeamMemberAdminRoleNoDiff(t *testing.T) {
+	var changeRoleCalled bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members":
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"message":"User is already a member of the team","data":{"id":"9","type":"team_member","attributes":{"email":"admin@example.com","role":"admin","role_id":1,"mobile_app_platforms":[]}}}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/team-members":
+			_, _ = w.Write([]byte(`{"data":{"id":"9","type":"team_member","attributes":{"email":"admin@example.com","role":"admin","role_id":1,"mobile_app_platforms":[]}}}`))
+		case r.Method == http.MethodDelete && r.URL.Path == "/api/v2/team-members":
+			w.WriteHeader(http.StatusNoContent)
+		case strings.Contains(r.URL.Path, "/change-role/"):
+			changeRoleCalled = true
+			t.Errorf("change-role endpoint must not be called for an admin member")
+			w.WriteHeader(http.StatusBadRequest)
+		default:
+			t.Errorf("Unexpected request: %s %s", r.Method, r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil }},
+		Steps: []resource.TestStep{
+			{
+				// Config sets a non-admin role; the API reports "admin". The admin must be
+				// left untouched: no perpetual diff and no change-role call (the API rejects
+				// admin changes, so trying would fail every apply).
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+				resource "betteruptime_team_member" "this" {
+					email = "admin@example.com"
+					role  = "responder"
+				}`,
+				Check: func(*terraform.State) error {
+					if changeRoleCalled {
+						return fmt.Errorf("change-role endpoint was called but must not be for an admin member")
+					}
+					return nil
+				},
+			},
+		},
+	})
+}
