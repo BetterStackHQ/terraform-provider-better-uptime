@@ -35,12 +35,13 @@ var teamMemberSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Computed:         true,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"responder", "member", "team_lead", "billing_admin"}, false)),
-		// A member who already holds a custom role (API role "custom") or the admin role is
-		// left untouched when managed via `role`: suppress the diff rather than force a
-		// perpetual one. Reassign a custom-role member via `role_id`; admin roles can't be
-		// changed through the API at all (the change-role endpoint rejects them).
+		// An admin is left untouched when managed via `role`: the change-role endpoint
+		// rejects admins in both directions, so suppress the diff rather than force a
+		// perpetual one. A custom role is NOT suppressed — a system role in config wins
+		// and the member is converged to it via change-role. (To keep a custom role,
+		// assign it through `role_id`, where `role` stays computed and yields no diff.)
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return old == "custom" || old == "admin"
+			return old == "admin"
 		},
 	},
 	"role_id": {
@@ -167,7 +168,16 @@ func teamMemberCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	d.SetId(d.Get("email").(string))
-	return teamMemberCopyAttrs(d, &out)
+	if derr := teamMemberCopyAttrs(d, &out); derr != nil {
+		return derr
+	}
+	// POST only invites/adopts; it never changes an existing member's role. If we
+	// adopted someone already on the team whose role differs from config, converge
+	// it now (the same change-role an update would do) so we don't leave a diff.
+	if memberID := d.Get("member_id").(string); memberID != "" {
+		return teamMemberReconcileRole(ctx, d, meta, memberID)
+	}
+	return nil
 }
 
 func teamMemberRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -214,6 +224,46 @@ func teamMemberUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 		return teamMemberRead(ctx, d, meta)
 	}
 
+	return teamMemberPostChangeRole(ctx, d, meta, memberID, roleID)
+}
+
+// teamMemberReconcileRole converges an existing member's role to the configured one
+// when they diverge, reusing change-role. Admins are skipped (the API rejects
+// changing them, mirroring the `role` DiffSuppressFunc). The cheap equality checks
+// avoid the roles lookup (and an unnecessary call) when config already matches.
+func teamMemberReconcileRole(ctx context.Context, d *schema.ResourceData, meta interface{}, memberID string) diag.Diagnostics {
+	if d.Get("role").(string) == "admin" {
+		return nil
+	}
+	cfg := d.GetRawConfig()
+	if cfg.IsNull() {
+		return nil
+	}
+	if v := cfg.GetAttr("role_id"); !v.IsNull() && v.AsString() != "" {
+		if v.AsString() == d.Get("role_id").(string) {
+			return nil
+		}
+	} else if v := cfg.GetAttr("role"); !v.IsNull() && v.AsString() != "" {
+		if v.AsString() == d.Get("role").(string) {
+			return nil
+		}
+	} else {
+		return nil // No role configured — leave whatever the member already has.
+	}
+
+	roleID, derr := teamMemberConfiguredRoleID(ctx, d, meta)
+	if derr != nil {
+		return derr
+	}
+	if roleID == "" {
+		return nil
+	}
+	return teamMemberPostChangeRole(ctx, d, meta, memberID, roleID)
+}
+
+// teamMemberPostChangeRole POSTs the change-role endpoint and copies the returned
+// member back into state. Shared by create (reconciling an adopted member) and update.
+func teamMemberPostChangeRole(ctx context.Context, d *schema.ResourceData, meta interface{}, memberID, roleID string) diag.Diagnostics {
 	baseURL := meta.(*client).BetterStackBaseURL()
 	path := fmt.Sprintf("/api/v2/team-members/%s/change-role/%s", url.PathEscape(memberID), url.PathEscape(roleID))
 	log.Printf("POST %s%s", baseURL, path)

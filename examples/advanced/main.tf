@@ -24,8 +24,11 @@ data "betteruptime_team_member" "existing" {
   email = "petr@betterstack.com"
 }
 
+# Look up a role by name to reference its ID below. The name matches a built-in
+# role's display name ("Team lead") or a custom role's name — this is mainly useful
+# for custom roles, since built-in roles can be set directly via `role` (see "new").
 data "betteruptime_role" "team_lead" {
-  name = "team_lead"
+  name = "Team lead"
 }
 
 resource "betteruptime_team_member" "new" {

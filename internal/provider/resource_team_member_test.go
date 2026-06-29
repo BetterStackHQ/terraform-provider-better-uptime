@@ -212,22 +212,28 @@ func TestResourceTeamMemberRoleUpdate(t *testing.T) {
 	})
 }
 
-func TestResourceTeamMemberCustomRoleNoDiff(t *testing.T) {
+func TestResourceTeamMemberCustomRoleConvergesOnCreate(t *testing.T) {
 	var changeRoleCalled bool
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch {
 		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members":
+			// Adopting someone who is already a member and currently holds a custom role.
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"data":{"id":"5","type":"team_member","attributes":{"email":"custom@example.com","role":"custom","role_id":77}}}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/roles":
+			_, _ = w.Write([]byte(`{"data":[{"id":"12","type":"role","attributes":{"name":"Member","role":"member"}}]}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members/5/change-role/12":
+			changeRoleCalled = true
+			_, _ = w.Write([]byte(`{"data":{"id":"5","type":"team_member","attributes":{"email":"custom@example.com","role":"member","role_id":12}}}`))
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/team-members":
-			_, _ = w.Write([]byte(`{"data":{"id":"5","type":"team_member","attributes":{"email":"custom@example.com","role":"custom","role_id":77}}}`))
+			role, roleID := "custom", "77"
+			if changeRoleCalled {
+				role, roleID = "member", "12"
+			}
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":"5","type":"team_member","attributes":{"email":"custom@example.com","role":"%s","role_id":%s}}}`, role, roleID)))
 		case r.Method == http.MethodDelete && r.URL.Path == "/api/v2/team-members":
 			w.WriteHeader(http.StatusNoContent)
-		case strings.Contains(r.URL.Path, "/change-role/"):
-			changeRoleCalled = true
-			t.Errorf("change-role endpoint must not be called for a custom-role member")
-			w.WriteHeader(http.StatusBadRequest)
 		default:
 			t.Errorf("Unexpected request: %s %s", r.Method, r.URL.Path)
 		}
@@ -239,8 +245,8 @@ func TestResourceTeamMemberCustomRoleNoDiff(t *testing.T) {
 		ProviderFactories: map[string]func() (*schema.Provider, error){"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil }},
 		Steps: []resource.TestStep{
 			{
-				// Config has a system role; API returns "custom". DiffSuppressFunc must
-				// prevent any perpetual diff and must not trigger a change-role call.
+				// Config sets a system role but the member already holds a custom role:
+				// the configured role wins — change-role converges them, leaving no diff.
 				Config: `
 				provider "betteruptime" {
 					api_token = "foo"
@@ -249,12 +255,83 @@ func TestResourceTeamMemberCustomRoleNoDiff(t *testing.T) {
 					email = "custom@example.com"
 					role  = "member"
 				}`,
-				Check: func(*terraform.State) error {
-					if changeRoleCalled {
-						return fmt.Errorf("change-role endpoint was called but must not be for a custom-role member")
-					}
-					return nil
-				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "role", "member"),
+					func(*terraform.State) error {
+						if !changeRoleCalled {
+							return fmt.Errorf("expected change-role to converge the custom-role member to the configured system role")
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
+func TestResourceTeamMemberCustomToSystemRole(t *testing.T) {
+	var changeRoleCalled bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members":
+			// Step 1 invites with a custom role by id; API reports role "custom".
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"data":{"id":"9","type":"team_member","attributes":{"email":"c2s@example.com","role":"custom","role_id":206}}}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/roles":
+			_, _ = w.Write([]byte(`{"data":[{"id":"11","type":"role","attributes":{"name":"Responder","role":"responder"}}]}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/team-members/9/change-role/11":
+			changeRoleCalled = true
+			_, _ = w.Write([]byte(`{"data":{"id":"9","type":"team_member","attributes":{"email":"c2s@example.com","role":"responder","role_id":11}}}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/team-members":
+			role, roleID := "custom", "206"
+			if changeRoleCalled {
+				role, roleID = "responder", "11"
+			}
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":"9","type":"team_member","attributes":{"email":"c2s@example.com","role":"%s","role_id":%s}}}`, role, roleID)))
+		case r.Method == http.MethodDelete && r.URL.Path == "/api/v2/team-members":
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			t.Errorf("Unexpected request: %s %s", r.Method, r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil }},
+		Steps: []resource.TestStep{
+			{
+				// Assign a custom role by id — round-trips as role "custom", no diff.
+				Config: `
+				provider "betteruptime" { api_token = "foo" }
+				resource "betteruptime_team_member" "this" {
+					email   = "c2s@example.com"
+					role_id = "206"
+				}`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "role", "custom"),
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "role_id", "206"),
+				),
+			},
+			{
+				// Switch the same member to a system role: the custom→system diff is no
+				// longer suppressed, and change-role converges them.
+				Config: `
+				provider "betteruptime" { api_token = "foo" }
+				resource "betteruptime_team_member" "this" {
+					email = "c2s@example.com"
+					role  = "responder"
+				}`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_team_member.this", "role", "responder"),
+					func(*terraform.State) error {
+						if !changeRoleCalled {
+							return fmt.Errorf("expected change-role when switching a custom-role member to a system role")
+						}
+						return nil
+					},
+				),
 			},
 		},
 	})
