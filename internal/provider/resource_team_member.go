@@ -9,9 +9,11 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var teamMemberSchema = map[string]*schema.Schema{
@@ -28,13 +30,26 @@ var teamMemberSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 	},
 	"role": {
-		Description: "The role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder.",
-		Type:        schema.TypeString,
-		Optional:    true,
-		Computed:    true,
+		Description:      "The system role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. Use `role_id` to assign a custom role. Set only one of `role` or `role_id`.",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Computed:         true,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"responder", "member", "team_lead", "billing_admin"}, false)),
+		// An admin is left untouched when managed via `role`: the change-role endpoint
+		// rejects admins in both directions, so suppress the diff rather than force a
+		// perpetual one. A custom role is NOT suppressed — a system role in config wins
+		// and the member is converged to it via change-role. (To keep a custom role,
+		// assign it through `role_id`, where `role` stays computed and yields no diff.)
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return d.Id() != ""
+			return old == "admin"
 		},
+	},
+	"role_id": {
+		Description:      "The ID of the role to assign — for example from the betteruptime_role data source. Use this to assign a custom role (for built-in roles you can use `role` instead). Set only one of `role` or `role_id`.",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Computed:         true,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`^[0-9]+$`), "role_id must be a numeric role ID (e.g. from the betteruptime_role data source)")),
 	},
 	"first_name": {
 		Description: "The first name of the team member (available after invitation is accepted).",
@@ -70,14 +85,15 @@ var teamMemberSchema = map[string]*schema.Schema{
 }
 
 type teamMember struct {
-	Email              *string  `json:"email,omitempty"`
-	Role               *string  `json:"role,omitempty"`
-	TeamName           *string  `json:"team_name,omitempty"`
-	FirstName          *string  `json:"first_name,omitempty"`
-	LastName           *string  `json:"last_name,omitempty"`
-	CreatedAt          *string  `json:"created_at,omitempty"`
-	InvitedAt          *string  `json:"invited_at,omitempty"`
-	MobileAppPlatforms []string `json:"mobile_app_platforms,omitempty"`
+	Email              *string     `json:"email,omitempty"`
+	Role               *string     `json:"role,omitempty"`
+	RoleID             json.Number `json:"role_id,omitempty"`
+	TeamName           *string     `json:"team_name,omitempty"`
+	FirstName          *string     `json:"first_name,omitempty"`
+	LastName           *string     `json:"last_name,omitempty"`
+	CreatedAt          *string     `json:"created_at,omitempty"`
+	InvitedAt          *string     `json:"invited_at,omitempty"`
+	MobileAppPlatforms []string    `json:"mobile_app_platforms,omitempty"`
 }
 
 type teamMemberHTTPResponse struct {
@@ -93,6 +109,7 @@ func newTeamMemberResource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: teamMemberCreate,
 		ReadContext:   teamMemberRead,
+		UpdateContext: teamMemberUpdate,
 		DeleteContext: teamMemberDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -108,10 +125,18 @@ func newTeamMemberResource() *schema.Resource {
 }
 
 func teamMemberCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if derr := teamMemberBothRolesError(d); derr != nil {
+		return derr
+	}
 	var in teamMember
 	load(d, "email", &in.Email)
-	load(d, "role", &in.Role)
 	load(d, "team_name", &in.TeamName)
+	// Prefer role_id (supports custom roles); otherwise fall back to the role name.
+	if v, ok := d.GetOk("role_id"); ok && v.(string) != "" {
+		in.RoleID = json.Number(v.(string))
+	} else {
+		load(d, "role", &in.Role)
+	}
 
 	reqBody, err := json.Marshal(&in)
 	if err != nil {
@@ -143,7 +168,16 @@ func teamMemberCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	d.SetId(d.Get("email").(string))
-	return teamMemberCopyAttrs(d, &out)
+	if derr := teamMemberCopyAttrs(d, &out); derr != nil {
+		return derr
+	}
+	// POST only invites/adopts; it never changes an existing member's role. If we
+	// adopted someone already on the team whose role differs from config, converge
+	// it now (the same change-role an update would do) so we don't leave a diff.
+	if memberID := d.Get("member_id").(string); memberID != "" {
+		return teamMemberReconcileRole(ctx, d, meta, memberID)
+	}
+	return nil
 }
 
 func teamMemberRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -166,6 +200,135 @@ func teamMemberDelete(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	return resourceDeleteWithBaseURL(ctx, meta, meta.(*client).BetterStackBaseURL(), path)
+}
+
+func teamMemberUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if derr := teamMemberBothRolesError(d); derr != nil {
+		return derr
+	}
+	if !d.HasChange("role") && !d.HasChange("role_id") {
+		return teamMemberRead(ctx, d, meta)
+	}
+
+	memberID := d.Get("member_id").(string)
+	if memberID == "" {
+		return diag.Errorf("Cannot change the role of %q: the invitation hasn't been accepted yet. A pending invitation's role is fixed at invite time.", d.Id())
+	}
+
+	roleID, derr := teamMemberConfiguredRoleID(ctx, d, meta)
+	if derr != nil {
+		return derr
+	}
+	if roleID == "" {
+		// Neither role nor role_id is set in config — nothing to change.
+		return teamMemberRead(ctx, d, meta)
+	}
+
+	return teamMemberPostChangeRole(ctx, d, meta, memberID, roleID)
+}
+
+// teamMemberReconcileRole converges an existing member's role to the configured one
+// when they diverge, reusing change-role. Admins are skipped (the API rejects
+// changing them, mirroring the `role` DiffSuppressFunc). The cheap equality checks
+// avoid the roles lookup (and an unnecessary call) when config already matches.
+func teamMemberReconcileRole(ctx context.Context, d *schema.ResourceData, meta interface{}, memberID string) diag.Diagnostics {
+	if d.Get("role").(string) == "admin" {
+		return nil
+	}
+	cfg := d.GetRawConfig()
+	if cfg.IsNull() {
+		return nil
+	}
+	if v := cfg.GetAttr("role_id"); !v.IsNull() && v.AsString() != "" {
+		if v.AsString() == d.Get("role_id").(string) {
+			return nil
+		}
+	} else if v := cfg.GetAttr("role"); !v.IsNull() && v.AsString() != "" {
+		if v.AsString() == d.Get("role").(string) {
+			return nil
+		}
+	} else {
+		return nil // No role configured — leave whatever the member already has.
+	}
+
+	roleID, derr := teamMemberConfiguredRoleID(ctx, d, meta)
+	if derr != nil {
+		return derr
+	}
+	if roleID == "" {
+		return nil
+	}
+	return teamMemberPostChangeRole(ctx, d, meta, memberID, roleID)
+}
+
+// teamMemberPostChangeRole POSTs the change-role endpoint and copies the returned
+// member back into state. Shared by create (reconciling an adopted member) and update.
+func teamMemberPostChangeRole(ctx context.Context, d *schema.ResourceData, meta interface{}, memberID, roleID string) diag.Diagnostics {
+	baseURL := meta.(*client).BetterStackBaseURL()
+	path := fmt.Sprintf("/api/v2/team-members/%s/change-role/%s", url.PathEscape(memberID), url.PathEscape(roleID))
+	log.Printf("POST %s%s", baseURL, path)
+	res, err := meta.(*client).PostWithBaseURL(ctx, baseURL, path, nil)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer func() {
+		_, _ = io.Copy(io.Discard, res.Body)
+		_ = res.Body.Close()
+	}()
+	body, err := io.ReadAll(res.Body)
+	if res.StatusCode != http.StatusOK {
+		return diag.Errorf("POST %s returned %d: %s", res.Request.URL.String(), res.StatusCode, string(body))
+	}
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var out teamMemberHTTPResponse
+	if err := json.Unmarshal(body, &out); err != nil {
+		return diag.FromErr(err)
+	}
+	return teamMemberCopyAttrs(d, &out)
+}
+
+// teamMemberBothRolesError errors when both `role` and `role_id` are set in config.
+// They're mutually exclusive; ConflictsWith can't be used because both fields are
+// Computed (and the data source clones them computed-only), so we check the raw config.
+func teamMemberBothRolesError(d *schema.ResourceData) diag.Diagnostics {
+	cfg := d.GetRawConfig()
+	if cfg.IsNull() {
+		return nil
+	}
+	role := cfg.GetAttr("role")
+	roleID := cfg.GetAttr("role_id")
+	if !role.IsNull() && role.AsString() != "" && !roleID.IsNull() && roleID.AsString() != "" {
+		return diag.Errorf("Only one of `role` or `role_id` may be set on betteruptime_team_member.")
+	}
+	return nil
+}
+
+// teamMemberConfiguredRoleID resolves the role id the user set in config — either
+// `role_id` directly, or `role` (a system role name) resolved via the roles API. It
+// reads the raw config (not merged state) so a computed counterpart value never leaks
+// in. Returns "" when neither is configured.
+func teamMemberConfiguredRoleID(ctx context.Context, d *schema.ResourceData, meta interface{}) (string, diag.Diagnostics) {
+	cfg := d.GetRawConfig()
+	if cfg.IsNull() {
+		return "", nil
+	}
+	if v := cfg.GetAttr("role_id"); !v.IsNull() && v.AsString() != "" {
+		return v.AsString(), nil
+	}
+	if v := cfg.GetAttr("role"); !v.IsNull() && v.AsString() != "" {
+		roleID, _, err := findRoleByName(ctx, meta, v.AsString())
+		if err != nil {
+			return "", diag.FromErr(err)
+		}
+		if roleID == "" {
+			return "", diag.Errorf("No role found with name: %s", v.AsString())
+		}
+		return roleID, nil
+	}
+	return "", nil
 }
 
 func teamMemberReadByEmail(ctx context.Context, d *schema.ResourceData, meta interface{}) (*teamMemberHTTPResponse, diag.Diagnostics, bool) {
@@ -223,6 +386,11 @@ func teamMemberCopyAttrs(d *schema.ResourceData, out *teamMemberHTTPResponse) di
 	}
 	if a.Role != nil {
 		set("role", *a.Role)
+	}
+	if a.RoleID != "" {
+		set("role_id", a.RoleID.String())
+	} else {
+		set("role_id", nil)
 	}
 	set("first_name", ptrToStr(a.FirstName))
 	set("last_name", ptrToStr(a.LastName))
