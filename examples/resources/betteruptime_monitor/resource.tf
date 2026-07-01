@@ -1,6 +1,8 @@
 # Comprehensive HTTP "status" monitor - proxy, custom header, expiry alerts and a maintenance window
 resource "betteruptime_monitor" "status" {
-  url                  = "https://example.com"
+  # Unique subdomain - expiration_policy_id is a per-domain setting shared by every
+  # monitor on that domain, so a dedicated domain keeps this example from clashing
+  url                  = "https://${random_pet.unique.id}.example.com"
   monitor_type         = "status"
   monitor_group_id     = betteruptime_monitor_group.this.id
   expiration_policy_id = betteruptime_policy.this.id
@@ -35,17 +37,15 @@ resource "betteruptime_monitor" "expected_status_code" {
   url                   = "https://example.com"
   monitor_type          = "expected_status_code"
   monitor_group_id      = betteruptime_monitor_group.this.id
-  expiration_policy_id  = betteruptime_policy.this.id
   expected_status_codes = [200, 201, 204]
 }
 
 # Keyword monitor - alerts when the expected text disappears from the page
 resource "betteruptime_monitor" "keyword" {
-  url                  = "https://example.com"
-  monitor_type         = "keyword"
-  monitor_group_id     = betteruptime_monitor_group.this.id
-  expiration_policy_id = betteruptime_policy.this.id
-  required_keyword     = "Better Stack"
+  url              = "https://example.com"
+  monitor_type     = "keyword"
+  monitor_group_id = betteruptime_monitor_group.this.id
+  required_keyword = "Better Stack"
 }
 
 # TCP monitor - checks that a port is accepting connections
