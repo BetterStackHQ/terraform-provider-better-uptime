@@ -15,7 +15,7 @@ https://betterstack.com/docs/uptime/api/list-all-severities/
 ```terraform
 # A severity (urgency) controls how team members are notified. This one is silent.
 resource "betteruptime_severity" "this" {
-  name           = "Terraform Severity"
+  name           = "Terraform Severity ${random_pet.unique.id}"
   call           = false
   sms            = false
   email          = false

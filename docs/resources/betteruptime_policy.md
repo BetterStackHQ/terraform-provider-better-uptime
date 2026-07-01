@@ -16,7 +16,7 @@ https://betterstack.com/docs/uptime/api/policies/
 # Escalation policy with every step type: escalation (to Slack/webhooks/on-call),
 # instructions, time branching, metadata branching, and a wider escalation.
 resource "betteruptime_policy" "this" {
-  name            = "Terraform Escalation Policy"
+  name            = "Terraform Escalation Policy ${random_pet.unique.id}"
   repeat_count    = 3
   repeat_delay    = 60
   policy_group_id = betteruptime_policy_group.this.id
@@ -88,7 +88,7 @@ EOT
 # Fallback policy: invoked only after "this" exhausts its repeats unacknowledged,
 # widening the blast radius to the whole team.
 resource "betteruptime_policy" "fallback" {
-  name            = "Terraform Fallback Policy"
+  name            = "Terraform Fallback Policy ${random_pet.unique.id}"
   repeat_count    = 5
   repeat_delay    = 120
   policy_group_id = betteruptime_policy_group.this.id
@@ -103,7 +103,7 @@ resource "betteruptime_policy" "fallback" {
 
 # Silent policy: no steps, so it never alerts anyone - incidents are only collected.
 resource "betteruptime_policy" "silent" {
-  name            = "Terraform Silent Policy"
+  name            = "Terraform Silent Policy ${random_pet.unique.id}"
   repeat_count    = 0
   repeat_delay    = 0
   policy_group_id = betteruptime_policy_group.this.id
