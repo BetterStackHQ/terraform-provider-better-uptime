@@ -5,6 +5,7 @@ resource "betteruptime_status_page_resource" "monitor_status" {
   resource_id            = betteruptime_monitor.status.id
   resource_type          = "Monitor"
   public_name            = "example.com site"
+  widget_type            = "response_times" # Show a response-times chart (Monitor only)
 }
 
 # A heartbeat on the status page.
@@ -14,6 +15,7 @@ resource "betteruptime_status_page_resource" "heartbeat" {
   resource_id            = betteruptime_heartbeat.this.id
   resource_type          = "Heartbeat"
   public_name            = "example.com site (heartbeat)"
+  explanation            = "Public API used by customer integrations" # Help text shown next to the resource
 }
 
 # A manually tracked item (no backing resource - toggled by hand or via API).
@@ -53,4 +55,13 @@ resource "betteruptime_status_page_resource" "email" {
       email = "petr@betterstack.com"
     }
   }
+}
+
+# Down whenever there is any ongoing incident.
+resource "betteruptime_status_page_resource" "down_on_any_incident" {
+  status_page_id         = betteruptime_status_page.this.id
+  status_page_section_id = betteruptime_status_page_section.manually_tracked_items.id
+  resource_type          = "ManuallyTrackedItem"
+  public_name            = "Down on any incident"
+  mark_as_down_for       = "any_incident"
 }

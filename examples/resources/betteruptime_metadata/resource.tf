@@ -29,3 +29,14 @@ resource "betteruptime_metadata" "assigned_policy" {
     item_id = betteruptime_policy.this.id
   }
 }
+
+# Metadata on a Heartbeat owner, with a Policy referenced by name instead of by id.
+resource "betteruptime_metadata" "runbook_owner" {
+  owner_type = "Heartbeat"
+  owner_id   = betteruptime_heartbeat.this.id
+  key        = "runbook-owner"
+  metadata_value {
+    type = "Policy"
+    name = betteruptime_policy.this.name # Reference a policy by name instead of by id
+  }
+}

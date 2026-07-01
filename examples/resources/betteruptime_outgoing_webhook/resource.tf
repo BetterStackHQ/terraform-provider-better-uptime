@@ -39,6 +39,29 @@ resource "betteruptime_outgoing_webhook" "on_call_change" {
   trigger_type = "on_call_change"
 
   custom_webhook_template_attributes {
+    http_method = "put" # Non-default HTTP method
+
+    headers_template {
+      name  = "Content-Type"
+      value = "application/json"
+    }
+    headers_template {
+      # Multiple template headers
+      name  = "Authorization"
+      value = "Bearer $INCIDENT_ID"
+    }
+
+    body_template = "{\"incident\":{\"id\":\"$INCIDENT_ID\",\"started_at\":\"$STARTED_AT\"}}"
+  }
+}
+
+# Outgoing webhook fired when a monitor's state changes.
+resource "betteruptime_outgoing_webhook" "on_monitor_change" {
+  name         = "Terraform Monitor Webhook"
+  url          = "https://example.com"
+  trigger_type = "monitor_change" # Fire when a monitor's state changes
+
+  custom_webhook_template_attributes {
     body_template = "{\"incident\":{\"id\":\"$INCIDENT_ID\",\"started_at\":\"$STARTED_AT\"}}"
   }
 }

@@ -7,6 +7,7 @@ resource "betteruptime_catalog_attribute" "on_call_team_name" {
 resource "betteruptime_catalog_attribute" "on_call_team_lead" {
   relation_id = betteruptime_catalog_relation.on_call_team.id
   name        = "Team lead"
+  position    = 1 # Order this attribute within the relation
 }
 
 resource "betteruptime_catalog_attribute" "affected_service" {
