@@ -13,7 +13,7 @@ https://betterstack.com/docs/uptime/api/aws-cloudwatch-integrations/
 ## Example Usage
 
 ```terraform
-# Better Stack receives alerts from CloudWatch through a generated webhook URL.
+# Better Stack receives alerts from CloudWatch through a generated webhook URL
 resource "betteruptime_aws_cloudwatch_integration" "this" {
   name           = "Terraform CloudWatch Integration"
   call           = false
@@ -21,6 +21,7 @@ resource "betteruptime_aws_cloudwatch_integration" "this" {
   email          = true
   push           = true
   critical_alert = false
+  policy_id      = betteruptime_policy.this.id # Route alerts through this escalation policy
 }
 ```
 

@@ -13,7 +13,7 @@ https://betterstack.com/docs/uptime/api/prometheus-integrations/
 ## Example Usage
 
 ```terraform
-# Better Stack receives alerts from Prometheus through a generated webhook URL.
+# Better Stack receives alerts from Prometheus through a generated webhook URL
 resource "betteruptime_prometheus_integration" "this" {
   name           = "Terraform Prometheus Integration"
   call           = false
@@ -21,6 +21,7 @@ resource "betteruptime_prometheus_integration" "this" {
   email          = true
   push           = true
   critical_alert = false
+  policy_id      = betteruptime_policy.this.id # Route alerts through this escalation policy
 }
 ```
 

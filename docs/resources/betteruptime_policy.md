@@ -14,7 +14,7 @@ https://betterstack.com/docs/uptime/api/policies/
 
 ```terraform
 # Escalation policy with every step type: escalation (to Slack/webhooks/on-call),
-# instructions, time branching, metadata branching, and a wider escalation.
+# instructions, time branching, metadata branching, and a wider escalation
 resource "betteruptime_policy" "this" {
   name            = "Terraform Escalation Policy ${random_pet.unique.id}"
   repeat_count    = 3
@@ -23,7 +23,7 @@ resource "betteruptime_policy" "this" {
 
   # After the 3 repeats pass unacknowledged, escalation continues with the fallback
   # policy below instead of stopping - the supported way to keep re-notifying once a
-  # policy is exhausted, without escalation loops.
+  # policy is exhausted, without escalation loops
   fallback_policy_id = betteruptime_policy.fallback.id
 
   steps {
@@ -33,12 +33,23 @@ resource "betteruptime_policy" "this" {
     step_members { type = "all_slack_integrations" }
     step_members { type = "all_webhook_integrations" }
     step_members { type = "current_on_call" }
+    # Chain to the fallback policy
+    step_members {
+      type = "policy"
+      id   = betteruptime_policy.fallback.id
+    }
+    # Escalate to whoever the incident metadata names
+    step_members {
+      type         = "incident_metadata"
+      metadata_key = "Assigned Policy"
+    }
   }
   steps {
-    type             = "instructions"
-    wait_before      = 0
-    reminder_enabled = false
-    comment          = <<EOT
+    type                    = "instructions"
+    wait_before             = 0
+    reminder_enabled        = true
+    reminder_interval_hours = 6 # Re-remind every 6 hours until the checklist is done
+    comment                 = <<EOT
 # Incident handling instructions
 
 - [ ] Acknowledge the alert
@@ -78,15 +89,18 @@ EOT
     policy_metadata_key = "Assigned Policy"
   }
   steps {
-    type        = "escalation"
-    wait_before = 180
-    urgency_id  = betteruptime_severity.this.id
+    type = "escalation"
+    # Run this step at 09:00 local time instead of after a fixed delay
+    # (wait_before and wait_until_time are mutually exclusive)
+    wait_until_time     = "09:00"
+    wait_until_timezone = "Eastern Time (US & Canada)"
+    urgency_id          = betteruptime_severity.this.id
     step_members { type = "entire_team" }
   }
 }
 
 # Fallback policy: invoked only after "this" exhausts its repeats unacknowledged,
-# widening the blast radius to the whole team.
+# widening the blast radius to the whole team
 resource "betteruptime_policy" "fallback" {
   name            = "Terraform Fallback Policy ${random_pet.unique.id}"
   repeat_count    = 5
@@ -101,7 +115,7 @@ resource "betteruptime_policy" "fallback" {
   }
 }
 
-# Silent policy: no steps, so it never alerts anyone - incidents are only collected.
+# Silent policy: no steps, so it never alerts anyone - incidents are only collected
 resource "betteruptime_policy" "silent" {
   name            = "Terraform Silent Policy ${random_pet.unique.id}"
   repeat_count    = 0

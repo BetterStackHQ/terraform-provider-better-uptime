@@ -13,7 +13,7 @@ https://betterstack.com/docs/uptime/api/azure-integrations/
 ## Example Usage
 
 ```terraform
-# Better Stack receives alerts from Azure through a generated webhook URL.
+# Better Stack receives alerts from Azure through a generated webhook URL
 resource "betteruptime_azure_integration" "this" {
   name           = "Terraform Azure Integration"
   call           = false
@@ -21,6 +21,7 @@ resource "betteruptime_azure_integration" "this" {
   email          = true
   push           = true
   critical_alert = false
+  policy_id      = betteruptime_policy.this.id # Route alerts through this escalation policy
 }
 ```
 

@@ -13,7 +13,7 @@ Monitor lookup.
 ## Example Usage
 
 ```terraform
-# Look up a monitor you manage by its URL.
+# Look up a monitor you manage by its URL
 data "betteruptime_monitor" "existing" {
   url        = betteruptime_monitor.status.url
   depends_on = [betteruptime_monitor.status]

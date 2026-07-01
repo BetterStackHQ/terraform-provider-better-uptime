@@ -20,6 +20,7 @@ resource "betteruptime_elastic_integration" "this" {
   email          = true
   push           = true
   critical_alert = true
+  policy_id      = betteruptime_policy.this.id # Route alerts through this escalation policy
 }
 ```
 

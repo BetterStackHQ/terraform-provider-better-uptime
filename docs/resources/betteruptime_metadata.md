@@ -13,7 +13,7 @@ https://betterstack.com/docs/uptime/api/metadata/
 ## Example Usage
 
 ```terraform
-# Metadata on a monitor.
+# Metadata on a monitor
 resource "betteruptime_metadata" "monitor_playwright" {
   owner_id   = betteruptime_monitor.playwright.id
   owner_type = "Monitor"
@@ -23,7 +23,7 @@ resource "betteruptime_metadata" "monitor_playwright" {
   }
 }
 
-# A User-typed metadata value, referenced by policy metadata branching.
+# A User-typed metadata value, referenced by policy metadata branching
 resource "betteruptime_metadata" "assigned_user" {
   owner_type = "EmailIntegration"
   owner_id   = betteruptime_email_integration.this.id
@@ -34,7 +34,7 @@ resource "betteruptime_metadata" "assigned_user" {
   }
 }
 
-# A Policy-typed metadata value (points at an escalation policy by id).
+# A Policy-typed metadata value (points at an escalation policy by id)
 resource "betteruptime_metadata" "assigned_policy" {
   owner_type = "EmailIntegration"
   owner_id   = betteruptime_email_integration.this.id
@@ -42,6 +42,17 @@ resource "betteruptime_metadata" "assigned_policy" {
   metadata_value {
     type    = "Policy"
     item_id = betteruptime_policy.this.id
+  }
+}
+
+# Metadata on a Heartbeat owner, with a Policy referenced by name instead of by id
+resource "betteruptime_metadata" "runbook_owner" {
+  owner_type = "Heartbeat"
+  owner_id   = betteruptime_heartbeat.this.id
+  key        = "runbook-owner"
+  metadata_value {
+    type = "Policy"
+    name = betteruptime_policy.this.name # Reference a policy by name instead of by id
   }
 }
 ```
