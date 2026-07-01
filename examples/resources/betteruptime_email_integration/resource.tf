@@ -95,15 +95,13 @@ resource "betteruptime_email_integration" "this" {
   }
 
   other_acknowledged_fields {
-    name          = "Note"
-    field_target  = "body"
-    match_type    = "match_after"
-    content_after = "Note:"
+    name         = "Note"
+    field_target = "body"
+    match_type   = "match_everything"
   }
   other_resolved_fields {
-    name          = "Resolution"
-    field_target  = "body"
-    match_type    = "match_after"
-    content_after = "Resolution:"
+    name         = "Resolution"
+    field_target = "body"
+    match_type   = "match_everything"
   }
 }

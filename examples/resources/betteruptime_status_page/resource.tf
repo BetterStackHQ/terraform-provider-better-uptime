@@ -25,10 +25,8 @@ resource "betteruptime_status_page" "this" {
   announcement_embed_link    = "https://example.com/status"           # Link target for the embedded announcement
   announcement_embed_css     = ".announcement { font-weight: bold; }" # Style the announcement embed
 
-  custom_css          = ".page { --brand: #0f172a; }"                  # Custom branding CSS
-  google_analytics_id = "G-XXXXXXXXXX"                                 # Google Analytics measurement ID
-  logo_url            = "https://betterstack.com/assets/logo.png"      # Company logo
-  dark_logo_url       = "https://betterstack.com/assets/logo-dark.png" # Dark-mode logo
+  custom_css          = ".page { --brand: #0f172a; }" # Custom branding CSS
+  google_analytics_id = "G-XXXXXXXXXX"                # Google Analytics measurement ID
 
   status_page_group_id = betteruptime_status_page_group.this.id # Place the page in a status-page group
 
