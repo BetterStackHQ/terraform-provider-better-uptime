@@ -104,8 +104,9 @@ jobs:
             case "$(basename "$f")" in main.tf | outputs.tf) continue ;; esac
             cp "$f" "combined-e2e/$(basename "$f")"
           done
-          # Resources that need a connected third-party account are documented but not run here.
-          deny_resources=" betteruptime_jira_integration "
+          # All resource examples run in the combined config (jira imports a
+          # pre-connected integration via better_stack_id).
+          deny_resources=" "
           for f in examples/resources/*/*.tf; do
             dir="$(basename "$(dirname "$f")")"
             case "$deny_resources" in *" $dir "*) continue ;; esac
