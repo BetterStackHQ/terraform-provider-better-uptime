@@ -1,8 +1,8 @@
 # Comprehensive HTTP "status" monitor - proxy, custom header, expiry alerts and a maintenance window
 resource "betteruptime_monitor" "status" {
-  # Unique subdomain - expiration_policy_id is a per-domain setting shared by every
-  # monitor on that domain, so a dedicated domain keeps this example from clashing
-  url                  = "https://${random_pet.unique.id}.example.com"
+  # Own registrable domain - expiration_policy_id is a per-domain setting (subdomains
+  # share it too), so a dedicated domain avoids clashing with the example.com monitors
+  url                  = "https://${random_pet.unique.id}.com"
   monitor_type         = "status"
   monitor_group_id     = betteruptime_monitor_group.this.id
   expiration_policy_id = betteruptime_policy.this.id
