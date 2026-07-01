@@ -4,7 +4,7 @@ variable "betteruptime_api_token" {
 Better Stack Uptime API token
 (https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#get-an-api-token)
 EOF
-  # The value can be omitted if the BETTERUPTIME_API_TOKEN env var is set.
+  # The value can be omitted if the BETTERUPTIME_API_TOKEN env var is set
   default = null
 }
 

@@ -1,4 +1,4 @@
-# An incoming webhook that parses JSON/query-string payloads into incidents.
+# An incoming webhook that parses JSON/query-string payloads into incidents
 resource "betteruptime_incoming_webhook" "this" {
   name                   = "Terraform Incoming Webhook"
   call                   = false

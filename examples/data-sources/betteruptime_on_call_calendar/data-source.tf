@@ -1,4 +1,4 @@
-# The team's default on-call calendar (looked up with no arguments).
+# The team's default on-call calendar (looked up with no arguments)
 data "betteruptime_on_call_calendar" "default" {}
 
 output "on_call_users" {

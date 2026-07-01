@@ -1,5 +1,5 @@
 # Escalation policy with every step type: escalation (to Slack/webhooks/on-call),
-# instructions, time branching, metadata branching, and a wider escalation.
+# instructions, time branching, metadata branching, and a wider escalation
 resource "betteruptime_policy" "this" {
   name            = "Terraform Escalation Policy ${random_pet.unique.id}"
   repeat_count    = 3
@@ -8,7 +8,7 @@ resource "betteruptime_policy" "this" {
 
   # After the 3 repeats pass unacknowledged, escalation continues with the fallback
   # policy below instead of stopping - the supported way to keep re-notifying once a
-  # policy is exhausted, without escalation loops.
+  # policy is exhausted, without escalation loops
   fallback_policy_id = betteruptime_policy.fallback.id
 
   steps {
@@ -85,7 +85,7 @@ EOT
 }
 
 # Fallback policy: invoked only after "this" exhausts its repeats unacknowledged,
-# widening the blast radius to the whole team.
+# widening the blast radius to the whole team
 resource "betteruptime_policy" "fallback" {
   name            = "Terraform Fallback Policy ${random_pet.unique.id}"
   repeat_count    = 5
@@ -100,7 +100,7 @@ resource "betteruptime_policy" "fallback" {
   }
 }
 
-# Silent policy: no steps, so it never alerts anyone - incidents are only collected.
+# Silent policy: no steps, so it never alerts anyone - incidents are only collected
 resource "betteruptime_policy" "silent" {
   name            = "Terraform Silent Policy ${random_pet.unique.id}"
   repeat_count    = 0

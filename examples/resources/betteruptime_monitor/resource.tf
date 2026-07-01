@@ -30,7 +30,7 @@ resource "betteruptime_monitor" "status" {
   ]
 }
 
-# Monitor that passes only when the endpoint returns a specific set of status codes.
+# Monitor that passes only when the endpoint returns a specific set of status codes
 resource "betteruptime_monitor" "expected_status_code" {
   url                   = "https://example.com"
   monitor_type          = "expected_status_code"
@@ -38,7 +38,7 @@ resource "betteruptime_monitor" "expected_status_code" {
   expected_status_codes = [200, 201, 204]
 }
 
-# Keyword monitor - alerts when the expected text disappears from the page.
+# Keyword monitor - alerts when the expected text disappears from the page
 resource "betteruptime_monitor" "keyword" {
   url              = "https://example.com"
   monitor_type     = "keyword"
@@ -46,7 +46,7 @@ resource "betteruptime_monitor" "keyword" {
   required_keyword = "Better Stack"
 }
 
-# TCP monitor - checks that a port is accepting connections.
+# TCP monitor - checks that a port is accepting connections
 resource "betteruptime_monitor" "tcp" {
   url              = "example.com"
   monitor_type     = "tcp"
@@ -54,7 +54,7 @@ resource "betteruptime_monitor" "tcp" {
   port             = "443"
 }
 
-# DNS monitor - checks that a record resolves to the expected value.
+# DNS monitor - checks that a record resolves to the expected value
 resource "betteruptime_monitor" "dns" {
   url              = "1.1.1.1"
   monitor_type     = "dns"
@@ -62,7 +62,7 @@ resource "betteruptime_monitor" "dns" {
   monitor_group_id = betteruptime_monitor_group.this.id
 }
 
-# Playwright browser monitor running a scripted scenario.
+# Playwright browser monitor running a scripted scenario
 resource "betteruptime_monitor" "playwright" {
   scenario_name     = "Better Stack Homepage"
   monitor_type      = "playwright"

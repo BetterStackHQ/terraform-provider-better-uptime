@@ -1,4 +1,4 @@
-# A ready-to-run basic example: a status page with a single monitor on it.
+# A ready-to-run basic example: a status page with a single monitor on it
 
 resource "betteruptime_status_page_group" "this" {
   name = "Status pages from Terraform"

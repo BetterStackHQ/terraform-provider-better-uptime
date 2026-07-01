@@ -1,4 +1,4 @@
-# Better Stack receives alerts from Prometheus through a generated webhook URL.
+# Better Stack receives alerts from Prometheus through a generated webhook URL
 resource "betteruptime_prometheus_integration" "this" {
   name           = "Terraform Prometheus Integration"
   call           = false

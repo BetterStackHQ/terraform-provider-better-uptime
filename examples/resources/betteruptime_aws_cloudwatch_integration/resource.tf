@@ -1,4 +1,4 @@
-# Better Stack receives alerts from CloudWatch through a generated webhook URL.
+# Better Stack receives alerts from CloudWatch through a generated webhook URL
 resource "betteruptime_aws_cloudwatch_integration" "this" {
   name           = "Terraform CloudWatch Integration"
   call           = false

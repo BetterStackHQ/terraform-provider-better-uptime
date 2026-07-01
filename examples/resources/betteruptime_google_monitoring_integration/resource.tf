@@ -1,4 +1,4 @@
-# Better Stack receives alerts from Google Monitoring through a generated webhook URL.
+# Better Stack receives alerts from Google Monitoring through a generated webhook URL
 resource "betteruptime_google_monitoring_integration" "this" {
   name           = "Terraform Google Monitoring Integration"
   call           = false
