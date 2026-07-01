@@ -3,12 +3,33 @@
 [![tests](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/BetterStackHQ/terraform-provider-better-uptime/actions/workflows/test.yml)
 [![documentation](https://img.shields.io/badge/-documentation-blue)](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs)
 
-These examples demonstrate how to provision and manage resources such as monitors, heartbeats, status pages, and more in Better Stack using Terraform.
+These examples demonstrate how to provision and manage Better Stack Uptime resources such as
+monitors, heartbeats, status pages, on-call calendars and integrations with Terraform.
 
-For instructions how to try the examples for yourself, see the subdirectories.
-You can start with the [basic example](./basic).
+The files in this directory are a ready-to-run **basic** example - a status page with a monitor.
+Per-resource and per-data-source examples are being migrated into [`resources/`](./resources) and
+[`data-sources/`](./data-sources), where they are embedded in the registry docs and exercised
+end-to-end in CI. The [advanced](./advanced), [catalog](./catalog), [ips](./ips) and
+[on_call_calendars](./on_call_calendars) subdirectories hold the remaining not-yet-migrated examples.
+
+## Usage
+
+```shell script
+git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
+  cd terraform-provider-better-uptime/examples
+
+echo '# See variables.tf for more.
+betteruptime_api_token = "XXXXXXXXXXXXXXXXXXXXXXXX"
+' > terraform.tfvars
+
+terraform init
+terraform apply
+
+# open the status page created above
+open $(terraform output -raw betteruptime_status_page_url)
+```
 
 ## Documentation
 
-See [Better Stack Uptime API docs](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/) to obtain API token and get the complete list of parameter options.
+See [Better Stack Uptime API docs](https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/) to obtain an API token and the complete list of parameter options.
 Or explore the [Terraform Registry provider documentation](https://registry.terraform.io/providers/BetterStackHQ/better-uptime/latest/docs).

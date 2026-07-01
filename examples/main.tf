@@ -1,11 +1,4 @@
-provider "betteruptime" {
-  api_token = var.betteruptime_api_token
-}
-
-resource "random_id" "status_page_subdomain" {
-  byte_length = 8
-  prefix      = "tf-status-"
-}
+# A ready-to-run basic example: a status page with a single monitor on it.
 
 resource "betteruptime_status_page_group" "this" {
   name = "Status pages from Terraform"
