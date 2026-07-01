@@ -37,9 +37,7 @@ jobs:
     strategy:
       matrix:
         terraform-version: ["0.14", "1.0", "1.8", "latest"]
-        # examples/ is the new basic root; the remaining subdirs are migrated into
-        # examples/resources and examples/data-sources in follow-up commits.
-        config: [examples, examples/advanced, examples/catalog, examples/ips, examples/on_call_calendars]
+        config: [examples]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -106,13 +104,19 @@ jobs:
             case "$(basename "$f")" in main.tf | outputs.tf) continue ;; esac
             cp "$f" "combined-e2e/$(basename "$f")"
           done
-          # Flatten in every documented example, except the denylisted ones (integrations
-          # that need real third-party credentials to create).
-          deny=" betteruptime_aws_cloudwatch_integration betteruptime_azure_integration betteruptime_google_monitoring_integration betteruptime_grafana_integration betteruptime_new_relic_integration betteruptime_prometheus_integration "
-          for f in examples/resources/*/*.tf examples/data-sources/*/*.tf; do
+          # Resources that need a connected third-party account are documented but not run here.
+          deny_resources=" betteruptime_jira_integration "
+          for f in examples/resources/*/*.tf; do
             dir="$(basename "$(dirname "$f")")"
-            case "$deny" in *" $dir "*) continue ;; esac
-            cp "$f" "combined-e2e/${dir}__$(basename "$f")"
+            case "$deny_resources" in *" $dir "*) continue ;; esac
+            cp "$f" "combined-e2e/res__${dir}__$(basename "$f")"
+          done
+          # Data sources needing a connected/seeded fixture or a run-unique lookup key.
+          deny_data=" betteruptime_monitor betteruptime_policy betteruptime_severity betteruptime_incoming_webhook betteruptime_slack_integration "
+          for f in examples/data-sources/*/*.tf; do
+            dir="$(basename "$(dirname "$f")")"
+            case "$deny_data" in *" $dir "*) continue ;; esac
+            cp "$f" "combined-e2e/ds__${dir}__$(basename "$f")"
           done
       - name: Add resources via Terraform
         run: make terraform CONFIGURATION="combined-e2e" ARGS="apply --auto-approve --input=false"
