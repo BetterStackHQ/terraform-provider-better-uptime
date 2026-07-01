@@ -7,10 +7,9 @@ These examples demonstrate how to provision and manage Better Stack Uptime resou
 monitors, heartbeats, status pages, on-call calendars and integrations with Terraform.
 
 The files in this directory are a ready-to-run **basic** example - a status page with a monitor.
-Per-resource and per-data-source examples are being migrated into [`resources/`](./resources) and
-[`data-sources/`](./data-sources), where they are embedded in the registry docs and exercised
-end-to-end in CI. The [advanced](./advanced), [catalog](./catalog), [ips](./ips) and
-[on_call_calendars](./on_call_calendars) subdirectories hold the remaining not-yet-migrated examples.
+Detailed, per-resource examples live in [`resources/`](./resources) and per-data-source examples in
+[`data-sources/`](./data-sources) - these are embedded in the registry docs and exercised
+end-to-end in CI.
 
 ## Usage
 
