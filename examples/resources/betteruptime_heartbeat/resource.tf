@@ -10,5 +10,5 @@ resource "betteruptime_heartbeat" "this" {
   maintenance_from     = "01:00:00"                  # Suppress incidents during a nightly window
   maintenance_to       = "03:00:00"
   maintenance_days     = ["sat", "sun"]
-  maintenance_timezone = "Europe/Berlin"
+  maintenance_timezone = "Berlin" # Rails timezone name, as the API stores it
 }

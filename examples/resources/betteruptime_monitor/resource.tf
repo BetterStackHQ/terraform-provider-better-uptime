@@ -21,7 +21,7 @@ resource "betteruptime_monitor" "status" {
   maintenance_from     = "01:00:00"                  # Nightly maintenance window - checks are suppressed inside it
   maintenance_to       = "03:00:00"
   maintenance_days     = ["sat", "sun"]
-  maintenance_timezone = "Europe/Berlin"
+  maintenance_timezone = "Berlin" # Rails timezone name, as the API stores it
   request_headers = [
     {
       "name" : "X-Source",
@@ -35,15 +35,17 @@ resource "betteruptime_monitor" "expected_status_code" {
   url                   = "https://example.com"
   monitor_type          = "expected_status_code"
   monitor_group_id      = betteruptime_monitor_group.this.id
+  expiration_policy_id  = betteruptime_policy.this.id
   expected_status_codes = [200, 201, 204]
 }
 
 # Keyword monitor - alerts when the expected text disappears from the page
 resource "betteruptime_monitor" "keyword" {
-  url              = "https://example.com"
-  monitor_type     = "keyword"
-  monitor_group_id = betteruptime_monitor_group.this.id
-  required_keyword = "Better Stack"
+  url                  = "https://example.com"
+  monitor_type         = "keyword"
+  monitor_group_id     = betteruptime_monitor_group.this.id
+  expiration_policy_id = betteruptime_policy.this.id
+  required_keyword     = "Better Stack"
 }
 
 # TCP monitor - checks that a port is accepting connections
