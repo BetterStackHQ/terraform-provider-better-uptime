@@ -932,6 +932,74 @@ func TestResourcePolicyMetadataValidation(t *testing.T) {
 			`,
 			expectError: nil,
 		},
+		{
+			name: "valid - metadata branching with a no_value matcher",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "no_value"
+						}
+						policy_id = 123
+					}
+				}
+			`,
+			expectError: nil,
+		},
+		{
+			name: "valid - no_value matcher combined with a literal value",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "String"
+							value = "production"
+						}
+						metadata_value {
+							type = "no_value"
+						}
+						policy_id = 123
+					}
+				}
+			`,
+			expectError: nil,
+		},
+		{
+			name: "invalid - no_value matcher with a value",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type = "no_value"
+							value = "oops"
+						}
+						policy_id = 123
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0\.metadata_value\.0: value must not be set for the no_value matcher`),
+		},
 	}
 
 	for _, tc := range cases {

@@ -41,6 +41,26 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 	},
 }
 
+// policyMetadataTypes extends the shared metadata value types with the policy-only "no_value"
+// matcher, which matches incidents whose metadata field is absent or blank.
+var policyMetadataTypes = append(append([]string{}, metadataTypes...), metadataNoValueType)
+
+// policyMetadataValueSchema is the shared metadata value schema with the "no_value" type allowed.
+// no_value is specific to policy metadata_branching, so it is not added to the base schema.
+var policyMetadataValueSchema = map[string]*schema.Schema{
+	"type": {
+		Description:  metadataValueSchema["type"].Description + "  \n  Policy `metadata_branching` steps additionally accept `no_value`, which matches incidents whose metadata field is absent or blank.\n",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      "String",
+		ValidateFunc: validation.StringInSlice(policyMetadataTypes, false),
+	},
+	"value":   metadataValueSchema["value"],
+	"item_id": metadataValueSchema["item_id"],
+	"name":    metadataValueSchema["name"],
+	"email":   metadataValueSchema["email"],
+}
+
 var policyStepSchema = map[string]*schema.Schema{
 	"type": {
 		Description:  "The type of the step. Can be either escalation, time_branching, metadata_branching, or instructions.",
@@ -123,7 +143,7 @@ var policyStepSchema = map[string]*schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
 		Default:     nil,
-		Elem:        &schema.Resource{Schema: metadataValueSchema},
+		Elem:        &schema.Resource{Schema: policyMetadataValueSchema},
 	},
 	"policy_id": {
 		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.",

@@ -80,6 +80,8 @@ Optional:
   - `name` - can be used to reference other items like teams, policies, etc.
   
   **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
+  
+  Policy `metadata_branching` steps additionally accept `no_value`, which matches incidents whose metadata field is absent or blank.
 - `value` (String) Value when type is String.
 
 
