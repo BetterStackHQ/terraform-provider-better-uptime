@@ -15,7 +15,6 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 ```terraform
 # Minimal incoming webhook - open an incident for every inbound call
 # (a catch-all started rule matches every request body)
-
 resource "betteruptime_incoming_webhook" "simple" {
   name                   = "Terraform Minimal Incoming Webhook"
   started_rule_type      = "any"
@@ -47,13 +46,11 @@ resource "betteruptime_incoming_webhook" "simple" {
 }
 
 # Auto-generated URL to POST alert payloads to
-
 output "incoming_webhook_url" {
   value = betteruptime_incoming_webhook.simple.url
 }
 
 # An incoming webhook that parses JSON/query-string payloads into incidents
-
 resource "betteruptime_incoming_webhook" "this" {
   name            = "Terraform Incoming Webhook"
   call            = false

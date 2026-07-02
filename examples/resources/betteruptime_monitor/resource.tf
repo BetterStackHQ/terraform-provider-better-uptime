@@ -1,12 +1,10 @@
 # Minimal HTTP monitor - checks that the URL returns a 2XX status code
-
 resource "betteruptime_monitor" "simple" {
   url          = "https://example.com"
   monitor_type = "status"
 }
 
 # Monitor that passes only when the endpoint returns a specific set of status codes
-
 resource "betteruptime_monitor" "expected_status_code" {
   url                   = "https://example.com"
   monitor_type          = "expected_status_code"
@@ -15,7 +13,6 @@ resource "betteruptime_monitor" "expected_status_code" {
 }
 
 # Keyword monitor - alerts when the expected text disappears from the page
-
 resource "betteruptime_monitor" "keyword" {
   url              = "https://example.com"
   monitor_type     = "keyword"
@@ -24,7 +21,6 @@ resource "betteruptime_monitor" "keyword" {
 }
 
 # Keyword absence monitor - the inverse of keyword, alerts when the unwanted text appears on the page
-
 resource "betteruptime_monitor" "keyword_absence" {
   url              = "https://example.com"
   monitor_type     = "keyword_absence"
@@ -33,7 +29,6 @@ resource "betteruptime_monitor" "keyword_absence" {
 }
 
 # Ping monitor - checks that the host is reachable via ICMP ping
-
 resource "betteruptime_monitor" "ping" {
   url              = "example.com"
   monitor_type     = "ping"
@@ -41,7 +36,6 @@ resource "betteruptime_monitor" "ping" {
 }
 
 # TCP monitor - checks that a port is accepting connections
-
 resource "betteruptime_monitor" "tcp" {
   url              = "example.com"
   monitor_type     = "tcp"
@@ -50,7 +44,6 @@ resource "betteruptime_monitor" "tcp" {
 }
 
 # DNS monitor - checks that the DNS server at url answers queries for the domain in request_body
-
 resource "betteruptime_monitor" "dns" {
   url              = "1.1.1.1"
   monitor_type     = "dns"
@@ -59,7 +52,6 @@ resource "betteruptime_monitor" "dns" {
 }
 
 # Playwright browser monitor running a scripted scenario
-
 resource "betteruptime_monitor" "playwright" {
   scenario_name     = "Better Stack Homepage"
   monitor_type      = "playwright"
@@ -81,7 +73,6 @@ resource "betteruptime_monitor" "playwright" {
 }
 
 # Comprehensive HTTP "status" monitor - proxy, custom header, expiry alerts and a maintenance window
-
 resource "betteruptime_monitor" "status" {
   # Own registrable domain - expiration_policy_id is a per-domain setting (subdomains
   # share it too), so a dedicated domain avoids clashing with the example.com monitors - use your own domain

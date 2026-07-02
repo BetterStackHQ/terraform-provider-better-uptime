@@ -1,5 +1,4 @@
 # Metadata on a monitor
-
 resource "betteruptime_metadata" "monitor" {
   owner_id   = betteruptime_monitor.simple.id
   owner_type = "Monitor"
@@ -10,7 +9,6 @@ resource "betteruptime_metadata" "monitor" {
 }
 
 # A User-typed metadata value, referenced by policy metadata branching
-
 resource "betteruptime_metadata" "assigned_user" {
   owner_type = "EmailIntegration"
   owner_id   = betteruptime_email_integration.this.id
@@ -24,7 +22,6 @@ resource "betteruptime_metadata" "assigned_user" {
 }
 
 # A Policy-typed metadata value (points at an escalation policy by id)
-
 resource "betteruptime_metadata" "assigned_policy" {
   owner_type = "EmailIntegration"
   owner_id   = betteruptime_email_integration.this.id
@@ -36,7 +33,6 @@ resource "betteruptime_metadata" "assigned_policy" {
 }
 
 # Metadata on a Heartbeat owner, with a Policy referenced by name instead of by id
-
 resource "betteruptime_metadata" "runbook_owner" {
   owner_type = "Heartbeat"
   owner_id   = betteruptime_heartbeat.this.id
@@ -51,7 +47,6 @@ resource "betteruptime_metadata" "runbook_owner" {
 
 # A Team-typed metadata value, attached to an incoming webhook
 # (all values of one metadata key must share the same type)
-
 resource "betteruptime_metadata" "owning_team" {
   owner_type = "IncomingWebhook"
   owner_id   = betteruptime_incoming_webhook.this.id
@@ -65,7 +60,6 @@ resource "betteruptime_metadata" "owning_team" {
 }
 
 # A Schedule-typed metadata value referencing an on-call calendar
-
 resource "betteruptime_metadata" "escalation_calendar" {
   owner_type = "IncomingWebhook"
   owner_id   = betteruptime_incoming_webhook.this.id

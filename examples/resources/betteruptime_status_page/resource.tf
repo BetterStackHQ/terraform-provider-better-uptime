@@ -1,86 +1,65 @@
 # Minimal status page
-
 resource "betteruptime_status_page" "simple" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   timezone     = "UTC"
 
   # Random suffix keeps the subdomain globally unique - pick your own, e.g. "acme-status"
-  subdomain = "min-${random_id.status_page_subdomain.hex}"
+  subdomain = "tf-status-simple-${random_id.status_page_subdomain.hex}"
 }
 
+# Status page with the commonly used options
 resource "betteruptime_status_page" "this" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   contact_url  = "mailto:support@example.com"
   timezone     = "Eastern Time (US & Canada)"
-  subdomain    = random_id.status_page_subdomain.hex
+  subdomain    = "tf-status-${random_id.status_page_subdomain.hex}"
   subscribable = true
-  ip_allowlist = [
-    "# Office network",
-    "192.168.1.0/24",
-    "2001:0db8:85a3::/64",
-  ]
 
-  # Use the modern status-page design
-  design = "v2"
+  # Place the page in a status-page group
+  status_page_group_id = betteruptime_status_page_group.this.id
 
-  # Light theme (applies with design v2)
-  theme = "light"
-
-  # Vertical layout (applies with design v2)
-  layout = "vertical"
-
-  # Show 90 days of history
-  history = 90
-
-  # Hide incidents shorter than 5 minutes
+  # Show 90 days of history, hiding incidents shorter than 5 minutes
+  history             = 90
   min_incident_length = 300
 
-  # Keep the page out of search engines
+  # Auto-generate downtime reports and keep the page out of search engines
+  automatic_reports        = true
   hide_from_search_engines = true
+}
 
-  # Auto-generate downtime reports
-  automatic_reports = true
+# Styled status page - branding, announcement and custom navigation
+resource "betteruptime_status_page" "styled" {
+  company_name = "Example, Inc"
+  company_url  = "https://example.com"
+  timezone     = "UTC"
+  subdomain    = "tf-status-styled-${random_id.status_page_subdomain.hex}"
 
-  # Banner announcement text
-  announcement = "All systems operational."
+  # The modern design with a light theme and vertical layout
+  design = "v2"
+  theme  = "light"
+  layout = "vertical"
 
-  # Show the announcement in the JS embed
+  # Company logos for the light and dark theme
+  # TODO: point at refs/heads/master instead of the branch before merging
+  logo_url      = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_black_text.png"
+  dark_logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_white_text.png"
+
+  # Banner announcement, also shown in the JavaScript embed
+  announcement               = "All systems operational."
   announcement_embed_visible = true
+  announcement_embed_link    = "https://example.com/status"
+  announcement_embed_css     = ".announcement { font-weight: bold; }"
 
-  # Link target for the embedded announcement
-  announcement_embed_link = "https://example.com/status"
-
-  # Style the announcement embed
-  announcement_embed_css = ".announcement { font-weight: bold; }"
-
-  # Custom branding CSS
-  custom_css = ".page { --brand: #0f172a; }"
-
-  # Google Analytics measurement ID
+  custom_css          = ".page { --brand: #0f172a; }"
   google_analytics_id = "G-XXXXXXXXXX"
 
   # Remove the "Powered by Better Stack" footer - available on higher plans
   whitelabeled = true
 
-  # TODO: point at refs/heads/master instead of the branch before merging
-  # Company logo
-  logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_black_text.png"
-
-  # Logo for the dark theme
-  dark_logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_white_text.png"
-
-  # Place the page in a status-page group
-  status_page_group_id = betteruptime_status_page_group.this.id
-
-  # Password-protect the page
-  password_enabled = true
-
-  # Required when password_enabled is true
-  password = "s3cret"
-
-  # Custom navigation links (design v2)
+  # Custom navigation links (custom_domain and custom_javascript are also
+  # available once a CNAME points at Better Stack)
   navigation_links {
     text = "Home"
     href = "https://example.com"
@@ -89,4 +68,23 @@ resource "betteruptime_status_page" "this" {
     text = "Incidents"
     href = "/incidents"
   }
+}
+
+# Restricted status page - visible only from allowed networks, with a password
+resource "betteruptime_status_page" "secure" {
+  company_name = "Example, Inc"
+  company_url  = "https://example.com"
+  timezone     = "UTC"
+  subdomain    = "tf-status-secure-${random_id.status_page_subdomain.hex}"
+
+  # Comment lines are supported in the allowlist
+  ip_allowlist = [
+    "# Office network",
+    "192.168.1.0/24",
+    "2001:0db8:85a3::/64",
+  ]
+
+  # Password-protect the page
+  password_enabled = true
+  password         = "s3cret"
 }

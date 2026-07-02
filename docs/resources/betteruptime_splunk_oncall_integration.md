@@ -14,7 +14,6 @@ https://betterstack.com/docs/uptime/api/splunk-on-call-integrations/
 
 ```terraform
 # Better Stack posts incident webhooks to a Splunk On-Call (VictorOps) URL
-
 resource "betteruptime_splunk_oncall_integration" "this" {
   name = "Terraform Splunk On-Call Integration"
 

@@ -1,6 +1,5 @@
 # Create Jira issues from incidents on demand. Connect the Jira account in the
 # Better Stack web UI first, then import the integration here by its better_stack_id
-
 resource "betteruptime_jira_integration" "this" {
   # ID of the Jira integration to manage - create it in the web UI first, the ID is in the integration's URL
   better_stack_id          = "35600"

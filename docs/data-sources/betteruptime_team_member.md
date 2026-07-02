@@ -14,7 +14,6 @@ Team member lookup by email.
 
 ```terraform
 # Look up a team member by e-mail
-
 data "betteruptime_team_member" "existing" {
   # Replace with your team member's e-mail
   email = "petr@betterstack.com"

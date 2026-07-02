@@ -14,7 +14,6 @@ https://betterstack.com/docs/uptime/api/google-monitoring-integrations/
 
 ```terraform
 # Better Stack receives alerts from Google Monitoring through a generated webhook URL
-
 resource "betteruptime_google_monitoring_integration" "this" {
   name           = "Terraform Google Monitoring Integration"
   call           = false
@@ -30,7 +29,6 @@ resource "betteruptime_google_monitoring_integration" "with_policy" {
 }
 
 # Point Google Monitoring at this URL to deliver alerts to Better Stack
-
 output "google_monitoring_integration_webhook_url" {
   value = betteruptime_google_monitoring_integration.this.webhook_url
 }

@@ -1,5 +1,4 @@
 # Outgoing webhook fired on incident changes, with a custom request template
-
 resource "betteruptime_outgoing_webhook" "on_incident" {
   name         = "Terraform Outgoing Webhook"
   url          = "https://example.com"
@@ -32,7 +31,6 @@ resource "betteruptime_outgoing_webhook" "on_incident" {
 }
 
 # Outgoing webhook fired when the on-call shift changes
-
 resource "betteruptime_outgoing_webhook" "on_call_change" {
   name         = "Terraform On-call Webhook"
   url          = "https://example.com"
@@ -59,7 +57,6 @@ resource "betteruptime_outgoing_webhook" "on_call_change" {
 }
 
 # Outgoing webhook fired when a monitor's state changes
-
 resource "betteruptime_outgoing_webhook" "on_monitor_change" {
   name = "Terraform Monitor Webhook"
   url  = "https://example.com"

@@ -1,5 +1,4 @@
 # The default High/Low severities exist in every account, so these work out of the box
-
 data "betteruptime_severity" "high" {
   name = "High Severity"
 }
@@ -8,7 +7,6 @@ data "betteruptime_severity" "low" {
 }
 
 # Minimal escalation policy - one step that pages whoever is on call
-
 resource "betteruptime_policy" "simple" {
   # random_pet keeps names unique when re-running the examples - use a plain name
   name = "Terraform Simple Policy ${random_pet.unique.id}"
@@ -23,7 +21,6 @@ resource "betteruptime_policy" "simple" {
 
 # Escalation policy with repeats and fallback chaining - pages integrations and
 # on-call first, then the entire team at 09:00
-
 resource "betteruptime_policy" "this" {
   name            = "Terraform Escalation Policy ${random_pet.unique.id}"
   repeat_count    = 3
@@ -68,7 +65,6 @@ resource "betteruptime_policy" "this" {
 }
 
 # Post handling instructions, re-remind until they are done, then page whoever is on call
-
 resource "betteruptime_policy" "instructions" {
   name            = "Terraform Instructions Policy ${random_pet.unique.id}"
   policy_group_id = betteruptime_policy_group.this.id
@@ -98,7 +94,6 @@ EOT
 }
 
 # Route weekend incidents to the silent policy, page whoever is on call otherwise
-
 resource "betteruptime_policy" "business_hours" {
   name            = "Terraform Business Hours Policy ${random_pet.unique.id}"
   policy_group_id = betteruptime_policy_group.this.id
@@ -125,7 +120,6 @@ resource "betteruptime_policy" "business_hours" {
 }
 
 # Route incidents to different policies based on their metadata
-
 resource "betteruptime_policy" "metadata_routing" {
   name            = "Terraform Metadata Routing Policy ${random_pet.unique.id}"
   policy_group_id = betteruptime_policy_group.this.id
@@ -176,7 +170,6 @@ resource "betteruptime_policy" "metadata_routing" {
 
 # Fallback policy: invoked only after "this" exhausts its repeats unacknowledged,
 # widening the blast radius to the whole team
-
 resource "betteruptime_policy" "fallback" {
   name            = "Terraform Fallback Policy ${random_pet.unique.id}"
   repeat_count    = 5
@@ -192,7 +185,6 @@ resource "betteruptime_policy" "fallback" {
 }
 
 # Silent policy: no steps, so it never alerts anyone - incidents are only collected
-
 resource "betteruptime_policy" "silent" {
   name            = "Terraform Silent Policy ${random_pet.unique.id}"
   repeat_count    = 0

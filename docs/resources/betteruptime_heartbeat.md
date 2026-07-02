@@ -14,7 +14,6 @@ https://betterstack.com/docs/uptime/api/heartbeats/
 
 ```terraform
 # Minimal heartbeat - a job pings this URL every hour; alerts when the pings stop
-
 resource "betteruptime_heartbeat" "simple" {
   name   = "Simple heartbeat"
   period = 3600
@@ -22,7 +21,6 @@ resource "betteruptime_heartbeat" "simple" {
 }
 
 # Have your job send a request here on each successful run
-
 output "heartbeat_url" {
   value = betteruptime_heartbeat.simple.url
 }

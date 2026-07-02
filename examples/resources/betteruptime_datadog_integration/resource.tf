@@ -1,5 +1,4 @@
 # Better Stack receives alerts from Datadog through a generated webhook URL
-
 resource "betteruptime_datadog_integration" "this" {
   name           = "Terraform Datadog Integration"
   call           = false
@@ -18,7 +17,6 @@ resource "betteruptime_datadog_integration" "with_policy" {
 }
 
 # Point Datadog at this URL to deliver alerts to Better Stack
-
 output "datadog_integration_webhook_url" {
   value = betteruptime_datadog_integration.this.webhook_url
 }

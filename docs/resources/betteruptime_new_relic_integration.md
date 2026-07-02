@@ -14,7 +14,6 @@ https://betterstack.com/docs/uptime/api/new-relic-integrations/
 
 ```terraform
 # Better Stack receives alerts from New Relic through a generated webhook URL
-
 resource "betteruptime_new_relic_integration" "this" {
   name           = "Terraform New Relic Integration"
   call           = false
@@ -33,7 +32,6 @@ resource "betteruptime_new_relic_integration" "with_policy" {
 }
 
 # Point New Relic at this URL to deliver alerts to Better Stack
-
 output "new_relic_integration_webhook_url" {
   value = betteruptime_new_relic_integration.this.webhook_url
 }

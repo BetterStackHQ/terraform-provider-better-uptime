@@ -1,5 +1,4 @@
 # A ready-to-run basic example: a status page with a single monitor on it
-
 resource "betteruptime_status_page_group" "this" {
   name = "Status pages from Terraform"
 }
@@ -8,7 +7,7 @@ resource "betteruptime_status_page" "this" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   timezone     = "UTC"
-  subdomain    = coalesce(var.betteruptime_status_page_subdomain, random_id.status_page_subdomain.hex)
+  subdomain    = coalesce(var.betteruptime_status_page_subdomain, "tf-status-${random_id.status_page_subdomain.hex}")
 
   status_page_group_id = betteruptime_status_page_group.this.id
 }

@@ -14,7 +14,6 @@ https://betterstack.com/docs/uptime/api/elastic-integrations/
 
 ```terraform
 # Better Stack receives alerts from Elastic through a generated webhook URL
-
 resource "betteruptime_elastic_integration" "this" {
   name  = "Terraform Elastic Integration"
   call  = false
@@ -32,7 +31,6 @@ resource "betteruptime_elastic_integration" "with_policy" {
 }
 
 # Point Elastic at this URL to deliver alerts to Better Stack
-
 output "elastic_integration_webhook_url" {
   value = betteruptime_elastic_integration.this.webhook_url
 }
