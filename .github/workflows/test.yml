@@ -55,11 +55,12 @@ jobs:
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
       # A data-source lookup that finds nothing yields a null output rather than an
-      # error, so a missing fixture would otherwise pass unnoticed.
+      # error, and an empty list (e.g. nobody on the default on-call calendar) hides
+      # a data problem the examples rely on - fail on both.
       - name: Verify no output is null or empty
         run: |
           make terraform CONFIGURATION="${{ matrix.config }}" ARGS="output -json > outputs.json"
-          EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "") | .key' "${{ matrix.config }}/outputs.json")"
+          EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "" or .value.value == [] or .value.value == {}) | .key' "${{ matrix.config }}/outputs.json")"
           if [ -n "$EMPTY" ]; then
             echo "Outputs with null or empty values:"
             echo "$EMPTY"
@@ -132,11 +133,12 @@ jobs:
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
       # A data-source lookup that finds nothing yields a null output rather than an
-      # error, so a missing fixture would otherwise pass unnoticed.
+      # error, and an empty list (e.g. nobody on the default on-call calendar) hides
+      # a data problem the examples rely on - fail on both.
       - name: Verify no output is null or empty
         run: |
           make terraform CONFIGURATION="combined-e2e" ARGS="output -json > outputs.json"
-          EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "") | .key' "combined-e2e/outputs.json")"
+          EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "" or .value.value == [] or .value.value == {}) | .key' "combined-e2e/outputs.json")"
           if [ -n "$EMPTY" ]; then
             echo "Outputs with null or empty values:"
             echo "$EMPTY"
