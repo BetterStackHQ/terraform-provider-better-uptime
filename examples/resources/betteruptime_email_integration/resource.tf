@@ -81,11 +81,11 @@ resource "betteruptime_email_integration" "this" {
   }
   title_field {
     # Subject text after the "[Alert]" tag becomes the incident title
-    name          = "Title"
-    special_type  = "title"
-    field_target  = "subject"
-    match_type    = "match_after"
-    content_after = "]"
+    name         = "Title"
+    special_type = "title"
+    field_target = "subject"
+    match_type   = "match_after"
+    content      = "]" # match_after and match_before take the marker in content
   }
   started_alert_id_field {
     name           = "Alert ID"

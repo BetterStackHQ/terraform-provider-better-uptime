@@ -56,18 +56,26 @@ resource "betteruptime_metadata" "runbook_owner" {
   }
 }
 
-# Metadata with Team and Schedule references, attached to an incoming webhook
-resource "betteruptime_metadata" "escalation_targets" {
+# A Team-typed metadata value, attached to an incoming webhook
+# (all values of one metadata key must share the same type)
+resource "betteruptime_metadata" "owning_team" {
   owner_type = "IncomingWebhook"
   owner_id   = betteruptime_incoming_webhook.this.id
-  key        = "Escalation targets"
+  key        = "Owning team"
   metadata_value {
     type = "Team"
     name = "Terraform E2E Tests" # Name of one of your teams
   }
+}
+
+# A Schedule-typed metadata value referencing an on-call calendar
+resource "betteruptime_metadata" "escalation_calendar" {
+  owner_type = "IncomingWebhook"
+  owner_id   = betteruptime_incoming_webhook.this.id
+  key        = "Escalation calendar"
   metadata_value {
     type    = "Schedule"
-    item_id = betteruptime_on_call_calendar.this.id # Reference an on-call calendar by ID
+    item_id = betteruptime_on_call_calendar.this.id
   }
 }
 ```
