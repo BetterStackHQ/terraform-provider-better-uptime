@@ -1,10 +1,16 @@
 # Minimal incoming webhook - open an incident for every inbound call
-# ("unused" means no filtering rules, so every request starts an incident)
+# (a catch-all started rule matches every request body)
 resource "betteruptime_incoming_webhook" "simple" {
-  started_rule_type      = "unused"
+  started_rule_type      = "any"
   acknowledged_rule_type = "unused"
   resolved_rule_type     = "unused"
 
+  # Match every request - .* matches any body, empty included
+  started_rules {
+    rule_target = "body"
+    match_type  = "matches_regex"
+    content     = ".*"
+  }
   # Whole request body becomes the incident title
   title_field {
     name         = "Title"

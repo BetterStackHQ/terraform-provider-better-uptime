@@ -14,12 +14,18 @@ https://betterstack.com/docs/uptime/api/email-integrations/
 
 ```terraform
 # Minimal e-mail integration - open an incident for every inbound e-mail
-# ("unused" means no filtering rules, so every e-mail starts an incident)
+# (a catch-all started rule matches every subject)
 resource "betteruptime_email_integration" "simple" {
-  started_rule_type      = "unused"
+  started_rule_type      = "any"
   acknowledged_rule_type = "unused"
   resolved_rule_type     = "unused"
 
+  # Match every e-mail - .* matches any subject, empty included
+  started_rules {
+    rule_target = "subject"
+    match_type  = "matches_regex"
+    content     = ".*"
+  }
   # Subject becomes the incident title
   title_field {
     name         = "Title"

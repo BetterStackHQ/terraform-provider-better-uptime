@@ -10,6 +10,42 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func TestDataPolicySkipsNullName(t *testing.T) {
+	// A policy with a null name must be skipped, not panic the lookup.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer foo" {
+			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
+		}
+		if r.Method == http.MethodGet && r.RequestURI == "/api/v3/policies?page=1" {
+			_, _ = w.Write([]byte(`{"data":[{"id":"1","attributes":{"name":null,"incident_token":"abc"}},{"id":"2","attributes":{"name":"Target Policy","incident_token":"def"}}],"pagination":{"next":null}}`))
+			return
+		}
+		t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+	}))
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil },
+		},
+		Steps: []resource.TestStep{{
+			Config: `
+			provider "betteruptime" {
+				api_token = "foo"
+			}
+			data "betteruptime_policy" "this" {
+				name = "Target Policy"
+			}
+			`,
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr("data.betteruptime_policy.this", "id", "2"),
+				resource.TestCheckResourceAttr("data.betteruptime_policy.this", "name", "Target Policy"),
+			),
+		}},
+	})
+}
+
 func TestDataPolicy(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Log("Received " + r.Method + " " + r.RequestURI)
