@@ -51,6 +51,7 @@ resource "betteruptime_status_page" "this" {
   timezone      = "Eastern Time (US & Canada)"
   subdomain     = coalesce(var.betteruptime_status_page_subdomain, random_id.status_page_subdomain.hex)
   subscribable  = true
+  published     = true
   ip_allowlist = [
     "# Office network",
     "192.168.1.0/24",

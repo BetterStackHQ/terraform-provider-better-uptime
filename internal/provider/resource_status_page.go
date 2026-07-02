@@ -93,6 +93,12 @@ var statusPageSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Description: "Do you want to allow users to subscribe to your status page changes?",
 	},
+	"published": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+		Description: "Is your status page published?",
+	},
 	"hide_from_search_engines": {
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -269,6 +275,7 @@ type statusPage struct {
 	CustomDomain             *string           `json:"custom_domain,omitempty"`
 	MinIncidentLength        *int              `json:"min_incident_length,omitempty"`
 	Subscribable             *bool             `json:"subscribable,omitempty"`
+	Published                *bool             `json:"published,omitempty"`
 	HideFromSearchEngines    *bool             `json:"hide_from_search_engines,omitempty"`
 	CustomCSS                *string           `json:"custom_css,omitempty"`
 	CustomJavaScript         *string           `json:"custom_javascript,omitempty"`
@@ -320,6 +327,7 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "custom_domain", v: &in.CustomDomain},
 		{k: "min_incident_length", v: &in.MinIncidentLength},
 		{k: "subscribable", v: &in.Subscribable},
+		{k: "published", v: &in.Published},
 		{k: "hide_from_search_engines", v: &in.HideFromSearchEngines},
 		{k: "custom_css", v: &in.CustomCSS},
 		{k: "custom_javascript", v: &in.CustomJavaScript},
