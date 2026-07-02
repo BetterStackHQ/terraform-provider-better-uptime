@@ -224,9 +224,9 @@ resource "betteruptime_email_integration" "this" {
 
 Optional:
 
-- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
+- `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
 - `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
@@ -239,7 +239,7 @@ Optional:
 
 Optional:
 
-- `content` (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
+- `content` (String) The content we should match to satisfy the rule. Should be a valid regular expression when match_type is matches_regex.
 - `match_type` (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
 - `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `target_field` (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
@@ -250,9 +250,9 @@ Optional:
 
 Optional:
 
-- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
+- `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
 - `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
@@ -265,9 +265,9 @@ Optional:
 
 Optional:
 
-- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
+- `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
 - `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
@@ -280,9 +280,9 @@ Optional:
 
 Optional:
 
-- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
+- `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
 - `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
@@ -295,9 +295,9 @@ Optional:
 
 Optional:
 
-- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
+- `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
 - `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
@@ -310,9 +310,9 @@ Optional:
 
 Optional:
 
-- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
+- `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
 - `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
@@ -325,7 +325,7 @@ Optional:
 
 Optional:
 
-- `content` (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
+- `content` (String) The content we should match to satisfy the rule. Should be a valid regular expression when match_type is matches_regex.
 - `match_type` (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
 - `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `target_field` (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
@@ -336,9 +336,9 @@ Optional:
 
 Optional:
 
-- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
+- `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
 - `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
@@ -351,7 +351,7 @@ Optional:
 
 Optional:
 
-- `content` (String) The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.
+- `content` (String) The content we should match to satisfy the rule. Should be a valid regular expression when match_type is matches_regex.
 - `match_type` (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
 - `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `target_field` (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters
@@ -362,9 +362,9 @@ Optional:
 
 Optional:
 
-- `content` (String) How should we extract content the field. Should be a valid Regex when match_type is match_regex.
-- `content_after` (String) When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.
-- `content_before` (String) When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.
+- `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
+- `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
+- `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
 - `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
