@@ -27,7 +27,7 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"email": {
-		Description: "The e-mail address of the user to notify during an incident. Can be used instead of id when member type is user - it is resolved to the user's ID automatically.",
+		Description: "The e-mail address of the user to notify during an incident. Can be used instead of id when member type is user - it is resolved to the user's ID automatically. When both id and email are set, email takes precedence.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,

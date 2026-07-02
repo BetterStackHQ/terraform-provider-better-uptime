@@ -1,7 +1,11 @@
 package provider
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"regexp"
 	"testing"
 
@@ -779,8 +783,88 @@ func TestResourcePolicyChainedPolicyMember(t *testing.T) {
 	})
 }
 
+// newPolicyUserResolvingServer emulates the real policies API for user step members:
+// it resolves an e-mail to the user's ID and always returns BOTH id and email in
+// responses, like PolicySerializer does. The SDK test framework fails any step whose
+// post-apply plan is not empty, so these tests prove the Computed id/email round-trip
+// causes no drift.
+func newPolicyUserResolvingServer(t *testing.T) *TestServer {
+	enrich := func(body []byte) []byte {
+		parsed := make(map[string]interface{})
+		if err := json.Unmarshal(body, &parsed); err != nil {
+			t.Fatal(err)
+		}
+		steps, _ := parsed["steps"].([]interface{})
+		for _, s := range steps {
+			step, _ := s.(map[string]interface{})
+			members, _ := step["step_members"].([]interface{})
+			for _, m := range members {
+				member, _ := m.(map[string]interface{})
+				if member["type"] != "user" {
+					continue
+				}
+				if _, hasEmail := member["email"]; hasEmail {
+					member["id"] = 42 // the API resolves the e-mail to the user's ID
+				} else if _, hasId := member["id"]; hasId {
+					member["email"] = "resolved@example.com" // the API returns the user's e-mail
+				}
+			}
+		}
+		enriched, err := json.Marshal(parsed)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return enriched
+	}
+
+	ts := &TestServer{}
+	ts.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ts.mu.Lock()
+		ts.CalledRequests = append(ts.CalledRequests, CalledRequest{Method: r.Method, URL: r.RequestURI, Body: string(body)})
+		ts.mu.Unlock()
+		t.Log("Received " + r.Method + " " + r.RequestURI + " " + string(body))
+
+		switch {
+		case r.Method == http.MethodPost && r.RequestURI == "/api/v3/policies":
+			ts.Data.Store(enrich(body))
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":"1","attributes":%s}}`, ts.Data.Load().([]byte))))
+		case r.Method == http.MethodGet && r.RequestURI == "/api/v3/policies/1":
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":"1","attributes":%s}}`, ts.Data.Load().([]byte))))
+		case r.Method == http.MethodPatch && r.RequestURI == "/api/v3/policies/1":
+			// Merge the partial update into the stored object, like the real API.
+			merged := make(map[string]interface{})
+			if err := json.Unmarshal(ts.Data.Load().([]byte), &merged); err != nil {
+				t.Fatal(err)
+			}
+			patch := make(map[string]interface{})
+			if err := json.Unmarshal(body, &patch); err != nil {
+				t.Fatal(err)
+			}
+			for k, v := range patch {
+				merged[k] = v
+			}
+			mergedBody, err := json.Marshal(merged)
+			if err != nil {
+				t.Fatal(err)
+			}
+			ts.Data.Store(enrich(mergedBody))
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"data":{"id":"1","attributes":%s}}`, ts.Data.Load().([]byte))))
+		case r.Method == http.MethodDelete && r.RequestURI == "/api/v3/policies/1":
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
+		}
+	}))
+	return ts
+}
+
 func TestResourcePolicyUserStepMemberByEmail(t *testing.T) {
-	server := newResourceServer(t, "/api/v3/policies", "1")
+	server := newPolicyUserResolvingServer(t)
 	defer server.Close()
 
 	resource.Test(t, resource.TestCase{
@@ -791,6 +875,7 @@ func TestResourcePolicyUserStepMemberByEmail(t *testing.T) {
 			},
 		},
 		Steps: []resource.TestStep{
+			// Step 1 - the e-mail is sent; the API returns the resolved id alongside it.
 			{
 				Config: `
 				provider "betteruptime" {
@@ -815,12 +900,83 @@ func TestResourcePolicyUserStepMemberByEmail(t *testing.T) {
 					resource.TestCheckResourceAttrSet("betteruptime_policy.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.type", "user"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", "petr@example.com"),
-					// The e-mail is sent to the API, which resolves it to the user's ID.
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "42"),
 					server.TestCheckCalledRequest("POST", "/api/v3/policies", `{"name":"Terraform - User by email","steps":[{"type":"escalation","urgency_id":123,"step_members":[{"type":"user","email":"petr@example.com"}],"days":[],"metadata_values":[]}]}`),
 				),
 				PreConfig: func() {
-					t.Log("test user step member referenced by e-mail")
+					t.Log("step 1 - create with e-mail only")
 				},
+			},
+			// Step 2 - changing the e-mail re-resolves it on update.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name = "Terraform - User by email"
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					urgency_id  = 123
+					step_members {
+					  type  = "user"
+					  email = "juraj@example.com"
+					}
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", "juraj@example.com"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "42"),
+				),
+				PreConfig: func() {
+					t.Log("step 2 - change the e-mail")
+				},
+			},
+		},
+	})
+}
+
+func TestResourcePolicyUserStepMemberById(t *testing.T) {
+	server := newPolicyUserResolvingServer(t)
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// The API returns the user's e-mail alongside a configured id.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name = "Terraform - User by id"
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					urgency_id  = 123
+					step_members {
+					  type = "user"
+					  id   = 42
+					}
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "42"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", "resolved@example.com"),
+				),
 			},
 		},
 	})
