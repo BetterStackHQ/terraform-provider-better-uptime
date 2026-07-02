@@ -14,8 +14,10 @@ https://betterstack.com/docs/uptime/api/list-all-severities/
 
 ```terraform
 # A severity (urgency) controls how team members are notified. This one notifies via e-mail and push.
+
 resource "betteruptime_severity" "this" {
-  name           = "Terraform Severity ${random_pet.unique.id}" # random_pet keeps names unique when re-running the examples - use a plain name
+  # random_pet keeps names unique when re-running the examples - use a plain name
+  name           = "Terraform Severity ${random_pet.unique.id}"
   email          = true
   push           = true
   call           = false

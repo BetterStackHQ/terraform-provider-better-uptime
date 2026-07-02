@@ -29,6 +29,7 @@ resource "betteruptime_catalog_record" "demo_team" {
 }
 
 # API Services incidents in Production -> Demo team
+
 resource "betteruptime_catalog_record" "api_production" {
   relation_id = betteruptime_catalog_relation.service.id
 

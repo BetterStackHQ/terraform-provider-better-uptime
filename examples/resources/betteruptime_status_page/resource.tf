@@ -1,8 +1,10 @@
 # Minimal status page
+
 resource "betteruptime_status_page" "simple" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   timezone     = "UTC"
+
   # Random suffix keeps the subdomain globally unique - pick your own, e.g. "acme-status"
   subdomain = "min-${random_id.status_page_subdomain.hex}"
 }
@@ -20,32 +22,63 @@ resource "betteruptime_status_page" "this" {
     "2001:0db8:85a3::/64",
   ]
 
-  design  = "v2"       # Use the modern status-page design
-  theme   = "light"    # Light theme (applies with design v2)
-  layout  = "vertical" # Vertical layout (applies with design v2)
-  history = 90         # Show 90 days of history
+  # Use the modern status-page design
+  design = "v2"
 
-  min_incident_length      = 300  # Hide incidents shorter than 5 minutes
-  hide_from_search_engines = true # Keep the page out of search engines
-  automatic_reports        = true # Auto-generate downtime reports
+  # Light theme (applies with design v2)
+  theme = "light"
 
-  announcement               = "All systems operational."             # Banner announcement text
-  announcement_embed_visible = true                                   # Show the announcement in the JS embed
-  announcement_embed_link    = "https://example.com/status"           # Link target for the embedded announcement
-  announcement_embed_css     = ".announcement { font-weight: bold; }" # Style the announcement embed
+  # Vertical layout (applies with design v2)
+  layout = "vertical"
 
-  custom_css          = ".page { --brand: #0f172a; }" # Custom branding CSS
-  google_analytics_id = "G-XXXXXXXXXX"                # Google Analytics measurement ID
-  whitelabeled        = true                          # Remove the "Powered by Better Stack" footer - available on higher plans
+  # Show 90 days of history
+  history = 90
+
+  # Hide incidents shorter than 5 minutes
+  min_incident_length = 300
+
+  # Keep the page out of search engines
+  hide_from_search_engines = true
+
+  # Auto-generate downtime reports
+  automatic_reports = true
+
+  # Banner announcement text
+  announcement = "All systems operational."
+
+  # Show the announcement in the JS embed
+  announcement_embed_visible = true
+
+  # Link target for the embedded announcement
+  announcement_embed_link = "https://example.com/status"
+
+  # Style the announcement embed
+  announcement_embed_css = ".announcement { font-weight: bold; }"
+
+  # Custom branding CSS
+  custom_css = ".page { --brand: #0f172a; }"
+
+  # Google Analytics measurement ID
+  google_analytics_id = "G-XXXXXXXXXX"
+
+  # Remove the "Powered by Better Stack" footer - available on higher plans
+  whitelabeled = true
 
   # TODO: point at refs/heads/master instead of the branch before merging
-  logo_url      = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_black_text.png" # Company logo
-  dark_logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_white_text.png" # Logo for the dark theme
+  # Company logo
+  logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_black_text.png"
 
-  status_page_group_id = betteruptime_status_page_group.this.id # Place the page in a status-page group
+  # Logo for the dark theme
+  dark_logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_white_text.png"
 
-  password_enabled = true     # Password-protect the page
-  password         = "s3cret" # Required when password_enabled is true
+  # Place the page in a status-page group
+  status_page_group_id = betteruptime_status_page_group.this.id
+
+  # Password-protect the page
+  password_enabled = true
+
+  # Required when password_enabled is true
+  password = "s3cret"
 
   # Custom navigation links (design v2)
   navigation_links {

@@ -15,6 +15,7 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 ```terraform
 # Minimal incoming webhook - open an incident for every inbound call
 # (a catch-all started rule matches every request body)
+
 resource "betteruptime_incoming_webhook" "simple" {
   name                   = "Terraform Minimal Incoming Webhook"
   started_rule_type      = "any"
@@ -27,6 +28,7 @@ resource "betteruptime_incoming_webhook" "simple" {
     match_type  = "matches_regex"
     content     = ".*"
   }
+
   # Whole request body becomes the incident title
   title_field {
     name         = "Title"
@@ -34,6 +36,7 @@ resource "betteruptime_incoming_webhook" "simple" {
     field_target = "body"
     match_type   = "match_everything"
   }
+
   # Whole request body becomes the incident cause
   cause_field {
     name         = "Cause"
@@ -44,22 +47,27 @@ resource "betteruptime_incoming_webhook" "simple" {
 }
 
 # Auto-generated URL to POST alert payloads to
+
 output "incoming_webhook_url" {
   value = betteruptime_incoming_webhook.simple.url
 }
 
 # An incoming webhook that parses JSON/query-string payloads into incidents
+
 resource "betteruptime_incoming_webhook" "this" {
-  name                   = "Terraform Incoming Webhook"
-  call                   = false
-  sms                    = false
-  email                  = true
-  push                   = true
-  critical_alert         = false
-  team_wait              = 180
-  recovery_period        = 0
-  paused                 = false
-  policy_id              = betteruptime_policy.this.id # Route webhook incidents through this policy
+  name            = "Terraform Incoming Webhook"
+  call            = false
+  sms             = false
+  email           = true
+  push            = true
+  critical_alert  = false
+  team_wait       = 180
+  recovery_period = 0
+  paused          = false
+
+  # Route webhook incidents through this policy
+  policy_id = betteruptime_policy.this.id
+
   started_rule_type      = "any"
   acknowledged_rule_type = "any"
   resolved_rule_type     = "all"

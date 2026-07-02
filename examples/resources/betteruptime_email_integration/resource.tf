@@ -1,5 +1,6 @@
 # Minimal e-mail integration - open an incident for every inbound e-mail
 # (a catch-all started rule matches every subject)
+
 resource "betteruptime_email_integration" "simple" {
   name                   = "Terraform Minimal Email integration"
   started_rule_type      = "any"
@@ -12,6 +13,7 @@ resource "betteruptime_email_integration" "simple" {
     match_type  = "matches_regex"
     content     = ".*"
   }
+
   # Subject becomes the incident title
   title_field {
     name         = "Title"
@@ -19,6 +21,7 @@ resource "betteruptime_email_integration" "simple" {
     field_target = "subject"
     match_type   = "match_everything"
   }
+
   # E-mail body becomes the incident cause
   cause_field {
     name         = "Cause"
@@ -29,25 +32,32 @@ resource "betteruptime_email_integration" "simple" {
 }
 
 # Auto-generated inbox to forward alert e-mails to
+
 output "email_integration_address" {
   value = betteruptime_email_integration.simple.email_address
 }
 
 # An e-mail integration that parses inbound alert e-mails into incidents, showing
 # the full range of field extractors (cause, title, alert id, custom fields)
+
 resource "betteruptime_email_integration" "this" {
-  name                   = "Terraform Email integration"
-  call                   = false
-  sms                    = false
-  email                  = true
-  push                   = true
-  critical_alert         = false
-  team_wait              = 180
-  recovery_period        = 0
-  paused                 = false
-  policy_id              = betteruptime_policy.this.id # Route parsed e-mail incidents through this policy
-  started_rule_type      = "any"
-  acknowledged_rule_type = "any" # Acknowledge on any matching rule
+  name            = "Terraform Email integration"
+  call            = false
+  sms             = false
+  email           = true
+  push            = true
+  critical_alert  = false
+  team_wait       = 180
+  recovery_period = 0
+  paused          = false
+
+  # Route parsed e-mail incidents through this policy
+  policy_id = betteruptime_policy.this.id
+
+  started_rule_type = "any"
+
+  # Acknowledge on any matching rule
+  acknowledged_rule_type = "any"
   resolved_rule_type     = "all"
 
   started_rules {
@@ -85,7 +95,9 @@ resource "betteruptime_email_integration" "this" {
     special_type = "title"
     field_target = "subject"
     match_type   = "match_after"
-    content      = "]" # match_after and match_before take the marker in content
+
+    # match_after and match_before take the marker in content
+    content = "]"
   }
   started_alert_id_field {
     name           = "Alert ID"

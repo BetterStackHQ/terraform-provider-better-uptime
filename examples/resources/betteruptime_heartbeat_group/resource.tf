@@ -4,6 +4,7 @@ resource "betteruptime_heartbeat_group" "this" {
 
 resource "betteruptime_heartbeat_group" "secondary" {
   name = "Secondary heartbeats"
+
   # sort_index orders sibling groups in the dashboard
   sort_index = 2
 }

@@ -19,6 +19,7 @@ resource "betteruptime_severity_group" "this" {
 
 resource "betteruptime_severity_group" "secondary" {
   name = "Secondary severities from Terraform"
+
   # sort_index orders sibling groups in the dashboard
   sort_index = 2
 }

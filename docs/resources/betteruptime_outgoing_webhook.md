@@ -14,6 +14,7 @@ https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/
 
 ```terraform
 # Outgoing webhook fired on incident changes, with a custom request template
+
 resource "betteruptime_outgoing_webhook" "on_incident" {
   name         = "Terraform Outgoing Webhook"
   url          = "https://example.com"
@@ -46,13 +47,15 @@ resource "betteruptime_outgoing_webhook" "on_incident" {
 }
 
 # Outgoing webhook fired when the on-call shift changes
+
 resource "betteruptime_outgoing_webhook" "on_call_change" {
   name         = "Terraform On-call Webhook"
   url          = "https://example.com"
   trigger_type = "on_call_change"
 
   custom_webhook_template_attributes {
-    http_method = "put" # Non-default HTTP method
+    # Non-default HTTP method
+    http_method = "put"
 
     headers_template {
       name  = "Content-Type"
@@ -60,8 +63,10 @@ resource "betteruptime_outgoing_webhook" "on_call_change" {
     }
     headers_template {
       # Multiple template headers
-      name  = "Authorization"
-      value = "Bearer your-api-token" # Replace with your endpoint's token
+      name = "Authorization"
+
+      # Replace with your endpoint's token
+      value = "Bearer your-api-token"
     }
 
     body_template = jsonencode({ event = "on_call_changed" })
@@ -69,10 +74,13 @@ resource "betteruptime_outgoing_webhook" "on_call_change" {
 }
 
 # Outgoing webhook fired when a monitor's state changes
+
 resource "betteruptime_outgoing_webhook" "on_monitor_change" {
-  name         = "Terraform Monitor Webhook"
-  url          = "https://example.com"
-  trigger_type = "monitor_change" # Fire when a monitor's state changes
+  name = "Terraform Monitor Webhook"
+  url  = "https://example.com"
+
+  # Fire when a monitor's state changes
+  trigger_type = "monitor_change"
 
   custom_webhook_template_attributes {
     body_template = "{\"incident\":{\"id\":\"$INCIDENT_ID\",\"started_at\":\"$STARTED_AT\"}}"

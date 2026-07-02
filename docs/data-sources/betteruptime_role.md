@@ -14,6 +14,7 @@ Look up a team role by name to obtain its ID (for use with `betteruptime_team_me
 
 ```terraform
 # Look up a custom role by name - system role names like member or team_lead work too
+
 data "betteruptime_role" "existing" {
   name = "My custom role"
 }
