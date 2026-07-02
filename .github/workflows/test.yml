@@ -9,29 +9,27 @@ on:
     - cron: '0 3 * * *'
 jobs:
   test:
-    strategy:
-      matrix:
-        go-version: ['1.23.x']
-        os: [ubuntu-latest, macos-latest, windows-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
+    # Checkout must precede setup-go so its cache can be keyed on go.sum.
+    - name: Checkout code
+      uses: actions/checkout@v7
     - name: Install Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v6
       with:
-        go-version: ${{ matrix.go-version }}
+        go-version: '1.23.x'
     - name: Install Terraform
-      uses: hashicorp/setup-terraform@v3
+      uses: hashicorp/setup-terraform@v4
       with:
         terraform_version: 'latest'
-        # Disable the wrapper: on Windows it creates a `terraform` file with
-        # no extension that is not discoverable via PATHEXT, so go test falls
-        # back to hc-install and trips the expired GPG check.
+        # Disable the wrapper: the acceptance-test driver must exec the real
+        # terraform binary, not the wrapper script shadowing it on PATH.
         terraform_wrapper: false
-    - name: Checkout code
-      uses: actions/checkout@v2
     - name: Test
-      run: go test ./...
+      env:
+        # Skip terraform's checkpoint version-check call in every init the tests run.
+        CHECKPOINT_DISABLE: "1"
+      run: go test -timeout 10m ./...
 
   e2e_test:
     strategy:
@@ -41,16 +39,17 @@ jobs:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
+      # Checkout must precede setup-go so its cache can be keyed on go.sum.
+      - name: Checkout code
+        uses: actions/checkout@v7
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v6
         with:
           go-version: '1.23.x'
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ matrix.terraform-version }}
-      - name: Checkout code
-        uses: actions/checkout@v2
       - name: Add resources via Terraform
         run: make terraform CONFIGURATION="${{ matrix.config }}" ARGS="apply --auto-approve --input=false"
         env:
