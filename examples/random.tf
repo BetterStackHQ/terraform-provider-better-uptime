@@ -4,7 +4,7 @@ resource "random_id" "status_page_subdomain" {
   byte_length = 8
 }
 
-# Unique suffix for resources whose names must not collide across runs
+# Unique suffix for resources whose names or invitation e-mails must not collide across runs
 resource "random_pet" "unique" {
   length = 2
 }
