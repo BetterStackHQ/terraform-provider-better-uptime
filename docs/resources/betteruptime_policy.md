@@ -58,6 +58,12 @@ resource "betteruptime_policy" "this" {
     step_members { type = "all_webhook_integrations" }
     step_members { type = "current_on_call" }
 
+    # Page a specific team member - replace with your colleague's e-mail
+    step_members {
+      type  = "user"
+      email = "petr@betterstack.com"
+    }
+
     # Chain to the fallback policy
     step_members {
       type = "policy"
