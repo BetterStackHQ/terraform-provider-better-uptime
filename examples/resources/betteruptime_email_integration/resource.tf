@@ -1,7 +1,15 @@
 # Minimal e-mail integration - open an incident for every inbound e-mail
 # (a catch-all started rule matches every subject)
 resource "betteruptime_email_integration" "simple" {
-  name                   = "Terraform Minimal Email Integration"
+  name = "Terraform Minimal Email Integration"
+
+  call           = false
+  sms            = false
+  email          = true
+  push           = true
+  critical_alert = false
+  team_wait      = 300
+
   started_rule_type      = "any"
   acknowledged_rule_type = "unused"
   resolved_rule_type     = "unused"
@@ -39,12 +47,6 @@ output "email_integration_address" {
 # the full range of field extractors (cause, title, alert id, custom fields)
 resource "betteruptime_email_integration" "this" {
   name            = "Terraform Email Integration"
-  call            = false
-  sms             = false
-  email           = true
-  push            = true
-  critical_alert  = false
-  team_wait       = 180
   recovery_period = 0
   paused          = false
 
@@ -57,37 +59,15 @@ resource "betteruptime_email_integration" "this" {
   acknowledged_rule_type = "any"
   resolved_rule_type     = "all"
 
-  started_rules {
-    rule_target = "subject"
-    match_type  = "contains"
-    content     = "[Alert]"
-  }
-  started_rules {
-    # Only e-mails from your alerting sender open incidents
-    rule_target = "from_email"
-    match_type  = "equals"
-    content     = "alerts@example.com"
-  }
-  resolved_rules {
-    rule_target = "subject"
-    match_type  = "contains"
-    content     = "[Resolved Alert]"
-  }
-  acknowledged_rules {
-    # Match acknowledgement e-mails by subject
-    rule_target = "subject"
-    match_type  = "contains"
-    content     = "[Acknowledged]"
-  }
-
   cause_field {
     name         = "Cause"
     special_type = "cause"
     field_target = "subject"
     match_type   = "match_everything"
   }
+
+  # Subject text after the "[Alert]" tag becomes the incident title
   title_field {
-    # Subject text after the "[Alert]" tag becomes the incident title
     name         = "Title"
     special_type = "title"
     field_target = "subject"
@@ -95,6 +75,19 @@ resource "betteruptime_email_integration" "this" {
 
     # match_after and match_before take the marker in content
     content = "]"
+  }
+
+  started_rules {
+    rule_target = "subject"
+    match_type  = "contains"
+    content     = "[Alert]"
+  }
+
+  # Only e-mails from your alerting sender open incidents
+  started_rules {
+    rule_target = "from_email"
+    match_type  = "equals"
+    content     = "alerts@example.com"
   }
   started_alert_id_field {
     name           = "Alert ID"
@@ -104,24 +97,6 @@ resource "betteruptime_email_integration" "this" {
     content_before = "]"
     content_after  = ")"
   }
-  resolved_alert_id_field {
-    name           = "Alert ID"
-    special_type   = "alert_id"
-    field_target   = "subject"
-    match_type     = "match_between"
-    content_before = "]"
-    content_after  = ")"
-  }
-  acknowledged_alert_id_field {
-    # Extract the alert id when acknowledging
-    name           = "Alert ID"
-    special_type   = "alert_id"
-    field_target   = "subject"
-    match_type     = "match_between"
-    content_before = "]"
-    content_after  = ")"
-  }
-
   other_started_fields {
     name           = "Description"
     field_target   = "body"
@@ -136,18 +111,49 @@ resource "betteruptime_email_integration" "this" {
     content_before = "Severity:"
     content_after  = "\n"
   }
+
+  # Extract the error message from the subject with a regex
   other_started_fields {
-    # Extract the error message from the subject with a regex
     name         = "Error message"
     field_target = "subject"
     match_type   = "match_regex"
     content      = "Error: (.*)"
   }
 
+  # Match acknowledgement e-mails by subject
+  acknowledged_rules {
+    rule_target = "subject"
+    match_type  = "contains"
+    content     = "[Acknowledged]"
+  }
+
+  # Extract the alert id when acknowledging
+  acknowledged_alert_id_field {
+    name           = "Alert ID"
+    special_type   = "alert_id"
+    field_target   = "subject"
+    match_type     = "match_between"
+    content_before = "]"
+    content_after  = ")"
+  }
   other_acknowledged_fields {
     name         = "Note"
     field_target = "body"
     match_type   = "match_everything"
+  }
+
+  resolved_rules {
+    rule_target = "subject"
+    match_type  = "contains"
+    content     = "[Resolved Alert]"
+  }
+  resolved_alert_id_field {
+    name           = "Alert ID"
+    special_type   = "alert_id"
+    field_target   = "subject"
+    match_type     = "match_between"
+    content_before = "]"
+    content_after  = ")"
   }
   other_resolved_fields {
     name         = "Resolution"

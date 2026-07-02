@@ -140,6 +140,9 @@ jobs:
             dir="$(basename "$(dirname "$f")")"
             cp "$f" "combined-e2e/ds__${dir}__$(basename "$f")"
           done
+          # Invitation e-mails must be unique across the concurrent matrix jobs; the
+          # docs keep clean addresses, the combined run suffixes them with the pet.
+          sed -i -E 's/(alice|bob|dylan)@betterstack\.com/\1+${random_pet.unique.id}@betterstack.com/' combined-e2e/res__betteruptime_team_member__resource.tf
       - name: Add resources via Terraform
         run: make terraform CONFIGURATION="combined-e2e" ARGS="apply --auto-approve --input=false"
         env:
