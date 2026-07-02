@@ -13,10 +13,14 @@ Policy lookup.
 ## Example Usage
 
 ```terraform
-# Look up an escalation policy by name
+# Look up an existing escalation policy by name
 data "betteruptime_policy" "existing" {
-  name       = betteruptime_policy.this.name
-  depends_on = [betteruptime_policy.this]
+  name = "My Existing Policy"
+}
+
+# The looked-up policy ID, e.g. to attach a monitor to it
+output "policy_id" {
+  value = data.betteruptime_policy.existing.id
 }
 ```
 

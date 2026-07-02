@@ -93,6 +93,21 @@ var metadataTypes = []string{
 
 const scalarMetadataTypesCount = 1
 
+// metadataNoValueType is the policy-only "No value" matcher: it matches incidents whose
+// metadata field is absent or blank. It is not a real catalog type, carries no value or
+// identifier fields, and is only accepted in policy metadata_branching steps.
+const metadataNoValueType = "no_value"
+
+// validateNoValueMatcher ensures the "No value" sentinel carries no other fields.
+func validateNoValueMatcher(attrMap map[string]interface{}, path string) error {
+	for _, field := range []string{"value", "item_id", "name", "email"} {
+		if v, ok := attrMap[field].(string); ok && v != "" {
+			return fmt.Errorf("%s: %s must not be set for the no_value matcher", path, field)
+		}
+	}
+	return nil
+}
+
 var metadataValueSchema = map[string]*schema.Schema{
 	"type": {
 		Description: "Value types can be grouped into 2 main categories:\n" +
@@ -418,6 +433,11 @@ func validateMetadataValueWithRawConfig(attrMap map[string]interface{}, rawConfi
 
 func validateMetadataValue(attrMap map[string]interface{}, path string) error {
 	attrType := attrMap["type"].(string)
+
+	// The "No value" matcher is a bare sentinel with no value or identifier fields.
+	if attrType == metadataNoValueType {
+		return validateNoValueMatcher(attrMap, path)
+	}
 
 	// Validation for String type
 	if attrType == "String" {

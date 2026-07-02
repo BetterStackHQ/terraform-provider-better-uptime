@@ -13,6 +13,14 @@ https://betterstack.com/docs/uptime/api/status-pages/
 ## Example Usage
 
 ```terraform
+# Minimal status page - subdomain must be globally unique across Better Stack
+resource "betteruptime_status_page" "simple" {
+  company_name = "Example, Inc"
+  company_url  = "https://example.com"
+  timezone     = "UTC"
+  subdomain    = "min-${random_id.status_page_subdomain.hex}"
+}
+
 resource "betteruptime_status_page" "this" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"

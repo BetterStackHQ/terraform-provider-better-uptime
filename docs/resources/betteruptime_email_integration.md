@@ -13,6 +13,41 @@ https://betterstack.com/docs/uptime/api/email-integrations/
 ## Example Usage
 
 ```terraform
+# Minimal e-mail integration: open an incident for every inbound e-mail.
+# started_rule_type = "all" with no started_rules matches every e-mail
+resource "betteruptime_email_integration" "simple" {
+  started_rule_type      = "all"
+  acknowledged_rule_type = "unused"
+  resolved_rule_type     = "unused"
+
+  # Subject becomes the incident title
+  title_field {
+    name         = "Title"
+    special_type = "title"
+    field_target = "subject"
+    match_type   = "match_everything"
+  }
+  # E-mail body becomes the incident cause
+  cause_field {
+    name         = "Cause"
+    special_type = "cause"
+    field_target = "body"
+    match_type   = "match_everything"
+  }
+  # Alert id is required to dedupe/resolve incidents; take it from the body
+  started_alert_id_field {
+    name         = "Alert ID"
+    special_type = "alert_id"
+    field_target = "body"
+    match_type   = "match_everything"
+  }
+}
+
+# Auto-generated inbox to forward alert e-mails to
+output "email_integration_address" {
+  value = betteruptime_email_integration.simple.email_address
+}
+
 # An e-mail integration that parses inbound alert e-mails into incidents, showing
 # the full range of field extractors (cause, title, alert id, custom fields)
 resource "betteruptime_email_integration" "this" {

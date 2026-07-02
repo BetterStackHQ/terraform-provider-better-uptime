@@ -72,6 +72,10 @@ EOT
     metadata_value {
       value = "FYI"
     }
+    metadata_value {
+      # Also match incidents whose Description metadata is absent or blank
+      type = "no_value"
+    }
     policy_id = null
   }
   steps {
