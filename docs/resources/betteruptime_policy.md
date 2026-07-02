@@ -13,6 +13,14 @@ https://betterstack.com/docs/uptime/api/policies/
 ## Example Usage
 
 ```terraform
+# The default High/Low severities exist in every account, so these work out of the box
+data "betteruptime_severity" "high" {
+  name = "High Severity"
+}
+data "betteruptime_severity" "low" {
+  name = "Low Severity"
+}
+
 # Minimal escalation policy - one step that pages whoever is on call
 resource "betteruptime_policy" "simple" {
   name = "Terraform Simple Policy ${random_pet.unique.id}"
@@ -20,6 +28,7 @@ resource "betteruptime_policy" "simple" {
   steps {
     type        = "escalation"
     wait_before = 0
+    urgency_id  = data.betteruptime_severity.high.id
     step_members { type = "current_on_call" }
   }
 }
@@ -40,7 +49,7 @@ resource "betteruptime_policy" "this" {
   steps {
     type        = "escalation"
     wait_before = 0
-    urgency_id  = betteruptime_severity.this.id
+    urgency_id  = data.betteruptime_severity.high.id
     step_members { type = "all_slack_integrations" }
     step_members { type = "all_webhook_integrations" }
     step_members { type = "current_on_call" }
@@ -109,7 +118,7 @@ EOT
     # (wait_before and wait_until_time are mutually exclusive)
     wait_until_time     = "09:00"
     wait_until_timezone = "Eastern Time (US & Canada)"
-    urgency_id          = betteruptime_severity.this.id
+    urgency_id          = data.betteruptime_severity.low.id
     step_members { type = "entire_team" }
   }
 }
@@ -125,7 +134,7 @@ resource "betteruptime_policy" "fallback" {
   steps {
     type        = "escalation"
     wait_before = 0
-    urgency_id  = betteruptime_severity.this.id
+    urgency_id  = data.betteruptime_severity.high.id
     step_members { type = "entire_team" }
   }
 }

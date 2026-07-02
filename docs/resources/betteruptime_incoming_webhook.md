@@ -16,6 +16,7 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 # Minimal incoming webhook - open an incident for every inbound call
 # (a catch-all started rule matches every request body)
 resource "betteruptime_incoming_webhook" "simple" {
+  name                   = "Terraform Minimal Incoming Webhook"
   started_rule_type      = "any"
   acknowledged_rule_type = "unused"
   resolved_rule_type     = "unused"

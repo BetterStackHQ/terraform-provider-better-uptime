@@ -16,6 +16,7 @@ https://betterstack.com/docs/uptime/api/email-integrations/
 # Minimal e-mail integration - open an incident for every inbound e-mail
 # (a catch-all started rule matches every subject)
 resource "betteruptime_email_integration" "simple" {
+  name                   = "Terraform Minimal Email integration"
   started_rule_type      = "any"
   acknowledged_rule_type = "unused"
   resolved_rule_type     = "unused"
