@@ -1,6 +1,9 @@
 package provider
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
@@ -122,6 +125,39 @@ func containsString(s []string, e string) bool {
 func isRulesAttribute(attribute string) bool  { return containsString(RulesAttributes, attribute) }
 func isFieldAttribute(attribute string) bool  { return containsString(FieldAttributes, attribute) }
 func isFieldsAttribute(attribute string) bool { return containsString(FieldsAttributes, attribute) }
+
+// validateIntegrationRuleConditions rejects, at plan time, an email/incoming-webhook
+// integration whose *_rule_type is "all" or "any" but has no matching rules. The API
+// otherwise fails the apply with a 422 ("At least one condition ... is required").
+// "unused" matches every message and needs no rules, so it is always allowed.
+func validateIntegrationRuleConditions(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	config := diff.GetRawConfig()
+	if config.IsNull() || !config.IsKnown() {
+		return nil
+	}
+	for _, pair := range []struct {
+		typeKey  string
+		rulesKey string
+	}{
+		{"started_rule_type", "started_rules"},
+		{"acknowledged_rule_type", "acknowledged_rules"},
+		{"resolved_rule_type", "resolved_rules"},
+	} {
+		typeAttr := config.GetAttr(pair.typeKey)
+		if typeAttr.IsNull() || !typeAttr.IsKnown() {
+			continue
+		}
+		ruleType := typeAttr.AsString()
+		if ruleType != "all" && ruleType != "any" {
+			continue
+		}
+		rulesAttr := config.GetAttr(pair.rulesKey)
+		if rulesAttr.IsNull() || (rulesAttr.IsKnown() && rulesAttr.LengthInt() == 0) {
+			return fmt.Errorf("%s = %q requires at least one %s block; use \"unused\" to match every message", pair.typeKey, ruleType, pair.rulesKey)
+		}
+	}
+	return nil
+}
 
 func loadIntegrationRules(d *schema.ResourceData, key string, receiver **[]integrationRule) {
 	x := receiver

@@ -13,10 +13,10 @@ https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/
 ## Example Usage
 
 ```terraform
-# Minimal incoming webhook: open an incident for every inbound call.
-# started_rule_type = "all" with no started_rules matches every request
+# Minimal incoming webhook - open an incident for every inbound call
+# ("unused" means no filtering rules, so every request starts an incident)
 resource "betteruptime_incoming_webhook" "simple" {
-  started_rule_type      = "all"
+  started_rule_type      = "unused"
   acknowledged_rule_type = "unused"
   resolved_rule_type     = "unused"
 

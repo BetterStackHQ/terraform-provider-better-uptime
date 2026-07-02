@@ -15,7 +15,7 @@ Policy lookup.
 ```terraform
 # Look up an existing escalation policy by name
 data "betteruptime_policy" "existing" {
-  name = "My Existing Policy"
+  name = "My Existing Escalation Policy"
 }
 
 # The looked-up policy ID, e.g. to attach a monitor to it

@@ -1,7 +1,7 @@
-# Minimal e-mail integration: open an incident for every inbound e-mail.
-# started_rule_type = "all" with no started_rules matches every e-mail
+# Minimal e-mail integration - open an incident for every inbound e-mail
+# ("unused" means no filtering rules, so every e-mail starts an incident)
 resource "betteruptime_email_integration" "simple" {
-  started_rule_type      = "all"
+  started_rule_type      = "unused"
   acknowledged_rule_type = "unused"
   resolved_rule_type     = "unused"
 
@@ -16,13 +16,6 @@ resource "betteruptime_email_integration" "simple" {
   cause_field {
     name         = "Cause"
     special_type = "cause"
-    field_target = "body"
-    match_type   = "match_everything"
-  }
-  # Alert id is required to dedupe/resolve incidents; take it from the body
-  started_alert_id_field {
-    name         = "Alert ID"
-    special_type = "alert_id"
     field_target = "body"
     match_type   = "match_everything"
   }
