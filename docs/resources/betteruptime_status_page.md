@@ -13,12 +13,13 @@ https://betterstack.com/docs/uptime/api/status-pages/
 ## Example Usage
 
 ```terraform
-# Minimal status page - subdomain must be globally unique across Better Stack
+# Minimal status page
 resource "betteruptime_status_page" "simple" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   timezone     = "UTC"
-  subdomain    = "min-${random_id.status_page_subdomain.hex}"
+  # Random suffix keeps the subdomain globally unique - pick your own, e.g. "acme-status"
+  subdomain = "min-${random_id.status_page_subdomain.hex}"
 }
 
 resource "betteruptime_status_page" "this" {
@@ -50,6 +51,11 @@ resource "betteruptime_status_page" "this" {
 
   custom_css          = ".page { --brand: #0f172a; }" # Custom branding CSS
   google_analytics_id = "G-XXXXXXXXXX"                # Google Analytics measurement ID
+  whitelabeled        = true                          # Remove the "Powered by Better Stack" footer - available on higher plans
+
+  # TODO: point at refs/heads/master instead of the branch before merging
+  logo_url      = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_black_text.png" # Company logo
+  dark_logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_white_text.png" # Logo for the dark theme
 
   status_page_group_id = betteruptime_status_page_group.this.id # Place the page in a status-page group
 

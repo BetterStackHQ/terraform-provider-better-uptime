@@ -1,3 +1,4 @@
+# Better Stack receives alerts from Datadog through a generated webhook URL
 resource "betteruptime_datadog_integration" "this" {
   name           = "Terraform Datadog Integration"
   call           = false

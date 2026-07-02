@@ -13,7 +13,7 @@ Monitor lookup.
 ## Example Usage
 
 ```terraform
-# Look up an existing monitor by its URL (the only lookup key the schema exposes)
+# Monitors are looked up by their URL
 data "betteruptime_monitor" "existing" {
   url = "https://betterstack.com"
 }

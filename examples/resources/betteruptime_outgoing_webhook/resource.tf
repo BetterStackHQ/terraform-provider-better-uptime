@@ -13,8 +13,6 @@ resource "betteruptime_outgoing_webhook" "on_incident" {
   notify_alongside_primary_responder = false
 
   custom_webhook_template_attributes {
-    http_method = "get"
-
     auth_username = "user"
     auth_password = "password"
 
@@ -48,10 +46,10 @@ resource "betteruptime_outgoing_webhook" "on_call_change" {
     headers_template {
       # Multiple template headers
       name  = "Authorization"
-      value = "Bearer $INCIDENT_ID"
+      value = "Bearer your-api-token" # Replace with your endpoint's token
     }
 
-    body_template = "{\"incident\":{\"id\":\"$INCIDENT_ID\",\"started_at\":\"$STARTED_AT\"}}"
+    body_template = jsonencode({ event = "on_call_changed" })
   }
 }
 

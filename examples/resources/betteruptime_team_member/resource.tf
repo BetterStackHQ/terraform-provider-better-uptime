@@ -1,6 +1,6 @@
 # Invite a team member with the built-in member role
 resource "betteruptime_team_member" "alice" {
-  email = "alice@betterstack.com"
+  email = "alice@betterstack.com" # Replace with your colleague's e-mail
   role  = "member"
 }
 

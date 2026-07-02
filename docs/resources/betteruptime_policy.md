@@ -23,7 +23,7 @@ data "betteruptime_severity" "low" {
 
 # Minimal escalation policy - one step that pages whoever is on call
 resource "betteruptime_policy" "simple" {
-  name = "Terraform Simple Policy ${random_pet.unique.id}"
+  name = "Terraform Simple Policy ${random_pet.unique.id}" # random_pet keeps names unique when re-running the examples - use a plain name
 
   steps {
     type        = "escalation"
@@ -33,8 +33,8 @@ resource "betteruptime_policy" "simple" {
   }
 }
 
-# Escalation policy with every step type: escalation (to Slack/webhooks/on-call),
-# instructions, time branching, metadata branching, and a wider escalation
+# Escalation policy with repeats and fallback chaining - pages integrations and
+# on-call first, then the entire team at 09:00
 resource "betteruptime_policy" "this" {
   name            = "Terraform Escalation Policy ${random_pet.unique.id}"
   repeat_count    = 3
@@ -58,12 +58,23 @@ resource "betteruptime_policy" "this" {
       type = "policy"
       id   = betteruptime_policy.fallback.id
     }
-    # Escalate to whoever the incident metadata names
-    step_members {
-      type         = "incident_metadata"
-      metadata_key = "Assigned Policy"
-    }
   }
+  steps {
+    type = "escalation"
+    # Run this step at 09:00 local time instead of after a fixed delay
+    # (wait_before and wait_until_time are mutually exclusive)
+    wait_until_time     = "09:00"
+    wait_until_timezone = "Eastern Time (US & Canada)"
+    urgency_id          = data.betteruptime_severity.low.id
+    step_members { type = "entire_team" }
+  }
+}
+
+# Post handling instructions, re-remind until they are done, then page whoever is on call
+resource "betteruptime_policy" "instructions" {
+  name            = "Terraform Instructions Policy ${random_pet.unique.id}"
+  policy_group_id = betteruptime_policy_group.this.id
+
   steps {
     type                    = "instructions"
     wait_before             = 0
@@ -78,14 +89,41 @@ resource "betteruptime_policy" "this" {
 EOT
   }
   steps {
+    type        = "escalation"
+    wait_before = 0
+    urgency_id  = data.betteruptime_severity.high.id
+    step_members { type = "current_on_call" }
+  }
+}
+
+# Route weekend incidents to the silent policy, page whoever is on call otherwise
+resource "betteruptime_policy" "business_hours" {
+  name            = "Terraform Business Hours Policy ${random_pet.unique.id}"
+  policy_group_id = betteruptime_policy_group.this.id
+
+  steps {
     type        = "time_branching"
     wait_before = 0
-    time_from   = "00:00"
-    time_to     = "00:00"
     days        = ["sat", "sun"]
+    time_from   = "00:00"
+    time_to     = "00:00" # 00:00-00:00 covers the whole day
     timezone    = "Eastern Time (US & Canada)"
-    policy_id   = null
+    # Matching incidents continue with the silent policy below
+    policy_id = betteruptime_policy.silent.id
   }
+  steps {
+    type        = "escalation"
+    wait_before = 0
+    urgency_id  = data.betteruptime_severity.high.id
+    step_members { type = "current_on_call" }
+  }
+}
+
+# Route incidents to different policies based on their metadata
+resource "betteruptime_policy" "metadata_routing" {
+  name            = "Terraform Metadata Routing Policy ${random_pet.unique.id}"
+  policy_group_id = betteruptime_policy_group.this.id
+
   steps {
     type         = "metadata_branching"
     wait_before  = 0
@@ -100,7 +138,7 @@ EOT
       # Also match incidents whose Description metadata is absent or blank
       type = "no_value"
     }
-    policy_id = null
+    policy_id = betteruptime_policy.silent.id
   }
   steps {
     type         = "metadata_branching"
@@ -108,18 +146,21 @@ EOT
     metadata_key = "Assigned User"
     metadata_value {
       type  = "User"
-      email = "petr@betterstack.com"
+      email = "petr@betterstack.com" # Replace with your team member's e-mail
     }
+    # Continue with the policy named by the incident's "Assigned Policy" metadata
     policy_metadata_key = "Assigned Policy"
   }
   steps {
-    type = "escalation"
-    # Run this step at 09:00 local time instead of after a fixed delay
-    # (wait_before and wait_until_time are mutually exclusive)
-    wait_until_time     = "09:00"
-    wait_until_timezone = "Eastern Time (US & Canada)"
-    urgency_id          = data.betteruptime_severity.low.id
-    step_members { type = "entire_team" }
+    type        = "escalation"
+    wait_before = 0
+    urgency_id  = data.betteruptime_severity.high.id
+    # Escalate to whoever the incident metadata names
+    step_members {
+      type         = "incident_metadata"
+      metadata_key = "Assigned Policy"
+    }
+    step_members { type = "current_on_call" }
   }
 }
 

@@ -68,7 +68,7 @@ resource "betteruptime_incoming_webhook" "this" {
     content      = "acknowledged"
   }
   started_rules {
-    # Cover header target and regex rule matching
+    # Rules can also match request headers
     rule_target  = "header"
     target_field = "X-Alert"
     match_type   = "matches_regex"
@@ -118,7 +118,7 @@ resource "betteruptime_incoming_webhook" "this" {
     match_type   = "match_everything"
   }
   other_started_fields {
-    # Cover the header field target
+    # Fields can be extracted from request headers too
     name         = "Alert header"
     field_target = "header"
     target_field = "X-Alert"

@@ -5,7 +5,7 @@ resource "betteruptime_status_page_resource" "monitor_status" {
   resource_id            = betteruptime_monitor.status.id
   resource_type          = "Monitor"
   public_name            = "example.com site"
-  widget_type            = "response_times" # Show a response-times chart (Monitor only)
+  widget_type            = "response_times" # Show a response-times chart (also: plain, history, intraday_history)
 }
 
 # A heartbeat on the status page
@@ -16,6 +16,16 @@ resource "betteruptime_status_page_resource" "heartbeat" {
   resource_type          = "Heartbeat"
   public_name            = "example.com site (heartbeat)"
   explanation            = "Public API used by customer integrations" # Help text shown next to the resource
+  position               = 2                                          # Explicit position within the section, indexed from zero
+}
+
+# Publish a whole monitor group - HeartbeatGroup works the same way
+resource "betteruptime_status_page_resource" "monitor_group" {
+  status_page_id         = betteruptime_status_page.this.id
+  status_page_section_id = betteruptime_status_page_section.monitors.id
+  resource_id            = betteruptime_monitor_group.this.id
+  resource_type          = "MonitorGroup"
+  public_name            = "All monitors"
 }
 
 # A manually tracked item (no backing resource - toggled by hand or via API)

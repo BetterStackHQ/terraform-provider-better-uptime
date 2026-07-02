@@ -14,8 +14,8 @@ https://betterstack.com/docs/uptime/api/metadata/
 
 ```terraform
 # Metadata on a monitor
-resource "betteruptime_metadata" "monitor_playwright" {
-  owner_id   = betteruptime_monitor.playwright.id
+resource "betteruptime_metadata" "monitor" {
+  owner_id   = betteruptime_monitor.simple.id
   owner_type = "Monitor"
   key        = "E-mail"
   metadata_value {
@@ -30,7 +30,7 @@ resource "betteruptime_metadata" "assigned_user" {
   key        = "Assigned User"
   metadata_value {
     type  = "User"
-    email = "petr@betterstack.com"
+    email = "petr@betterstack.com" # Replace with your team member's e-mail
   }
 }
 
@@ -53,6 +53,21 @@ resource "betteruptime_metadata" "runbook_owner" {
   metadata_value {
     type = "Policy"
     name = "My Existing Escalation Policy" # Reference a policy by name instead of by id
+  }
+}
+
+# Metadata with Team and Schedule references, attached to an incoming webhook
+resource "betteruptime_metadata" "escalation_targets" {
+  owner_type = "IncomingWebhook"
+  owner_id   = betteruptime_incoming_webhook.this.id
+  key        = "Escalation targets"
+  metadata_value {
+    type = "Team"
+    name = "Terraform E2E Tests" # Name of one of your teams
+  }
+  metadata_value {
+    type    = "Schedule"
+    item_id = betteruptime_on_call_calendar.this.id # Reference an on-call calendar by ID
   }
 }
 ```

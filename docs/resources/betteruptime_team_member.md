@@ -15,7 +15,7 @@ Allows managing **non-admin team members** using Terraform. Learn more about [in
 ```terraform
 # Invite a team member with the built-in member role
 resource "betteruptime_team_member" "alice" {
-  email = "alice@betterstack.com"
+  email = "alice@betterstack.com" # Replace with your colleague's e-mail
   role  = "member"
 }
 

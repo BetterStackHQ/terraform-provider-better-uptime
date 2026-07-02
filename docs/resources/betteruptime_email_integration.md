@@ -70,6 +70,12 @@ resource "betteruptime_email_integration" "this" {
     match_type  = "contains"
     content     = "[Alert]"
   }
+  started_rules {
+    # Only e-mails from your alerting sender open incidents
+    rule_target = "from_email"
+    match_type  = "equals"
+    content     = "alerts@example.com"
+  }
   resolved_rules {
     rule_target = "subject"
     match_type  = "contains"
@@ -89,12 +95,12 @@ resource "betteruptime_email_integration" "this" {
     match_type   = "match_everything"
   }
   title_field {
-    name           = "Title"
-    special_type   = "title"
-    field_target   = "subject"
-    match_type     = "match_between"
-    content_before = "["
-    content_after  = "]"
+    # Subject text after the "[Alert]" tag becomes the incident title
+    name          = "Title"
+    special_type  = "title"
+    field_target  = "subject"
+    match_type    = "match_after"
+    content_after = "]"
   }
   started_alert_id_field {
     name           = "Alert ID"

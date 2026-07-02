@@ -13,10 +13,10 @@ https://betterstack.com/docs/uptime/api/jira-integrations/
 ## Example Usage
 
 ```terraform
-# Creates Jira issues from incidents. Connect the Jira account in the Better Stack
-# web UI first, then import the integration here by its better_stack_id
+# Create Jira issues from incidents on demand. Connect the Jira account in the
+# Better Stack web UI first, then import the integration here by its better_stack_id
 resource "betteruptime_jira_integration" "this" {
-  better_stack_id          = "35600" # ID of the Jira integration to manage - create it in the web UI first, then import
+  better_stack_id          = "35600" # ID of the Jira integration to manage - create it in the web UI first, the ID is in the integration's URL
   name                     = "Terraform Jira Integration"
   automatic_issue_creation = false
   jira_project_key         = "TST"
