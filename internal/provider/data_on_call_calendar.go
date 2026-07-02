@@ -138,7 +138,7 @@ func onCallCalendarLookup(ctx context.Context, d *schema.ResourceData, meta inte
 			return diag.FromErr(err)
 		}
 		for _, e := range res.Data {
-			if *e.Attributes.Name == calendarName {
+			if e.Attributes.Name != nil && *e.Attributes.Name == calendarName {
 				if d.Id() != "" {
 					return diag.Errorf("There are multiple on-call calendars with the same name: %s", calendarName)
 				}
