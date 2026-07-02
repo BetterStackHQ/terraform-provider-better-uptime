@@ -1,3 +1,31 @@
+# Minimal incoming webhook: open an incident for every inbound call.
+# started_rule_type = "all" with no started_rules matches every request
+resource "betteruptime_incoming_webhook" "simple" {
+  started_rule_type      = "all"
+  acknowledged_rule_type = "unused"
+  resolved_rule_type     = "unused"
+
+  # Whole request body becomes the incident title
+  title_field {
+    name         = "Title"
+    special_type = "title"
+    field_target = "body"
+    match_type   = "match_everything"
+  }
+  # Whole request body becomes the incident cause
+  cause_field {
+    name         = "Cause"
+    special_type = "cause"
+    field_target = "body"
+    match_type   = "match_everything"
+  }
+}
+
+# Auto-generated URL to POST alert payloads to
+output "incoming_webhook_url" {
+  value = betteruptime_incoming_webhook.simple.url
+}
+
 # An incoming webhook that parses JSON/query-string payloads into incidents
 resource "betteruptime_incoming_webhook" "this" {
   name                   = "Terraform Incoming Webhook"

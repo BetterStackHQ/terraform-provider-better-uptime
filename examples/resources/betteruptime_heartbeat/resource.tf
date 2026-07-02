@@ -12,3 +12,8 @@ resource "betteruptime_heartbeat" "this" {
   maintenance_days     = ["sat", "sun"]
   maintenance_timezone = "Berlin" # Rails timezone name, as the API stores it
 }
+
+# Have your job send a request here on each successful run
+output "heartbeat_url" {
+  value = betteruptime_heartbeat.this.url
+}

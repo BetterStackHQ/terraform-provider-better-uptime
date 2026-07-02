@@ -1,3 +1,14 @@
+# Minimal escalation policy - one step that pages whoever is on call
+resource "betteruptime_policy" "simple" {
+  name = "Terraform Simple Policy ${random_pet.unique.id}"
+
+  steps {
+    type        = "escalation"
+    wait_before = 0
+    step_members { type = "current_on_call" }
+  }
+}
+
 # Escalation policy with every step type: escalation (to Slack/webhooks/on-call),
 # instructions, time branching, metadata branching, and a wider escalation
 resource "betteruptime_policy" "this" {

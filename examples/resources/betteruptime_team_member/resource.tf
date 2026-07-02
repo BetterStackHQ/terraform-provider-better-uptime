@@ -1,11 +1,22 @@
-# Invite a team member. A random suffix keeps the invitation e-mail unique per run.
-resource "betteruptime_team_member" "new" {
-  email = "invitation+${random_pet.unique.id}@example.com"
+# Invite a team member with the built-in member role
+resource "betteruptime_team_member" "alice" {
+  email = "alice@betterstack.com"
   role  = "member"
 }
 
 # Invite a team member with the built-in team_lead role
-resource "betteruptime_team_member" "lead" {
-  email = "tf-lead-${random_pet.unique.id}@example.com" # Unique per run to avoid collisions
+resource "betteruptime_team_member" "bob" {
+  email = "bob@betterstack.com"
   role  = "team_lead"
+}
+
+# Look up a custom role by name to assign it by id
+data "betteruptime_role" "custom" {
+  name = "My custom role"
+}
+
+# Invite a team member with a custom role via role_id (set only one of role or role_id)
+resource "betteruptime_team_member" "dylan" {
+  email   = "dylan@betterstack.com"
+  role_id = data.betteruptime_role.custom.id
 }

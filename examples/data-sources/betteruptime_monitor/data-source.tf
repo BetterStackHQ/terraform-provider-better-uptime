@@ -1,5 +1,9 @@
-# Look up a monitor you manage by its URL
+# Look up an existing monitor by its URL (the only lookup key the schema exposes)
 data "betteruptime_monitor" "existing" {
-  url        = betteruptime_monitor.status.url
-  depends_on = [betteruptime_monitor.status]
+  url = "https://betterstack.com"
+}
+
+# Expose the monitor type so callers can confirm what was matched
+output "monitor_type" {
+  value = data.betteruptime_monitor.existing.monitor_type
 }

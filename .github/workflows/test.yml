@@ -104,19 +104,14 @@ jobs:
             case "$(basename "$f")" in main.tf | outputs.tf) continue ;; esac
             cp "$f" "combined-e2e/$(basename "$f")"
           done
-          # All resource examples run in the combined config (jira imports a
-          # pre-connected integration via better_stack_id).
-          deny_resources=" "
+          # Every resource and data-source example runs in the combined config.
+          # Data sources look up pre-existing "My Existing ..." fixtures on the team.
           for f in examples/resources/*/*.tf; do
             dir="$(basename "$(dirname "$f")")"
-            case "$deny_resources" in *" $dir "*) continue ;; esac
             cp "$f" "combined-e2e/res__${dir}__$(basename "$f")"
           done
-          # Data sources needing a connected/seeded fixture or a run-unique lookup key.
-          deny_data=" betteruptime_monitor betteruptime_policy betteruptime_severity betteruptime_incoming_webhook betteruptime_slack_integration "
           for f in examples/data-sources/*/*.tf; do
             dir="$(basename "$(dirname "$f")")"
-            case "$deny_data" in *" $dir "*) continue ;; esac
             cp "$f" "combined-e2e/ds__${dir}__$(basename "$f")"
           done
       - name: Add resources via Terraform

@@ -9,3 +9,8 @@ resource "betteruptime_new_relic_integration" "this" {
   policy_id      = betteruptime_policy.this.id # Route alerts through this escalation policy
   alerting_rule  = "alert_and_warn"            # Open incidents for both alarms and warnings
 }
+
+# Point New Relic at this URL to deliver alerts to Better Stack
+output "new_relic_integration_webhook_url" {
+  value = betteruptime_new_relic_integration.this.webhook_url
+}

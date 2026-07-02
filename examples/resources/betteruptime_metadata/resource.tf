@@ -37,6 +37,6 @@ resource "betteruptime_metadata" "runbook_owner" {
   key        = "runbook-owner"
   metadata_value {
     type = "Policy"
-    name = betteruptime_policy.this.name # Reference a policy by name instead of by id
+    name = "My Existing Policy" # Reference a policy by name instead of by id
   }
 }
