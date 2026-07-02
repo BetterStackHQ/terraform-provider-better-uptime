@@ -79,7 +79,7 @@ func policyLookup(ctx context.Context, d *schema.ResourceData, meta interface{})
 			return diag.FromErr(err)
 		}
 		for _, e := range res.Data {
-			if e.Attributes.Name != nil && *e.Attributes.Name == name {
+			if *e.Attributes.Name == name {
 				if d.Id() != "" {
 					return diag.Errorf("There are multiple policies with the same name: %s", name)
 				}

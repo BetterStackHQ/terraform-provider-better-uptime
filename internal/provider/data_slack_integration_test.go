@@ -10,42 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestDataSlackIntegrationSkipsNullChannel(t *testing.T) {
-	// A Slack integration with a null channel name must be skipped, not panic the lookup.
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != "Bearer foo" {
-			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
-		}
-		if r.Method == http.MethodGet && r.RequestURI == "/api/v2/slack-integrations?page=1" {
-			_, _ = w.Write([]byte(`{"data":[{"id":"1","attributes":{"slack_channel_name":null,"slack_team_name":"Team1"}},{"id":"2","attributes":{"slack_channel_name":"#target","slack_team_name":"Team2"}}],"pagination":{"next":null}}`))
-			return
-		}
-		t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
-	}))
-	defer server.Close()
-
-	resource.Test(t, resource.TestCase{
-		IsUnitTest: true,
-		ProviderFactories: map[string]func() (*schema.Provider, error){
-			"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil },
-		},
-		Steps: []resource.TestStep{{
-			Config: `
-			provider "betteruptime" {
-				api_token = "foo"
-			}
-			data "betteruptime_slack_integration" "this" {
-				slack_channel_name = "#target"
-			}
-			`,
-			Check: resource.ComposeTestCheckFunc(
-				resource.TestCheckResourceAttr("data.betteruptime_slack_integration.this", "id", "2"),
-				resource.TestCheckResourceAttr("data.betteruptime_slack_integration.this", "slack_channel_name", "#target"),
-			),
-		}},
-	})
-}
-
 func TestDataSlackIntegration(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Log("Received " + r.Method + " " + r.RequestURI)

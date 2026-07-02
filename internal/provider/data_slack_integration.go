@@ -81,7 +81,7 @@ func slackIntegrationLookup(ctx context.Context, d *schema.ResourceData, meta in
 			return diag.FromErr(err)
 		}
 		for _, e := range res.Data {
-			if e.Attributes.SlackChannelName != nil && *e.Attributes.SlackChannelName == slackChannelName {
+			if *e.Attributes.SlackChannelName == slackChannelName {
 				if d.Id() != "" {
 					return diag.Errorf("There are multiple Slack integrations with the same slack_channel_name: %s", slackChannelName)
 				}

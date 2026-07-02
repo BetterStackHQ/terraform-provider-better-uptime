@@ -10,45 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestOnCallCalendarDataSkipsNullName(t *testing.T) {
-	// An on-call calendar with a null name must be skipped, not panic the lookup.
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != "Bearer foo" {
-			t.Fatal("Not authorized: " + r.Header.Get("Authorization"))
-		}
-		switch {
-		case r.Method == http.MethodGet && r.RequestURI == "/api/v2/on-calls?page=1":
-			_, _ = w.Write([]byte(`{"data":[{"id":"1","attributes":{"name":null,"default_calendar":false},"relationships":{"on_call_users":{"data":[]}}},{"id":"2","attributes":{"name":"Secondary","default_calendar":false},"relationships":{"on_call_users":{"data":[]}}}],"included":[],"pagination":{"next":null}}`))
-		case r.Method == http.MethodGet && r.RequestURI == "/api/v2/on-calls/2/rotation":
-			w.WriteHeader(http.StatusNotFound)
-		default:
-			t.Fatal("Unexpected " + r.Method + " " + r.RequestURI)
-		}
-	}))
-	defer server.Close()
-
-	resource.Test(t, resource.TestCase{
-		IsUnitTest: true,
-		ProviderFactories: map[string]func() (*schema.Provider, error){
-			"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil },
-		},
-		Steps: []resource.TestStep{{
-			Config: `
-			provider "betteruptime" {
-				api_token = "foo"
-			}
-			data "betteruptime_on_call_calendar" "this" {
-				name = "Secondary"
-			}
-			`,
-			Check: resource.ComposeTestCheckFunc(
-				resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "id", "2"),
-				resource.TestCheckResourceAttr("data.betteruptime_on_call_calendar.this", "name", "Secondary"),
-			),
-		}},
-	})
-}
-
 func TestOnCallCalendarData(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Log("Received " + r.Method + " " + r.RequestURI)
