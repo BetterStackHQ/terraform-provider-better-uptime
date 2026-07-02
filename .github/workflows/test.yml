@@ -67,6 +67,20 @@ jobs:
           fi
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+      # A data-source lookup that finds nothing yields a null output rather than an
+      # error, so a missing fixture would otherwise pass unnoticed.
+      - name: Verify no output is null or empty
+        run: |
+          make terraform CONFIGURATION="${{ matrix.config }}" ARGS="output -json > outputs.json"
+          EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "") | .key' "${{ matrix.config }}/outputs.json")"
+          if [ -n "$EMPTY" ]; then
+            echo "Outputs with null or empty values:"
+            echo "$EMPTY"
+            exit 1
+          fi
+          echo "All $(jq 'length' "${{ matrix.config }}/outputs.json") outputs have values."
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
       - name: Destroy resources via Terraform
         if: always()
         run: make terraform CONFIGURATION="${{ matrix.config }}" ARGS="destroy --auto-approve --input=false"
@@ -128,6 +142,20 @@ jobs:
             echo "$CHANGES planned changes detected after first apply. Failure!"
             exit 1
           fi
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+      # A data-source lookup that finds nothing yields a null output rather than an
+      # error, so a missing fixture would otherwise pass unnoticed.
+      - name: Verify no output is null or empty
+        run: |
+          make terraform CONFIGURATION="combined-e2e" ARGS="output -json > outputs.json"
+          EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "") | .key' "combined-e2e/outputs.json")"
+          if [ -n "$EMPTY" ]; then
+            echo "Outputs with null or empty values:"
+            echo "$EMPTY"
+            exit 1
+          fi
+          echo "All $(jq 'length' "combined-e2e/outputs.json") outputs have values."
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
       - name: Destroy resources via Terraform
