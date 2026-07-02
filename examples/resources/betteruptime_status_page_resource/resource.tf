@@ -68,6 +68,7 @@ resource "betteruptime_status_page_resource" "email" {
     key = "Assigned User"
     metadata_value {
       type = "User"
+
       # Replace with your team member's e-mail
       email = "petr@betterstack.com"
     }
