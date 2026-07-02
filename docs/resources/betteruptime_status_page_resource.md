@@ -82,7 +82,8 @@ resource "betteruptime_status_page_resource" "email" {
   mark_as_degraded_metadata_rule {
     key = "Assigned User"
     metadata_value {
-      type  = "User"
+      type = "User"
+      # Replace with your team member's e-mail
       email = "petr@betterstack.com"
     }
   }

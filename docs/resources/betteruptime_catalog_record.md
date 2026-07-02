@@ -24,7 +24,8 @@ resource "betteruptime_catalog_record" "demo_team" {
   attribute {
     attribute_id = betteruptime_catalog_attribute.on_call_team_lead.id
     type         = "User"
-    email        = "petr@betterstack.com"
+    # Replace with your team member's e-mail
+    email = "petr@betterstack.com"
   }
 }
 

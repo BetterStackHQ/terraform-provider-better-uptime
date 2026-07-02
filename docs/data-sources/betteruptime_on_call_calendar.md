@@ -16,8 +16,9 @@ On-call calendar lookup.
 # The team's default on-call calendar (looked up with no arguments)
 data "betteruptime_on_call_calendar" "default" {}
 
-output "on_call_users" {
-  value = data.betteruptime_on_call_calendar.default.on_call_users
+# Who is on call right now
+output "on_call_user_emails" {
+  value = data.betteruptime_on_call_calendar.default.on_call_users[*].email
 }
 
 # Look up a specific calendar by name

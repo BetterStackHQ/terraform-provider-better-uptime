@@ -35,7 +35,8 @@ resource "betteruptime_monitor" "keyword" {
   required_keyword = "Better Stack"
 }
 
-# Keyword absence monitor - the inverse of keyword, alerts when the unwanted text appears on the page
+# Keyword absence monitor - the inverse of keyword, alerts when the
+# unwanted text appears on the page
 resource "betteruptime_monitor" "keyword_absence" {
   url              = "https://example.com"
   monitor_type     = "keyword_absence"
@@ -58,7 +59,8 @@ resource "betteruptime_monitor" "tcp" {
   port             = "443"
 }
 
-# DNS monitor - checks that the DNS server at url answers queries for the domain in request_body
+# DNS monitor - checks that the DNS server at url answers queries
+# for the domain in request_body
 resource "betteruptime_monitor" "dns" {
   url              = "1.1.1.1"
   monitor_type     = "dns"
@@ -87,10 +89,11 @@ resource "betteruptime_monitor" "playwright" {
   }
 }
 
-# Comprehensive HTTP "status" monitor - proxy, custom header, expiry alerts and a maintenance window
+# Comprehensive HTTP "status" monitor - proxy, custom header,
+# expiry alerts and a maintenance window
 resource "betteruptime_monitor" "status" {
-  # Own registrable domain - expiration_policy_id is a per-domain setting (subdomains
-  # share it too), so a dedicated domain avoids clashing with the example.com monitors - use your own domain
+  # Use your own domain here - expiration_policy_id is a per-domain setting
+  # (subdomains included), shared by every monitor on that domain
   url                  = "https://my-${random_pet.unique.id}-domain.com"
   monitor_type         = "status"
   monitor_group_id     = betteruptime_monitor_group.this.id
