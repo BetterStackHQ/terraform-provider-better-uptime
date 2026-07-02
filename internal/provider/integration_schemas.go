@@ -43,19 +43,19 @@ var integrationFieldSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.StringInSlice([]string{"match_before", "match_after", "match_between", "match_regex", "match_everything"}, false),
 	},
 	"content": {
-		Description: "How should we extract content the field. Should be a valid Regex when match_type is match_regex.",
+		Description: "The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
 	},
 	"content_before": {
-		Description: "When should we stop extracting content for the field. Should be present when match_type is either match_between or match_before.",
+		Description: "When should we stop extracting content for the field. Required when match_type is match_between.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
 	},
 	"content_after": {
-		Description: "When should we start extracting content for the field. Should be present when match_type is either match_between or match_after.",
+		Description: "When should we start extracting content for the field. Required when match_type is match_between.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
@@ -84,7 +84,7 @@ var integrationRuleSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.StringInSlice([]string{"contains", "contains_not", "matches_regex", "matches_regex_not", "equals", "equals_not"}, false),
 	},
 	"content": {
-		Description: "The content we should match to satisfy the rule. Should be a valid Regex when match_type is match_regex.",
+		Description: "The content we should match to satisfy the rule. Should be a valid regular expression when match_type is matches_regex.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
