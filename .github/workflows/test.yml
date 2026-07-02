@@ -75,8 +75,8 @@ jobs:
 
   # Assembles every documented example into one configuration - the basic example's
   # scaffolding (provider/versions/variables/random) without its own main.tf/outputs.tf,
-  # plus every resources/* and data-sources/* example bar the denylisted ones - and runs
-  # it as a single apply/plan/destroy, keeping the registry docs' snippets verified.
+  # plus every resources/* and data-sources/* example - and runs it as a single
+  # apply/plan/destroy, keeping the registry docs' snippets verified.
   e2e_combined:
     strategy:
       matrix:

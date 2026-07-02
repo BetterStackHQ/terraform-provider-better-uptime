@@ -25,7 +25,7 @@ help:
 	@echo "  make test"
 	@echo "  make test-coverage"
 	@echo
-	@echo "  make terraform CONFIGURATION=examples/basic ARGS=apply"
+	@echo "  make terraform CONFIGURATION=examples ARGS=apply"
 	@echo
 	@echo "  # Run in \"Debug\" mode (connect debugger to port 2345)."
 	@echo "  make debug"
