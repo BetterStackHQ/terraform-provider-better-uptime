@@ -94,7 +94,8 @@ Required:
 
 Optional:
 
-- `id` (Number) The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook, pagerduty_integration and policy member types. This is e.g. the ID of the user to notify when member type is user, the on-call calendar ID when member type is current_on_call, or the chained escalation policy ID when member type is policy.
+- `email` (String) The e-mail address of the user to notify during an incident. Can be used instead of id when member type is user - it is resolved to the user's ID automatically. Only one of id and email can be set.
+- `id` (Number) The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook, pagerduty_integration and policy member types. This is e.g. the ID of the user to notify when member type is user, the on-call calendar ID when member type is current_on_call, or the chained escalation policy ID when member type is policy. When member type is user, you can set email instead.
 - `metadata_key` (String) The metadata key to use to retrieve the escalation target from the incident's metadata. Required when type is incident_metadata.
 - `team_id` (Number, Deprecated) The ID of the team to notify when member team is entire_team. When left empty, the default team for the incident is used. This field is deprecated, use id instead.
 
