@@ -52,7 +52,7 @@ resource "betteruptime_metadata" "runbook_owner" {
   key        = "runbook-owner"
   metadata_value {
     type = "Policy"
-    name = "My Existing Escalation Policy" # Reference a policy by name instead of by id
+    name = "My Existing Policy" # Reference a policy by name instead of by id
   }
 }
 ```
