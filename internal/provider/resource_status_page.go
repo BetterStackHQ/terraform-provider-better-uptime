@@ -97,7 +97,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
-		Description: "Is your status page published?",
+		Description: "Is your status page currently accessible?",
 	},
 	"hide_from_search_engines": {
 		Type:        schema.TypeBool,
