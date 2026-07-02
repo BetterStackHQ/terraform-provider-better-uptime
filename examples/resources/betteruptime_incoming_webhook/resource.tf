@@ -60,6 +60,14 @@ resource "betteruptime_incoming_webhook" "this" {
     match_type   = "contains"
     content      = "alert"
   }
+
+  # Rules can also match request headers
+  started_rules {
+    rule_target  = "header"
+    target_field = "X-Alert"
+    match_type   = "matches_regex"
+    content      = "firing"
+  }
   resolved_rules {
     rule_target  = "json"
     target_field = "incident.status"
@@ -71,13 +79,6 @@ resource "betteruptime_incoming_webhook" "this" {
     target_field = "incident.status"
     match_type   = "contains"
     content      = "acknowledged"
-  }
-  started_rules {
-    # Rules can also match request headers
-    rule_target  = "header"
-    target_field = "X-Alert"
-    match_type   = "matches_regex"
-    content      = "firing"
   }
 
   cause_field {

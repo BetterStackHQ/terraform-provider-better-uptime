@@ -6,7 +6,7 @@ resource "betteruptime_elastic_integration" "this" {
   email = true
   push  = true
 
-  # Bypass Do not Disturb on the mobile app
+  # Bypass Do Not Disturb on the mobile app
   critical_alert = true
 }
 

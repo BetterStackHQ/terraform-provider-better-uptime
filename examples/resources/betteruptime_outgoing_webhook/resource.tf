@@ -44,8 +44,8 @@ resource "betteruptime_outgoing_webhook" "on_call_change" {
       name  = "Content-Type"
       value = "application/json"
     }
+    # Multiple template headers
     headers_template {
-      # Multiple template headers
       name = "Authorization"
 
       # Replace with your endpoint's token
@@ -58,10 +58,8 @@ resource "betteruptime_outgoing_webhook" "on_call_change" {
 
 # Outgoing webhook fired when a monitor's state changes
 resource "betteruptime_outgoing_webhook" "on_monitor_change" {
-  name = "Terraform Monitor Webhook"
-  url  = "https://example.com"
-
-  # Fire when a monitor's state changes
+  name         = "Terraform Monitor Webhook"
+  url          = "https://example.com"
   trigger_type = "monitor_change"
 
   custom_webhook_template_attributes {

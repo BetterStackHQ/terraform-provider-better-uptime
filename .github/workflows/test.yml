@@ -110,16 +110,17 @@ jobs:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
+      # Checkout must precede setup-go so its cache can be keyed on go.sum.
+      - name: Checkout code
+        uses: actions/checkout@v7
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v6
         with:
           go-version: '1.23.x'
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ matrix.terraform-version }}
-      - name: Checkout code
-        uses: actions/checkout@v2
       - name: Assemble combined examples
         run: |
           mkdir -p combined-e2e

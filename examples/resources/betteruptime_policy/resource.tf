@@ -168,7 +168,7 @@ resource "betteruptime_policy" "metadata_routing" {
   }
 }
 
-# Fallback policy: invoked only after "this" exhausts its repeats unacknowledged,
+# Fallback policy: takes over once "this" exhausts its repeats unacknowledged,
 # widening the blast radius to the whole team
 resource "betteruptime_policy" "fallback" {
   name            = "Terraform Fallback Policy ${random_pet.unique.id}"

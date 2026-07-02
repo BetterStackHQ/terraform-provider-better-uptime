@@ -7,7 +7,7 @@ resource "betteruptime_datadog_integration" "this" {
   push           = true
   critical_alert = false
 
-  # Open incidents for both alarms and warnings
+  # Open incidents for both alerts and warnings
   alerting_rule = "alert_and_warn"
 }
 
