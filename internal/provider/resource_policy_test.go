@@ -779,6 +779,53 @@ func TestResourcePolicyChainedPolicyMember(t *testing.T) {
 	})
 }
 
+func TestResourcePolicyUserStepMemberByEmail(t *testing.T) {
+	server := newResourceServer(t, "/api/v3/policies", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name = "Terraform - User by email"
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					urgency_id  = 123
+					step_members {
+					  type  = "user"
+					  email = "petr@example.com"
+					}
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_policy.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.type", "user"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", "petr@example.com"),
+					// The e-mail is sent to the API, which resolves it to the user's ID.
+					server.TestCheckCalledRequest("POST", "/api/v3/policies", `{"name":"Terraform - User by email","steps":[{"type":"escalation","urgency_id":123,"step_members":[{"type":"user","email":"petr@example.com"}],"days":[],"metadata_values":[]}]}`),
+				),
+				PreConfig: func() {
+					t.Log("test user step member referenced by e-mail")
+				},
+			},
+		},
+	})
+}
+
 func TestResourcePolicyMetadataValidation(t *testing.T) {
 	server := newResourceServer(t, "/api/v3/policies", "1")
 	defer server.Close()

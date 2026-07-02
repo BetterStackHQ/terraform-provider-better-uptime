@@ -21,10 +21,16 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"id": {
-		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook, pagerduty_integration and policy member types. This is e.g. the ID of the user to notify when member type is user, the on-call calendar ID when member type is current_on_call, or the chained escalation policy ID when member type is policy.",
+		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook, pagerduty_integration and policy member types. This is e.g. the ID of the user to notify when member type is user, the on-call calendar ID when member type is current_on_call, or the chained escalation policy ID when member type is policy. When member type is user, you can set email instead and the ID is resolved automatically.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Default:     nil,
+		Computed:    true,
+	},
+	"email": {
+		Description: "The e-mail address of the user to notify during an incident. Can be used instead of id when member type is user - it is resolved to the user's ID automatically.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
 	},
 	"metadata_key": {
 		Description: "The metadata key to use to retrieve the escalation target from the incident's metadata. Required when type is incident_metadata.",
@@ -247,6 +253,7 @@ func newPolicyResource() *schema.Resource {
 type policyStepMember struct {
 	Type        *string `mapstructure:"type,omitempty" json:"type,omitempty"`
 	Id          *int    `mapstructure:"id,omitempty" json:"id,omitempty"`
+	Email       *string `mapstructure:"email,omitempty" json:"email,omitempty"`
 	MetadataKey *string `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
 	TeamId      *int    `mapstructure:"team_id,omitempty" json:"team_id,omitempty"`
 }
