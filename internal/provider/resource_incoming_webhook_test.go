@@ -8,6 +8,36 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func TestResourceIncomingWebhookRequiresStartCondition(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/incoming-webhooks", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// started_rule_type "all"/"any" requires at least one rule; "unused" matches every request.
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+				resource "betteruptime_incoming_webhook" "this" {
+				  name                   = "Terraform Test"
+				  started_rule_type      = "all"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type     = "unused"
+				}`,
+				ExpectError: regexp.MustCompile(`started_rule_type.*requires at least one`),
+			},
+		},
+	})
+}
+
 func TestResourceIncomingWebhook(t *testing.T) {
 	server := newResourceServer(t, "/api/v2/incoming-webhooks", "1")
 	defer server.Close()

@@ -1,11 +1,43 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+func TestResourceEmailIntegrationRequiresStartCondition(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/email-integrations", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// started_rule_type "all"/"any" requires at least one rule; "unused" matches every e-mail.
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+
+				resource "betteruptime_email_integration" "this" {
+				  name                   = "Terraform Test"
+				  started_rule_type      = "all"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type     = "unused"
+				}`,
+				ExpectError: regexp.MustCompile(`started_rule_type.*requires at least one`),
+			},
+		},
+	})
+}
 
 func TestResourceEmailIntegration(t *testing.T) {
 	server := newResourceServer(t, "/api/v2/email-integrations", "1")

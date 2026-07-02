@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -205,7 +206,7 @@ func newEmailIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Description:   "https://betterstack.com/docs/uptime/api/email-integrations/",
-		CustomizeDiff: validateTeamNameNotChanged,
+		CustomizeDiff: customdiff.Sequence(validateTeamNameNotChanged, validateIntegrationRuleConditions),
 		Schema:        emailIntegrationSchema,
 	}
 }
