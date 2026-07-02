@@ -84,6 +84,7 @@ Read-Only:
 
 Read-Only:
 
+- `email` (String)
 - `id` (Number)
 - `metadata_key` (String)
 - `team_id` (Number)
