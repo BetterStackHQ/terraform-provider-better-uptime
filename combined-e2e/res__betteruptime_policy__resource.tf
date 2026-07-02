@@ -1,0 +1,133 @@
+# The default High/Low severities exist in every account, so these work out of the box
+data "betteruptime_severity" "high" {
+  name = "High Severity"
+}
+data "betteruptime_severity" "low" {
+  name = "Low Severity"
+}
+
+# Minimal escalation policy - one step that pages whoever is on call
+resource "betteruptime_policy" "simple" {
+  name = "Terraform Simple Policy ${random_pet.unique.id}"
+
+  steps {
+    type        = "escalation"
+    wait_before = 0
+    urgency_id  = data.betteruptime_severity.high.id
+    step_members { type = "current_on_call" }
+  }
+}
+
+# Escalation policy with every step type: escalation (to Slack/webhooks/on-call),
+# instructions, time branching, metadata branching, and a wider escalation
+resource "betteruptime_policy" "this" {
+  name            = "Terraform Escalation Policy ${random_pet.unique.id}"
+  repeat_count    = 3
+  repeat_delay    = 60
+  policy_group_id = betteruptime_policy_group.this.id
+
+  # After the 3 repeats pass unacknowledged, escalation continues with the fallback
+  # policy below instead of stopping - the supported way to keep re-notifying once a
+  # policy is exhausted, without escalation loops
+  fallback_policy_id = betteruptime_policy.fallback.id
+
+  steps {
+    type        = "escalation"
+    wait_before = 0
+    urgency_id  = data.betteruptime_severity.high.id
+    step_members { type = "all_slack_integrations" }
+    step_members { type = "all_webhook_integrations" }
+    step_members { type = "current_on_call" }
+    # Chain to the fallback policy
+    step_members {
+      type = "policy"
+      id   = betteruptime_policy.fallback.id
+    }
+    # Escalate to whoever the incident metadata names
+    step_members {
+      type         = "incident_metadata"
+      metadata_key = "Assigned Policy"
+    }
+  }
+  steps {
+    type                    = "instructions"
+    wait_before             = 0
+    reminder_enabled        = true
+    reminder_interval_hours = 6 # Re-remind every 6 hours until the checklist is done
+    comment                 = <<EOT
+# Incident handling instructions
+
+- [ ] Acknowledge the alert
+- [ ] Review the incident details and assess impact
+- [ ] Document any findings in the incident notes
+EOT
+  }
+  steps {
+    type        = "time_branching"
+    wait_before = 0
+    time_from   = "00:00"
+    time_to     = "00:00"
+    days        = ["sat", "sun"]
+    timezone    = "Eastern Time (US & Canada)"
+    policy_id   = null
+  }
+  steps {
+    type         = "metadata_branching"
+    wait_before  = 0
+    metadata_key = "Description"
+    metadata_value {
+      value = "Low priority issue"
+    }
+    metadata_value {
+      value = "FYI"
+    }
+    metadata_value {
+      # Also match incidents whose Description metadata is absent or blank
+      type = "no_value"
+    }
+    policy_id = null
+  }
+  steps {
+    type         = "metadata_branching"
+    wait_before  = 0
+    metadata_key = "Assigned User"
+    metadata_value {
+      type  = "User"
+      email = "petr@betterstack.com"
+    }
+    policy_metadata_key = "Assigned Policy"
+  }
+  steps {
+    type = "escalation"
+    # Run this step at 09:00 local time instead of after a fixed delay
+    # (wait_before and wait_until_time are mutually exclusive)
+    wait_until_time     = "09:00"
+    wait_until_timezone = "Eastern Time (US & Canada)"
+    urgency_id          = data.betteruptime_severity.low.id
+    step_members { type = "entire_team" }
+  }
+}
+
+# Fallback policy: invoked only after "this" exhausts its repeats unacknowledged,
+# widening the blast radius to the whole team
+resource "betteruptime_policy" "fallback" {
+  name            = "Terraform Fallback Policy ${random_pet.unique.id}"
+  repeat_count    = 5
+  repeat_delay    = 120
+  policy_group_id = betteruptime_policy_group.this.id
+
+  steps {
+    type        = "escalation"
+    wait_before = 0
+    urgency_id  = data.betteruptime_severity.high.id
+    step_members { type = "entire_team" }
+  }
+}
+
+# Silent policy: no steps, so it never alerts anyone - incidents are only collected
+resource "betteruptime_policy" "silent" {
+  name            = "Terraform Silent Policy ${random_pet.unique.id}"
+  repeat_count    = 0
+  repeat_delay    = 0
+  policy_group_id = betteruptime_policy_group.this.id
+}
