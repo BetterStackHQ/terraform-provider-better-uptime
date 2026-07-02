@@ -14,8 +14,7 @@ https://betterstack.com/docs/uptime/api/heartbeat-groups/
 
 ```terraform
 resource "betteruptime_heartbeat_group" "this" {
-  name       = "Example heartbeats"
-  sort_index = 0
+  name = "Example heartbeats"
 }
 
 resource "betteruptime_heartbeat_group" "secondary" {

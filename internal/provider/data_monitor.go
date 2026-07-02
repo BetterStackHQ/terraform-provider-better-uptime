@@ -81,7 +81,7 @@ func monitorLookup(ctx context.Context, d *schema.ResourceData, meta interface{}
 			return diag.FromErr(err)
 		}
 		for _, e := range res.Data {
-			if *e.Attributes.URL == url {
+			if e.Attributes.URL != nil && *e.Attributes.URL == url {
 				if d.Id() != "" {
 					return diag.Errorf("duplicate")
 				}
