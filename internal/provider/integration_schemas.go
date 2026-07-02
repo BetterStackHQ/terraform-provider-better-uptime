@@ -126,10 +126,7 @@ func isRulesAttribute(attribute string) bool  { return containsString(RulesAttri
 func isFieldAttribute(attribute string) bool  { return containsString(FieldAttributes, attribute) }
 func isFieldsAttribute(attribute string) bool { return containsString(FieldsAttributes, attribute) }
 
-// validateIntegrationRuleConditions rejects, at plan time, an email/incoming-webhook
-// integration whose *_rule_type is "all" or "any" but has no matching rules. The API
-// otherwise fails the apply with a 422 ("At least one condition ... is required").
-// "unused" matches every message and needs no rules, so it is always allowed.
+// "all" or "any" rule type requires at least 1 rule, otherwise the API call fails with 422
 func validateIntegrationRuleConditions(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
 	config := diff.GetRawConfig()
 	if config.IsNull() || !config.IsKnown() {
