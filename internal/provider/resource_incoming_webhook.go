@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -223,7 +224,7 @@ func newIncomingWebhookResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Description:   "https://betterstack.com/docs/uptime/api/list-all-incoming-webhooks/",
-		CustomizeDiff: validateTeamNameNotChanged,
+		CustomizeDiff: customdiff.Sequence(validateTeamNameNotChanged, validateIntegrationRuleConditions),
 		Schema:        incomingWebhookSchema,
 	}
 }
