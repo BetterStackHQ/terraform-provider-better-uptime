@@ -784,11 +784,14 @@ func TestResourcePolicyChainedPolicyMember(t *testing.T) {
 }
 
 // newPolicyUserResolvingServer emulates the real policies API for user step members:
-// it resolves an e-mail to the user's ID and always returns BOTH id and email in
-// responses, like PolicySerializer does. The SDK test framework fails any step whose
-// post-apply plan is not empty, so these tests prove the Computed id/email round-trip
-// causes no drift.
+// e-mails resolve to the team's user IDs and responses always carry BOTH id and
+// email, like PolicySerializer does. The SDK test framework fails any step whose
+// post-apply plan is not empty, so these tests prove the config-managed identifier
+// round-trips without drift and without poisoning the state with its counterpart.
 func newPolicyUserResolvingServer(t *testing.T) *TestServer {
+	userIDs := map[string]float64{"petr@betterstack.com": 201, "simon@betterstack.com": 202}
+	userEmails := map[float64]string{201: "petr@betterstack.com", 202: "simon@betterstack.com"}
+
 	enrich := func(body []byte) []byte {
 		parsed := make(map[string]interface{})
 		if err := json.Unmarshal(body, &parsed); err != nil {
@@ -803,10 +806,18 @@ func newPolicyUserResolvingServer(t *testing.T) *TestServer {
 				if member["type"] != "user" {
 					continue
 				}
-				if _, hasEmail := member["email"]; hasEmail {
-					member["id"] = 42 // the API resolves the e-mail to the user's ID
-				} else if _, hasId := member["id"]; hasId {
-					member["email"] = "resolved@example.com" // the API returns the user's e-mail
+				if email, ok := member["email"].(string); ok {
+					id, found := userIDs[email]
+					if !found {
+						t.Fatalf("unknown user e-mail %q", email)
+					}
+					member["id"] = id
+				} else if id, ok := member["id"].(float64); ok {
+					email, found := userEmails[id]
+					if !found {
+						t.Fatalf("unknown user id %v", id)
+					}
+					member["email"] = email
 				}
 			}
 		}
@@ -875,7 +886,8 @@ func TestResourcePolicyUserStepMemberByEmail(t *testing.T) {
 			},
 		},
 		Steps: []resource.TestStep{
-			// Step 1 - the e-mail is sent; the API returns the resolved id alongside it.
+			// Step 1 - create with e-mail only. The API resolves and returns the user's
+			// ID, but the state must keep only the configured e-mail.
 			{
 				Config: `
 				provider "betteruptime" {
@@ -891,7 +903,7 @@ func TestResourcePolicyUserStepMemberByEmail(t *testing.T) {
 					urgency_id  = 123
 					step_members {
 					  type  = "user"
-					  email = "petr@example.com"
+					  email = "petr@betterstack.com"
 					}
 				  }
 				}
@@ -899,15 +911,17 @@ func TestResourcePolicyUserStepMemberByEmail(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_policy.this", "id"),
 					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.type", "user"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", "petr@example.com"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "42"),
-					server.TestCheckCalledRequest("POST", "/api/v3/policies", `{"name":"Terraform - User by email","steps":[{"type":"escalation","urgency_id":123,"step_members":[{"type":"user","email":"petr@example.com"}],"days":[],"metadata_values":[]}]}`),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", "petr@betterstack.com"),
+					// The resolved ID from the response is NOT stored - it would poison updates.
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "0"),
+					server.TestCheckCalledRequest("POST", "/api/v3/policies", `{"name":"Terraform - User by email","steps":[{"type":"escalation","urgency_id":123,"step_members":[{"type":"user","email":"petr@betterstack.com"}],"days":[],"metadata_values":[]}]}`),
 				),
 				PreConfig: func() {
 					t.Log("step 1 - create with e-mail only")
 				},
 			},
-			// Step 2 - changing the e-mail re-resolves it on update.
+			// Step 2 - change the e-mail to another team member. The update must send
+			// the new e-mail WITHOUT any stale id, so the member actually changes.
 			{
 				Config: `
 				provider "betteruptime" {
@@ -923,14 +937,15 @@ func TestResourcePolicyUserStepMemberByEmail(t *testing.T) {
 					urgency_id  = 123
 					step_members {
 					  type  = "user"
-					  email = "juraj@example.com"
+					  email = "simon@betterstack.com"
 					}
 				  }
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", "juraj@example.com"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "42"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", "simon@betterstack.com"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "0"),
+					server.TestCheckCalledRequest("PATCH", "/api/v3/policies/1", `{"steps":[{"type":"escalation","urgency_id":123,"step_members":[{"type":"user","email":"simon@betterstack.com"}],"days":[],"metadata_values":[]}]}`),
 				),
 				PreConfig: func() {
 					t.Log("step 2 - change the e-mail")
@@ -952,7 +967,8 @@ func TestResourcePolicyUserStepMemberById(t *testing.T) {
 			},
 		},
 		Steps: []resource.TestStep{
-			// The API returns the user's e-mail alongside a configured id.
+			// Step 1 - create with id only. The API returns the user's e-mail too, but
+			// the state must keep only the configured id.
 			{
 				Config: `
 				provider "betteruptime" {
@@ -968,15 +984,90 @@ func TestResourcePolicyUserStepMemberById(t *testing.T) {
 					urgency_id  = 123
 					step_members {
 					  type = "user"
-					  id   = 42
+					  id   = 201
 					}
 				  }
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "42"),
-					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", "resolved@example.com"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "201"),
+					// The e-mail from the response is NOT stored - a stale e-mail would take
+					// precedence server-side and silently pin the member on later id changes.
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", ""),
 				),
+				PreConfig: func() {
+					t.Log("step 1 - create with id only")
+				},
+			},
+			// Step 2 - change the id to another user. The update must send the new id
+			// WITHOUT any e-mail, so the API honors the id change.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name = "Terraform - User by id"
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					urgency_id  = 123
+					step_members {
+					  type = "user"
+					  id   = 202
+					}
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.id", "202"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.step_members.0.email", ""),
+					server.TestCheckCalledRequest("PATCH", "/api/v3/policies/1", `{"steps":[{"type":"escalation","urgency_id":123,"step_members":[{"type":"user","id":202}],"days":[],"metadata_values":[]}]}`),
+				),
+				PreConfig: func() {
+					t.Log("step 2 - change the id")
+				},
+			},
+		},
+	})
+}
+
+func TestResourcePolicyUserStepMemberBothSetError(t *testing.T) {
+	server := newPolicyUserResolvingServer(t)
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name = "Terraform - User by both"
+
+				  steps {
+					type        = "escalation"
+					wait_before = 0
+					urgency_id  = 123
+					step_members {
+					  type  = "user"
+					  id    = 201
+					  email = "simon@betterstack.com"
+					}
+				  }
+				}
+				`,
+				ExpectError: regexp.MustCompile(`only one of id and email can be set`),
 			},
 		},
 	})

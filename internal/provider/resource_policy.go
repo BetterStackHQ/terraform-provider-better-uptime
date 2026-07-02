@@ -21,16 +21,16 @@ var policyStepMemberSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"id": {
-		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook, pagerduty_integration and policy member types. This is e.g. the ID of the user to notify when member type is user, the on-call calendar ID when member type is current_on_call, or the chained escalation policy ID when member type is policy. When member type is user, you can set email instead and the ID is resolved automatically.",
+		Description: "The ID of the resource to notify during an incident. Required for user, webhook, slack_integration, microsoft_teams_integration, zapier_webhook, pagerduty_integration and policy member types. This is e.g. the ID of the user to notify when member type is user, the on-call calendar ID when member type is current_on_call, or the chained escalation policy ID when member type is policy. When member type is user, you can set email instead.",
 		Type:        schema.TypeInt,
 		Optional:    true,
-		Computed:    true,
+		Default:     nil,
 	},
 	"email": {
-		Description: "The e-mail address of the user to notify during an incident. Can be used instead of id when member type is user - it is resolved to the user's ID automatically. When both id and email are set, email takes precedence.",
+		Description: "The e-mail address of the user to notify during an incident. Can be used instead of id when member type is user - it is resolved to the user's ID automatically. Only one of id and email can be set.",
 		Type:        schema.TypeString,
 		Optional:    true,
-		Computed:    true,
+		Default:     nil,
 	},
 	"metadata_key": {
 		Description: "The metadata key to use to retrieve the escalation target from the incident's metadata. Required when type is incident_metadata.",
@@ -367,6 +367,19 @@ func policyCopyAttrs(d *schema.ResourceData, in *policy) diag.Diagnostics {
 					}
 				}
 			}
+			// Keep only the identifier the user manages on step members - the API returns
+			// both id and email for user members, and storing the unconfigured one would
+			// poison later updates (the stale counterpart would pin the member).
+			if step.Members != nil {
+				for memberIndex := range *step.Members {
+					if value, ok := d.GetOk(fmt.Sprintf("steps.%d.step_members.%d.id", stepIndex, memberIndex)); !ok || value == 0 {
+						(*(*in.Steps)[stepIndex].Members)[memberIndex].Id = nil
+					}
+					if value, ok := d.GetOk(fmt.Sprintf("steps.%d.step_members.%d.email", stepIndex, memberIndex)); !ok || value == "" {
+						(*(*in.Steps)[stepIndex].Members)[memberIndex].Email = nil
+					}
+				}
+			}
 		}
 	}
 
@@ -486,6 +499,19 @@ func validatePolicy(ctx context.Context, d *schema.ResourceDiff, m interface{}) 
 	for i, step := range steps {
 		stepMap := step.(map[string]interface{})
 		stepType := stepMap["type"].(string)
+
+		// Validate step members reference a user by either id or email, never both -
+		// the API resolves email with precedence, silently ignoring a changed id.
+		if members, ok := stepMap["step_members"].([]interface{}); ok {
+			for j, member := range members {
+				memberMap := member.(map[string]interface{})
+				id, _ := memberMap["id"].(int)
+				email, _ := memberMap["email"].(string)
+				if id != 0 && email != "" {
+					return fmt.Errorf("steps.%d.step_members.%d: only one of id and email can be set", i, j)
+				}
+			}
+		}
 
 		// Validate metadata_branching specific attributes
 		if stepType == "metadata_branching" {
