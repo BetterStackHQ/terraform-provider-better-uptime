@@ -54,19 +54,30 @@ jobs:
         run: make terraform CONFIGURATION="${{ matrix.config }}" ARGS="apply --auto-approve --input=false"
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
-      # A data-source lookup that finds nothing yields a null output rather than an
-      # error, and an empty list (e.g. nobody on the default on-call calendar) hides
-      # a data problem the examples rely on - fail on both.
-      - name: Verify no output is null or empty
+      # A data-source lookup that finds nothing yields a null output - and Terraform
+      # drops null outputs from state entirely, so also check every output declared
+      # in the configuration is actually present. Empty strings and collections
+      # (e.g. nobody on the default on-call calendar) hide a data problem too.
+      - name: Verify no output is missing, null, or empty
         run: |
           make terraform CONFIGURATION="${{ matrix.config }}" ARGS="output -json > outputs.json"
+          echo "Terraform outputs:"
+          jq 'map_values(.value)' "${{ matrix.config }}/outputs.json"
+          DECLARED="$(grep -hoE '^output "[^"]+"' "${{ matrix.config }}"/*.tf | sed -E 's/^output "([^"]+)"/\1/' | sort -u)"
+          MISSING="$(comm -23 <(echo "$DECLARED") <(jq -r 'keys[]' "${{ matrix.config }}/outputs.json" | sort -u))"
           EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "" or .value.value == [] or .value.value == {}) | .key' "${{ matrix.config }}/outputs.json")"
-          if [ -n "$EMPTY" ]; then
-            echo "Outputs with null or empty values:"
-            echo "$EMPTY"
+          if [ -n "$MISSING" ] || [ -n "$EMPTY" ]; then
+            if [ -n "$MISSING" ]; then
+              echo "Declared outputs missing a value:"
+              echo "$MISSING"
+            fi
+            if [ -n "$EMPTY" ]; then
+              echo "Outputs with null or empty values:"
+              echo "$EMPTY"
+            fi
             exit 1
           fi
-          echo "All $(jq 'length' "${{ matrix.config }}/outputs.json") outputs have values."
+          echo "All $(echo "$DECLARED" | wc -l) declared outputs have values."
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
       - name: Plan resources via Terraform - must be empty
@@ -132,19 +143,30 @@ jobs:
         run: make terraform CONFIGURATION="combined-e2e" ARGS="apply --auto-approve --input=false"
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
-      # A data-source lookup that finds nothing yields a null output rather than an
-      # error, and an empty list (e.g. nobody on the default on-call calendar) hides
-      # a data problem the examples rely on - fail on both.
-      - name: Verify no output is null or empty
+      # A data-source lookup that finds nothing yields a null output - and Terraform
+      # drops null outputs from state entirely, so also check every output declared
+      # in the configuration is actually present. Empty strings and collections
+      # (e.g. nobody on the default on-call calendar) hide a data problem too.
+      - name: Verify no output is missing, null, or empty
         run: |
           make terraform CONFIGURATION="combined-e2e" ARGS="output -json > outputs.json"
+          echo "Terraform outputs:"
+          jq 'map_values(.value)' "combined-e2e/outputs.json"
+          DECLARED="$(grep -hoE '^output "[^"]+"' combined-e2e/*.tf | sed -E 's/^output "([^"]+)"/\1/' | sort -u)"
+          MISSING="$(comm -23 <(echo "$DECLARED") <(jq -r 'keys[]' "combined-e2e/outputs.json" | sort -u))"
           EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "" or .value.value == [] or .value.value == {}) | .key' "combined-e2e/outputs.json")"
-          if [ -n "$EMPTY" ]; then
-            echo "Outputs with null or empty values:"
-            echo "$EMPTY"
+          if [ -n "$MISSING" ] || [ -n "$EMPTY" ]; then
+            if [ -n "$MISSING" ]; then
+              echo "Declared outputs missing a value:"
+              echo "$MISSING"
+            fi
+            if [ -n "$EMPTY" ]; then
+              echo "Outputs with null or empty values:"
+              echo "$EMPTY"
+            fi
             exit 1
           fi
-          echo "All $(jq 'length' "combined-e2e/outputs.json") outputs have values."
+          echo "All $(echo "$DECLARED" | wc -l) declared outputs have values."
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
       - name: Plan resources via Terraform - must be empty
