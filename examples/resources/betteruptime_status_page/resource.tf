@@ -17,6 +17,9 @@ resource "betteruptime_status_page" "this" {
   subdomain    = "tf-status-${random_id.status_page_subdomain.hex}"
   subscribable = true
 
+  # Set to your own domain, e.g. "status.example.com" - setting it back to "" removes the custom domain again
+  custom_domain = ""
+
   # Place the page in a status-page group
   status_page_group_id = betteruptime_status_page_group.this.id
 

@@ -32,6 +32,9 @@ resource "betteruptime_status_page" "this" {
   subdomain    = "tf-status-${random_id.status_page_subdomain.hex}"
   subscribable = true
 
+  # Set to your own domain, e.g. "status.example.com" - setting it back to "" removes the custom domain again
+  custom_domain = ""
+
   # Place the page in a status-page group
   status_page_group_id = betteruptime_status_page_group.this.id
 
@@ -124,7 +127,7 @@ resource "betteruptime_status_page" "secure" {
 - `automatic_reports` (Boolean) Generate automatic reports when your services go down
 - `contact_url` (String) URL that should be used for contacting you in case of an emergency.
 - `custom_css` (String) Unleash your inner designer and tweak our status page design to fit your branding.
-- `custom_domain` (String) Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com`
+- `custom_domain` (String) Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com` To remove the custom domain, set the value to an empty string `""`.
 - `custom_javascript` (String) Add custom behavior to your status page. It is only allowed for status pages with a custom domain name.
 - `dark_logo_url` (String) A direct link to a dark version of your company's logo. The image should be under 20MB in size.
 - `design` (String) Choose between classic and modern status page design. Possible values: 'v1', 'v2'.
