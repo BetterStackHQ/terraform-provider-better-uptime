@@ -60,8 +60,9 @@ resource "betteruptime_status_page" "styled" {
   layout = "vertical"
 
   # Company logos for the light and dark theme
-  logo_url      = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/master/examples/resources/betteruptime_status_page/logo_black_text.png"
-  dark_logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/master/examples/resources/betteruptime_status_page/logo_white_text.png"
+  # TODO: point at refs/heads/master instead of the branch before merging
+  logo_url      = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_black_text.png"
+  dark_logo_url = "https://raw.githubusercontent.com/BetterStackHQ/terraform-provider-better-uptime/refs/heads/petr/uptime-examples-docs-e2e/examples/resources/betteruptime_status_page/logo_white_text.png"
 
   # Banner announcement, also shown in the JavaScript embed
   announcement               = "All systems operational."
