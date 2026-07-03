@@ -50,6 +50,8 @@ resource "betteruptime_status_page" "this" {
   contact_url   = "mailto:support@example.com"
   timezone      = "Eastern Time (US & Canada)"
   subdomain     = coalesce(var.betteruptime_status_page_subdomain, random_id.status_page_subdomain.hex)
+  # Set to your own domain, e.g. "status.example.com" — setting it back to "" removes the custom domain again.
+  custom_domain = ""
   subscribable  = true
   ip_allowlist = [
     "# Office network",

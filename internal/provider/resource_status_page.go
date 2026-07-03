@@ -76,7 +76,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"custom_domain": {
-		Description: "Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com`",
+		Description: "Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com` To remove the custom domain, set the value to an empty string `\"\"`.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
@@ -243,12 +243,35 @@ func newStatusPageResource() *schema.Resource {
 		ReadContext:   statusPageRead,
 		UpdateContext: statusPageUpdate,
 		DeleteContext: statusPageDelete,
+		CustomizeDiff: statusPageCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Description: "https://betterstack.com/docs/uptime/api/status-pages/",
 		Schema:      statusPageSchema,
 	}
+}
+
+// statusPageCustomizeDiff forces a diff for an explicit `custom_domain = ""`. The SDK treats an
+// empty string on an Optional+Computed attribute the same as an absent one and keeps the old
+// value, so the removal has to be detected from the raw config.
+func statusPageCustomizeDiff(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	if diff.Id() == "" {
+		// The resource is being created — there is no custom domain to remove yet.
+		return nil
+	}
+	config := diff.GetRawConfig()
+	if config.IsNull() || !config.IsKnown() {
+		return nil
+	}
+	attr := config.GetAttr("custom_domain")
+	if attr.IsNull() || !attr.IsKnown() || attr.AsString() != "" {
+		return nil
+	}
+	if old, _ := diff.GetChange("custom_domain"); old.(string) != "" {
+		return diff.SetNew("custom_domain", "")
+	}
+	return nil
 }
 
 type navigationLink struct {
@@ -424,17 +447,45 @@ func statusPageUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 			if d.HasChange(e.k) {
 				loadIPAllowlist(d, e.v.(**[]string))
 			}
+		} else if e.k == "custom_domain" {
+			loadCustomDomain(d, e.v.(**string))
 		} else {
 			if d.HasChange(e.k) {
 				load(d, e.k, e.v)
 			}
 		}
 	}
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s", url.PathEscape(d.Id())), &in, &out)
+	if err := resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s", url.PathEscape(d.Id())), &in, &out); err != nil {
+		return err
+	}
+	if in.CustomDomain != nil {
+		// The SDK plans a removed custom domain as "known after apply" and would keep the old
+		// value in state, so store the value that was sent to the API explicitly.
+		if err := d.Set("custom_domain", *in.CustomDomain); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+	return nil
 }
 
 func statusPageDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/status-pages/%s", url.PathEscape(d.Id())))
+}
+
+// loadCustomDomain loads custom_domain including an explicit empty string, which both load()
+// and HasChange miss on a Computed attribute. The empty value has to reach the API to remove
+// the domain from the status page, so it's detected from the raw config instead.
+func loadCustomDomain(d *schema.ResourceData, target **string) {
+	if config := d.GetRawConfig(); !config.IsNull() && config.IsKnown() {
+		if attr := config.GetAttr("custom_domain"); !attr.IsNull() && attr.IsKnown() && attr.AsString() == "" {
+			t := ""
+			*target = &t
+			return
+		}
+	}
+	if d.HasChange("custom_domain") {
+		load(d, "custom_domain", target)
+	}
 }
 
 func loadNavigationLinks(d *schema.ResourceData, target **[]navigationLink) error {

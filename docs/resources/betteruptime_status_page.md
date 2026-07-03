@@ -31,7 +31,7 @@ https://betterstack.com/docs/uptime/api/status-pages/
 - `automatic_reports` (Boolean) Generate automatic reports when your services go down
 - `contact_url` (String) URL that should be used for contacting you in case of an emergency.
 - `custom_css` (String) Unleash your inner designer and tweak our status page design to fit your branding.
-- `custom_domain` (String) Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com`
+- `custom_domain` (String) Do you want a custom domain on your status page? Add a CNAME record that points your domain to status.betteruptime.com. Example: `CNAME status.walmine.com statuspage.betteruptime.com` To remove the custom domain, set the value to an empty string `""`.
 - `custom_javascript` (String) Add custom behavior to your status page. It is only allowed for status pages with a custom domain name.
 - `dark_logo_url` (String) A direct link to a dark version of your company's logo. The image should be under 20MB in size.
 - `design` (String) Choose between classic and modern status page design. Possible values: 'v1', 'v2'.
