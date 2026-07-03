@@ -1,0 +1,25 @@
+# A ready-to-run basic example: a status page with a single monitor on it
+resource "betteruptime_status_page_group" "this" {
+  name = "Status pages from Terraform"
+}
+
+resource "betteruptime_status_page" "this" {
+  company_name = "Example, Inc"
+  company_url  = "https://example.com"
+  timezone     = "UTC"
+  subdomain    = coalesce(var.betteruptime_status_page_subdomain, "tf-status-${random_id.status_page_subdomain.hex}")
+
+  status_page_group_id = betteruptime_status_page_group.this.id
+}
+
+resource "betteruptime_monitor" "this" {
+  url          = "https://example.com"
+  monitor_type = "status"
+}
+
+resource "betteruptime_status_page_resource" "monitor" {
+  status_page_id = betteruptime_status_page.this.id
+  resource_id    = betteruptime_monitor.this.id
+  resource_type  = "Monitor"
+  public_name    = "example.com site"
+}

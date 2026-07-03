@@ -35,7 +35,7 @@ jobs:
     strategy:
       matrix:
         terraform-version: ["0.14", "1.0", "1.8", "latest"]
-        config: [examples/basic, examples/advanced, examples/catalog, examples/ips, examples/on_call_calendars]
+        config: [examples]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -52,6 +52,32 @@ jobs:
           terraform_version: ${{ matrix.terraform-version }}
       - name: Add resources via Terraform
         run: make terraform CONFIGURATION="${{ matrix.config }}" ARGS="apply --auto-approve --input=false"
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+      # A data-source lookup that finds nothing yields a null output - and Terraform
+      # drops null outputs from state entirely, so also check every output declared
+      # in the configuration is actually present. Empty strings and collections
+      # (e.g. nobody on the default on-call calendar) hide a data problem too.
+      - name: Verify no output is missing, null, or empty
+        run: |
+          make terraform CONFIGURATION="${{ matrix.config }}" ARGS="output -json > outputs.json"
+          echo "Terraform outputs:"
+          jq 'map_values(.value)' "${{ matrix.config }}/outputs.json"
+          DECLARED="$(grep -hoE '^output "[^"]+"' "${{ matrix.config }}"/*.tf | sed -E 's/^output "([^"]+)"/\1/' | sort -u)"
+          MISSING="$(comm -23 <(echo "$DECLARED") <(jq -r 'keys[]' "${{ matrix.config }}/outputs.json" | sort -u))"
+          EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "" or .value.value == [] or .value.value == {}) | .key' "${{ matrix.config }}/outputs.json")"
+          if [ -n "$MISSING" ] || [ -n "$EMPTY" ]; then
+            if [ -n "$MISSING" ]; then
+              echo "Declared outputs missing a value:"
+              echo "$MISSING"
+            fi
+            if [ -n "$EMPTY" ]; then
+              echo "Outputs with null or empty values:"
+              echo "$EMPTY"
+            fi
+            exit 1
+          fi
+          echo "All $(echo "$DECLARED" | wc -l) declared outputs have values."
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
       - name: Plan resources via Terraform - must be empty
@@ -73,9 +99,102 @@ jobs:
         env:
           BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
 
+  # Assembles every documented example into one configuration - the basic example's
+  # scaffolding (provider/versions/variables/random) without its own main.tf/outputs.tf,
+  # plus every resources/* and data-sources/* example - and runs it as a single
+  # apply/plan/destroy, keeping the registry docs' snippets verified.
+  e2e_combined:
+    strategy:
+      matrix:
+        terraform-version: ["0.14", "1.0", "1.8", "latest"]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout must precede setup-go so its cache can be keyed on go.sum.
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Install Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.23.x'
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ matrix.terraform-version }}
+      - name: Assemble combined examples
+        run: |
+          mkdir -p combined-e2e
+          # Reuse the basic example's scaffolding (provider/versions/variables/random),
+          # but not its own resources/outputs.
+          for f in examples/*.tf; do
+            case "$(basename "$f")" in main.tf | outputs.tf) continue ;; esac
+            cp "$f" "combined-e2e/$(basename "$f")"
+          done
+          # Every resource and data-source example runs in the combined config.
+          # Data sources look up pre-existing "My Existing ..." fixtures on the team.
+          for f in examples/resources/*/*.tf; do
+            dir="$(basename "$(dirname "$f")")"
+            cp "$f" "combined-e2e/res__${dir}__$(basename "$f")"
+          done
+          for f in examples/data-sources/*/*.tf; do
+            dir="$(basename "$(dirname "$f")")"
+            cp "$f" "combined-e2e/ds__${dir}__$(basename "$f")"
+          done
+          # Invitation e-mails must be unique across the concurrent matrix jobs; the
+          # docs keep clean addresses, the combined run suffixes them with the pet.
+          sed -i -E 's/(alice|bob|dylan)@betterstack\.com/\1+${random_pet.unique.id}@betterstack.com/' combined-e2e/res__betteruptime_team_member__resource.tf
+      - name: Add resources via Terraform
+        run: make terraform CONFIGURATION="combined-e2e" ARGS="apply --auto-approve --input=false"
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+      # A data-source lookup that finds nothing yields a null output - and Terraform
+      # drops null outputs from state entirely, so also check every output declared
+      # in the configuration is actually present. Empty strings and collections
+      # (e.g. nobody on the default on-call calendar) hide a data problem too.
+      - name: Verify no output is missing, null, or empty
+        run: |
+          make terraform CONFIGURATION="combined-e2e" ARGS="output -json > outputs.json"
+          echo "Terraform outputs:"
+          jq 'map_values(.value)' "combined-e2e/outputs.json"
+          DECLARED="$(grep -hoE '^output "[^"]+"' combined-e2e/*.tf | sed -E 's/^output "([^"]+)"/\1/' | sort -u)"
+          MISSING="$(comm -23 <(echo "$DECLARED") <(jq -r 'keys[]' "combined-e2e/outputs.json" | sort -u))"
+          EMPTY="$(jq -r 'to_entries[] | select(.value.value == null or .value.value == "" or .value.value == [] or .value.value == {}) | .key' "combined-e2e/outputs.json")"
+          if [ -n "$MISSING" ] || [ -n "$EMPTY" ]; then
+            if [ -n "$MISSING" ]; then
+              echo "Declared outputs missing a value:"
+              echo "$MISSING"
+            fi
+            if [ -n "$EMPTY" ]; then
+              echo "Outputs with null or empty values:"
+              echo "$EMPTY"
+            fi
+            exit 1
+          fi
+          echo "All $(echo "$DECLARED" | wc -l) declared outputs have values."
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+      - name: Plan resources via Terraform - must be empty
+        run: |
+          make terraform CONFIGURATION="combined-e2e" ARGS="plan --input=false --out=tfplan"
+          make terraform CONFIGURATION="combined-e2e" ARGS="show --json tfplan > tfplan.json"
+          CHANGES="$(jq "[.resource_changes[]? | select(.change.actions != [\"no-op\"])] | length" "combined-e2e/tfplan.json")"
+          if [ "$CHANGES" == "0" ]; then
+            echo "No planned changes detected after first apply. Success!"
+          else
+            echo "$CHANGES planned changes detected after first apply. Failure!"
+            exit 1
+          fi
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+      - name: Destroy resources via Terraform
+        if: always()
+        run: make terraform CONFIGURATION="combined-e2e" ARGS="destroy --auto-approve --input=false"
+        env:
+          BETTERUPTIME_API_TOKEN: ${{ secrets.UPTIME_E2E_TEAM_TOKEN }}
+
   notify-linear:
     if: ${{ failure() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'schedule') }}
-    needs: [e2e_test]
+    needs: [e2e_test, e2e_combined]
     runs-on: ubuntu-latest
     permissions:
       contents: read
