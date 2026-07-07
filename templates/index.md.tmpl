@@ -17,7 +17,7 @@ terraform {
   required_providers {
     betteruptime = {
       source  = "BetterStackHQ/better-uptime"
-      version = ">= 0.9.3"
+      version = ">= 0.21.6"
     }
   }
 }
@@ -38,7 +38,7 @@ resource "betteruptime_status_page" "this" {
   company_name = "Example, Inc"
   company_url  = "https://example.com"
   timezone     = "UTC"
-  subdomain    = "example"
+  subdomain    = "your-company-status" # Must be globally unique across Better Stack
 }
 
 resource "betteruptime_monitor" "this" {
@@ -51,6 +51,23 @@ resource "betteruptime_status_page_resource" "monitor" {
   resource_id    = betteruptime_monitor.this.id
   resource_type  = "Monitor"
   public_name    = "example.com site"
+}
+```
+
+The API client is preconfigured with sensible defaults. To tune retries, timeouts or rate limiting, set the options explicitly - the values below are the defaults:
+
+```terraform
+provider "betteruptime" {
+  api_token = "XXXXXXXXXXXXXXXXXXXXXXXX"
+
+  # Defaults are already set to work nicely with Uptime API
+  # If needed, you can customize the configuration to better suit your use case
+  api_retry_max      = 4
+  api_retry_wait_min = 10
+  api_retry_wait_max = 300
+  api_timeout        = 60
+  api_rate_limit     = 8
+  api_rate_burst     = 0
 }
 ```
 

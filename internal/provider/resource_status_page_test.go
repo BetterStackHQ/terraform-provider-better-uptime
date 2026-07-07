@@ -259,7 +259,63 @@ func TestResourceStatusPage(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "require_sso", "false"),
 				),
 			},
-			// Step 8 - import.
+			// Step 8 - set custom domain.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_status_page" "this" {
+					company_name  = "Example, Inc"
+					company_url   = "https://example.com"
+					timezone      = "America/Los_Angeles"
+					subdomain     = "%s"
+					custom_domain = "status.example.com"
+					navigation_links {
+						text = "Example2"
+						href = "https://example.com/test"
+					}
+					navigation_links {
+						text = "Status"
+						href = "/status"
+					}
+				}
+				`, subdomain),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_status_page.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "custom_domain", "status.example.com"),
+				),
+			},
+			// Step 9 - remove custom domain using an empty string.
+			{
+				Config: fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_status_page" "this" {
+					company_name  = "Example, Inc"
+					company_url   = "https://example.com"
+					timezone      = "America/Los_Angeles"
+					subdomain     = "%s"
+					custom_domain = ""
+					navigation_links {
+						text = "Example2"
+						href = "https://example.com/test"
+					}
+					navigation_links {
+						text = "Status"
+						href = "/status"
+					}
+				}
+				`, subdomain),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_status_page.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "custom_domain", ""),
+				),
+			},
+			// Step 10 - import.
 			{
 				ResourceName:      "betteruptime_status_page.this",
 				ImportState:       true,

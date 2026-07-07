@@ -8,7 +8,7 @@ GOLANGCI_LINT := golangci-lint run --disable-all \
 	-E staticcheck \
 	-E typecheck \
 	-E unused
-VERSION := 0.21.6
+VERSION := 0.21.7
 .PHONY: test build
 
 help:
@@ -25,7 +25,7 @@ help:
 	@echo "  make test"
 	@echo "  make test-coverage"
 	@echo
-	@echo "  make terraform CONFIGURATION=examples/basic ARGS=apply"
+	@echo "  make terraform CONFIGURATION=examples ARGS=apply"
 	@echo
 	@echo "  # Run in \"Debug\" mode (connect debugger to port 2345)."
 	@echo "  make debug"
