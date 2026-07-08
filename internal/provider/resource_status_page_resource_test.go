@@ -276,6 +276,59 @@ func TestResourceStatusPageResourceManuallyTrackedItem(t *testing.T) {
 	})
 }
 
+func TestResourceStatusPageResourceUnknownStatusHistoryField(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/status-pages/0/resources", "1")
+	defer server.Close()
+
+	// The API returns status_history entries with fields unknown to the provider
+	// (e.g. degraded_duration, which caused https://github.com/BetterStackHQ/terraform-provider-better-uptime/issues/222).
+	attributes := `{"resource_id":2,"resource_type":"Monitor","public_name":"example","status_history":[{"day":"2026-07-08","status":"downtime","downtime_duration":60,"maintenance_duration":0,"degraded_duration":30,"another_future_field":"ignored"}]}`
+	server.ExpectRequest("POST", "/api/v2/status-pages/0/resources", "", 201, `{"data":{"id":"1","attributes":`+attributes+`}}`)
+	server.ExpectRequest("GET", "/api/v2/status-pages/0/resources/1", "", 200, `{"data":{"id":"1","attributes":`+attributes+`}}`)
+
+	config := `
+	provider "betteruptime" {
+		api_token = "foo"
+	}
+
+	resource "betteruptime_status_page_resource" "this" {
+		status_page_id = "0"
+		resource_id    = "2"
+		resource_type  = "Monitor"
+		public_name    = "example"
+	}
+	`
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create; unknown status_history fields must be ignored, known ones kept.
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_status_page_resource.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "status_history.#", "1"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "status_history.0.day", "2026-07-08"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "status_history.0.status", "downtime"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "status_history.0.downtime_duration", "60"),
+					resource.TestCheckNoResourceAttr("betteruptime_status_page_resource.this", "status_history.0.degraded_duration"),
+					resource.TestCheckNoResourceAttr("betteruptime_status_page_resource.this", "status_history.0.another_future_field"),
+				),
+			},
+			// Step 2 - refresh + plan must not fail on the unknown fields either.
+			{
+				Config:   config,
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
 func TestResourceStatusPageResourceValidation(t *testing.T) {
 	server := newResourceServer(t, "/api/v2/status-pages/0/resources", "1")
 	defer server.Close()
