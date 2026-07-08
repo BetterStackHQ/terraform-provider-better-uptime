@@ -184,6 +184,12 @@ var statusPageStatusHistorySchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"degraded_duration": {
+		Description: "Status duration",
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Computed:    true,
+	},
 }
 
 func loadStatusPageResourceMetadataRule(d *schema.ResourceData, ruleKey string) *map[string]interface{} {
