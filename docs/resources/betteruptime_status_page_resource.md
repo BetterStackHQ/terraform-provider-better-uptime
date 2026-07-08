@@ -199,7 +199,6 @@ Optional:
 Read-Only:
 
 - `day` (String)
-- `degraded_duration` (Number)
 - `downtime_duration` (Number)
 - `maintenance_duration` (Number)
 - `status` (String)
