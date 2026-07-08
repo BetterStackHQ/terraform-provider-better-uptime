@@ -451,6 +451,7 @@ func statusPageResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func statusPageResourceCopyAttrs(d *schema.ResourceData, in *statusPageResource) diag.Diagnostics {
 	var derr diag.Diagnostics
+	in.StatusHistory = dropUnknownKeys(in.StatusHistory, statusPageStatusHistorySchema)
 	for _, e := range statusPageResourceRef(in) {
 		if e.k == "mark_as_down_metadata_rule" {
 			if err := statusPageResourceMetadataRuleCopyAttrs(d, in.MarkAsDownMetadataRule, "mark_as_down_metadata_rule"); err != nil {

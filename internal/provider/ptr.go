@@ -62,3 +62,22 @@ func truePtr() *bool {
 	b := true
 	return &b
 }
+
+// dropUnknownKeys removes keys not defined in the schema from raw API maps,
+// so fields newly added to the API are ignored instead of failing d.Set.
+func dropUnknownKeys(in *[]map[string]interface{}, s map[string]*schema.Schema) *[]map[string]interface{} {
+	if in == nil {
+		return nil
+	}
+	out := make([]map[string]interface{}, len(*in))
+	for i, m := range *in {
+		filtered := make(map[string]interface{}, len(m))
+		for k, v := range m {
+			if _, ok := s[k]; ok {
+				filtered[k] = v
+			}
+		}
+		out[i] = filtered
+	}
+	return &out
+}
