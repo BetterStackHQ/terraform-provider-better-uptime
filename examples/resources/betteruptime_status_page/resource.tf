@@ -16,6 +16,7 @@ resource "betteruptime_status_page" "this" {
   timezone     = "Eastern Time (US & Canada)"
   subdomain    = "tf-status-${random_id.status_page_subdomain.hex}"
   subscribable = true
+  published    = true
 
   # Set to your own domain, e.g. "status.example.com" - setting it back to "" removes the custom domain again
   custom_domain = ""

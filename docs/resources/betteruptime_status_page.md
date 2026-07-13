@@ -31,6 +31,7 @@ resource "betteruptime_status_page" "this" {
   timezone     = "Eastern Time (US & Canada)"
   subdomain    = "tf-status-${random_id.status_page_subdomain.hex}"
   subscribable = true
+  published    = true
 
   # Set to your own domain, e.g. "status.example.com" - setting it back to "" removes the custom domain again
   custom_domain = ""
@@ -140,6 +141,7 @@ resource "betteruptime_status_page" "secure" {
 - `navigation_links` (Block List) Adjust the navigation links on your status page. Only applicable when design: v2. Only first 4 links considered. (see [below for nested schema](#nestedblock--navigation_links))
 - `password` (String, Sensitive) Set a password of your status page (we won't store it as plaintext, promise). Required when password_enabled: true. We will set password_enabled: false automatically when you send us an empty password.
 - `password_enabled` (Boolean) Do you want to enable password protection on your status page?
+- `published` (Boolean) Is your status page currently accessible?
 - `require_sso` (Boolean) Require SSO sign-in to access your status page. Requires SSO to be configured for your organization and is mutually exclusive with password protection.
 - `status_page_group_id` (Number) Set this attribute if you want to add this status page to a status page group.
 - `subscribable` (Boolean) Do you want to allow users to subscribe to your status page changes?
