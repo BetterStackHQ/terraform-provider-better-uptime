@@ -620,16 +620,17 @@ func monitorCopyAttrs(d *schema.ResourceData, in *monitor) diag.Diagnostics {
 				derr = append(derr, diag.FromErr(err)[0])
 			}
 		} else if e.k == "url" {
-			// Special handling for URL and scenario name
+			// Special handling for URL and scenario name. The API omits either field for
+			// monitor types that don't have it, so keep the state value when it's absent.
 			currentUrl := d.Get("url").(string)
 			currentScenarioName := d.Get("scenario_name").(string)
-			if currentScenarioName != "" {
+			if currentScenarioName != "" && in.ScenarioName != nil {
 				// Read scenario name from API only if we have it defined
 				if err := d.Set("scenario_name", *in.ScenarioName); err != nil {
 					derr = append(derr, diag.FromErr(err)[0])
 				}
 			}
-			if currentUrl != "" || currentScenarioName == "" {
+			if (currentUrl != "" || currentScenarioName == "") && in.URL != nil {
 				// Read URL from API if we have it defined, or if we're missing scenario name
 				if err := d.Set("url", *in.URL); err != nil {
 					derr = append(derr, diag.FromErr(err)[0])
@@ -698,6 +699,17 @@ func validateMonitor(ctx context.Context, diff *schema.ResourceDiff, v interface
 	// Validate request headers
 	if err := validateRequestHeaders(ctx, diff, v); err != nil {
 		return err
+	}
+
+	// The API rejects in-place monitor_type changes to or from playwright (422), and the
+	// failed apply would still persist the planned attributes into state
+	// (hashicorp/terraform-plugin-sdk#476), leaving a state that panics on refresh - fail
+	// at plan time instead. Changes among the other types stay allowed in place.
+	if diff.Id() != "" && diff.HasChange("monitor_type") {
+		oldType, newType := diff.GetChange("monitor_type")
+		if oldType.(string) == "playwright" || newType.(string) == "playwright" {
+			return fmt.Errorf("monitor_type cannot be changed to or from 'playwright' in place; recreate the monitor instead, e.g. via terraform apply -replace")
+		}
 	}
 
 	// Validate URL requirement based on monitor type
