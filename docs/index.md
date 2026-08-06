@@ -76,7 +76,7 @@ provider "betteruptime" {
 
 ### Required
 
-- `api_token` (String, Sensitive) Better Stack Uptime API token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token on how to obtain the API token for your team.
+- `api_token` (String, Sensitive) Better Stack Uptime API token. The value can be omitted if `BETTERUPTIME_API_TOKEN` environment variable is set. See https://betterstack.com/docs/uptime/api/getting-started-with-uptime-api/#obtaining-an-uptime-api-token on how to obtain the API token for your team. Managing a `betteruptime_team_member` whose role is `billing_admin` requires a global API token rather than a team-scoped one.
 
 ### Optional
 
