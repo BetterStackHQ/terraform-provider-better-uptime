@@ -47,7 +47,7 @@ resource "betteruptime_team_member" "dylan" {
 
 ### Optional
 
-- `role` (String) The system role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. Use `role_id` to assign a custom role. Set only one of `role` or `role_id`.
+- `role` (String) The system role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. Use `role_id` to assign a custom role. Set only one of `role` or `role_id`. Managing a team member whose role is `billing_admin` requires a global API token, because Billing admin applies to every team in the organization.
 - `role_id` (String) The ID of the role to assign — for example from the betteruptime_role data source. Use this to assign a custom role (for built-in roles you can use `role` instead). Set only one of `role` or `role_id`.
 - `team_name` (String) Used to specify the team the resource should be created in when using global tokens.
 

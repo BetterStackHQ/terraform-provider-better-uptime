@@ -30,7 +30,7 @@ var teamMemberSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 	},
 	"role": {
-		Description:      "The system role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. Use `role_id` to assign a custom role. Set only one of `role` or `role_id`.",
+		Description:      "The system role of the team member. Allowed values: responder, member, team_lead, billing_admin. Defaults to responder. Use `role_id` to assign a custom role. Set only one of `role` or `role_id`. Managing a team member whose role is `billing_admin` requires a global API token, because Billing admin applies to every team in the organization.",
 		Type:             schema.TypeString,
 		Optional:         true,
 		Computed:         true,
