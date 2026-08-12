@@ -37,6 +37,7 @@ func TestResourceStatusPage(t *testing.T) {
 					subdomain         = "%s"
 					password          = "secret123"
 					automatic_reports = true
+					include_all_incidents_in_rss_feed = true
 					published         = true
 
 					navigation_links {
@@ -55,6 +56,7 @@ func TestResourceStatusPage(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "timezone", "UTC"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "password", "secret123"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "automatic_reports", "true"),
+					resource.TestCheckResourceAttr("betteruptime_status_page.this", "include_all_incidents_in_rss_feed", "true"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "published", "true"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.0.text", "Example"),
 					resource.TestCheckResourceAttr("betteruptime_status_page.this", "navigation_links.0.href", "https://example.com"),
