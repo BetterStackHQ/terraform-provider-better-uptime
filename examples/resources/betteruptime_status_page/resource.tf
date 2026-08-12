@@ -31,6 +31,11 @@ resource "betteruptime_status_page" "this" {
   # Auto-generate downtime reports and keep the page out of search engines
   automatic_reports        = true
   hide_from_search_engines = true
+
+  # Keep the RSS feed to the status updates shown on the page. Set to true to also
+  # publish incidents nobody wrote an update for - pair it with automatic_reports = false,
+  # or the feed carries both the generated report and the raw incident for one outage
+  include_all_incidents_in_rss_feed = false
 }
 
 # Styled status page - branding, announcement and custom navigation

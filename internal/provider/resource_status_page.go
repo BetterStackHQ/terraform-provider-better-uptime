@@ -208,6 +208,12 @@ var statusPageSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+	"include_all_incidents_in_rss_feed": {
+		Description: "Publish incidents to the status page RSS feed, including ones you never report on the status page. Each resource's `mark_as_down_for` and `mark_as_degraded_for` rules and the status page's `min_incident_length` still apply.",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
 	"status_page_group_id": {
 		Description: "Set this attribute if you want to add this status page to a status page group.",
 		Type:        schema.TypeInt,
@@ -286,40 +292,41 @@ type navigationLink struct {
 }
 
 type statusPage struct {
-	History                  *int              `json:"history,omitempty"`
-	CompanyName              *string           `json:"company_name,omitempty"`
-	CompanyURL               *string           `json:"company_url,omitempty"`
-	ContactURL               *string           `json:"contact_url,omitempty"`
-	LogoURL                  *string           `json:"logo_remote_url,omitempty"`
-	DarkLogoURL              *string           `json:"dark_logo_remote_url,omitempty"`
-	Whitelabeled             *bool             `json:"whitelabeled,omitempty"`
-	Timezone                 *string           `json:"timezone,omitempty"`
-	Subdomain                *string           `json:"subdomain,omitempty"`
-	CustomDomain             *string           `json:"custom_domain,omitempty"`
-	MinIncidentLength        *int              `json:"min_incident_length,omitempty"`
-	Subscribable             *bool             `json:"subscribable,omitempty"`
-	Published                *bool             `json:"published,omitempty"`
-	HideFromSearchEngines    *bool             `json:"hide_from_search_engines,omitempty"`
-	CustomCSS                *string           `json:"custom_css,omitempty"`
-	CustomJavaScript         *string           `json:"custom_javascript,omitempty"`
-	GoogleAnalyticsID        *string           `json:"google_analytics_id,omitempty"`
-	Announcement             *string           `json:"announcement,omitempty"`
-	AnnouncementEmbedVisible *bool             `json:"announcement_embed_visible,omitempty"`
-	AnnouncementEmbedLink    *string           `json:"announcement_embed_link,omitempty"`
-	AnnouncementEmbedCSS     *string           `json:"announcement_embed_css,omitempty"`
-	PasswordEnabled          *bool             `json:"password_enabled,omitempty"`
-	Password                 *string           `json:"password,omitempty"`
-	RequireSSO               *bool             `json:"require_sso,omitempty"`
-	AggregateState           *string           `json:"aggregate_state,omitempty"`
-	CreatedAt                *string           `json:"created_at,omitempty"`
-	UpdatedAt                *string           `json:"updated_at,omitempty"`
-	Design                   *string           `json:"design,omitempty"`
-	Theme                    *string           `json:"theme,omitempty"`
-	Layout                   *string           `json:"layout,omitempty"`
-	AutomaticReports         *bool             `json:"automatic_reports,omitempty"`
-	StatusPageGroupID        *int              `json:"status_page_group_id,omitempty"`
-	NavigationLinks          *[]navigationLink `json:"navigation_links,omitempty"`
-	IPAllowlist              *[]string         `json:"ip_allowlist,omitempty"`
+	History                      *int              `json:"history,omitempty"`
+	CompanyName                  *string           `json:"company_name,omitempty"`
+	CompanyURL                   *string           `json:"company_url,omitempty"`
+	ContactURL                   *string           `json:"contact_url,omitempty"`
+	LogoURL                      *string           `json:"logo_remote_url,omitempty"`
+	DarkLogoURL                  *string           `json:"dark_logo_remote_url,omitempty"`
+	Whitelabeled                 *bool             `json:"whitelabeled,omitempty"`
+	Timezone                     *string           `json:"timezone,omitempty"`
+	Subdomain                    *string           `json:"subdomain,omitempty"`
+	CustomDomain                 *string           `json:"custom_domain,omitempty"`
+	MinIncidentLength            *int              `json:"min_incident_length,omitempty"`
+	Subscribable                 *bool             `json:"subscribable,omitempty"`
+	Published                    *bool             `json:"published,omitempty"`
+	HideFromSearchEngines        *bool             `json:"hide_from_search_engines,omitempty"`
+	CustomCSS                    *string           `json:"custom_css,omitempty"`
+	CustomJavaScript             *string           `json:"custom_javascript,omitempty"`
+	GoogleAnalyticsID            *string           `json:"google_analytics_id,omitempty"`
+	Announcement                 *string           `json:"announcement,omitempty"`
+	AnnouncementEmbedVisible     *bool             `json:"announcement_embed_visible,omitempty"`
+	AnnouncementEmbedLink        *string           `json:"announcement_embed_link,omitempty"`
+	AnnouncementEmbedCSS         *string           `json:"announcement_embed_css,omitempty"`
+	PasswordEnabled              *bool             `json:"password_enabled,omitempty"`
+	Password                     *string           `json:"password,omitempty"`
+	RequireSSO                   *bool             `json:"require_sso,omitempty"`
+	AggregateState               *string           `json:"aggregate_state,omitempty"`
+	CreatedAt                    *string           `json:"created_at,omitempty"`
+	UpdatedAt                    *string           `json:"updated_at,omitempty"`
+	Design                       *string           `json:"design,omitempty"`
+	Theme                        *string           `json:"theme,omitempty"`
+	Layout                       *string           `json:"layout,omitempty"`
+	AutomaticReports             *bool             `json:"automatic_reports,omitempty"`
+	IncludeAllIncidentsInRSSFeed *bool             `json:"include_all_incidents_in_rss_feed,omitempty"`
+	StatusPageGroupID            *int              `json:"status_page_group_id,omitempty"`
+	NavigationLinks              *[]navigationLink `json:"navigation_links,omitempty"`
+	IPAllowlist                  *[]string         `json:"ip_allowlist,omitempty"`
 }
 
 type statusPageHTTPResponse struct {
@@ -369,6 +376,7 @@ func statusPageRef(in *statusPage) []struct {
 		{k: "theme", v: &in.Theme},
 		{k: "layout", v: &in.Layout},
 		{k: "automatic_reports", v: &in.AutomaticReports},
+		{k: "include_all_incidents_in_rss_feed", v: &in.IncludeAllIncidentsInRSSFeed},
 		{k: "status_page_group_id", v: &in.StatusPageGroupID},
 		{k: "navigation_links", v: &in.NavigationLinks},
 		{k: "ip_allowlist", v: &in.IPAllowlist},
