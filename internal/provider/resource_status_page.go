@@ -209,7 +209,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"include_all_incidents_in_rss_feed": {
-		Description: "Publish incidents to the status page RSS feed, including ones no status update reports. Only incidents that already mark a resource as down or degraded qualify, and the status page's minimum incident length applies. When false, the feed carries only the status updates and maintenance windows published on the page.",
+		Description: "Publish incidents to the status page RSS feed, including ones you never report on the status page. Each resource's `mark_as_down_for` and `mark_as_degraded_for` rules and the status page's `min_incident_length` still apply.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
