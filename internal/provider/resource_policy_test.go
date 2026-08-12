@@ -1397,3 +1397,251 @@ func TestResourcePolicyMetadataValueStateCleanup(t *testing.T) {
 		},
 	})
 }
+
+func TestResourcePolicyResolveRemove(t *testing.T) {
+	server := newResourceServer(t, "/api/v3/policies", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create a policy with resolve_remove steps.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name = "Terraform - Resolve Remove"
+
+				  steps {
+					type        = "resolve_remove"
+					wait_before = 300
+					action_type = "resolve_incident"
+				  }
+				  steps {
+					type                = "resolve_remove"
+					wait_until_time     = "08:30"
+					wait_until_timezone = "UTC"
+					action_type         = "remove_incident"
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_policy.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.type", "resolve_remove"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.wait_before", "300"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.action_type", "resolve_incident"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.type", "resolve_remove"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.wait_until_time", "08:30"),
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.1.action_type", "remove_incident"),
+				),
+			},
+			// Step 2 - change the action type.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "this" {
+				  name = "Terraform - Resolve Remove"
+
+				  steps {
+					type        = "resolve_remove"
+					wait_before = 300
+					action_type = "remove_incident"
+				  }
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_policy.this", "steps.0.action_type", "remove_incident"),
+				),
+			},
+			// Step 3 - import.
+			{
+				ResourceName:      "betteruptime_policy.this",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestResourcePolicyActionTypeValidation(t *testing.T) {
+	server := newResourceServer(t, "/api/v3/policies", "1")
+	defer server.Close()
+
+	cases := []struct {
+		name        string
+		config      string
+		expectError *regexp.Regexp
+	}{
+		{
+			name: "invalid - resolve_remove without action_type",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type        = "resolve_remove"
+						wait_before = 0
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: action_type must be either resolve_incident or remove_incident for resolve_remove step`),
+		},
+		{
+			name: "invalid - resolve_remove with escalation action_type",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type        = "resolve_remove"
+						wait_before = 0
+						action_type = "escalate_to_policy"
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: action_type must be either resolve_incident or remove_incident for resolve_remove step`),
+		},
+		{
+			name: "invalid - resolve_remove with policy_id",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type        = "resolve_remove"
+						wait_before = 0
+						action_type = "resolve_incident"
+						policy_id   = 123
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: policy_id and policy_metadata_key cannot be used with resolve_remove step`),
+		},
+		{
+			name: "invalid - action_type on escalation step",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type        = "escalation"
+						wait_before = 0
+						urgency_id  = 123
+						action_type = "resolve_incident"
+						step_members { type = "current_on_call" }
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: action_type can only be used with resolve_remove, time_branching, and metadata_branching steps`),
+		},
+		{
+			name: "invalid - escalate_to_policy without a policy",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type        = "time_branching"
+						wait_before = 0
+						timezone    = "UTC"
+						days        = ["mon"]
+						time_from   = "08:00"
+						time_to     = "22:00"
+						action_type = "escalate_to_policy"
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: policy_id or policy_metadata_key must be set when action_type is escalate_to_policy`),
+		},
+		{
+			name: "invalid - resolve action combined with a policy",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type  = "String"
+							value = "staging"
+						}
+						action_type = "resolve_incident"
+						policy_id   = 123
+					}
+				}
+			`,
+			expectError: regexp.MustCompile(`steps\.0: policy_id and policy_metadata_key cannot be used when action_type is resolve_incident`),
+		},
+		{
+			name: "valid - metadata branching resolving the incident",
+			config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_policy" "test" {
+					name = "Test Policy"
+					steps {
+						type = "metadata_branching"
+						metadata_key = "environment"
+						metadata_value {
+							type  = "String"
+							value = "staging"
+						}
+						action_type = "resolve_incident"
+					}
+				}
+			`,
+			expectError: nil,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			resource.Test(t, resource.TestCase{
+				IsUnitTest: true,
+				ProviderFactories: map[string]func() (*schema.Provider, error){
+					"betteruptime": func() (*schema.Provider, error) {
+						return New(WithURL(server.URL)), nil
+					},
+				},
+				Steps: []resource.TestStep{
+					{
+						Config:      tc.config,
+						ExpectError: tc.expectError,
+					},
+				},
+			})
+		})
+	}
+}

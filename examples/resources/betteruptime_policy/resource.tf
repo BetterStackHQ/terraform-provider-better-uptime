@@ -168,6 +168,38 @@ resource "betteruptime_policy" "metadata_routing" {
   }
 }
 
+# Auto-triage policy: remove false positives right away, page whoever is on call,
+# then auto-resolve the incident if it is still open an hour later
+resource "betteruptime_policy" "auto_resolve" {
+  name            = "Terraform Auto Resolve Policy ${random_pet.unique.id}"
+  policy_group_id = betteruptime_policy_group.this.id
+
+  steps {
+    type         = "metadata_branching"
+    wait_before  = 0
+    metadata_key = "Description"
+    metadata_value {
+      value = "False positive"
+    }
+
+    # Remove matching incidents instead of escalating to a policy
+    action_type = "remove_incident"
+  }
+  steps {
+    type        = "escalation"
+    wait_before = 0
+    urgency_id  = data.betteruptime_severity.low.id
+    step_members { type = "current_on_call" }
+  }
+  steps {
+    type        = "resolve_remove"
+    wait_before = 3600
+
+    # Use "remove_incident" to remove the incident without a trace instead
+    action_type = "resolve_incident"
+  }
+}
+
 # Fallback policy: takes over once "this" exhausts its repeats unacknowledged,
 # widening the blast radius to the whole team
 resource "betteruptime_policy" "fallback" {
