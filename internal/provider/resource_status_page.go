@@ -209,7 +209,7 @@ var statusPageSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"include_all_incidents_in_rss_feed": {
-		Description: "Publish every incident your monitors, heartbeats or integrations trigger to the status page RSS feed, including ones you never report on the status page. When false, the feed carries only the status updates you publish.",
+		Description: "Publish incidents to the status page RSS feed, including ones no status update reports. Only incidents that already mark a resource as down or degraded qualify, and the status page's minimum incident length applies. When false, the feed carries only the status updates and maintenance windows published on the page.",
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Computed:    true,
