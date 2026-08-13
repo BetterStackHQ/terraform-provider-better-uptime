@@ -46,6 +46,7 @@ output "policy_id" {
 
 Read-Only:
 
+- `action_type` (String)
 - `comment` (String)
 - `days` (List of String)
 - `metadata_key` (String)

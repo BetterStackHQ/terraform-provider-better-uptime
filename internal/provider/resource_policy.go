@@ -69,10 +69,10 @@ var policyMetadataValueSchema = map[string]*schema.Schema{
 
 var policyStepSchema = map[string]*schema.Schema{
 	"type": {
-		Description:  "The type of the step. Can be either escalation, time_branching, metadata_branching, or instructions.",
+		Description:  "The type of the step. Can be either escalation, time_branching, metadata_branching, instructions, or resolve_remove.",
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"escalation", "time_branching", "metadata_branching", "instructions"}, false),
+		ValidateFunc: validation.StringInSlice([]string{"escalation", "time_branching", "metadata_branching", "instructions", "resolve_remove"}, false),
 	},
 	"wait_before": {
 		Description: "How long to wait in seconds before executing this step since previous step. Omit if wait_until_time is set.",
@@ -150,6 +150,13 @@ var policyStepSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Default:     nil,
 		Elem:        &schema.Resource{Schema: policyMetadataValueSchema},
+	},
+	"action_type": {
+		Description:  "The action to take. Required when step type is resolve_remove - use resolve_incident or remove_incident. Optional when step type is time_branching or metadata_branching - use escalate_to_policy, resolve_incident, remove_incident, or do_not_escalate. When omitted on branching steps, the action defaults to escalate_to_policy if policy_id or policy_metadata_key is set, and to do_not_escalate otherwise; the resolved value is stored in state, so change it by setting an explicit value.",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.StringInSlice([]string{"escalate_to_policy", "resolve_incident", "remove_incident", "do_not_escalate"}, false),
 	},
 	"policy_id": {
 		Description: "A policy to executed if the branching rule matches the time of an incident. Used when step type is time_branching or metadata_branching.",
@@ -272,6 +279,7 @@ type policyStep struct {
 	MetadataKey           *string             `mapstructure:"metadata_key,omitempty" json:"metadata_key,omitempty"`
 	MetadataValues        *[]metadataValue    `mapstructure:"metadata_value" json:"metadata_values,omitempty"`
 	LegacyMetadataValues  *[]string           `mapstructure:"metadata_values" json:"-"`
+	ActionType            *string             `mapstructure:"action_type,omitempty" json:"action_type,omitempty"`
 	PolicyId              *int                `mapstructure:"policy_id,omitempty" json:"policy_id,omitempty"`
 	PolicyMetadataKey     *string             `mapstructure:"policy_metadata_key,omitempty" json:"policy_metadata_key,omitempty"`
 	Comment               *string             `mapstructure:"comment,omitempty" json:"instructions_comment,omitempty"`
@@ -434,6 +442,11 @@ func loadPolicySteps(d *schema.ResourceData, receiver **[]policyStep) error {
 			stepValuesObject["reminder_interval_hours"] = nil
 		}
 
+		// Clear the computed action_type for step types that don't use it
+		if stepType == "escalation" || stepType == "instructions" {
+			stepValuesObject["action_type"] = nil
+		}
+
 		// Remove default values ("" or 0) from step
 		for k, v := range stepValuesObject {
 			if v == "" || v == 0 {
@@ -531,6 +544,32 @@ func validatePolicy(ctx context.Context, d *schema.ResourceDiff, m interface{}) 
 			if len(stepMap["metadata_value"].([]interface{})) > 0 {
 				return fmt.Errorf("steps.%d: metadata_value must be empty for non-metadata_branching steps", i)
 			}
+		}
+
+		// Validate action_type - it drives resolve_remove steps and the outcome of branching steps
+		actionType, _ := stepMap["action_type"].(string)
+		policyID, _ := stepMap["policy_id"].(int)
+		policyMetadataKey, _ := stepMap["policy_metadata_key"].(string)
+		if stepType == "resolve_remove" {
+			if actionType != "resolve_incident" && actionType != "remove_incident" {
+				return fmt.Errorf("steps.%d: action_type must be either resolve_incident or remove_incident for resolve_remove step", i)
+			}
+			if policyID != 0 || policyMetadataKey != "" {
+				return fmt.Errorf("steps.%d: policy_id and policy_metadata_key cannot be used with resolve_remove step", i)
+			}
+		} else if stepType == "time_branching" || stepType == "metadata_branching" {
+			// An unknown policy_id (a reference to a not-yet-created policy) reads as 0 during plan - only
+			// require a policy when both policy attributes are known to be empty.
+			policyKnown := d.NewValueKnown(fmt.Sprintf("steps.%d.policy_id", i)) && d.NewValueKnown(fmt.Sprintf("steps.%d.policy_metadata_key", i))
+			if actionType == "escalate_to_policy" && policyID == 0 && policyMetadataKey == "" && policyKnown {
+				return fmt.Errorf("steps.%d: policy_id or policy_metadata_key must be set when action_type is escalate_to_policy", i)
+			}
+			if actionType != "" && actionType != "escalate_to_policy" && (policyID != 0 || policyMetadataKey != "") {
+				return fmt.Errorf("steps.%d: policy_id and policy_metadata_key cannot be used when action_type is %s, set action_type = \"escalate_to_policy\" to escalate to a policy", i, actionType)
+			}
+		} else if actionType != "" && !d.HasChange(fmt.Sprintf("steps.%d.type", i)) {
+			// Validate the computed field only if the type is not changing
+			return fmt.Errorf("steps.%d: action_type can only be used with resolve_remove, time_branching, and metadata_branching steps", i)
 		}
 
 		// Validate instructions specific attributes

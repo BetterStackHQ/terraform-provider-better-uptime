@@ -183,6 +183,38 @@ resource "betteruptime_policy" "metadata_routing" {
   }
 }
 
+# Auto-triage policy: remove false positives right away, page whoever is on call,
+# then auto-resolve the incident if it is still open an hour later
+resource "betteruptime_policy" "auto_resolve" {
+  name            = "Terraform Auto Resolve Policy ${random_pet.unique.id}"
+  policy_group_id = betteruptime_policy_group.this.id
+
+  steps {
+    type         = "metadata_branching"
+    wait_before  = 0
+    metadata_key = "Description"
+    metadata_value {
+      value = "False positive"
+    }
+
+    # Remove matching incidents instead of escalating to a policy
+    action_type = "remove_incident"
+  }
+  steps {
+    type        = "escalation"
+    wait_before = 0
+    urgency_id  = data.betteruptime_severity.low.id
+    step_members { type = "current_on_call" }
+  }
+  steps {
+    type        = "resolve_remove"
+    wait_before = 3600
+
+    # Use "remove_incident" to remove the incident without a trace instead
+    action_type = "resolve_incident"
+  }
+}
+
 # Fallback policy: takes over once "this" exhausts its repeats unacknowledged,
 # widening the blast radius to the whole team
 resource "betteruptime_policy" "fallback" {
@@ -234,10 +266,11 @@ resource "betteruptime_policy" "silent" {
 
 Required:
 
-- `type` (String) The type of the step. Can be either escalation, time_branching, metadata_branching, or instructions.
+- `type` (String) The type of the step. Can be either escalation, time_branching, metadata_branching, instructions, or resolve_remove.
 
 Optional:
 
+- `action_type` (String) The action to take. Required when step type is resolve_remove - use resolve_incident or remove_incident. Optional when step type is time_branching or metadata_branching - use escalate_to_policy, resolve_incident, remove_incident, or do_not_escalate. When omitted on branching steps, the action defaults to escalate_to_policy if policy_id or policy_metadata_key is set, and to do_not_escalate otherwise; the resolved value is stored in state, so change it by setting an explicit value.
 - `comment` (String) Post instructions as a comment into the incident timeline. You can use Markdown, reference metadata as `{server_region}`, and interactive checkboxes like `- [ ] Step 1`. Used when step type is instructions.
 - `days` (List of String) An array of days during which the branching rule will be executed. Valid values are ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]. Used when step type is branching.
 - `metadata_key` (String) A metadata field key to check. Used when step type is metadata_branching.
