@@ -46,11 +46,6 @@ resource "betteruptime_status_page" "this" {
   # Auto-generate downtime reports and keep the page out of search engines
   automatic_reports        = true
   hide_from_search_engines = true
-
-  # Keep the RSS feed to the status updates shown on the page. Set to true to also
-  # publish incidents nobody wrote an update for - pair it with automatic_reports = false,
-  # or the feed carries both the generated report and the raw incident for one outage
-  include_all_incidents_in_rss_feed = false
 }
 
 # Styled status page - branding, announcement and custom navigation
@@ -139,7 +134,6 @@ resource "betteruptime_status_page" "secure" {
 - `google_analytics_id` (String) Specify your own Google Analytics ID if you want to receive hits on your status page.
 - `hide_from_search_engines` (Boolean) Hide your status page from search engines.
 - `history` (Number) Number of days to display on the status page. Between 7 and 365 days.
-- `include_all_incidents_in_rss_feed` (Boolean) Publish incidents to the status page RSS feed, including ones you never report on the status page. Each resource's `mark_as_down_for` and `mark_as_degraded_for` rules and the status page's `min_incident_length` still apply.
 - `ip_allowlist` (List of String) List of IP addresses or CIDR ranges that are allowed to access the status page. Accepts IPv4, IPv6, CIDR ranges, and comments starting with `#`. To remove all IP restrictions, set to an empty list `[]`. This is a [billable feature](https://betterstack.com/pricing#status-pages).
 - `layout` (String) Choose usual vertical layout or space-saving horizontal layout. Only applicable when design: v2. Possible values: 'vertical', 'horizontal'.
 - `logo_url` (String) A direct link to your company's logo. The image should be under 20MB in size.
