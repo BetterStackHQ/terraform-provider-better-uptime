@@ -299,7 +299,7 @@ Optional:
 - `name` (String) Name of the referenced item when type is different than `String`.
 - `type` (String) Value types can be grouped into 2 main categories:
   - **Scalar**: `String`
-  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
+  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `Source`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
   
   The value of a **Scalar** type is defined using the value field.
   

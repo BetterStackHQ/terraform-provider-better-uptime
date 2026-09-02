@@ -69,3 +69,15 @@ resource "betteruptime_metadata" "escalation_calendar" {
     item_id = betteruptime_on_call_calendar.this.id
   }
 }
+
+# A Source-typed metadata value referencing a Better Stack Telemetry source,
+# either by its id (as returned by the Telemetry sources API) or by name
+resource "betteruptime_metadata" "source" {
+  owner_type = "IncomingWebhook"
+  owner_id   = betteruptime_incoming_webhook.this.id
+  key        = "Source"
+  metadata_value {
+    type = "Source"
+    name = "My Existing Source"
+  }
+}
