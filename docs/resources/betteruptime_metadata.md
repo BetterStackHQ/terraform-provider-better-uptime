@@ -93,7 +93,7 @@ resource "betteruptime_metadata" "source" {
   key        = "Source"
   metadata_value {
     type = "Source"
-    name = "Production logs"
+    name = "My Existing Source"
   }
 }
 ```
