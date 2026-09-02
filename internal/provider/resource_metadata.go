@@ -85,10 +85,10 @@ var metadataSchema = map[string]*schema.Schema{
 }
 
 var metadataTypes = []string{
-	"String", "User", "Team", "Policy", "Schedule",
+	"String", "User", "Team", "Policy", "Schedule", "Source",
 	"SlackIntegration", "LinearIntegration", "JiraIntegration",
 	"MicrosoftTeamsWebhook", "ZapierWebhook", "NativeWebhook",
-	"PagerDutyWebhook", "Source",
+	"PagerDutyWebhook",
 }
 
 const scalarMetadataTypesCount = 1
