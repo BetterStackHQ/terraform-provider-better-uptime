@@ -88,7 +88,7 @@ var metadataTypes = []string{
 	"String", "User", "Team", "Policy", "Schedule",
 	"SlackIntegration", "LinearIntegration", "JiraIntegration",
 	"MicrosoftTeamsWebhook", "ZapierWebhook", "NativeWebhook",
-	"PagerDutyWebhook",
+	"PagerDutyWebhook", "Source",
 }
 
 const scalarMetadataTypesCount = 1
