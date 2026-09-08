@@ -391,7 +391,7 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml"\], got metadata`),
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml" "sns_envelope"\], got metadata`),
 			},
 			{
 				Config: `
@@ -459,7 +459,7 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml"\], got from_json`),
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml" "sns_envelope"\], got from_json`),
 			},
 			{
 				Config: `

@@ -23,14 +23,14 @@ var integrationFieldSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"field_target": {
-		Description:  "The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
+		Description:  "The target of the field. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.",
 		Type:         schema.TypeString,
 		Optional:     true,
 		Computed:     true,
-		ValidateFunc: validation.StringInSlice([]string{"from_email", "subject", "body", "query_string", "header", "body", "json", "xml"}, false),
+		ValidateFunc: validation.StringInSlice([]string{"from_email", "subject", "body", "query_string", "header", "body", "json", "xml", "sns_envelope"}, false),
 	},
 	"target_field": {
-		Description: "The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters",
+		Description: "The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when field_target is sns_envelope",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
@@ -64,14 +64,14 @@ var integrationFieldSchema = map[string]*schema.Schema{
 
 var integrationRuleSchema = map[string]*schema.Schema{
 	"rule_target": {
-		Description:  "The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
+		Description:  "The target of the rule. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.",
 		Type:         schema.TypeString,
 		Optional:     true,
 		Computed:     true,
-		ValidateFunc: validation.StringInSlice([]string{"from_email", "subject", "body", "query_string", "header", "body", "json", "xml"}, false),
+		ValidateFunc: validation.StringInSlice([]string{"from_email", "subject", "body", "query_string", "header", "body", "json", "xml", "sns_envelope"}, false),
 	},
 	"target_field": {
-		Description: "The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters",
+		Description: "The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when rule_target is sns_envelope",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
