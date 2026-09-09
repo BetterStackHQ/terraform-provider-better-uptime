@@ -69,9 +69,9 @@ output "amazon_sns_integration_url" {
 
 ### Required
 
-- `acknowledged_rule_type` (String) Should an incident be acknowledged for all webhooks, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any
-- `resolved_rule_type` (String) Should an incident be resolved for all webhooks, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any
-- `started_rule_type` (String) Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
+- `acknowledged_rule_type` (String) Should an incident be acknowledged for all notifications, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any
+- `resolved_rule_type` (String) Should an incident be resolved for all notifications, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any
+- `started_rule_type` (String) Should an incident be started for all notifications, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
 
 ### Optional
 
@@ -102,9 +102,9 @@ output "amazon_sns_integration_url" {
 
 - `created_at` (String) The time when this Amazon SNS integration was created.
 - `id` (String) The ID of this Amazon SNS integration.
-- `sample_body` (String) Sample request body the webhook. Used only to make the configuration easier.
-- `sample_headers` (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
-- `sample_query_string` (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
+- `sample_body` (String) Sample Amazon SNS message. Used only to make the configuration easier.
+- `sample_headers` (String) Sample request HTTP headers of the notification (separated by a newline). Used only to make the configuration easier.
+- `sample_query_string` (String) Sample query string of the notification (without the leading ?). Used only to make the configuration easier.
 - `subscription_state` (String) Whether the Amazon SNS subscription has been confirmed: active once AWS has confirmed it, awaiting until then. Set by Better Stack when AWS confirms it, so it is read-only.
 - `topic_arn` (String) The ARN of the Amazon SNS topic this integration is subscribed to. Set by Better Stack when AWS confirms the subscription, so it is read-only.
 - `updated_at` (String) The time when this Amazon SNS integration was updated.

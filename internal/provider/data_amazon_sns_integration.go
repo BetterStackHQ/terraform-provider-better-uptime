@@ -33,6 +33,10 @@ func newAmazonSnsIntegrationDataSource() *schema.Resource {
 		s[k] = &cp
 	}
 	delete(s, "team_name")
+	// The resource's copy explains how to change this. Nothing here changes anything.
+	if title := s["title_field"]; title != nil {
+		title.Description = "The field describing how the incident title is extracted, if one is configured."
+	}
 	return &schema.Resource{
 		ReadContext: amazonSnsIntegrationLookup,
 		Description: "Amazon SNS integration lookup.",
@@ -94,6 +98,13 @@ func amazonSnsIntegrationLookup(ctx context.Context, d *schema.ResourceData, met
 		}
 		page++
 		if res.Pagination.Next == "" {
+			// Erroring rather than returning an empty data source, the way the team member lookup
+			// does: a silent no-match hands null attributes to whatever interpolated them, and the
+			// failure surfaces somewhere else entirely.
+			if d.Id() == "" {
+				return diag.Errorf("Amazon SNS integration with name %q not found", name)
+			}
+
 			return nil
 		}
 	}

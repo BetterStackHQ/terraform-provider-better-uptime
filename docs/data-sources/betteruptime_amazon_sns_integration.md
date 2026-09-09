@@ -34,7 +34,7 @@ output "existing_amazon_sns_subscription_state" {
 ### Read-Only
 
 - `acknowledged_alert_id_field` (List of Object) When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--acknowledged_alert_id_field))
-- `acknowledged_rule_type` (String) Should an incident be acknowledged for all webhooks, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any
+- `acknowledged_rule_type` (String) Should an incident be acknowledged for all notifications, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any
 - `acknowledged_rules` (List of Object) An array of rules to match to acknowledge an incident. (see [below for nested schema](#nestedatt--acknowledged_rules))
 - `call` (Boolean) Whether to call when a new incident is created.
 - `cause_field` (List of Object) A field describing how to extract an incident cause, used as a short description shared with the team member on-call. (see [below for nested schema](#nestedatt--cause_field))
@@ -50,18 +50,18 @@ output "existing_amazon_sns_subscription_state" {
 - `push` (Boolean) Whether to send a push notification when a new incident is created.
 - `recovery_period` (Number) How long the integration must be up to automatically mark an incident as resolved after being down.
 - `resolved_alert_id_field` (List of Object) When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--resolved_alert_id_field))
-- `resolved_rule_type` (String) Should an incident be resolved for all webhooks, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any
+- `resolved_rule_type` (String) Should an incident be resolved for all notifications, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any
 - `resolved_rules` (List of Object) An array of rules to match to resolved an incident. (see [below for nested schema](#nestedatt--resolved_rules))
-- `sample_body` (String) Sample request body the webhook. Used only to make the configuration easier.
-- `sample_headers` (String) Sample request HTTP headers the webhook (separated by a newline). Used only to make the configuration easier.
-- `sample_query_string` (String) Sample query string of the webhook (without the leading ?). Used only to make the configuration easier.
+- `sample_body` (String) Sample Amazon SNS message. Used only to make the configuration easier.
+- `sample_headers` (String) Sample request HTTP headers of the notification (separated by a newline). Used only to make the configuration easier.
+- `sample_query_string` (String) Sample query string of the notification (without the leading ?). Used only to make the configuration easier.
 - `sms` (Boolean) Whether to send an SMS when a new incident is created.
 - `started_alert_id_field` (List of Object) When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents. (see [below for nested schema](#nestedatt--started_alert_id_field))
-- `started_rule_type` (String) Should an incident be started for all webhooks, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
+- `started_rule_type` (String) Should an incident be started for all notifications, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any
 - `started_rules` (List of Object) An array of rules to match to start a new incident. (see [below for nested schema](#nestedatt--started_rules))
 - `subscription_state` (String) Whether the Amazon SNS subscription has been confirmed: active once AWS has confirmed it, awaiting until then. Set by Better Stack when AWS confirms it, so it is read-only.
 - `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
-- `title_field` (List of Object) An optional field describing how to extract a customized incident title. Defaults to the Amazon SNS envelope's Subject. It can be changed but not removed through Terraform. (see [below for nested schema](#nestedatt--title_field))
+- `title_field` (List of Object) The field describing how the incident title is extracted, if one is configured. (see [below for nested schema](#nestedatt--title_field))
 - `topic_arn` (String) The ARN of the Amazon SNS topic this integration is subscribed to. Set by Better Stack when AWS confirms the subscription, so it is read-only.
 - `updated_at` (String) The time when this Amazon SNS integration was updated.
 - `url` (String) The URL to subscribe the Amazon SNS topic to, using the HTTPS protocol with raw message delivery disabled.

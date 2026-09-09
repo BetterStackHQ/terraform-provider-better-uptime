@@ -39,10 +39,10 @@ var statusPageResourceSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"resource_type": {
-		Description:  "The type of the resource you are adding. Available values: ManuallyTrackedItem, Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, ResourceGroup, LogsChart, CatalogReference.",
+		Description:  "The type of the resource you are adding. Available values: ManuallyTrackedItem, Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, AmazonSnsIntegration, ResourceGroup, LogsChart, CatalogReference.",
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"ManuallyTrackedItem", "Monitor", "MonitorGroup", "Heartbeat", "HeartbeatGroup", "WebhookIntegration", "EmailIntegration", "IncomingWebhook", "ResourceGroup", "LogsChart", "CatalogReference"}, false),
+		ValidateFunc: validation.StringInSlice([]string{"ManuallyTrackedItem", "Monitor", "MonitorGroup", "Heartbeat", "HeartbeatGroup", "WebhookIntegration", "EmailIntegration", "IncomingWebhook", "AmazonSnsIntegration", "ResourceGroup", "LogsChart", "CatalogReference"}, false),
 	},
 	"public_name": {
 		Description: "The resource name displayed publicly on your status page.",

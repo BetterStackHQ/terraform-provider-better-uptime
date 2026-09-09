@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -262,7 +263,7 @@ type incomingWebhook struct {
 	AcknowledgedRules        *[]integrationRule  `json:"acknowledged_rules,omitempty"`
 	ResolvedRules            *[]integrationRule  `json:"resolved_rules,omitempty"`
 	CauseField               *integrationField   `json:"cause_field,omitempty"`
-	TitleField               *integrationField   `json:"title_field"`
+	TitleField               *integrationField   `json:"title_field,omitempty"`
 	StartedAlertIdField      *integrationField   `json:"started_alert_id_field,omitempty"`
 	AcknowledgedAlertIdField *integrationField   `json:"acknowledged_alert_id_field,omitempty"`
 	ResolvedAlertIdField     *integrationField   `json:"resolved_alert_id_field,omitempty"`
@@ -393,7 +394,54 @@ func incomingWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/incoming-webhooks/%s", url.PathEscape(d.Id())), &in, &out)
+	body, err := patchBodyRemovingTitleField(d, &in)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/incoming-webhooks/%s", url.PathEscape(d.Id())), body, &out)
+}
+
+// The API reads a present-and-null title_field as "remove the title extraction", so the key must
+// only appear when that is what the practitioner asked for. It used to be sent on every PATCH,
+// because the struct field had no omitempty and update only loads what changed: renaming a webhook
+// deleted its title extraction, and the next plan put it back.
+//
+// Removal is read from the raw config and state rather than HasChange, which reports a removed
+// block the same way it reports one that was never there.
+func patchBodyRemovingTitleField(d *schema.ResourceData, in *incomingWebhook) (interface{}, error) {
+	if !titleFieldRemoved(d) {
+		return in, nil
+	}
+
+	encoded, err := json.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	var body map[string]json.RawMessage
+	if err := json.Unmarshal(encoded, &body); err != nil {
+		return nil, err
+	}
+	body["title_field"] = json.RawMessage("null")
+
+	return body, nil
+}
+
+func titleFieldRemoved(d *schema.ResourceData) bool {
+	state := d.GetRawState()
+	config := d.GetRawConfig()
+	if state.IsNull() || !state.IsKnown() || config.IsNull() || !config.IsKnown() {
+		return false
+	}
+
+	previous := state.GetAttr("title_field")
+	if previous.IsNull() || !previous.IsKnown() || previous.LengthInt() == 0 {
+		return false
+	}
+
+	current := config.GetAttr("title_field")
+
+	return current.IsNull() || (current.IsKnown() && current.LengthInt() == 0)
 }
 
 func incomingWebhookDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

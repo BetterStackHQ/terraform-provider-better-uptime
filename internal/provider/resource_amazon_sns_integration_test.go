@@ -183,7 +183,7 @@ func TestResourceAmazonSnsIntegrationUpdateSendsOnlyChangedAttributes(t *testing
 				ResourceName:      "betteruptime_amazon_sns_integration.this",
 				ImportState:       true,
 				ImportStateId:     "1",
-				ImportStateVerify: false, // Cannot verify due to TypeSet fields not properly transformed
+				ImportStateVerify: true,
 			},
 		},
 	})

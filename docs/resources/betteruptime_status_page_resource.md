@@ -106,7 +106,7 @@ resource "betteruptime_status_page_resource" "down_on_any_incident" {
 ### Required
 
 - `public_name` (String) The resource name displayed publicly on your status page.
-- `resource_type` (String) The type of the resource you are adding. Available values: ManuallyTrackedItem, Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, ResourceGroup, LogsChart, CatalogReference.
+- `resource_type` (String) The type of the resource you are adding. Available values: ManuallyTrackedItem, Monitor, MonitorGroup, Heartbeat, HeartbeatGroup, WebhookIntegration, EmailIntegration, IncomingWebhook, AmazonSnsIntegration, ResourceGroup, LogsChart, CatalogReference.
 - `status_page_id` (String) The ID of the Status Page.
 
 ### Optional

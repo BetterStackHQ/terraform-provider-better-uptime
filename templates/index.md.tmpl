@@ -99,4 +99,8 @@ terraform state rm betteruptime_incoming_webhook.sns
 terraform import betteruptime_amazon_sns_integration.sns <integration-id>
 ```
 
+A `data "betteruptime_incoming_webhook"` that looks one up by name needs the same treatment:
+switch it to `data "betteruptime_amazon_sns_integration"`, which looks up the same name in the
+table the integration now lives in.
+
 {{ .SchemaMarkdown | trimspace }}

@@ -105,7 +105,7 @@ resource "betteruptime_metadata" "source" {
 
 - `key` (String) The key of this Metadata.
 - `owner_id` (String) The ID of the owner of this Metadata.
-- `owner_type` (String) The type of the owner of this Metadata. Valid values: `Monitor`, `Heartbeat`, `Incident`, `WebhookIntegration`, `EmailIntegration`, `IncomingWebhook`, `CallRouting`
+- `owner_type` (String) The type of the owner of this Metadata. Valid values: `Monitor`, `Heartbeat`, `Incident`, `WebhookIntegration`, `EmailIntegration`, `IncomingWebhook`, `AmazonSnsIntegration`, `CallRouting`
 
 ### Optional
 
