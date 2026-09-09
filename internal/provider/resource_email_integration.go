@@ -11,6 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// Email integrations read the e-mail itself, so its sender, subject and body are the targets.
+var emailIntegrationTargets = integrationTargets{
+	values:            []string{"from_email", "subject", "body"},
+	targetDescription: "Can be any of the following: from_email, subject, or body.",
+}
+
+var emailIntegrationFieldSchema = integrationFieldSchemaFor(emailIntegrationTargets)
+var emailIntegrationRuleSchema = integrationRuleSchemaFor(emailIntegrationTargets)
+
 var emailIntegrationSchema = map[string]*schema.Schema{
 	"team_name": teamNameSchema(),
 	"id": {
@@ -103,28 +112,28 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"started_rules": {
 		Description: "An array of rules to match to start a new incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationRuleSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"acknowledged_rules": {
 		Description: "An array of rules to match to acknowledge an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationRuleSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"resolved_rules": {
 		Description: "An array of rules to match to resolved an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationRuleSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"cause_field": {
 		Description: "A field describing how to extract an incident cause, used as a short description shared with the team member on-call.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -132,7 +141,7 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"title_field": {
 		Description: "An optional field describing how to extract a customized incident title.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -140,7 +149,7 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"started_alert_id_field": {
 		Description: "When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -148,7 +157,7 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"acknowledged_alert_id_field": {
 		Description: "When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -156,7 +165,7 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"resolved_alert_id_field": {
 		Description: "When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -164,21 +173,21 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"other_started_fields": {
 		Description: "An array of additional fields, which will be extracted when starting an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"other_acknowledged_fields": {
 		Description: "An array of additional fields, which will be extracted when acknowledging an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"other_resolved_fields": {
 		Description: "An array of additional fields, which will be extracted when resolving an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},

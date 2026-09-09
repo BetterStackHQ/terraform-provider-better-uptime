@@ -391,7 +391,41 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml" "sns_envelope"\], got metadata`),
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["query_string" "header" "body" "json" "xml"\], got metadata`),
+			},
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+				resource "betteruptime_incoming_webhook" "this" {
+				  name = "Terraform Test"
+				  call = false
+				  sms = false
+				  email = true
+				  push = true
+				  critical_alert = true
+				  team_wait = 180
+				  recovery_period = 0
+				  paused = false
+				  started_rule_type = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type = "all"
+				  started_rules {
+					rule_target = "sns_envelope"
+					target_field = "incident.status"
+					match_type = "contains"
+					content = "alert"
+				  }
+				  cause_field {
+					field_target = "json"
+					target_field = "incident.status"
+					match_type = "match_everything"
+					content = "title"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["query_string" "header" "body" "json" "xml"\], got sns_envelope`),
 			},
 			{
 				Config: `
@@ -459,7 +493,41 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml" "sns_envelope"\], got from_json`),
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["query_string" "header" "body" "json" "xml"\], got from_json`),
+			},
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+				resource "betteruptime_incoming_webhook" "this" {
+				  name = "Terraform Test"
+				  call = false
+				  sms = false
+				  email = true
+				  push = true
+				  critical_alert = true
+				  team_wait = 180
+				  recovery_period = 0
+				  paused = false
+				  started_rule_type = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type = "all"
+				  started_rules {
+					rule_target = "json"
+					target_field = "incident.status"
+					match_type = "contains"
+					content = "alert"
+				  }
+				  cause_field {
+					field_target = "sns_envelope"
+					target_field = "incident.status"
+					match_type = "match_everything"
+					content = "title"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["query_string" "header" "body" "json" "xml"\], got sns_envelope`),
 			},
 			{
 				Config: `

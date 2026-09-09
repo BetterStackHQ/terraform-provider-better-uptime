@@ -353,3 +353,50 @@ func TestResourceEmailIntegration(t *testing.T) {
 		},
 	})
 }
+
+// Email integrations read e-mails, not HTTP requests, so the incoming webhook targets are rejected
+// while planning rather than as a 422 at apply.
+func TestResourceEmailIntegrationValidation(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/email-integrations", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: testProviderFactories(server.URL),
+		Steps: []resource.TestStep{
+			{
+				Config: testProviderBlock + `
+				resource "betteruptime_email_integration" "this" {
+				  name                   = "Terraform Test"
+				  started_rule_type      = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type     = "unused"
+				  started_rules {
+					rule_target  = "json"
+					target_field = "incident.status"
+					match_type   = "contains"
+					content      = "alert"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["from_email" "subject" "body"\], got json`),
+			},
+			{
+				Config: testProviderBlock + `
+				resource "betteruptime_email_integration" "this" {
+				  name                   = "Terraform Test"
+				  started_rule_type      = "unused"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type     = "unused"
+				  cause_field {
+					field_target = "sns_envelope"
+					target_field = "Subject"
+					match_type   = "match_everything"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["from_email" "subject" "body"\], got sns_envelope`),
+			},
+		},
+	})
+}

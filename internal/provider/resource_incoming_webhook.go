@@ -11,6 +11,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// Incoming webhooks read the HTTP request, so its parts are the targets.
+var incomingWebhookTargets = integrationTargets{
+	values:                 []string{"query_string", "header", "body", "json", "xml"},
+	targetDescription:      "Can be any of the following: query_string, header, body, json, or xml.",
+	targetFieldDescription: "Should be a JSON key when the target is json, a CSS selector when it is xml, the header name when it is header, or the parameter name when it is query_string.",
+}
+
+var incomingWebhookFieldSchema = integrationFieldSchemaFor(incomingWebhookTargets)
+var incomingWebhookRuleSchema = integrationRuleSchemaFor(incomingWebhookTargets)
+
 var incomingWebhookSchema = map[string]*schema.Schema{
 	"team_name": teamNameSchema(),
 	"id": {
@@ -121,28 +131,28 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"started_rules": {
 		Description: "An array of rules to match to start a new incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationRuleSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"acknowledged_rules": {
 		Description: "An array of rules to match to acknowledge an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationRuleSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"resolved_rules": {
 		Description: "An array of rules to match to resolved an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationRuleSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"cause_field": {
 		Description: "A field describing how to extract an incident cause, used as a short description shared with the team member on-call.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -150,7 +160,7 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"title_field": {
 		Description: "An optional field describing how to extract a customized incident title.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    false,
 		MaxItems:    1,
@@ -158,7 +168,7 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"started_alert_id_field": {
 		Description: "When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -166,7 +176,7 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"acknowledged_alert_id_field": {
 		Description: "When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -174,7 +184,7 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"resolved_alert_id_field": {
 		Description: "When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -182,21 +192,21 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"other_started_fields": {
 		Description: "An array of additional fields, which will be extracted when starting an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"other_acknowledged_fields": {
 		Description: "An array of additional fields, which will be extracted when acknowledging an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"other_resolved_fields": {
 		Description: "An array of additional fields, which will be extracted when resolving an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},

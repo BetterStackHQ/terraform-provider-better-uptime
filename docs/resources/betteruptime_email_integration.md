@@ -227,11 +227,11 @@ Optional:
 - `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
 - `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
 - `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
-- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
 - `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when field_target is sns_envelope
+- `target_field` (String) The target field within the content of the field_target.
 
 
 <a id="nestedblock--acknowledged_rules"></a>
@@ -241,8 +241,8 @@ Optional:
 
 - `content` (String) The content we should match to satisfy the rule. Should be a valid regular expression when match_type is matches_regex.
 - `match_type` (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
-- `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
-- `target_field` (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when rule_target is sns_envelope
+- `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body.
+- `target_field` (String) The target field within the content of the rule_target.
 
 
 <a id="nestedblock--cause_field"></a>
@@ -253,11 +253,11 @@ Optional:
 - `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
 - `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
 - `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
-- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
 - `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when field_target is sns_envelope
+- `target_field` (String) The target field within the content of the field_target.
 
 
 <a id="nestedblock--other_acknowledged_fields"></a>
@@ -268,11 +268,11 @@ Optional:
 - `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
 - `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
 - `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
-- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
 - `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when field_target is sns_envelope
+- `target_field` (String) The target field within the content of the field_target.
 
 
 <a id="nestedblock--other_resolved_fields"></a>
@@ -283,11 +283,11 @@ Optional:
 - `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
 - `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
 - `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
-- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
 - `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when field_target is sns_envelope
+- `target_field` (String) The target field within the content of the field_target.
 
 
 <a id="nestedblock--other_started_fields"></a>
@@ -298,11 +298,11 @@ Optional:
 - `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
 - `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
 - `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
-- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
 - `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when field_target is sns_envelope
+- `target_field` (String) The target field within the content of the field_target.
 
 
 <a id="nestedblock--resolved_alert_id_field"></a>
@@ -313,11 +313,11 @@ Optional:
 - `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
 - `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
 - `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
-- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
 - `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when field_target is sns_envelope
+- `target_field` (String) The target field within the content of the field_target.
 
 
 <a id="nestedblock--resolved_rules"></a>
@@ -327,8 +327,8 @@ Optional:
 
 - `content` (String) The content we should match to satisfy the rule. Should be a valid regular expression when match_type is matches_regex.
 - `match_type` (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
-- `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
-- `target_field` (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when rule_target is sns_envelope
+- `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body.
+- `target_field` (String) The target field within the content of the rule_target.
 
 
 <a id="nestedblock--started_alert_id_field"></a>
@@ -339,11 +339,11 @@ Optional:
 - `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
 - `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
 - `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
-- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
 - `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when field_target is sns_envelope
+- `target_field` (String) The target field within the content of the field_target.
 
 
 <a id="nestedblock--started_rules"></a>
@@ -353,8 +353,8 @@ Optional:
 
 - `content` (String) The content we should match to satisfy the rule. Should be a valid regular expression when match_type is matches_regex.
 - `match_type` (String) The type of the rule. Can be any of the following: contains, contains_not, matches_regex, matches_regex_not, equals, or equals_not.
-- `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
-- `target_field` (String) The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when rule_target is sns_envelope
+- `rule_target` (String) The target of the rule. Can be any of the following: from_email, subject, or body.
+- `target_field` (String) The target field within the content of the rule_target.
 
 
 <a id="nestedblock--title_field"></a>
@@ -365,10 +365,10 @@ Optional:
 - `content` (String) The content to match. Required when match_type is match_before, match_after, or match_regex. Should be a valid regular expression when match_type is match_regex.
 - `content_after` (String) When should we start extracting content for the field. Required when match_type is match_between.
 - `content_before` (String) When should we stop extracting content for the field. Required when match_type is match_between.
-- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body for email integrations, query_string, header, body, json and xml for incoming webhooks and Amazon SNS integrations, or sns_envelope for Amazon SNS integrations only.
+- `field_target` (String) The target of the field. Can be any of the following: from_email, subject, or body.
 - `match_type` (String) The match type of the field. Can be any of the following: match_before, match_after, match_between, match_regex, or match_everything.
 - `name` (String) The name of the field.
 - `special_type` (String) A special type of the field. Can be alert_id or cause or otherwise null for a custom field.
-- `target_field` (String) The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers, a parameter name for query parameters, or one of TopicArn, MessageId and Subject when field_target is sns_envelope
+- `target_field` (String) The target field within the content of the field_target.
 
 
