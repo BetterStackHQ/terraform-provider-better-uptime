@@ -244,9 +244,14 @@ func newAmazonSnsIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description:   "https://betterstack.com/docs/uptime/api/list-all-amazon-sns-integrations/",
-		CustomizeDiff: customdiff.Sequence(validateTeamNameNotChanged, validateIntegrationRuleConditions),
-		Schema:        amazonSnsIntegrationSchema,
+		Description: "https://betterstack.com/docs/uptime/api/list-all-amazon-sns-integrations/",
+		CustomizeDiff: customdiff.Sequence(
+			validateTeamNameNotChanged,
+			validateIntegrationRuleConditions,
+			validateSnsEnvelopeTargetField,
+			validateAmazonSnsTitleFieldNotRemoved,
+		),
+		Schema: amazonSnsIntegrationSchema,
 	}
 }
 

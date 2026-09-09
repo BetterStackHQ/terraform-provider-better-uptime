@@ -2,6 +2,7 @@ package provider
 
 import (
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -110,6 +111,91 @@ func TestResourceAmazonSnsIntegrationKeepsApiTitleDefault(t *testing.T) {
 				  resolved_rule_type     = "unused"
 				}`,
 				Check: server.TestCheckCalledRequestWithout("POST", "/api/v2/amazon-sns", "title_field"),
+			},
+		},
+	})
+}
+
+// An sns_envelope target without a valid target_field is a 422 at apply time, and the whole point
+// of the resource's other CustomizeDiff checks is to catch that class of error while planning.
+func TestResourceAmazonSnsIntegrationRejectsBadSnsEnvelopeTargetField(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/amazon-sns", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: amazonSnsProviderFactories(server),
+		Steps: []resource.TestStep{
+			{
+				Config: amazonSnsProviderBlock + `
+				resource "betteruptime_amazon_sns_integration" "this" {
+				  name                   = "Terraform Test"
+				  started_rule_type      = "unused"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type     = "unused"
+				  title_field {
+					field_target = "sns_envelope"
+					match_type   = "match_everything"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`title_field\.0: field_target = "sns_envelope" requires target_field to be one of TopicArn, MessageId, Subject`),
+			},
+			{
+				Config: amazonSnsProviderBlock + `
+				resource "betteruptime_amazon_sns_integration" "this" {
+				  name                   = "Terraform Test"
+				  started_rule_type      = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type     = "unused"
+				  started_rules {
+					rule_target  = "sns_envelope"
+					target_field = "Topic"
+					match_type   = "contains"
+					content      = "backend"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`started_rules\.0: target_field must be one of TopicArn, MessageId, Subject when rule_target = "sns_envelope", got "Topic"`),
+			},
+		},
+	})
+}
+
+// title_field is Computed, so deleting the block produces no diff at all. Terraform would say
+// "No changes" while the extraction stayed in place, which is the silent no-op team_name already
+// refuses to make.
+func TestResourceAmazonSnsIntegrationRefusesToRemoveTitleField(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/amazon-sns", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: amazonSnsProviderFactories(server),
+		Steps: []resource.TestStep{
+			{
+				Config: amazonSnsProviderBlock + `
+				resource "betteruptime_amazon_sns_integration" "this" {
+				  name                   = "Terraform Test"
+				  started_rule_type      = "unused"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type     = "unused"
+				  title_field {
+					field_target = "sns_envelope"
+					target_field = "Subject"
+					match_type   = "match_everything"
+				  }
+				}`,
+			},
+			{
+				Config: amazonSnsProviderBlock + `
+				resource "betteruptime_amazon_sns_integration" "this" {
+				  name                   = "Terraform Test"
+				  started_rule_type      = "unused"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type     = "unused"
+				}`,
+				ExpectError: regexp.MustCompile(`title_field cannot be removed through Terraform`),
 			},
 		},
 	})
