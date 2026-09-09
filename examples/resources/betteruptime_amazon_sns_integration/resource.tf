@@ -1,8 +1,6 @@
 # An Amazon SNS integration opens an incident for every notification the topic publishes.
-#
-# Subscribe the topic to the integration's url on the AWS side, with protocol HTTPS and raw
-# message delivery disabled. Better Stack answers the SubscriptionConfirmation handshake, then
-# fills in topic_arn and subscription_state, which is why both are read-only here.
+# Better Stack answers the SubscriptionConfirmation handshake once the topic is subscribed to
+# the integration's url, then fills in topic_arn and subscription_state.
 resource "betteruptime_amazon_sns_integration" "backend_alerts" {
   name = "Terraform Amazon SNS"
 
@@ -45,7 +43,7 @@ resource "betteruptime_amazon_sns_integration" "backend_alerts" {
   }
 }
 
-# Subscribe the SNS topic to this URL (HTTPS protocol, raw message delivery disabled)
+# Subscribe the SNS topic to this URL
 output "amazon_sns_integration_url" {
   value = betteruptime_amazon_sns_integration.backend_alerts.url
 }

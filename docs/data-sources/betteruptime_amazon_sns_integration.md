@@ -61,7 +61,7 @@ output "existing_amazon_sns_subscription_state" {
 - `started_rules` (List of Object) An array of rules to match to start a new incident. (see [below for nested schema](#nestedatt--started_rules))
 - `subscription_state` (String) Whether the Amazon SNS subscription has been confirmed: active once AWS has confirmed it, awaiting until then. Set by Better Stack when AWS confirms it, so it is read-only.
 - `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
-- `title_field` (List of Object) An optional field describing how to extract a customized incident title. Defaults to the Amazon SNS envelope's Subject. Omit the block to keep whatever is configured; it cannot be removed through Terraform. (see [below for nested schema](#nestedatt--title_field))
+- `title_field` (List of Object) An optional field describing how to extract a customized incident title. Defaults to the Amazon SNS envelope's Subject. It can be changed but not removed through Terraform. (see [below for nested schema](#nestedatt--title_field))
 - `topic_arn` (String) The ARN of the Amazon SNS topic this integration is subscribed to. Set by Better Stack when AWS confirms the subscription, so it is read-only.
 - `updated_at` (String) The time when this Amazon SNS integration was updated.
 - `url` (String) The URL to subscribe the Amazon SNS topic to, using the HTTPS protocol with raw message delivery disabled.

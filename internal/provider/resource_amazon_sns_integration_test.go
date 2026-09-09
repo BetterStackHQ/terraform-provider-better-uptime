@@ -6,22 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
-const amazonSnsProviderBlock = `
-provider "betteruptime" {
-  api_token = "foo"
-}
-`
-
-func amazonSnsProviderFactories(server *TestServer) map[string]func() (*schema.Provider, error) {
-	return map[string]func() (*schema.Provider, error){
-		"betteruptime": func() (*schema.Provider, error) {
-			return New(WithURL(server.URL)), nil
-		},
-	}
-}
 
 // Applies the example config we actually ship, rather than a copy of it. The E2E job is the only
 // other thing that exercises the examples, and it needs live credentials, so an example that does
@@ -37,10 +22,10 @@ func TestResourceAmazonSnsIntegrationShippedExample(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:        true,
-		ProviderFactories: amazonSnsProviderFactories(server),
+		ProviderFactories: testProviderFactories(server.URL),
 		Steps: []resource.TestStep{
 			{
-				Config: amazonSnsProviderBlock + string(example),
+				Config: testProviderBlock + string(example),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("betteruptime_amazon_sns_integration.backend_alerts", "id"),
 					resource.TestCheckResourceAttr("betteruptime_amazon_sns_integration.backend_alerts", "name", "Terraform Amazon SNS"),
@@ -60,10 +45,10 @@ func TestResourceAmazonSnsIntegrationSnsEnvelopeTarget(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:        true,
-		ProviderFactories: amazonSnsProviderFactories(server),
+		ProviderFactories: testProviderFactories(server.URL),
 		Steps: []resource.TestStep{
 			{
-				Config: amazonSnsProviderBlock + `
+				Config: testProviderBlock + `
 				resource "betteruptime_amazon_sns_integration" "this" {
 				  name                   = "Terraform Test"
 				  started_rule_type      = "any"
@@ -100,10 +85,10 @@ func TestResourceAmazonSnsIntegrationKeepsApiTitleDefault(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:        true,
-		ProviderFactories: amazonSnsProviderFactories(server),
+		ProviderFactories: testProviderFactories(server.URL),
 		Steps: []resource.TestStep{
 			{
-				Config: amazonSnsProviderBlock + `
+				Config: testProviderBlock + `
 				resource "betteruptime_amazon_sns_integration" "this" {
 				  name                   = "Terraform Test"
 				  started_rule_type      = "unused"
@@ -124,10 +109,10 @@ func TestResourceAmazonSnsIntegrationRejectsBadSnsEnvelopeTargetField(t *testing
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:        true,
-		ProviderFactories: amazonSnsProviderFactories(server),
+		ProviderFactories: testProviderFactories(server.URL),
 		Steps: []resource.TestStep{
 			{
-				Config: amazonSnsProviderBlock + `
+				Config: testProviderBlock + `
 				resource "betteruptime_amazon_sns_integration" "this" {
 				  name                   = "Terraform Test"
 				  started_rule_type      = "unused"
@@ -142,7 +127,7 @@ func TestResourceAmazonSnsIntegrationRejectsBadSnsEnvelopeTargetField(t *testing
 				ExpectError: regexp.MustCompile(`title_field\.0: field_target = "sns_envelope" requires target_field to be one of TopicArn, MessageId, Subject`),
 			},
 			{
-				Config: amazonSnsProviderBlock + `
+				Config: testProviderBlock + `
 				resource "betteruptime_amazon_sns_integration" "this" {
 				  name                   = "Terraform Test"
 				  started_rule_type      = "any"
@@ -171,7 +156,7 @@ func TestResourceAmazonSnsIntegrationUpdateSendsOnlyChangedAttributes(t *testing
 	defer server.Close()
 
 	config := func(name string) string {
-		return amazonSnsProviderBlock + `
+		return testProviderBlock + `
 		resource "betteruptime_amazon_sns_integration" "this" {
 		  name                   = "` + name + `"
 		  started_rule_type      = "unused"
@@ -182,7 +167,7 @@ func TestResourceAmazonSnsIntegrationUpdateSendsOnlyChangedAttributes(t *testing
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:        true,
-		ProviderFactories: amazonSnsProviderFactories(server),
+		ProviderFactories: testProviderFactories(server.URL),
 		Steps: []resource.TestStep{
 			{
 				Config: config("Terraform Test"),
@@ -192,9 +177,6 @@ func TestResourceAmazonSnsIntegrationUpdateSendsOnlyChangedAttributes(t *testing
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("betteruptime_amazon_sns_integration.this", "name", "Terraform Test - Updated"),
 					server.TestCheckCalledRequest("PATCH", "/api/v2/amazon-sns/1", `{"name":"Terraform Test - Updated"}`),
-					server.TestCheckCalledRequestWithout("PATCH", "/api/v2/amazon-sns/1", "topic_arn"),
-					server.TestCheckCalledRequestWithout("PATCH", "/api/v2/amazon-sns/1", "subscription_state"),
-					server.TestCheckCalledRequestWithout("PATCH", "/api/v2/amazon-sns/1", "title_field"),
 				),
 			},
 			{
@@ -221,10 +203,10 @@ func TestResourceAmazonSnsIntegrationReadOnlyAttributes(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:        true,
-		ProviderFactories: amazonSnsProviderFactories(server),
+		ProviderFactories: testProviderFactories(server.URL),
 		Steps: []resource.TestStep{
 			{
-				Config: amazonSnsProviderBlock + `
+				Config: testProviderBlock + `
 				resource "betteruptime_amazon_sns_integration" "this" {
 				  name                   = "Terraform Test"
 				  started_rule_type      = "unused"
@@ -257,7 +239,7 @@ func TestResourceAmazonSnsIntegrationPlansCleanWithApiCreatedTitleField(t *testi
 	server.ExpectRequest("POST", "/api/v2/amazon-sns", "", 201, withDefault)
 	server.ExpectRequest("GET", "/api/v2/amazon-sns/1", "", 200, withDefault)
 
-	config := amazonSnsProviderBlock + `
+	config := testProviderBlock + `
 	resource "betteruptime_amazon_sns_integration" "this" {
 	  name                   = "Terraform Test"
 	  started_rule_type      = "unused"
@@ -267,7 +249,7 @@ func TestResourceAmazonSnsIntegrationPlansCleanWithApiCreatedTitleField(t *testi
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:        true,
-		ProviderFactories: amazonSnsProviderFactories(server),
+		ProviderFactories: testProviderFactories(server.URL),
 		Steps: []resource.TestStep{
 			{
 				Config: config,

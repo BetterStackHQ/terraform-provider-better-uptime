@@ -12,8 +12,25 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+// A provider block pointing at a test server, for tests that assemble their config by
+// concatenation rather than inlining the whole thing.
+const testProviderBlock = `
+provider "betteruptime" {
+  api_token = "foo"
+}
+`
+
+func testProviderFactories(url string) map[string]func() (*schema.Provider, error) {
+	return map[string]func() (*schema.Provider, error){
+		"betteruptime": func() (*schema.Provider, error) {
+			return New(WithURL(url)), nil
+		},
+	}
+}
 
 type CalledRequest struct {
 	Method string

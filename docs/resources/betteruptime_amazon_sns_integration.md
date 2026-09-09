@@ -14,10 +14,8 @@ https://betterstack.com/docs/uptime/api/amazon-sns-integrations/
 
 ```terraform
 # An Amazon SNS integration opens an incident for every notification the topic publishes.
-#
-# Subscribe the topic to the integration's url on the AWS side, with protocol HTTPS and raw
-# message delivery disabled. Better Stack answers the SubscriptionConfirmation handshake, then
-# fills in topic_arn and subscription_state, which is why both are read-only here.
+# Better Stack answers the SubscriptionConfirmation handshake once the topic is subscribed to
+# the integration's url, then fills in topic_arn and subscription_state.
 resource "betteruptime_amazon_sns_integration" "backend_alerts" {
   name = "Terraform Amazon SNS"
 
@@ -60,7 +58,7 @@ resource "betteruptime_amazon_sns_integration" "backend_alerts" {
   }
 }
 
-# Subscribe the SNS topic to this URL (HTTPS protocol, raw message delivery disabled)
+# Subscribe the SNS topic to this URL
 output "amazon_sns_integration_url" {
   value = betteruptime_amazon_sns_integration.backend_alerts.url
 }
@@ -98,7 +96,7 @@ output "amazon_sns_integration_url" {
 - `started_rules` (Block List) An array of rules to match to start a new incident. (see [below for nested schema](#nestedblock--started_rules))
 - `team_name` (String) Used to specify the team the resource should be created in when using global tokens. You can't update this value later.
 - `team_wait` (Number) How long to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.
-- `title_field` (Block List, Max: 1) An optional field describing how to extract a customized incident title. Defaults to the Amazon SNS envelope's Subject. Omit the block to keep whatever is configured; it cannot be removed through Terraform. (see [below for nested schema](#nestedblock--title_field))
+- `title_field` (Block List, Max: 1) An optional field describing how to extract a customized incident title. Defaults to the Amazon SNS envelope's Subject. It can be changed but not removed through Terraform. (see [below for nested schema](#nestedblock--title_field))
 
 ### Read-Only
 

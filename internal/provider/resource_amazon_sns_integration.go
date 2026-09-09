@@ -169,7 +169,7 @@ var amazonSnsIntegrationSchema = map[string]*schema.Schema{
 	// send title_field: null on every create, which the API reads as "destroy it" and which would
 	// silently drop that default; and it would then show the server's default as a permanent diff.
 	"title_field": {
-		Description: "An optional field describing how to extract a customized incident title. Defaults to the Amazon SNS envelope's Subject. Omit the block to keep whatever is configured; it cannot be removed through Terraform.",
+		Description: "An optional field describing how to extract a customized incident title. Defaults to the Amazon SNS envelope's Subject. It can be changed but not removed through Terraform.",
 		Type:        schema.TypeList,
 		Elem:        &schema.Resource{Schema: integrationFieldSchema},
 		Optional:    true,
