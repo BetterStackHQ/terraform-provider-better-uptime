@@ -1,0 +1,28 @@
+# Issues in this repo are synced with Linear. A GitHub closing keyword ("Closes #123",
+# "Fixes owner/repo#123") closes the issue the moment the PR merges, while Linear's PR
+# automation moves the linked Linear issue to Self QA at the same time. The two automations
+# then fight: the GitHub issue is closed, reopened, and the Linear issue lands in Triage.
+# Reference the issue with "Refs #123" instead and close it from Linear once the fix is
+# released.
+name: no closing keywords
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+permissions:
+  pull-requests: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject GitHub closing keywords in the PR description
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          pattern='\b(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\b:?[[:space:]]+(#[0-9]+|[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+#[0-9]+|https?://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/issues/[0-9]+)'
+          if matches=$(printf '%s' "$BODY" | grep -inoE "$pattern"); then
+            echo "::error::The PR description contains a GitHub closing keyword, which would close the issue on merge and desync it from Linear:"
+            echo "$matches"
+            echo "Use 'Refs #123' instead and close the issue from Linear once the fix is released."
+            exit 1
+          fi
+          echo "No closing keywords found."
