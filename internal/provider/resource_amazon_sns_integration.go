@@ -249,7 +249,6 @@ func newAmazonSnsIntegrationResource() *schema.Resource {
 			validateTeamNameNotChanged,
 			validateIntegrationRuleConditions,
 			validateSnsEnvelopeTargetField,
-			validateAmazonSnsTitleFieldNotRemoved,
 		),
 		Schema: amazonSnsIntegrationSchema,
 	}

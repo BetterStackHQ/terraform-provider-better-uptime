@@ -22,21 +22,23 @@ func validateSnsEnvelopeTargetField(ctx context.Context, diff *schema.ResourceDi
 		return nil
 	}
 
+	isCreate := diff.Id() == ""
+
 	fieldKeys := append(append([]string{}, FieldAttributes...), FieldsAttributes...)
 	for _, key := range fieldKeys {
-		if err := checkSnsEnvelopeBlocks(config, key, "field_target"); err != nil {
+		if err := checkSnsEnvelopeBlocks(config, key, "field_target", isCreate); err != nil {
 			return err
 		}
 	}
 	for _, key := range RulesAttributes {
-		if err := checkSnsEnvelopeBlocks(config, key, "rule_target"); err != nil {
+		if err := checkSnsEnvelopeBlocks(config, key, "rule_target", isCreate); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func checkSnsEnvelopeBlocks(config cty.Value, key, targetAttr string) error {
+func checkSnsEnvelopeBlocks(config cty.Value, key, targetAttr string, isCreate bool) error {
 	blocks := config.GetAttr(key)
 	if blocks.IsNull() || !blocks.IsKnown() || blocks.LengthInt() == 0 {
 		return nil
@@ -52,47 +54,25 @@ func checkSnsEnvelopeBlocks(config cty.Value, key, targetAttr string) error {
 		}
 
 		targetField := block.GetAttr("target_field")
-		if targetField.IsNull() || !targetField.IsKnown() || targetField.AsString() == "" {
-			return fmt.Errorf("%s.%d: %s = \"sns_envelope\" requires target_field to be one of %s",
-				key, i, targetAttr, strings.Join(snsEnvelopeTargetFields, ", "))
+		// A value the practitioner interpolated from something else is not knowable while
+		// planning. Refusing it would reject a config that is perfectly valid once applied.
+		if !targetField.IsKnown() {
+			continue
+		}
+		// target_field is Optional and Computed, so an absent one on an existing resource keeps
+		// the value already stored, which may well be a valid envelope field. Only creation can
+		// be sure that absent really means absent.
+		if targetField.IsNull() || targetField.AsString() == "" {
+			if isCreate {
+				return fmt.Errorf("%s.%d: %s = \"sns_envelope\" requires target_field to be one of %s",
+					key, i, targetAttr, strings.Join(snsEnvelopeTargetFields, ", "))
+			}
+			continue
 		}
 		if !containsString(snsEnvelopeTargetFields, targetField.AsString()) {
 			return fmt.Errorf("%s.%d: target_field must be one of %s when %s = \"sns_envelope\", got %q",
 				key, i, strings.Join(snsEnvelopeTargetFields, ", "), targetAttr, targetField.AsString())
 		}
-	}
-	return nil
-}
-
-// validateAmazonSnsTitleFieldNotRemoved rejects deleting a title_field block. title_field is
-// Computed on this resource, because the API fills it in with the envelope's Subject when the
-// integration is created, so removing the block from configuration produces no diff and Terraform
-// reports "No changes" while the extraction stays in place. Erroring is the same choice
-// validateTeamNameNotChanged makes: a silent no-op is worse than a refusal.
-//
-// Read from raw state and raw config rather than HasChange, which is false precisely because the
-// attribute is Computed and absent from configuration.
-func validateAmazonSnsTitleFieldNotRemoved(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
-	if diff.Id() == "" {
-		return nil
-	}
-
-	state := diff.GetRawState()
-	config := diff.GetRawConfig()
-	if state.IsNull() || !state.IsKnown() || config.IsNull() || !config.IsKnown() {
-		return nil
-	}
-
-	stateField := state.GetAttr("title_field")
-	if stateField.IsNull() || !stateField.IsKnown() || stateField.LengthInt() == 0 {
-		return nil
-	}
-
-	configField := config.GetAttr("title_field")
-	if configField.IsNull() || (configField.IsKnown() && configField.LengthInt() == 0) {
-		return fmt.Errorf("title_field cannot be removed through Terraform, because the API treats an " +
-			"absent title_field as \"keep the current one\". Change the block in place instead, or remove " +
-			"the extraction in the Better Stack UI")
 	}
 	return nil
 }

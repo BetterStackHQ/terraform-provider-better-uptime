@@ -162,45 +162,6 @@ func TestResourceAmazonSnsIntegrationRejectsBadSnsEnvelopeTargetField(t *testing
 	})
 }
 
-// title_field is Computed, so deleting the block produces no diff at all. Terraform would say
-// "No changes" while the extraction stayed in place, which is the silent no-op team_name already
-// refuses to make.
-func TestResourceAmazonSnsIntegrationRefusesToRemoveTitleField(t *testing.T) {
-	server := newResourceServer(t, "/api/v2/amazon-sns", "1")
-	defer server.Close()
-
-	resource.Test(t, resource.TestCase{
-		IsUnitTest:        true,
-		ProviderFactories: amazonSnsProviderFactories(server),
-		Steps: []resource.TestStep{
-			{
-				Config: amazonSnsProviderBlock + `
-				resource "betteruptime_amazon_sns_integration" "this" {
-				  name                   = "Terraform Test"
-				  started_rule_type      = "unused"
-				  acknowledged_rule_type = "unused"
-				  resolved_rule_type     = "unused"
-				  title_field {
-					field_target = "sns_envelope"
-					target_field = "Subject"
-					match_type   = "match_everything"
-				  }
-				}`,
-			},
-			{
-				Config: amazonSnsProviderBlock + `
-				resource "betteruptime_amazon_sns_integration" "this" {
-				  name                   = "Terraform Test"
-				  started_rule_type      = "unused"
-				  acknowledged_rule_type = "unused"
-				  resolved_rule_type     = "unused"
-				}`,
-				ExpectError: regexp.MustCompile(`title_field cannot be removed through Terraform`),
-			},
-		},
-	})
-}
-
 // The update path sends only what changed. This is what makes an explicit read-only write guard
 // unnecessary: a computed attribute with no configuration is never seen as changed, so topic_arn
 // and subscription_state stay out of the request without anything filtering them. title_field must
@@ -276,6 +237,46 @@ func TestResourceAmazonSnsIntegrationReadOnlyAttributes(t *testing.T) {
 					server.TestCheckCalledRequestWithout("POST", "/api/v2/amazon-sns", "topic_arn"),
 					server.TestCheckCalledRequestWithout("POST", "/api/v2/amazon-sns", "subscription_state"),
 				),
+			},
+		},
+	})
+}
+
+// The API auto-creates a title extraction from the envelope's Subject on every create, which is
+// the whole reason title_field is Computed here. That server-side default must not then look like
+// a configuration the practitioner removed: config never had a title_field block, so a plan after
+// apply has to come back empty rather than erroring.
+//
+// The default mock echoes the POST body back, so it can never return a field the provider did not
+// send. This one answers like the real API instead.
+func TestResourceAmazonSnsIntegrationPlansCleanWithApiCreatedTitleField(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/amazon-sns", "1")
+	defer server.Close()
+
+	const withDefault = `{"data":{"id":"1","attributes":{"name":"Terraform Test","started_rule_type":"unused","acknowledged_rule_type":"unused","resolved_rule_type":"unused","title_field":{"field_target":"sns_envelope","target_field":"Subject","match_type":"match_everything"}}}}`
+	server.ExpectRequest("POST", "/api/v2/amazon-sns", "", 201, withDefault)
+	server.ExpectRequest("GET", "/api/v2/amazon-sns/1", "", 200, withDefault)
+
+	config := amazonSnsProviderBlock + `
+	resource "betteruptime_amazon_sns_integration" "this" {
+	  name                   = "Terraform Test"
+	  started_rule_type      = "unused"
+	  acknowledged_rule_type = "unused"
+	  resolved_rule_type     = "unused"
+	}`
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: amazonSnsProviderFactories(server),
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.TestCheckResourceAttr(
+					"betteruptime_amazon_sns_integration.this", "title_field.0.target_field", "Subject"),
+			},
+			{
+				Config:   config,
+				PlanOnly: true,
 			},
 		},
 	})
