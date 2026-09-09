@@ -64,7 +64,7 @@ output "existing_amazon_sns_subscription_state" {
 - `title_field` (List of Object) An optional field describing how to extract a customized incident title. Defaults to the Amazon SNS envelope's Subject. Omit the block to keep whatever is configured; it cannot be removed through Terraform. (see [below for nested schema](#nestedatt--title_field))
 - `topic_arn` (String) The ARN of the Amazon SNS topic this integration is subscribed to. Set by Better Stack when AWS confirms the subscription, so it is read-only.
 - `updated_at` (String) The time when this Amazon SNS integration was updated.
-- `url` (String) The url at which we expect to receive the webhook.
+- `url` (String) The URL to subscribe the Amazon SNS topic to, using the HTTPS protocol with raw message delivery disabled.
 
 <a id="nestedatt--acknowledged_alert_id_field"></a>
 ### Nested Schema for `acknowledged_alert_id_field`

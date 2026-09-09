@@ -44,3 +44,8 @@ resource "betteruptime_amazon_sns_integration" "backend_alerts" {
     match_type   = "match_everything"
   }
 }
+
+# Subscribe the SNS topic to this URL (HTTPS protocol, raw message delivery disabled)
+output "amazon_sns_integration_url" {
+  value = betteruptime_amazon_sns_integration.backend_alerts.url
+}

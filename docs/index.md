@@ -75,19 +75,13 @@ provider "betteruptime" {
 
 Amazon SNS integrations used to be incoming webhooks with an internal flag, so the only way to
 manage one was `betteruptime_incoming_webhook`. They now have their own resource,
-`betteruptime_amazon_sns_integration`.
-
-Existing Amazon SNS integrations are being moved onto the new resource. Once yours has moved, the
-incoming webhook it used to be no longer exists, and Terraform reads it as deleted: a
-`betteruptime_incoming_webhook` resource plans to create a brand new webhook, and a
+`betteruptime_amazon_sns_integration`, and every existing Amazon SNS integration has been moved onto
+it, keeping its id. The incoming webhook it used to be no longer exists, so Terraform reads it as
+deleted: a `betteruptime_incoming_webhook` resource plans to create a brand new webhook, and a
 `data.betteruptime_incoming_webhook` lookup silently returns nothing.
 
-Move your configuration across **after** the integration has been moved, not before. Until then its
-id does not exist under `betteruptime_amazon_sns_integration` and the import below returns a 404.
-If you are unsure whether yours has moved yet, ask us.
-
-Its receive URL does not change, so nothing in AWS needs touching. Replace the resource block and
-re-import it under the new type:
+The receive URL did not change either, so nothing in AWS needs touching. Replace the resource block
+and re-import the integration under the new type, using the same id:
 
 ```terraform
 # Was: resource "betteruptime_incoming_webhook" "sns" { ... }

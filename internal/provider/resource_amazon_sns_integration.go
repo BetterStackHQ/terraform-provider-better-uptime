@@ -97,7 +97,7 @@ var amazonSnsIntegrationSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"url": {
-		Description: "The url at which we expect to receive the webhook.",
+		Description: "The URL to subscribe the Amazon SNS topic to, using the HTTPS protocol with raw message delivery disabled.",
 		Type:        schema.TypeString,
 		Optional:    false,
 		Computed:    true,
@@ -244,7 +244,7 @@ func newAmazonSnsIntegrationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description: "https://betterstack.com/docs/uptime/api/list-all-amazon-sns-integrations/",
+		Description: "https://betterstack.com/docs/uptime/api/amazon-sns-integrations/",
 		CustomizeDiff: customdiff.Sequence(
 			validateTeamNameNotChanged,
 			validateIntegrationRuleConditions,
