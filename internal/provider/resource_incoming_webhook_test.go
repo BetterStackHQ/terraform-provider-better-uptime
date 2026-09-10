@@ -240,7 +240,11 @@ func TestResourceIncomingWebhook(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "recovery_period", "180"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "paused", "true"),
 					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "started_rules.0.content", "alert"),
-					server.TestCheckCalledRequest("PATCH", "/api/v2/incoming-webhooks/1", `{"name":"Terraform Test - Updated","team_wait":0,"recovery_period":180,"paused":true,"title_field":null}`),
+					// This step really does drop the title_field block, so the null is correct here and the
+					// API removes the extraction. Keys are sorted because the removal path builds the body
+					// as a map; TestResourceIncomingWebhookKeepsTitleFieldOnUnrelatedUpdate covers the case
+					// this used to get wrong, where nothing touched title_field and it was nulled anyway.
+					server.TestCheckCalledRequest("PATCH", "/api/v2/incoming-webhooks/1", `{"name":"Terraform Test - Updated","paused":true,"recovery_period":180,"team_wait":0,"title_field":null}`),
 				),
 				PreConfig: func() {
 					t.Log("step 2")
@@ -391,7 +395,41 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml"\], got metadata`),
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["query_string" "header" "body" "json" "xml"\], got metadata`),
+			},
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+				resource "betteruptime_incoming_webhook" "this" {
+				  name = "Terraform Test"
+				  call = false
+				  sms = false
+				  email = true
+				  push = true
+				  critical_alert = true
+				  team_wait = 180
+				  recovery_period = 0
+				  paused = false
+				  started_rule_type = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type = "all"
+				  started_rules {
+					rule_target = "sns_envelope"
+					target_field = "incident.status"
+					match_type = "contains"
+					content = "alert"
+				  }
+				  cause_field {
+					field_target = "json"
+					target_field = "incident.status"
+					match_type = "match_everything"
+					content = "title"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected started_rules\.0\.rule_target to be one of \["query_string" "header" "body" "json" "xml"\], got sns_envelope`),
 			},
 			{
 				Config: `
@@ -459,7 +497,41 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				  }
 				}`,
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["from_email" "subject" "body" "query_string" "header" "body" "json" "xml"\], got from_json`),
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["query_string" "header" "body" "json" "xml"\], got from_json`),
+			},
+			{
+				Config: `
+				provider "betteruptime" {
+				  api_token = "foo"
+				}
+				resource "betteruptime_incoming_webhook" "this" {
+				  name = "Terraform Test"
+				  call = false
+				  sms = false
+				  email = true
+				  push = true
+				  critical_alert = true
+				  team_wait = 180
+				  recovery_period = 0
+				  paused = false
+				  started_rule_type = "any"
+				  acknowledged_rule_type = "unused"
+				  resolved_rule_type = "all"
+				  started_rules {
+					rule_target = "json"
+					target_field = "incident.status"
+					match_type = "contains"
+					content = "alert"
+				  }
+				  cause_field {
+					field_target = "sns_envelope"
+					target_field = "incident.status"
+					match_type = "match_everything"
+					content = "title"
+				  }
+				}`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected cause_field\.0\.field_target to be one of \["query_string" "header" "body" "json" "xml"\], got sns_envelope`),
 			},
 			{
 				Config: `
@@ -494,6 +566,87 @@ func TestResourceIncomingWebhookValidation(t *testing.T) {
 				}`,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`expected cause_field\.0\.match_type to be one of \["match_before" "match_after" "match_between" "match_regex" "match_everything"\], got match_something`),
+			},
+		},
+	})
+}
+
+// Renaming a webhook used to delete its title extraction: the struct field had no omitempty and
+// update only loads what changed, so every PATCH carried "title_field":null, which the API reads
+// as "remove it". The next plan then put it back.
+func TestResourceIncomingWebhookKeepsTitleFieldOnUnrelatedUpdate(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/incoming-webhooks", "1")
+	defer server.Close()
+
+	config := func(name string) string {
+		return `
+		provider "betteruptime" {
+		  api_token = "foo"
+		}
+		resource "betteruptime_incoming_webhook" "this" {
+		  name                   = "` + name + `"
+		  started_rule_type      = "unused"
+		  acknowledged_rule_type = "unused"
+		  resolved_rule_type     = "unused"
+		  title_field {
+			field_target = "json"
+			target_field = "incident.title"
+			match_type   = "match_everything"
+		  }
+		}`
+	}
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil },
+		},
+		Steps: []resource.TestStep{
+			{Config: config("Terraform Test")},
+			{
+				Config: config("Terraform Test - Renamed"),
+				Check: resource.ComposeTestCheckFunc(
+					server.TestCheckCalledRequest("PATCH", "/api/v2/incoming-webhooks/1", `{"name":"Terraform Test - Renamed"}`),
+					server.TestCheckCalledRequestWithout("PATCH", "/api/v2/incoming-webhooks/1", "title_field"),
+					resource.TestCheckResourceAttr("betteruptime_incoming_webhook.this", "title_field.0.target_field", "incident.title"),
+				),
+			},
+		},
+	})
+}
+
+// Removing the block still has to reach the API, which is the only way to clear a title extraction.
+func TestResourceIncomingWebhookRemovesTitleFieldWhenTheBlockGoes(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/incoming-webhooks", "1")
+	defer server.Close()
+
+	const head = `
+	provider "betteruptime" {
+	  api_token = "foo"
+	}
+	resource "betteruptime_incoming_webhook" "this" {
+	  name                   = "Terraform Test"
+	  started_rule_type      = "unused"
+	  acknowledged_rule_type = "unused"
+	  resolved_rule_type     = "unused"
+	`
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) { return New(WithURL(server.URL)), nil },
+		},
+		Steps: []resource.TestStep{
+			{Config: head + `
+			  title_field {
+				field_target = "json"
+				target_field = "incident.title"
+				match_type   = "match_everything"
+			  }
+			}`},
+			{
+				Config: head + "}",
+				Check:  server.TestCheckCalledRequest("PATCH", "/api/v2/incoming-webhooks/1", `{"title_field":null}`),
 			},
 		},
 	})

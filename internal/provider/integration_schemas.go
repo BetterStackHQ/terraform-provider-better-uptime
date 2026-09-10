@@ -23,14 +23,13 @@ var integrationFieldSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"field_target": {
-		Description:  "The target of the field. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
-		Type:         schema.TypeString,
-		Optional:     true,
-		Computed:     true,
-		ValidateFunc: validation.StringInSlice([]string{"from_email", "subject", "body", "query_string", "header", "body", "json", "xml"}, false),
+		Description: "The target of the field.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
 	},
 	"target_field": {
-		Description: "The target field within the content of the field_target. Should be a JSON key when field_target is json, a CSS selector when field_target is XML, name of the header for headers or a parameter name for query parameters",
+		Description: "The target field within the content of the field_target.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
@@ -64,14 +63,13 @@ var integrationFieldSchema = map[string]*schema.Schema{
 
 var integrationRuleSchema = map[string]*schema.Schema{
 	"rule_target": {
-		Description:  "The target of the rule. Can be any of the following: from_email, subject, or body for email integrations or query_string, header, body, json and xml for incoming webhooks.",
-		Type:         schema.TypeString,
-		Optional:     true,
-		Computed:     true,
-		ValidateFunc: validation.StringInSlice([]string{"from_email", "subject", "body", "query_string", "header", "body", "json", "xml"}, false),
+		Description: "The target of the rule.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
 	},
 	"target_field": {
-		Description: "The target field within the content of the rule_target. Should be a JSON key when rule_target is json, a CSS selector when rule_target is XML, name of the header for headers or a parameter name for query parameters",
+		Description: "The target field within the content of the rule_target.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
@@ -89,6 +87,45 @@ var integrationRuleSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
+}
+
+// integrationTargets is what one integration type accepts as a field_target or rule_target. The
+// shared field and rule schemas above are generic; each integration narrows a copy of them with
+// integrationFieldSchemaFor and integrationRuleSchemaFor, so a target the type does not support
+// fails while planning rather than as a 422 at apply, and its docs list only what applies.
+type integrationTargets struct {
+	// values is what field_target and rule_target accept.
+	values []string
+	// targetDescription follows the generic field_target and rule_target description.
+	targetDescription string
+	// targetFieldDescription, when set, follows the generic target_field description.
+	targetFieldDescription string
+}
+
+func integrationFieldSchemaFor(targets integrationTargets) map[string]*schema.Schema {
+	return narrowIntegrationSchema(integrationFieldSchema, "field_target", targets)
+}
+
+func integrationRuleSchemaFor(targets integrationTargets) map[string]*schema.Schema {
+	return narrowIntegrationSchema(integrationRuleSchema, "rule_target", targets)
+}
+
+func narrowIntegrationSchema(base map[string]*schema.Schema, targetKey string, targets integrationTargets) map[string]*schema.Schema {
+	s := make(map[string]*schema.Schema, len(base))
+	for k, v := range base {
+		cp := *v
+		switch k {
+		case targetKey:
+			cp.Description += " " + targets.targetDescription
+			cp.ValidateFunc = validation.StringInSlice(targets.values, false)
+		case "target_field":
+			if targets.targetFieldDescription != "" {
+				cp.Description += " " + targets.targetFieldDescription
+			}
+		}
+		s[k] = &cp
+	}
+	return s
 }
 
 type integrationField struct {

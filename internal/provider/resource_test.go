@@ -6,13 +6,31 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+// A provider block pointing at a test server, for tests that assemble their config by
+// concatenation rather than inlining the whole thing.
+const testProviderBlock = `
+provider "betteruptime" {
+  api_token = "foo"
+}
+`
+
+func testProviderFactories(url string) map[string]func() (*schema.Provider, error) {
+	return map[string]func() (*schema.Provider, error){
+		"betteruptime": func() (*schema.Provider, error) {
+			return New(WithURL(url)), nil
+		},
+	}
+}
 
 type CalledRequest struct {
 	Method string
@@ -128,6 +146,28 @@ func (ts *TestServer) ExpectRequest(method, url, body string, statusCode int, re
 		StatusCode: statusCode,
 		Response:   response,
 	})
+}
+
+// Asserts that a request was made and that its body does NOT mention needle. Useful for a key
+// whose mere presence changes the API's behaviour, such as a null field the API reads as "destroy".
+func (ts *TestServer) TestCheckCalledRequestWithout(method, url, needle string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		ts.mu.Lock()
+		defer ts.mu.Unlock()
+		found := false
+		for _, req := range ts.CalledRequests {
+			if req.Method == method && req.URL == url {
+				found = true
+				if strings.Contains(req.Body, needle) {
+					return fmt.Errorf(`request %s %s should not mention %q, got body "%s"`, method, url, needle, req.Body)
+				}
+			}
+		}
+		if !found {
+			return fmt.Errorf("expected request %s %s not found", method, url)
+		}
+		return nil
+	}
 }
 
 func (ts *TestServer) TestCheckCalledRequest(method, url, body string) resource.TestCheckFunc {

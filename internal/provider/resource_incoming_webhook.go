@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -10,6 +11,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+// Incoming webhooks read the HTTP request, so its parts are the targets.
+var incomingWebhookTargets = integrationTargets{
+	values:                 []string{"query_string", "header", "body", "json", "xml"},
+	targetDescription:      "Can be any of the following: query_string, header, body, json, or xml.",
+	targetFieldDescription: "Should be a JSON key when the target is json, a CSS selector when it is xml, the header name when it is header, or the parameter name when it is query_string.",
+}
+
+var incomingWebhookFieldSchema = integrationFieldSchemaFor(incomingWebhookTargets)
+var incomingWebhookRuleSchema = integrationRuleSchemaFor(incomingWebhookTargets)
 
 var incomingWebhookSchema = map[string]*schema.Schema{
 	"team_name": teamNameSchema(),
@@ -121,28 +132,28 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"started_rules": {
 		Description: "An array of rules to match to start a new incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationRuleSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"acknowledged_rules": {
 		Description: "An array of rules to match to acknowledge an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationRuleSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"resolved_rules": {
 		Description: "An array of rules to match to resolved an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationRuleSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"cause_field": {
 		Description: "A field describing how to extract an incident cause, used as a short description shared with the team member on-call.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -150,7 +161,7 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"title_field": {
 		Description: "An optional field describing how to extract a customized incident title.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    false,
 		MaxItems:    1,
@@ -158,7 +169,7 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"started_alert_id_field": {
 		Description: "When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -166,7 +177,7 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"acknowledged_alert_id_field": {
 		Description: "When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -174,7 +185,7 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"resolved_alert_id_field": {
 		Description: "When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -182,21 +193,21 @@ var incomingWebhookSchema = map[string]*schema.Schema{
 	"other_started_fields": {
 		Description: "An array of additional fields, which will be extracted when starting an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"other_acknowledged_fields": {
 		Description: "An array of additional fields, which will be extracted when acknowledging an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"other_resolved_fields": {
 		Description: "An array of additional fields, which will be extracted when resolving an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: integrationFieldSchema},
+		Elem:        &schema.Resource{Schema: incomingWebhookFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
@@ -252,7 +263,7 @@ type incomingWebhook struct {
 	AcknowledgedRules        *[]integrationRule  `json:"acknowledged_rules,omitempty"`
 	ResolvedRules            *[]integrationRule  `json:"resolved_rules,omitempty"`
 	CauseField               *integrationField   `json:"cause_field,omitempty"`
-	TitleField               *integrationField   `json:"title_field"`
+	TitleField               *integrationField   `json:"title_field,omitempty"`
 	StartedAlertIdField      *integrationField   `json:"started_alert_id_field,omitempty"`
 	AcknowledgedAlertIdField *integrationField   `json:"acknowledged_alert_id_field,omitempty"`
 	ResolvedAlertIdField     *integrationField   `json:"resolved_alert_id_field,omitempty"`
@@ -383,7 +394,54 @@ func incomingWebhookUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/incoming-webhooks/%s", url.PathEscape(d.Id())), &in, &out)
+	body, err := patchBodyRemovingTitleField(d, &in)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/incoming-webhooks/%s", url.PathEscape(d.Id())), body, &out)
+}
+
+// The API reads a present-and-null title_field as "remove the title extraction", so the key must
+// only appear when that is what the practitioner asked for. It used to be sent on every PATCH,
+// because the struct field had no omitempty and update only loads what changed: renaming a webhook
+// deleted its title extraction, and the next plan put it back.
+//
+// Removal is read from the raw config and state rather than HasChange, which reports a removed
+// block the same way it reports one that was never there.
+func patchBodyRemovingTitleField(d *schema.ResourceData, in *incomingWebhook) (interface{}, error) {
+	if !titleFieldRemoved(d) {
+		return in, nil
+	}
+
+	encoded, err := json.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	var body map[string]json.RawMessage
+	if err := json.Unmarshal(encoded, &body); err != nil {
+		return nil, err
+	}
+	body["title_field"] = json.RawMessage("null")
+
+	return body, nil
+}
+
+func titleFieldRemoved(d *schema.ResourceData) bool {
+	state := d.GetRawState()
+	config := d.GetRawConfig()
+	if state.IsNull() || !state.IsKnown() || config.IsNull() || !config.IsKnown() {
+		return false
+	}
+
+	previous := state.GetAttr("title_field")
+	if previous.IsNull() || !previous.IsKnown() || previous.LengthInt() == 0 {
+		return false
+	}
+
+	current := config.GetAttr("title_field")
+
+	return current.IsNull() || (current.IsKnown() && current.LengthInt() == 0)
 }
 
 func incomingWebhookDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

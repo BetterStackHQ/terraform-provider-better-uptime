@@ -1,5 +1,10 @@
 package provider
 
+// Amazon SNS integrations are the same resource shape as incoming webhooks: they share their
+// extraction model and their receive URL, which is why this mirrors resource_incoming_webhook.go.
+// What is its own is the subscription handshake, and both of its fields are read-only: Better
+// Stack writes them when AWS confirms the subscription, so Terraform must not try to manage them.
+
 import (
 	"context"
 	"fmt"
@@ -11,31 +16,45 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Email integrations read the e-mail itself, so its sender, subject and body are the targets.
-var emailIntegrationTargets = integrationTargets{
-	values:            []string{"from_email", "subject", "body"},
-	targetDescription: "Can be any of the following: from_email, subject, or body.",
+// Amazon SNS delivers each notification as an HTTP request, so the incoming webhook targets apply,
+// plus sns_envelope for what lives on the SNS envelope around the message rather than inside it.
+var amazonSnsIntegrationTargets = integrationTargets{
+	values:                 []string{"query_string", "header", "body", "json", "xml", "sns_envelope"},
+	targetDescription:      "Can be any of the following: query_string, header, body, json, or xml for the HTTP request Amazon SNS delivers, or sns_envelope for the TopicArn, MessageId and Subject of the notification envelope.",
+	targetFieldDescription: "Should be a JSON key when the target is json, a CSS selector when it is xml, the header name when it is header, the parameter name when it is query_string, or one of TopicArn, MessageId and Subject when it is sns_envelope.",
 }
 
-var emailIntegrationFieldSchema = integrationFieldSchemaFor(emailIntegrationTargets)
-var emailIntegrationRuleSchema = integrationRuleSchemaFor(emailIntegrationTargets)
+var amazonSnsIntegrationFieldSchema = integrationFieldSchemaFor(amazonSnsIntegrationTargets)
+var amazonSnsIntegrationRuleSchema = integrationRuleSchemaFor(amazonSnsIntegrationTargets)
 
-var emailIntegrationSchema = map[string]*schema.Schema{
+var amazonSnsIntegrationSchema = map[string]*schema.Schema{
 	"team_name": teamNameSchema(),
+	"topic_arn": {
+		Description: "The ARN of the Amazon SNS topic this integration is subscribed to. Set by Better Stack when AWS confirms the subscription, so it is read-only.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
+	"subscription_state": {
+		Description: "Whether the Amazon SNS subscription has been confirmed: active once AWS has confirmed it, awaiting until then. Set by Better Stack when AWS confirms it, so it is read-only.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
 	"id": {
-		Description: "The ID of this Email integration.",
+		Description: "The ID of this Amazon SNS integration.",
 		Type:        schema.TypeString,
 		Optional:    false,
 		Computed:    true,
 	},
 	"name": {
-		Description: "The name of this Email integration.",
+		Description: "The name of this Amazon SNS integration.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
 	},
 	"policy_id": {
-		Description: "ID of the escalation policy associated with the email integration.",
+		Description: "ID of the escalation policy associated with the Amazon SNS integration.",
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
@@ -88,60 +107,82 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
-	"email_address": {
-		Description: "The email address we expect emails to receive at.",
+	"url": {
+		Description: "The URL to subscribe the Amazon SNS topic to, using the HTTPS protocol with raw message delivery disabled.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
+	"sample_query_string": {
+		Description: "Sample query string of the notification (without the leading ?). Used only to make the configuration easier.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
+	"sample_headers": {
+		Description: "Sample request HTTP headers of the notification (separated by a newline). Used only to make the configuration easier.",
+		Type:        schema.TypeString,
+		Optional:    false,
+		Computed:    true,
+	},
+	"sample_body": {
+		Description: "Sample Amazon SNS message. Used only to make the configuration easier.",
 		Type:        schema.TypeString,
 		Optional:    false,
 		Computed:    true,
 	},
 	"started_rule_type": {
-		Description: "Should an incident be started for all emails, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any",
+		Description: "Should an incident be started for all notifications, those satisfying all started_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"acknowledged_rule_type": {
-		Description: "Should an incident be acknowledged for all emails, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any",
+		Description: "Should an incident be acknowledged for all notifications, those satisfying all acknowledged_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"resolved_rule_type": {
-		Description: "Should an incident be resolved for all emails, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any",
+		Description: "Should an incident be resolved for all notifications, those satisfying all resolved_rules, or those satisfying any of them. Valid values are unused, all, or any",
 		Type:        schema.TypeString,
 		Required:    true,
 	},
 	"started_rules": {
 		Description: "An array of rules to match to start a new incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationRuleSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"acknowledged_rules": {
 		Description: "An array of rules to match to acknowledge an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationRuleSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"resolved_rules": {
 		Description: "An array of rules to match to resolved an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationRuleSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationRuleSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"cause_field": {
 		Description: "A field describing how to extract an incident cause, used as a short description shared with the team member on-call.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
 	},
+	// Computed, unlike the incoming webhook resource's copy: the API gives a fresh Amazon SNS
+	// integration a title extracted from the envelope's Subject. Leaving this Optional-only would
+	// send title_field: null on every create, which the API reads as "destroy it" and which would
+	// silently drop that default; and it would then show the server's default as a permanent diff.
 	"title_field": {
-		Description: "An optional field describing how to extract a customized incident title.",
+		Description: "An optional field describing how to extract a customized incident title. Defaults to the Amazon SNS envelope's Subject. It can be changed but not removed through Terraform.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -149,7 +190,7 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"started_alert_id_field": {
 		Description: "When starting an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -157,7 +198,7 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"acknowledged_alert_id_field": {
 		Description: "When acknowledging an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -165,7 +206,7 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"resolved_alert_id_field": {
 		Description: "When resolving an incident, how to extract an alert id, a unique alert identifier which will be used to acknowledge and resolve incidents.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 		MaxItems:    1,
@@ -173,55 +214,61 @@ var emailIntegrationSchema = map[string]*schema.Schema{
 	"other_started_fields": {
 		Description: "An array of additional fields, which will be extracted when starting an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"other_acknowledged_fields": {
 		Description: "An array of additional fields, which will be extracted when acknowledging an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"other_resolved_fields": {
 		Description: "An array of additional fields, which will be extracted when resolving an incident.",
 		Type:        schema.TypeList,
-		Elem:        &schema.Resource{Schema: emailIntegrationFieldSchema},
+		Elem:        &schema.Resource{Schema: amazonSnsIntegrationFieldSchema},
 		Optional:    true,
 		Computed:    true,
 	},
 	"created_at": {
-		Description: "The time when this email integration was created.",
+		Description: "The time when this Amazon SNS integration was created.",
 		Type:        schema.TypeString,
 		Optional:    false,
 		Computed:    true,
 	},
 	"updated_at": {
-		Description: "The time when this email integration was updated.",
+		Description: "The time when this Amazon SNS integration was updated.",
 		Type:        schema.TypeString,
 		Optional:    false,
 		Computed:    true,
 	},
 }
 
-func newEmailIntegrationResource() *schema.Resource {
+func newAmazonSnsIntegrationResource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: emailIntegrationCreate,
-		ReadContext:   emailIntegrationRead,
-		UpdateContext: emailIntegrationUpdate,
-		DeleteContext: emailIntegrationDelete,
+		CreateContext: amazonSnsIntegrationCreate,
+		ReadContext:   amazonSnsIntegrationRead,
+		UpdateContext: amazonSnsIntegrationUpdate,
+		DeleteContext: amazonSnsIntegrationDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Description:   "https://betterstack.com/docs/uptime/api/email-integrations/",
-		CustomizeDiff: customdiff.Sequence(validateTeamNameNotChanged, validateIntegrationRuleConditions),
-		Schema:        emailIntegrationSchema,
+		Description: "https://betterstack.com/docs/uptime/api/amazon-sns-integrations/",
+		CustomizeDiff: customdiff.Sequence(
+			validateTeamNameNotChanged,
+			validateIntegrationRuleConditions,
+			validateSnsEnvelopeTargetField,
+		),
+		Schema: amazonSnsIntegrationSchema,
 	}
 }
 
-type emailIntegration struct {
+type amazonSnsIntegration struct {
 	Id                       *int                `json:"id,omitempty"`
+	TopicArn                 *string             `json:"topic_arn,omitempty"`
+	SubscriptionState        *string             `json:"subscription_state,omitempty"`
 	Name                     *string             `json:"name,omitempty"`
 	PolicyId                 *string             `json:"policy_id,omitempty"`
 	Call                     *bool               `json:"call,omitempty"`
@@ -232,7 +279,10 @@ type emailIntegration struct {
 	TeamWait                 *int                `json:"team_wait,omitempty"`
 	RecoveryPeriod           *int                `json:"recovery_period,omitempty"`
 	Paused                   *bool               `json:"paused,omitempty"`
-	EmailAddress             *string             `json:"email_address,omitempty"`
+	Url                      *string             `json:"url,omitempty"`
+	SampleQueryString        *string             `json:"sample_query_string,omitempty"`
+	SampleHeaders            *string             `json:"sample_headers,omitempty"`
+	SampleBody               *string             `json:"sample_body,omitempty"`
 	StartedRuleType          *string             `json:"started_rule_type,omitempty"`
 	AcknowledgedRuleType     *string             `json:"acknowledged_rule_type,omitempty"`
 	ResolvedRuleType         *string             `json:"resolved_rule_type,omitempty"`
@@ -252,14 +302,14 @@ type emailIntegration struct {
 	UpdatedAt                *string             `json:"updated_at,omitempty"`
 }
 
-type emailIntegrationHTTPResponse struct {
+type amazonSnsIntegrationHTTPResponse struct {
 	Data struct {
-		ID         string           `json:"id"`
-		Attributes emailIntegration `json:"attributes"`
+		ID         string               `json:"id"`
+		Attributes amazonSnsIntegration `json:"attributes"`
 	} `json:"data"`
 }
 
-func emailIntegrationRef(in *emailIntegration) []struct {
+func amazonSnsIntegrationRef(in *amazonSnsIntegration) []struct {
 	k string
 	v interface{}
 } {
@@ -269,6 +319,8 @@ func emailIntegrationRef(in *emailIntegration) []struct {
 		v interface{}
 	}{
 		{k: "name", v: &in.Name},
+		{k: "topic_arn", v: &in.TopicArn},
+		{k: "subscription_state", v: &in.SubscriptionState},
 		{k: "policy_id", v: &in.PolicyId},
 		{k: "call", v: &in.Call},
 		{k: "sms", v: &in.SMS},
@@ -278,7 +330,10 @@ func emailIntegrationRef(in *emailIntegration) []struct {
 		{k: "team_wait", v: &in.TeamWait},
 		{k: "recovery_period", v: &in.RecoveryPeriod},
 		{k: "paused", v: &in.Paused},
-		{k: "email_address", v: &in.EmailAddress},
+		{k: "url", v: &in.Url},
+		{k: "sample_query_string", v: &in.SampleQueryString},
+		{k: "sample_headers", v: &in.SampleHeaders},
+		{k: "sample_body", v: &in.SampleBody},
 		{k: "started_rule_type", v: &in.StartedRuleType},
 		{k: "acknowledged_rule_type", v: &in.AcknowledgedRuleType},
 		{k: "resolved_rule_type", v: &in.ResolvedRuleType},
@@ -298,10 +353,10 @@ func emailIntegrationRef(in *emailIntegration) []struct {
 	}
 }
 
-func emailIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var in emailIntegration
+func amazonSnsIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var in amazonSnsIntegration
 
-	for _, e := range emailIntegrationRef(&in) {
+	for _, e := range amazonSnsIntegrationRef(&in) {
 		if isRulesAttribute(e.k) {
 			loadIntegrationRules(d, e.k, e.v.(**[]integrationRule))
 		} else if isFieldAttribute(e.k) {
@@ -313,28 +368,28 @@ func emailIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 	load(d, "team_name", &in.TeamName)
-	var out emailIntegrationHTTPResponse
-	if err := resourceCreate(ctx, meta, "/api/v2/email-integrations", &in, &out); err != nil {
+	var out amazonSnsIntegrationHTTPResponse
+	if err := resourceCreate(ctx, meta, "/api/v2/amazon-sns", &in, &out); err != nil {
 		return err
 	}
 	d.SetId(out.Data.ID)
-	return emailIntegrationCopyAttrs(d, &out.Data.Attributes)
+	return amazonSnsIntegrationCopyAttrs(d, &out.Data.Attributes)
 }
 
-func emailIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var out emailIntegrationHTTPResponse
-	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/email-integrations/%s", url.PathEscape(d.Id())), &out); err != nil {
+func amazonSnsIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var out amazonSnsIntegrationHTTPResponse
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/amazon-sns/%s", url.PathEscape(d.Id())), &out); err != nil {
 		return err
 	} else if !ok {
 		d.SetId("") // Force "create" on 404.
 		return nil
 	}
-	return emailIntegrationCopyAttrs(d, &out.Data.Attributes)
+	return amazonSnsIntegrationCopyAttrs(d, &out.Data.Attributes)
 }
 
-func emailIntegrationCopyAttrs(d *schema.ResourceData, in *emailIntegration) diag.Diagnostics {
+func amazonSnsIntegrationCopyAttrs(d *schema.ResourceData, in *amazonSnsIntegration) diag.Diagnostics {
 	var derr diag.Diagnostics
-	for _, e := range emailIntegrationRef(in) {
+	for _, e := range amazonSnsIntegrationRef(in) {
 		value := reflect.Indirect(reflect.ValueOf(e.v)).Interface()
 		// Handle field attributes that need special formatting (null or set of 1 element)
 		if isFieldAttribute(e.k) {
@@ -351,10 +406,10 @@ func emailIntegrationCopyAttrs(d *schema.ResourceData, in *emailIntegration) dia
 	return derr
 }
 
-func emailIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var in emailIntegration
-	var out policyHTTPResponse
-	for _, e := range emailIntegrationRef(&in) {
+func amazonSnsIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var in amazonSnsIntegration
+	var out amazonSnsIntegrationHTTPResponse
+	for _, e := range amazonSnsIntegrationRef(&in) {
 		if d.HasChange(e.k) {
 			if isRulesAttribute(e.k) {
 				loadIntegrationRules(d, e.k, e.v.(**[]integrationRule))
@@ -368,9 +423,15 @@ func emailIntegrationUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	return resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/email-integrations/%s", url.PathEscape(d.Id())), &in, &out)
+	// Copying the response back matters more here than for a plain incoming webhook: topic_arn and
+	// subscription_state flip on their own when AWS answers the handshake, so an update that did not
+	// refresh them would leave an integration confirmed between applies looking unconfirmed in state.
+	if err := resourceUpdate(ctx, meta, fmt.Sprintf("/api/v2/amazon-sns/%s", url.PathEscape(d.Id())), &in, &out); err != nil {
+		return err
+	}
+	return amazonSnsIntegrationCopyAttrs(d, &out.Data.Attributes)
 }
 
-func emailIntegrationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/email-integrations/%s", url.PathEscape(d.Id())))
+func amazonSnsIntegrationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceDelete(ctx, meta, fmt.Sprintf("/api/v2/amazon-sns/%s", url.PathEscape(d.Id())))
 }
