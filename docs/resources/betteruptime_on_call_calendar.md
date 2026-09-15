@@ -23,6 +23,19 @@ resource "betteruptime_on_call_calendar" "this" {
     rotation_interval  = "day"
     start_rotations_at = "2025-01-01T00:00:00Z"
     end_rotations_at   = "2030-01-01T00:00:00Z"
+    timezone           = "Europe/Prague"
+
+    # One block per day and window, so a Monday to Friday schedule takes five blocks
+    working_hours {
+      day        = "monday"
+      start_time = "09:00"
+      end_time   = "17:00"
+    }
+    working_hours {
+      day        = "friday"
+      start_time = "09:00"
+      end_time   = "17:00"
+    }
   }
 }
 ```
@@ -55,6 +68,21 @@ Required:
 - `rotation_length` (Number) The length of each rotation shift. See `rotation_interval` for units.
 - `start_rotations_at` (String) Start time of the rotation in RFC 3339 format (e.g. `2026-01-01T00:00:00Z`)
 - `users` (List of String) List of email addresses for users participating in the rotation.
+
+Optional:
+
+- `timezone` (String) Time zone the rotation's start time and working hours are interpreted in, an IANA name such as `Europe/Prague`. Omit to keep the time zone the rotation already has; a new rotation with working hours and no time zone uses UTC.
+- `working_hours` (Block List) Windows during which the rotation pages anyone, one block per day and window. Omit for a rotation that is active around the clock; omitting it on an existing rotation removes its working hours. A window whose `end_time` is not after `start_time` runs overnight. (see [below for nested schema](#nestedblock--on_call_rotation--working_hours))
+
+<a id="nestedblock--on_call_rotation--working_hours"></a>
+### Nested Schema for `on_call_rotation.working_hours`
+
+Required:
+
+- `day` (String) Day of the week. Must be one of: `sunday`, `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`.
+- `end_time` (String) End of the window as `HH:MM` on a 24-hour clock (e.g. `17:00`).
+- `start_time` (String) Start of the window as `HH:MM` on a 24-hour clock (e.g. `09:00`).
+
 
 
 <a id="nestedatt--on_call_users"></a>

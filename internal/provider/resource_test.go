@@ -148,6 +148,23 @@ func (ts *TestServer) ExpectRequest(method, url, body string, statusCode int, re
 	})
 }
 
+// Swaps the response of an already-registered expectation, as a check so that it lands after the
+// step's apply and before the plan that verifies the step settled. Expectations are matched in
+// registration order and never consumed, so a later ExpectRequest would not be reached.
+func (ts *TestServer) ReplaceExpectedResponseAfterApply(method, url, response string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		ts.mu.Lock()
+		defer ts.mu.Unlock()
+		for i, expected := range ts.ExpectedRequests {
+			if expected.Method == method && expected.URL == url {
+				ts.ExpectedRequests[i].Response = response
+				return nil
+			}
+		}
+		return fmt.Errorf("no expectation registered for %s %s", method, url)
+	}
+}
+
 // Asserts that a request was made and that its body does NOT mention needle. Useful for a key
 // whose mere presence changes the API's behaviour, such as a null field the API reads as "destroy".
 func (ts *TestServer) TestCheckCalledRequestWithout(method, url, needle string) resource.TestCheckFunc {
