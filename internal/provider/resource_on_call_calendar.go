@@ -160,8 +160,8 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 
 var onCallWeekDays = []string{"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"}
 
-// HH:MM or HH:MM:SS on a 24-hour clock; the API answers HH:MM whatever was sent.
-var timeOfDayPattern = regexp.MustCompile(`^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$`)
+// HH:MM on a 24-hour clock, with an optional :00 for callers that write seconds; the API rejects any other seconds.
+var timeOfDayPattern = regexp.MustCompile(`^([01][0-9]|2[0-3]):[0-5][0-9](:00)?$`)
 
 func newOnCallCalendarResource() *schema.Resource {
 	return &schema.Resource{
