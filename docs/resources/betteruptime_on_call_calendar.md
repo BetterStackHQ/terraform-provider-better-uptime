@@ -18,10 +18,11 @@ resource "betteruptime_on_call_calendar" "this" {
 
   on_call_rotation {
     # Replace with your team members' e-mails
-    users              = ["petr@betterstack.com"]
-    rotation_length    = 1
-    rotation_interval  = "day"
-    start_rotations_at = "2025-01-01T00:00:00Z"
+    users             = ["petr@betterstack.com"]
+    rotation_length   = 1
+    rotation_interval = "day"
+    # Midnight in the rotation's time zone; the offset fixes the first shift, the zone keeps that wall clock across daylight-saving changes
+    start_rotations_at = "2025-01-01T00:00:00+01:00"
     end_rotations_at   = "2030-01-01T00:00:00Z"
     timezone           = "Europe/Prague"
 
@@ -83,8 +84,8 @@ Required:
 
 Optional:
 
-- `timezone` (String) Time zone the rotation's start time and working hours are interpreted in, an IANA name such as `Europe/Prague`. Omit to keep the time zone the rotation already has; a new rotation with working hours and no time zone uses UTC.
-- `working_hours` (Block List) Windows during which the rotation pages anyone, one block per day and window. Omit for a rotation that is active around the clock; omitting it on an existing rotation removes its working hours. A window whose `end_time` is not after `start_time` runs overnight. (see [below for nested schema](#nestedblock--on_call_rotation--working_hours))
+- `timezone` (String) Time zone the rotation's working hours are written in and its handovers follow across daylight-saving changes, an IANA name such as `Europe/Prague`. The offset in `start_rotations_at` still fixes the instant of the first shift, so write it in this time zone's offset. Omit to keep the time zone the rotation already has; a new rotation with working hours and no time zone uses UTC.
+- `working_hours` (Block List, Max: 50) Windows during which the rotation pages anyone, one block per day and window. Omit for a rotation that is active around the clock; omitting it on an existing rotation removes its working hours. A window whose `end_time` is not after `start_time` runs overnight. (see [below for nested schema](#nestedblock--on_call_rotation--working_hours))
 
 <a id="nestedblock--on_call_rotation--working_hours"></a>
 ### Nested Schema for `on_call_rotation.working_hours`

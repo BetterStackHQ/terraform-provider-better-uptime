@@ -172,6 +172,14 @@ func TestAccResourceOnCallCalendarWithWorkingHours(t *testing.T) {
 
 	defer server.Close()
 
+	tooManyWorkingHours := ""
+	for i := 0; i < 51; i++ {
+		tooManyWorkingHours += `
+				    working_hours {
+				      day = "monday"
+				    }`
+	}
+
 	resource.UnitTest(t, resource.TestCase{
 		IsUnitTest:        true,
 		ProviderFactories: testProviderFactories(server.URL),
@@ -261,7 +269,43 @@ func TestAccResourceOnCallCalendarWithWorkingHours(t *testing.T) {
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`expected a time of day as HH:MM \(24-hour clock\), got 9am`),
 			},
-			// Step 4 - remove the working hours, keeping the rest of the rotation
+			// Step 4 - test more working hours than the API accepts
+			{
+				Config: testProviderBlock + fmt.Sprintf(`
+				resource "betteruptime_on_call_calendar" "test" {
+				  name = "%s"
+				  on_call_rotation {
+				    users              = ["user1@example.com"]
+				    rotation_length    = 1
+				    rotation_interval  = "day"
+				    start_rotations_at = "2026-01-05T00:00:00Z"
+				    end_rotations_at   = "2027-01-05T00:00:00Z"
+%s
+				  }
+				}
+				`, name, tooManyWorkingHours),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Too many working_hours blocks`),
+			},
+			// Step 5 - test a blank time zone
+			{
+				Config: testProviderBlock + fmt.Sprintf(`
+				resource "betteruptime_on_call_calendar" "test" {
+				  name = "%s"
+				  on_call_rotation {
+				    users              = ["user1@example.com"]
+				    rotation_length    = 1
+				    rotation_interval  = "day"
+				    start_rotations_at = "2026-01-05T00:00:00Z"
+				    end_rotations_at   = "2027-01-05T00:00:00Z"
+				    timezone           = " "
+				  }
+				}
+				`, name),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`(?s)timezone.*to not be an empty string or whitespace`),
+			},
+			// Step 6 - remove the working hours, keeping the rest of the rotation
 			{
 				Config: testProviderBlock + fmt.Sprintf(`
 				resource "betteruptime_on_call_calendar" "test" {
@@ -292,7 +336,8 @@ func TestAccResourceOnCallCalendarWithWholeDayWorkingHours(t *testing.T) {
 	name := "Whole Day Calendar"
 	rotationURL := "/api/v2/on-calls/123/rotation"
 	rotationRequest := `{"end_rotations_at":"2027-01-05T00:00:00Z","rotation_interval":"day","rotation_length":1,"start_rotations_at":"2026-01-05T00:00:00Z","users":["user1@example.com"],"working_hours":[{"day":"sunday","end_time":"00:00","start_time":"00:00"}]}`
-	rotationResponse := `{"users":["user1@example.com"],"rotation_length":1,"rotation_interval":"day","start_rotations_at":"2026-01-05T00:00:00Z","end_rotations_at":"2027-01-05T00:00:00Z","timezone":null,"effective_timezone":"UTC","working_hours":[{"day":"sunday","start_time":"00:00","end_time":"00:00"}]}`
+	// A rotation created with working hours and no time zone is stored as UTC and answers with it.
+	rotationResponse := `{"users":["user1@example.com"],"rotation_length":1,"rotation_interval":"day","start_rotations_at":"2026-01-05T00:00:00Z","end_rotations_at":"2027-01-05T00:00:00Z","timezone":"UTC","effective_timezone":"UTC","working_hours":[{"day":"sunday","start_time":"00:00","end_time":"00:00"}]}`
 
 	server := newResourceServer(t, "/api/v2/on-calls", id)
 
@@ -324,6 +369,7 @@ func TestAccResourceOnCallCalendarWithWholeDayWorkingHours(t *testing.T) {
 				}
 				`, name),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.timezone", "UTC"),
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.#", "1"),
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.0.day", "sunday"),
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.0.start_time", "00:00"),
@@ -529,7 +575,51 @@ func TestAccResourceOnCallCalendarWorkingHoursDrift(t *testing.T) {
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.1.day", "friday"),
 					server.TestCheckCalledRequest("POST", rotationURL, rotationRequest),
 					server.TestCheckCalledRequestWithout("POST", rotationURL, "wednesday"),
+					// The create in step 1 satisfies the checks above on its own, so this pins the step's own POST.
+					server.TestCheckCalledRequestCount("POST", rotationURL, 2),
 					server.ReplaceExpectedResponseAfterApply("GET", rotationURL, rotationResponse),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceOnCallCalendarLegacyRotationResponse(t *testing.T) {
+	id := "123"
+	name := "Legacy Calendar"
+	rotationURL := "/api/v2/on-calls/123/rotation"
+	rotationRequest := `{"end_rotations_at":"2027-01-05T00:00:00Z","rotation_interval":"day","rotation_length":1,"start_rotations_at":"2026-01-05T00:00:00Z","users":["user1@example.com"]}`
+	// The shape the API answered with before it learned about time zones and working hours.
+	rotationResponse := `{"users":["user1@example.com"],"rotation_length":1,"rotation_interval":"day","start_rotations_at":"2026-01-05T00:00:00Z","end_rotations_at":"2027-01-05T00:00:00Z"}`
+
+	server := newResourceServer(t, "/api/v2/on-calls", id)
+
+	server.ExpectRequest("POST", rotationURL, rotationRequest, http.StatusCreated, rotationResponse)
+	server.ExpectRequest("GET", rotationURL, "", http.StatusOK, rotationResponse)
+
+	defer server.Close()
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: testProviderFactories(server.URL),
+		Steps: []resource.TestStep{
+			// Step 1 - a response without the new keys decodes, and the step's follow-up plan is empty
+			{
+				Config: testProviderBlock + fmt.Sprintf(`
+				resource "betteruptime_on_call_calendar" "test" {
+				  name = "%s"
+				  on_call_rotation {
+				    users              = ["user1@example.com"]
+				    rotation_length    = 1
+				    rotation_interval  = "day"
+				    start_rotations_at = "2026-01-05T00:00:00Z"
+				    end_rotations_at   = "2027-01-05T00:00:00Z"
+				  }
+				}
+				`, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.#", "0"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.timezone", ""),
 				),
 			},
 		},

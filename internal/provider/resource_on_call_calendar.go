@@ -120,15 +120,18 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 					DiffSuppressFunc: diffSuppressRFC3339DateTime,
 				},
 				"timezone": {
-					Description: "Time zone the rotation's start time and working hours are interpreted in, an IANA name such as `Europe/Prague`. Omit to keep the time zone the rotation already has; a new rotation with working hours and no time zone uses UTC.",
-					Type:        schema.TypeString,
-					Optional:    true,
-					Computed:    true,
+					Description:  "Time zone the rotation's working hours are written in and its handovers follow across daylight-saving changes, an IANA name such as `Europe/Prague`. The offset in `start_rotations_at` still fixes the instant of the first shift, so write it in this time zone's offset. Omit to keep the time zone the rotation already has; a new rotation with working hours and no time zone uses UTC.",
+					Type:         schema.TypeString,
+					Optional:     true,
+					Computed:     true,
+					ValidateFunc: validation.StringIsNotWhiteSpace,
 				},
 				"working_hours": {
 					Description: "Windows during which the rotation pages anyone, one block per day and window. Omit for a rotation that is active around the clock; omitting it on an existing rotation removes its working hours. A window whose `end_time` is not after `start_time` runs overnight.",
 					Type:        schema.TypeList,
 					Optional:    true,
+					// The API rejects a 51st window, and a plan-time error beats an apply that fails halfway.
+					MaxItems: 50,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"day": {

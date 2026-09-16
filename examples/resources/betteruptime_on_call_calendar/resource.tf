@@ -3,10 +3,11 @@ resource "betteruptime_on_call_calendar" "this" {
 
   on_call_rotation {
     # Replace with your team members' e-mails
-    users              = ["petr@betterstack.com"]
-    rotation_length    = 1
-    rotation_interval  = "day"
-    start_rotations_at = "2025-01-01T00:00:00Z"
+    users             = ["petr@betterstack.com"]
+    rotation_length   = 1
+    rotation_interval = "day"
+    # Midnight in the rotation's time zone; the offset fixes the first shift, the zone keeps that wall clock across daylight-saving changes
+    start_rotations_at = "2025-01-01T00:00:00+01:00"
     end_rotations_at   = "2030-01-01T00:00:00Z"
     timezone           = "Europe/Prague"
 

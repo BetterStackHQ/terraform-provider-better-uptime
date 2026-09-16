@@ -199,3 +199,22 @@ func (ts *TestServer) TestCheckCalledRequest(method, url, body string) resource.
 		return fmt.Errorf(`expected request %s %s with body "%s" not found`, method, url, body)
 	}
 }
+
+// Asserts how many matching requests were made. CalledRequests spans the whole test, so a check
+// that only looks for one request is already satisfied by an identical one from an earlier step.
+func (ts *TestServer) TestCheckCalledRequestCount(method, url string, expected int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		ts.mu.Lock()
+		defer ts.mu.Unlock()
+		count := 0
+		for _, req := range ts.CalledRequests {
+			if req.Method == method && req.URL == url {
+				count++
+			}
+		}
+		if count != expected {
+			return fmt.Errorf("expected %d requests %s %s, got %d", expected, method, url, count)
+		}
+		return nil
+	}
+}
