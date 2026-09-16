@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
@@ -266,7 +267,12 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 	// Only set rotation if it exists
 	var rotationList []onCallRotation
 	if rot != nil {
-		rotationList = []onCallRotation{*rot}
+		rotation := *rot
+		if rotation.WorkingHours != nil {
+			workingHours := reorderOnCallWorkingHours(d, *rotation.WorkingHours)
+			rotation.WorkingHours = &workingHours
+		}
+		rotationList = []onCallRotation{rotation}
 	}
 	if err := d.Set("on_call_rotation", rotationList); err != nil {
 		derr = append(derr, diag.FromErr(err)[0])
@@ -330,6 +336,62 @@ func normalizeTimeOfDay(value string) string {
 	}
 
 	return value
+}
+
+// The API stores the windows as a set and returns them in canonical order, Sunday first and then by
+// start time; an ordered block list has to keep the operator's order or every plan diffs on order alone.
+func reorderOnCallWorkingHours(d *schema.ResourceData, workingHours []onCallWorkingHour) []onCallWorkingHour {
+	existing, ok := d.Get("on_call_rotation.0.working_hours").([]interface{})
+	if !ok || len(existing) == 0 {
+		return workingHours
+	}
+
+	value := func(v *string) string {
+		if v == nil {
+			return ""
+		}
+		return *v
+	}
+
+	used := make([]bool, len(workingHours))
+	ordered := make([]onCallWorkingHour, 0, len(workingHours))
+
+	for _, e := range existing {
+		em, ok := e.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		day, _ := em["day"].(string)
+		startTime, _ := em["start_time"].(string)
+		endTime, _ := em["end_time"].(string)
+		signature := onCallWorkingHourSignature(day, startTime, endTime)
+
+		for i, workingHour := range workingHours {
+			if used[i] {
+				continue
+			}
+			if onCallWorkingHourSignature(value(workingHour.Day), value(workingHour.StartTime), value(workingHour.EndTime)) == signature {
+				used[i] = true
+				ordered = append(ordered, workingHour)
+				break
+			}
+		}
+	}
+
+	// A window the configuration does not have, such as one added in Better Stack, lands at the end in
+	// the API's own order, so the next plan still shows it as a removal.
+	for i, workingHour := range workingHours {
+		if !used[i] {
+			ordered = append(ordered, workingHour)
+		}
+	}
+
+	return ordered
+}
+
+// The times are compared as HH:MM, so a configured 09:00:00 pairs with the 09:00 the API returns.
+func onCallWorkingHourSignature(day, startTime, endTime string) string {
+	return strings.Join([]string{day, normalizeTimeOfDay(startTime), normalizeTimeOfDay(endTime)}, "\x00")
 }
 
 // Terraform hands back every key of the block, zero-valued when unconfigured; the API treats a blank

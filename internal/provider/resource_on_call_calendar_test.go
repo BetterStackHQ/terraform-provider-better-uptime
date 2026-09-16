@@ -393,6 +393,80 @@ func TestAccResourceOnCallCalendarWithSplitDayWorkingHours(t *testing.T) {
 	})
 }
 
+func TestAccResourceOnCallCalendarUnsortedWorkingHours(t *testing.T) {
+	id := "123"
+	name := "Unsorted Calendar"
+	rotationURL := "/api/v2/on-calls/123/rotation"
+	rotationRequest := `{"end_rotations_at":"2027-01-05T00:00:00Z","rotation_interval":"day","rotation_length":1,"start_rotations_at":"2026-01-05T00:00:00Z","users":["user1@example.com"],"working_hours":[{"day":"monday","end_time":"17:00","start_time":"09:00"},{"day":"saturday","end_time":"00:00","start_time":"00:00"},{"day":"friday","end_time":"12:00","start_time":"09:00"},{"day":"friday","end_time":"17:00","start_time":"12:30"}]}`
+	// The API stores the windows as a set and answers in canonical order, Sunday first and then by start time.
+	rotationResponse := `{"users":["user1@example.com"],"rotation_length":1,"rotation_interval":"day","start_rotations_at":"2026-01-05T00:00:00Z","end_rotations_at":"2027-01-05T00:00:00Z","timezone":null,"effective_timezone":"UTC","working_hours":[{"day":"monday","start_time":"09:00","end_time":"17:00"},{"day":"friday","start_time":"09:00","end_time":"12:00"},{"day":"friday","start_time":"12:30","end_time":"17:00"},{"day":"saturday","start_time":"00:00","end_time":"00:00"}]}`
+
+	server := newResourceServer(t, "/api/v2/on-calls", id)
+
+	server.ExpectRequest("POST", rotationURL, rotationRequest, http.StatusCreated, rotationResponse)
+	server.ExpectRequest("GET", rotationURL, "", http.StatusOK, rotationResponse)
+
+	defer server.Close()
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: testProviderFactories(server.URL),
+		Steps: []resource.TestStep{
+			// Step 1 - blocks written out of canonical order keep the order of the config, so the
+			// step's follow-up plan is empty instead of wanting to reshuffle them on every run
+			{
+				Config: testProviderBlock + fmt.Sprintf(`
+				resource "betteruptime_on_call_calendar" "test" {
+				  name = "%s"
+				  on_call_rotation {
+				    users              = ["user1@example.com"]
+				    rotation_length    = 1
+				    rotation_interval  = "day"
+				    start_rotations_at = "2026-01-05T00:00:00Z"
+				    end_rotations_at   = "2027-01-05T00:00:00Z"
+
+				    working_hours {
+				      day        = "monday"
+				      start_time = "09:00"
+				      end_time   = "17:00"
+				    }
+				    working_hours {
+				      day = "saturday"
+				    }
+				    working_hours {
+				      day        = "friday"
+				      start_time = "09:00"
+				      end_time   = "12:00"
+				    }
+				    working_hours {
+				      day        = "friday"
+				      start_time = "12:30"
+				      end_time   = "17:00"
+				    }
+				  }
+				}
+				`, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.#", "4"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.0.day", "monday"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.0.start_time", "09:00"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.0.end_time", "17:00"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.1.day", "saturday"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.1.start_time", "00:00"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.1.end_time", "00:00"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.2.day", "friday"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.2.start_time", "09:00"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.2.end_time", "12:00"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.3.day", "friday"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.3.start_time", "12:30"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.3.end_time", "17:00"),
+					server.TestCheckCalledRequest("POST", rotationURL, rotationRequest),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceOnCallCalendarWorkingHoursDrift(t *testing.T) {
 	id := "123"
 	name := "Drifting Calendar"
