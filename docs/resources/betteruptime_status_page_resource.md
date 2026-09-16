@@ -154,17 +154,17 @@ Optional:
 
 - `email` (String) Email of the referenced user when type is `User`.
 - `item_id` (String) ID of the referenced item when type is different than `String`.
-- `name` (String) Name of the referenced item when type is different than `String`.
+- `name` (String) Name of the referenced item when type is different than `String`. Not available for `Endpoint`, `SlackIntegration`, and `ZapierWebhook`, which are referenced by `item_id`.
 - `type` (String) Value types can be grouped into 2 main categories:
   - **Scalar**: `String`
-  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `Source`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
+  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `Endpoint`, `Source`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
   
   The value of a **Scalar** type is defined using the value field.
   
   The value of a **Reference** type is defined using one of the following fields:
   - `item_id` - great choice when you know the ID of the target item.
   - `email` - your go-to choice when you're referencing users.
-  - `name` - can be used to reference other items like teams, policies, etc.
+  - `name` - can be used to reference other items like teams, policies, etc. Not available for `Endpoint`, `SlackIntegration`, and `ZapierWebhook`, which are referenced by `item_id`.
   
   **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
 - `value` (String) Value when type is String.
@@ -186,17 +186,17 @@ Optional:
 
 - `email` (String) Email of the referenced user when type is `User`.
 - `item_id` (String) ID of the referenced item when type is different than `String`.
-- `name` (String) Name of the referenced item when type is different than `String`.
+- `name` (String) Name of the referenced item when type is different than `String`. Not available for `Endpoint`, `SlackIntegration`, and `ZapierWebhook`, which are referenced by `item_id`.
 - `type` (String) Value types can be grouped into 2 main categories:
   - **Scalar**: `String`
-  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `Source`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
+  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `Endpoint`, `Source`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
   
   The value of a **Scalar** type is defined using the value field.
   
   The value of a **Reference** type is defined using one of the following fields:
   - `item_id` - great choice when you know the ID of the target item.
   - `email` - your go-to choice when you're referencing users.
-  - `name` - can be used to reference other items like teams, policies, etc.
+  - `name` - can be used to reference other items like teams, policies, etc. Not available for `Endpoint`, `SlackIntegration`, and `ZapierWebhook`, which are referenced by `item_id`.
   
   **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
 - `value` (String) Value when type is String.
