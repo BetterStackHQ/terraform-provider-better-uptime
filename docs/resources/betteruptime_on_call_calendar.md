@@ -25,15 +25,27 @@ resource "betteruptime_on_call_calendar" "this" {
     end_rotations_at   = "2030-01-01T00:00:00Z"
     timezone           = "Europe/Prague"
 
-    # One block per day and window, so a Monday to Friday schedule takes five blocks
+    # One block per day and window
     working_hours {
       day        = "monday"
       start_time = "09:00"
       end_time   = "17:00"
     }
+
+    # Omit the times for a whole day
+    working_hours {
+      day = "saturday"
+    }
+
+    # Several blocks for one day are allowed
     working_hours {
       day        = "friday"
       start_time = "09:00"
+      end_time   = "12:00"
+    }
+    working_hours {
+      day        = "friday"
+      start_time = "12:30"
       end_time   = "17:00"
     }
   }
@@ -80,8 +92,11 @@ Optional:
 Required:
 
 - `day` (String) Day of the week. Must be one of: `sunday`, `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`.
-- `end_time` (String) End of the window as `HH:MM` on a 24-hour clock (e.g. `17:00`).
-- `start_time` (String) Start of the window as `HH:MM` on a 24-hour clock (e.g. `09:00`).
+
+Optional:
+
+- `end_time` (String) End of the window as `HH:MM` on a 24-hour clock (e.g. `17:00`). Ends at midnight when omitted, so a block with both times omitted covers the whole day.
+- `start_time` (String) Start of the window as `HH:MM` on a 24-hour clock (e.g. `09:00`). Starts at midnight when omitted.
 
 
 
