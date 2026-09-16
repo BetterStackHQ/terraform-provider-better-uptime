@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
@@ -117,10 +119,55 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 					ValidateDiagFunc: validateRFC3339DateTime,
 					DiffSuppressFunc: diffSuppressRFC3339DateTime,
 				},
+				"timezone": {
+					Description:  "Time zone the rotation's working hours are written in and its handovers follow across daylight-saving changes, an IANA name such as `Europe/Prague`. The offset in `start_rotations_at` still fixes the instant of the first shift, so write it in this time zone's offset. Omit to keep the time zone the rotation already has; a new rotation with working hours and no time zone uses UTC.",
+					Type:         schema.TypeString,
+					Optional:     true,
+					Computed:     true,
+					ValidateFunc: validation.StringIsNotWhiteSpace,
+				},
+				"working_hours": {
+					Description: "Windows during which the rotation pages anyone, one block per day and window. Omit for a rotation that is active around the clock; omitting it on an existing rotation removes its working hours. A window whose `end_time` is not after `start_time` runs overnight.",
+					Type:        schema.TypeList,
+					Optional:    true,
+					// The API rejects a 51st window, and a plan-time error beats an apply that fails halfway.
+					MaxItems: 50,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"day": {
+								Description:  "Day of the week. Must be one of: `sunday`, `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`.",
+								Type:         schema.TypeString,
+								Required:     true,
+								ValidateFunc: validation.StringInSlice(onCallWeekDays, false),
+							},
+							"start_time": {
+								Description:      "Start of the window as `HH:MM` on a 24-hour clock (e.g. `09:00`). Starts at midnight when omitted.",
+								Type:             schema.TypeString,
+								Optional:         true,
+								Default:          "00:00",
+								ValidateDiagFunc: validateTimeOfDay,
+								DiffSuppressFunc: diffSuppressTimeOfDay,
+							},
+							"end_time": {
+								Description:      "End of the window as `HH:MM` on a 24-hour clock (e.g. `17:00`). Ends at midnight when omitted, so a block with both times omitted covers the whole day.",
+								Type:             schema.TypeString,
+								Optional:         true,
+								Default:          "00:00",
+								ValidateDiagFunc: validateTimeOfDay,
+								DiffSuppressFunc: diffSuppressTimeOfDay,
+							},
+						},
+					},
+				},
 			},
 		},
 	},
 }
+
+var onCallWeekDays = []string{"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"}
+
+// HH:MM on a 24-hour clock, with an optional :00 for callers that write seconds; the API rejects any other seconds.
+var timeOfDayPattern = regexp.MustCompile(`^([01][0-9]|2[0-3]):[0-5][0-9](:00)?$`)
 
 func newOnCallCalendarResource() *schema.Resource {
 	return &schema.Resource{
@@ -144,12 +191,20 @@ type onCallCalendar struct {
 	TeamName        *string `json:"team_name,omitempty"`
 }
 
+type onCallWorkingHour struct {
+	Day       *string `mapstructure:"day,omitempty" json:"day,omitempty"`
+	StartTime *string `mapstructure:"start_time,omitempty" json:"start_time,omitempty"`
+	EndTime   *string `mapstructure:"end_time,omitempty" json:"end_time,omitempty"`
+}
+
 type onCallRotation struct {
-	Users            *[]string `mapstructure:"users,omitempty" json:"users,omitempty"`
-	RotationLength   *int      `mapstructure:"rotation_length,omitempty" json:"rotation_length,omitempty"`
-	RotationInterval *string   `mapstructure:"rotation_interval,omitempty" json:"rotation_interval,omitempty"`
-	StartRotationsAt *string   `mapstructure:"start_rotations_at,omitempty" json:"start_rotations_at,omitempty"`
-	EndRotationsAt   *string   `mapstructure:"end_rotations_at,omitempty" json:"end_rotations_at,omitempty"`
+	Users            *[]string            `mapstructure:"users,omitempty" json:"users,omitempty"`
+	RotationLength   *int                 `mapstructure:"rotation_length,omitempty" json:"rotation_length,omitempty"`
+	RotationInterval *string              `mapstructure:"rotation_interval,omitempty" json:"rotation_interval,omitempty"`
+	StartRotationsAt *string              `mapstructure:"start_rotations_at,omitempty" json:"start_rotations_at,omitempty"`
+	EndRotationsAt   *string              `mapstructure:"end_rotations_at,omitempty" json:"end_rotations_at,omitempty"`
+	Timezone         *string              `mapstructure:"timezone,omitempty" json:"timezone,omitempty"`
+	WorkingHours     *[]onCallWorkingHour `mapstructure:"working_hours,omitempty" json:"working_hours,omitempty"`
 }
 
 type onCallRelationships struct {
@@ -215,7 +270,12 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 	// Only set rotation if it exists
 	var rotationList []onCallRotation
 	if rot != nil {
-		rotationList = []onCallRotation{*rot}
+		rotation := *rot
+		if rotation.WorkingHours != nil {
+			workingHours := reorderOnCallWorkingHours(d, *rotation.WorkingHours)
+			rotation.WorkingHours = &workingHours
+		}
+		rotationList = []onCallRotation{rotation}
 	}
 	if err := d.Set("on_call_rotation", rotationList); err != nil {
 		derr = append(derr, diag.FromErr(err)[0])
@@ -255,6 +315,106 @@ func diffSuppressRFC3339DateTime(k, old, new string, d *schema.ResourceData) boo
 	return oldTime.UTC().Equal(newTime.UTC())
 }
 
+func validateTimeOfDay(i interface{}, p cty.Path) diag.Diagnostics {
+	v, ok := i.(string)
+	if !ok {
+		return diag.Errorf("expected type to be string")
+	}
+
+	if !timeOfDayPattern.MatchString(v) {
+		return diag.Errorf("expected a time of day as HH:MM (24-hour clock), got %s", v)
+	}
+
+	return nil
+}
+
+func diffSuppressTimeOfDay(k, old, new string, d *schema.ResourceData) bool {
+	return normalizeTimeOfDay(old) == normalizeTimeOfDay(new)
+}
+
+// Seconds are dropped rather than compared: the API stores HH:MM:SS but only ever returns HH:MM.
+func normalizeTimeOfDay(value string) string {
+	if len(value) > 5 && timeOfDayPattern.MatchString(value) {
+		return value[:5]
+	}
+
+	return value
+}
+
+// The API stores the windows as a set and returns them in canonical order, Sunday first and then by
+// start time; an ordered block list has to keep the operator's order or every plan diffs on order alone.
+func reorderOnCallWorkingHours(d *schema.ResourceData, workingHours []onCallWorkingHour) []onCallWorkingHour {
+	existing, ok := d.Get("on_call_rotation.0.working_hours").([]interface{})
+	if !ok || len(existing) == 0 {
+		return workingHours
+	}
+
+	value := func(v *string) string {
+		if v == nil {
+			return ""
+		}
+		return *v
+	}
+
+	used := make([]bool, len(workingHours))
+	ordered := make([]onCallWorkingHour, 0, len(workingHours))
+
+	for _, e := range existing {
+		em, ok := e.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		day, _ := em["day"].(string)
+		startTime, _ := em["start_time"].(string)
+		endTime, _ := em["end_time"].(string)
+		signature := onCallWorkingHourSignature(day, startTime, endTime)
+
+		for i, workingHour := range workingHours {
+			if used[i] {
+				continue
+			}
+			if onCallWorkingHourSignature(value(workingHour.Day), value(workingHour.StartTime), value(workingHour.EndTime)) == signature {
+				used[i] = true
+				ordered = append(ordered, workingHour)
+				break
+			}
+		}
+	}
+
+	// A window the configuration does not have, such as one added in Better Stack, lands at the end in
+	// the API's own order, so the next plan still shows it as a removal.
+	for i, workingHour := range workingHours {
+		if !used[i] {
+			ordered = append(ordered, workingHour)
+		}
+	}
+
+	return ordered
+}
+
+// The times are compared as HH:MM, so a configured 09:00:00 pairs with the 09:00 the API returns.
+func onCallWorkingHourSignature(day, startTime, endTime string) string {
+	return strings.Join([]string{day, normalizeTimeOfDay(startTime), normalizeTimeOfDay(endTime)}, "\x00")
+}
+
+// Terraform hands back every key of the block, zero-valued when unconfigured; the API treats a blank
+// timezone and an empty working_hours list as "not sent", and the request should say the same.
+func onCallRotationRequest(block interface{}) map[string]interface{} {
+	request := map[string]interface{}{}
+	for key, value := range block.(map[string]interface{}) {
+		request[key] = value
+	}
+
+	if timezone, _ := request["timezone"].(string); timezone == "" {
+		delete(request, "timezone")
+	}
+	if workingHours, _ := request["working_hours"].([]interface{}); len(workingHours) == 0 {
+		delete(request, "working_hours")
+	}
+
+	return request
+}
+
 func resourceOnCallCalendarCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var in onCallCalendar
 	for _, e := range onCallCalendarRef(&in) {
@@ -278,7 +438,7 @@ func resourceOnCallCalendarCreate(ctx context.Context, d *schema.ResourceData, m
 
 	if inRotations, ok := d.GetOk("on_call_rotation"); ok && len(inRotations.([]interface{})) > 0 {
 		var outRotation onCallRotation
-		if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), inRotations.([]interface{})[0], &outRotation); err != nil {
+		if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), onCallRotationRequest(inRotations.([]interface{})[0]), &outRotation); err != nil {
 			return err
 		}
 		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
@@ -345,7 +505,7 @@ func resourceOnCallCalendarUpdate(ctx context.Context, d *schema.ResourceData, m
 	if d.HasChange("on_call_rotation") {
 		if inRotations, ok := d.GetOk("on_call_rotation"); ok && len(inRotations.([]interface{})) > 0 {
 			var outRotation onCallRotation
-			if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), inRotations.([]interface{})[0], &outRotation); err != nil {
+			if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), onCallRotationRequest(inRotations.([]interface{})[0]), &outRotation); err != nil {
 				return err
 			}
 			return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)

@@ -54,7 +54,19 @@ Read-Only:
 - `rotation_interval` (String)
 - `rotation_length` (Number)
 - `start_rotations_at` (String)
+- `timezone` (String)
 - `users` (List of String)
+- `working_hours` (List of Object) (see [below for nested schema](#nestedobjatt--on_call_rotation--working_hours))
+
+<a id="nestedobjatt--on_call_rotation--working_hours"></a>
+### Nested Schema for `on_call_rotation.working_hours`
+
+Read-Only:
+
+- `day` (String)
+- `end_time` (String)
+- `start_time` (String)
+
 
 
 <a id="nestedatt--on_call_users"></a>
