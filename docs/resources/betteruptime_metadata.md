@@ -97,6 +97,18 @@ resource "betteruptime_metadata" "source" {
   }
 }
 
+# A Monitor-typed metadata value referencing another monitor by id
+# (monitors are the `Endpoint` type and cannot be referenced by name)
+resource "betteruptime_metadata" "related_monitor" {
+  owner_type = "Monitor"
+  owner_id   = betteruptime_monitor.simple.id
+  key        = "Related monitor"
+  metadata_value {
+    type    = "Endpoint"
+    item_id = betteruptime_monitor.simple.id
+  }
+}
+
 # Metadata on an Amazon SNS integration
 resource "betteruptime_metadata" "amazon_sns_account" {
   owner_type = "AmazonSnsIntegration"
@@ -115,11 +127,11 @@ resource "betteruptime_metadata" "amazon_sns_account" {
 
 - `key` (String) The key of this Metadata.
 - `owner_id` (String) The ID of the owner of this Metadata.
-- `owner_type` (String) The type of the owner of this Metadata. Valid values: `Monitor`, `Heartbeat`, `Incident`, `WebhookIntegration`, `EmailIntegration`, `IncomingWebhook`, `AmazonSnsIntegration`, `CallRouting`
+- `owner_type` (String) The type of the owner of this Metadata. Valid values: `Monitor`, `Heartbeat`, `Incident`, `WebhookIntegration`, `EmailIntegration`, `IncomingWebhook`, `AmazonSnsIntegration`
 
 ### Optional
 
-- `metadata_value` (Block List) An array of typed metadata values of this Metadata. (see [below for nested schema](#nestedblock--metadata_value))
+- `metadata_value` (Block List) An array of typed metadata values of this Metadata. All values of one key must share the same type and must not repeat. (see [below for nested schema](#nestedblock--metadata_value))
 - `team_name` (String, Deprecated) Used to specify the team the resource should be created in when using global tokens. This field is deprecated, team name doesn't have to be specified for this resource anymore. You can't update this value later.
 - `value` (String, Deprecated) The value of this Metadata. This field is deprecated, use repeatable block metadata_value to define values with types instead.
 
@@ -136,17 +148,17 @@ Optional:
 
 - `email` (String) Email of the referenced user when type is `User`.
 - `item_id` (String) ID of the referenced item when type is different than `String`.
-- `name` (String) Name of the referenced item when type is different than `String`.
+- `name` (String) Name of the referenced item when type is different than `String`. Not available for `Endpoint`, `SlackIntegration`, and `ZapierWebhook`, which are referenced by `item_id`.
 - `type` (String) Value types can be grouped into 2 main categories:
   - **Scalar**: `String`
-  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `Source`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
+  - **Reference**: `User`, `Team`, `Policy`, `Schedule`, `Endpoint`, `Source`, `SlackIntegration`, `LinearIntegration`, `JiraIntegration`, `MicrosoftTeamsWebhook`, `ZapierWebhook`, `NativeWebhook`, `PagerDutyWebhook`
   
   The value of a **Scalar** type is defined using the value field.
   
   The value of a **Reference** type is defined using one of the following fields:
   - `item_id` - great choice when you know the ID of the target item.
   - `email` - your go-to choice when you're referencing users.
-  - `name` - can be used to reference other items like teams, policies, etc.
+  - `name` - can be used to reference other items like teams, policies, etc. Not available for `Endpoint`, `SlackIntegration`, and `ZapierWebhook`, which are referenced by `item_id`.
   
   **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**
 - `value` (String) Value when type is String.

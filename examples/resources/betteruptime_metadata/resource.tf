@@ -82,6 +82,18 @@ resource "betteruptime_metadata" "source" {
   }
 }
 
+# A Monitor-typed metadata value referencing another monitor by id
+# (monitors are the `Endpoint` type and cannot be referenced by name)
+resource "betteruptime_metadata" "related_monitor" {
+  owner_type = "Monitor"
+  owner_id   = betteruptime_monitor.simple.id
+  key        = "Related monitor"
+  metadata_value {
+    type    = "Endpoint"
+    item_id = betteruptime_monitor.simple.id
+  }
+}
+
 # Metadata on an Amazon SNS integration
 resource "betteruptime_metadata" "amazon_sns_account" {
   owner_type = "AmazonSnsIntegration"

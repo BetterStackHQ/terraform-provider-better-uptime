@@ -38,9 +38,9 @@ var metadataSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"owner_type": {
-		Description:  "The type of the owner of this Metadata. Valid values: `Monitor`, `Heartbeat`, `Incident`, `WebhookIntegration`, `EmailIntegration`, `IncomingWebhook`, `AmazonSnsIntegration`, `CallRouting`",
+		Description:  "The type of the owner of this Metadata. Valid values: `Monitor`, `Heartbeat`, `Incident`, `WebhookIntegration`, `EmailIntegration`, `IncomingWebhook`, `AmazonSnsIntegration`",
 		Type:         schema.TypeString,
-		ValidateFunc: validation.StringInSlice([]string{"Monitor", "Heartbeat", "Incident", "WebhookIntegration", "EmailIntegration", "IncomingWebhook", "AmazonSnsIntegration", "CallRouting"}, false),
+		ValidateFunc: validation.StringInSlice([]string{"Monitor", "Heartbeat", "Incident", "WebhookIntegration", "EmailIntegration", "IncomingWebhook", "AmazonSnsIntegration"}, false),
 		Required:     true,
 		ForceNew:     true,
 	},
@@ -64,7 +64,7 @@ var metadataSchema = map[string]*schema.Schema{
 		Deprecated:  "Use repeatable block metadata_value to define values with types instead.",
 	},
 	"metadata_value": {
-		Description: "An array of typed metadata values of this Metadata.",
+		Description: "An array of typed metadata values of this Metadata. All values of one key must share the same type and must not repeat.",
 		Type:        schema.TypeList,
 		Optional:    true,
 		Default:     nil,
@@ -85,7 +85,7 @@ var metadataSchema = map[string]*schema.Schema{
 }
 
 var metadataTypes = []string{
-	"String", "User", "Team", "Policy", "Schedule", "Source",
+	"String", "User", "Team", "Policy", "Schedule", "Endpoint", "Source",
 	"SlackIntegration", "LinearIntegration", "JiraIntegration",
 	"MicrosoftTeamsWebhook", "ZapierWebhook", "NativeWebhook",
 	"PagerDutyWebhook",
@@ -119,7 +119,7 @@ var metadataValueSchema = map[string]*schema.Schema{
 			"  The value of a **Reference** type is defined using one of the following fields:\n" +
 			"  - `item_id` - great choice when you know the ID of the target item.\n" +
 			"  - `email` - your go-to choice when you're referencing users.\n" +
-			"  - `name` - can be used to reference other items like teams, policies, etc.\n" +
+			"  - `name` - can be used to reference other items like teams, policies, etc. Not available for `Endpoint`, `SlackIntegration`, and `ZapierWebhook`, which are referenced by `item_id`.\n" +
 			"  \n" +
 			"  **The reference types require the presence of at least one of the three fields: `item_id`, `name`, `email`.**\n",
 		Type:         schema.TypeString,
@@ -138,7 +138,7 @@ var metadataValueSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"name": {
-		Description: "Name of the referenced item when type is different than `String`.",
+		Description: "Name of the referenced item when type is different than `String`. Not available for `Endpoint`, `SlackIntegration`, and `ZapierWebhook`, which are referenced by `item_id`.",
 		Type:        schema.TypeString,
 		Optional:    true,
 	},
