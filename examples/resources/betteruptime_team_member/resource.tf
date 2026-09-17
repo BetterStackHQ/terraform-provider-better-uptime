@@ -1,14 +1,13 @@
-# Invite a team member with the built-in member role
+# Invite a team member with the default responder role
 resource "betteruptime_team_member" "alice" {
   # Replace with your colleague's e-mail
   email = "alice@betterstack.com"
-  role  = "member"
 }
 
-# Invite a team member with the built-in team_lead role
+# Invite a team member with the built-in member role
 resource "betteruptime_team_member" "bob" {
   email = "bob@betterstack.com"
-  role  = "team_lead"
+  role  = "member"
 }
 
 # Look up a custom role by name to assign it by id
