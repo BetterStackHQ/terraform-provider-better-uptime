@@ -57,7 +57,7 @@ Or explore the [Terraform Registry provider documentation](https://registry.terr
 
 ## Development
 
-> PREREQUISITE: [go1.23+](https://golang.org/dl/).
+> PREREQUISITE: [go1.26+](https://golang.org/dl/).
 
 ```shell script
 git clone https://github.com/BetterStackHQ/terraform-provider-better-uptime && \
