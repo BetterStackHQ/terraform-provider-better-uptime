@@ -1,13 +1,5 @@
 SHELL := /bin/bash
-GOLANGCI_LINT := golangci-lint run --disable-all \
-	-E errcheck \
-	-E goimports \
-	-E gosimple \
-	-E govet \
-	-E ineffassign \
-	-E staticcheck \
-	-E typecheck \
-	-E unused
+GOLANGCI_LINT := golangci-lint run
 VERSION := 0.22.2
 .PHONY: test build
 
@@ -51,7 +43,7 @@ clean:
 	rm -rf release/
 
 lint-init:
-	@test -n "$$(which golangci-lint)" || (curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.64.6)
+	@test -n "$$(which golangci-lint)" || (curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $$(go env GOPATH)/bin v2.13.2)
 
 lint: lint-init
 	$(GOLANGCI_LINT)

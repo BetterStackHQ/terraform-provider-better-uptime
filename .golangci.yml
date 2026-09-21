@@ -1,0 +1,21 @@
+# golangci-lint v2 config mirroring the linter set previously passed as v1 CLI flags
+# (errcheck, goimports, gosimple, govet, ineffassign, staticcheck, typecheck, unused).
+version: "2"
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  settings:
+    staticcheck:
+      # SA* = former staticcheck, S1* = former gosimple
+      checks: ["SA*", "S1*"]
+  exclusions:
+    presets:
+      - std-error-handling
+formatters:
+  enable:
+    - goimports
