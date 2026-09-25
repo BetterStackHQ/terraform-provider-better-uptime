@@ -353,6 +353,9 @@ func resourcePolicyRead(ctx context.Context, d *schema.ResourceData, meta interf
 		d.SetId("") // Force "create" on 404.
 		return nil
 	}
+	if derr := setTeamNameFromAPI(d, out.Data.Attributes.TeamName); derr != nil {
+		return derr
+	}
 	return policyCopyAttrs(d, &out.Data.Attributes)
 }
 

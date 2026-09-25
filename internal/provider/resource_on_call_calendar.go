@@ -470,6 +470,9 @@ func resourceOnCallCalendarRead(ctx context.Context, d *schema.ResourceData, met
 		d.SetId("") // Force "create" on 404
 		return nil
 	}
+	if derr := setTeamNameFromAPI(d, out.Data.Attributes.TeamName); derr != nil {
+		return derr
+	}
 
 	var outRotation onCallRotation
 	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &outRotation); err != nil {

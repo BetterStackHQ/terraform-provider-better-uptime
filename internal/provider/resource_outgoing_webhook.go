@@ -295,6 +295,9 @@ func outgoingWebhookRead(ctx context.Context, d *schema.ResourceData, meta inter
 		d.SetId("")
 		return nil
 	}
+	if derr := setTeamNameFromAPI(d, out.Data.Attributes.TeamName); derr != nil {
+		return derr
+	}
 	return outgoingWebhookCopyAttrs(d, &out.Data.Attributes)
 }
 

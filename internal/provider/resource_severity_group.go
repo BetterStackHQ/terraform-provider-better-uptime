@@ -114,6 +114,9 @@ func severityGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		d.SetId("") // Force "create" on 404.
 		return nil
 	}
+	if derr := setTeamNameFromAPI(d, out.Data.Attributes.TeamName); derr != nil {
+		return derr
+	}
 	return severityGroupCopyAttrs(d, &out.Data.Attributes)
 }
 
