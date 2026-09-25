@@ -70,3 +70,88 @@ func TestTeamNameCannotBeChangedAfterCreate(t *testing.T) {
 		},
 	})
 }
+
+// TestTeamNameAfterImport verifies an imported resource can keep team_name in its config: Read
+// stores the team reported by the API, so the same team plans cleanly and a different one is
+// still rejected.
+func TestTeamNameAfterImport(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/urgency-groups", "1")
+	defer server.Close()
+	// An existing severity group, as returned by the API.
+	server.Data.Store([]byte(`{"name":"example","sort_index":1,"team_name":"First team"}`))
+
+	withTeamName := func(teamName string) string {
+		return fmt.Sprintf(`
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_severity_group" "this" {
+					name       = "example"
+					sort_index = 1
+					team_name  = "%s"
+				}
+				`, teamName)
+	}
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: testProviderFactories(server.URL),
+		Steps: []resource.TestStep{
+			{
+				Config:             withTeamName("First team"),
+				ResourceName:       "betteruptime_severity_group.this",
+				ImportState:        true,
+				ImportStateId:      "1",
+				ImportStatePersist: true,
+			},
+			{
+				Config:   withTeamName("First team"),
+				PlanOnly: true,
+			},
+			{
+				Config:      withTeamName("Second team"),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`team_name cannot be changed after resource is created`),
+			},
+		},
+	})
+}
+
+// TestTeamNameAfterImportNotReportedByAPI verifies team_name is accepted after importing a resource
+// whose API response doesn't include the team (status page groups), as there's nothing to compare.
+func TestTeamNameAfterImportNotReportedByAPI(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/status-page-groups", "1")
+	defer server.Close()
+	server.Data.Store([]byte(`{"name":"example","sort_index":1}`))
+
+	config := `
+		provider "betteruptime" {
+			api_token = "foo"
+		}
+
+		resource "betteruptime_status_page_group" "this" {
+			name       = "example"
+			sort_index = 1
+			team_name  = "First team"
+		}
+		`
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: testProviderFactories(server.URL),
+		Steps: []resource.TestStep{
+			{
+				Config:             config,
+				ResourceName:       "betteruptime_status_page_group.this",
+				ImportState:        true,
+				ImportStateId:      "1",
+				ImportStatePersist: true,
+			},
+			{
+				Config:   config,
+				PlanOnly: true,
+			},
+		},
+	})
+}

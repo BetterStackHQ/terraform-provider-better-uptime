@@ -177,6 +177,9 @@ func awsCloudWatchIntegrationRead(ctx context.Context, d *schema.ResourceData, m
 		d.SetId("") // Force "create" on 404.
 		return nil
 	}
+	if derr := setTeamNameFromAPI(d, out.Data.Attributes.TeamName); derr != nil {
+		return derr
+	}
 	return awsCloudWatchIntegrationCopyAttrs(d, &out.Data.Attributes)
 }
 
