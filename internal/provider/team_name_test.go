@@ -155,3 +155,39 @@ func TestTeamNameAfterImportNotReportedByAPI(t *testing.T) {
 		},
 	})
 }
+
+// TestTeamNameKeptAfterTeamRename verifies renaming a team doesn't break a config that still uses
+// the old name: Read keeps the team_name already in state instead of taking the API's.
+func TestTeamNameKeptAfterTeamRename(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/urgency-groups", "1")
+	defer server.Close()
+
+	config := `
+		provider "betteruptime" {
+			api_token = "foo"
+		}
+
+		resource "betteruptime_severity_group" "this" {
+			name       = "example"
+			sort_index = 1
+			team_name  = "First team"
+		}
+		`
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:        true,
+		ProviderFactories: testProviderFactories(server.URL),
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
+			{
+				PreConfig: func() {
+					server.Data.Store([]byte(`{"name":"example","sort_index":1,"team_name":"Renamed team"}`))
+				},
+				Config:   config,
+				PlanOnly: true,
+			},
+		},
+	})
+}

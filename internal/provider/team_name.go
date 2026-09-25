@@ -11,8 +11,8 @@ import (
 // teamNameSchema returns the schema for the team_name attribute shared by every resource that can
 // be created in a specific team using a global API token. The value is only used when the resource
 // is created; afterwards any change is suppressed (see DiffSuppressFunc), changing it to a
-// different non-empty value is rejected (see validateTeamNameNotChanged), and Read keeps it in sync
-// with the team the API reports (see setTeamNameFromAPI).
+// different non-empty value is rejected (see validateTeamNameNotChanged), and Read fills it in when
+// it's missing, e.g. after an import (see setTeamNameFromAPI).
 func teamNameSchema() *schema.Schema {
 	return &schema.Schema{
 		Description: "Used to specify the team the resource should be created in when using global tokens. You can't update this value later.",
@@ -25,15 +25,17 @@ func teamNameSchema() *schema.Schema {
 	}
 }
 
-// setTeamNameFromAPI stores the team the API reports the resource belongs to. Without it,
-// team_name only ever reached state from config on create, so an imported resource ended up with
-// an empty team_name and a config that sets it failed validateTeamNameNotChanged.
+// setTeamNameFromAPI fills an empty team_name with the team the API reports the resource belongs
+// to. Without it, team_name only ever reached state from config on create, so an imported resource
+// ended up with an empty team_name and a config that sets it failed validateTeamNameNotChanged.
+//
+// A team_name already in state is kept, so renaming a team doesn't turn existing configs into
+// errors in validateTeamNameNotChanged.
 //
 // Call it from resource Read only: data sources share the CopyAttrs functions but have no
 // team_name attribute.
 func setTeamNameFromAPI(d *schema.ResourceData, teamName *string) diag.Diagnostics {
-	if teamName == nil {
-		// Not reported by this endpoint, keep whatever is in state.
+	if teamName == nil || d.Get("team_name").(string) != "" {
 		return nil
 	}
 	return diag.FromErr(d.Set("team_name", *teamName))
