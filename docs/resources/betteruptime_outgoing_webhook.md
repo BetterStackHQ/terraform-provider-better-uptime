@@ -15,9 +15,10 @@ https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/
 ```terraform
 # Outgoing webhook fired on incident changes, with a custom request template
 resource "betteruptime_outgoing_webhook" "on_incident" {
-  name         = "Terraform Outgoing Webhook"
-  url          = "https://example.com"
-  trigger_type = "incident_change"
+  name                 = "Terraform Outgoing Webhook"
+  url                  = "https://example.com"
+  trigger_type         = "incident_change"
+  metadata_api_version = "v3"
 
   on_incident_started      = true
   on_incident_acknowledged = false
@@ -94,6 +95,7 @@ resource "betteruptime_outgoing_webhook" "on_monitor_change" {
 ### Optional
 
 - `custom_webhook_template_attributes` (Block List, Max: 1) Custom webhook template configuration. (see [below for nested schema](#nestedblock--custom_webhook_template_attributes))
+- `metadata_api_version` (String) Which metadata API's value representation the `$METADATA` variables of the custom template render in. Available values: `v2` (legacy: plain text values only, the last value of a key), `v3` (every value, typed like the metadata API). New webhooks start on `v3`. Only meaningful when `trigger_type` is `incident_change` or `monitor_change`.
 - `name` (String) The name of the outgoing webhook.
 - `notify_alongside_primary_responder` (Boolean) Whether this integration should be notified alongside the primary responder when no escalation policy is configured. Only applies to `incident_change` webhooks. Defaults to `true`.
 - `on_incident_acknowledged` (Boolean) Whether to trigger webhook when incident is acknowledged. Only when `trigger_type=incident_change`.

@@ -1,8 +1,9 @@
 # Outgoing webhook fired on incident changes, with a custom request template
 resource "betteruptime_outgoing_webhook" "on_incident" {
-  name         = "Terraform Outgoing Webhook"
-  url          = "https://example.com"
-  trigger_type = "incident_change"
+  name                 = "Terraform Outgoing Webhook"
+  url                  = "https://example.com"
+  trigger_type         = "incident_change"
+  metadata_api_version = "v3"
 
   on_incident_started      = true
   on_incident_acknowledged = false

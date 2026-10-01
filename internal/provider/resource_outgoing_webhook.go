@@ -40,6 +40,16 @@ var outgoingWebhookSchema = map[string]*schema.Schema{
 			"monitor_change",
 		}, false),
 	},
+	"metadata_api_version": {
+		Description: "Which metadata API's value representation the `$METADATA` variables of the custom template render in. Available values: `v2` (legacy: plain text values only, the last value of a key), `v3` (every value, typed like the metadata API). New webhooks start on `v3`. Only meaningful when `trigger_type` is `incident_change` or `monitor_change`.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
+		ValidateFunc: validation.StringInSlice([]string{
+			"v2",
+			"v3",
+		}, false),
+	},
 	"on_incident_started": {
 		Description: "Whether to trigger webhook when incident starts. Only when `trigger_type=incident_change`.",
 		Type:        schema.TypeBool,
@@ -151,6 +161,7 @@ type outgoingWebhook struct {
 	Name                            *string                          `json:"name,omitempty"`
 	URL                             *string                          `json:"url,omitempty"`
 	TriggerType                     *string                          `json:"trigger_type,omitempty"`
+	MetadataAPIVersion              *string                          `json:"metadata_api_version,omitempty"`
 	OnIncidentStarted               *bool                            `json:"on_incident_started,omitempty"`
 	OnIncidentAcknowledged          *bool                            `json:"on_incident_acknowledged,omitempty"`
 	OnIncidentResolved              *bool                            `json:"on_incident_resolved,omitempty"`
@@ -212,6 +223,7 @@ func outgoingWebhookRef(in *outgoingWebhook, triggerType string) []struct {
 		{k: "name", v: &in.Name},
 		{k: "url", v: &in.URL},
 		{k: "trigger_type", v: &in.TriggerType},
+		{k: "metadata_api_version", v: &in.MetadataAPIVersion},
 	}
 
 	// Only include incident-related fields if trigger_type is incident_change

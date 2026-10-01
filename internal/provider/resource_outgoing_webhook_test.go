@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -349,6 +350,76 @@ func TestResourceOutgoingWebhookSimpleEscalationOptOut(t *testing.T) {
 				ResourceName:      "betteruptime_outgoing_webhook.this",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestResourceOutgoingWebhookMetadataAPIVersion(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/outgoing-webhooks", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - an unknown version is refused before any request. It runs first because the
+			// post-test destroy reuses the last step's config, which must pass schema validation.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name                 = "test"
+					url                  = "https://example.com/webhook"
+					trigger_type         = "incident_change"
+					metadata_api_version = "v1"
+				}
+				`,
+				ExpectError: regexp.MustCompile(`expected metadata_api_version to be one of`),
+			},
+			// Step 2 - create on the legacy metadata API version
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name                 = "test"
+					url                  = "https://example.com/webhook"
+					trigger_type         = "incident_change"
+					metadata_api_version = "v2"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("betteruptime_outgoing_webhook.this", "id"),
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "metadata_api_version", "v2"),
+				),
+			},
+			// Step 3 - move it to the typed version
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_outgoing_webhook" "this" {
+					name                 = "test"
+					url                  = "https://example.com/webhook"
+					trigger_type         = "incident_change"
+					metadata_api_version = "v3"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_outgoing_webhook.this", "metadata_api_version", "v3"),
+				),
 			},
 		},
 	})
