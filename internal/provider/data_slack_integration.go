@@ -21,13 +21,7 @@ func newSlackIntegrationDataSource() *schema.Resource {
 			cp.Optional = false
 			cp.Computed = false
 		default:
-			cp.Computed = true
-			cp.Optional = false
-			cp.Required = false
-			cp.ValidateDiagFunc = nil
-			cp.Default = nil
-			cp.DefaultFunc = nil
-			cp.DiffSuppressFunc = nil
+			cp = *slackIntegrationComputedSchema(v)
 		}
 		s[k] = &cp
 	}
@@ -37,6 +31,27 @@ func newSlackIntegrationDataSource() *schema.Resource {
 		Description: "Slack integration lookup.",
 		Schema:      s,
 	}
+}
+
+// A computed-only copy of a resource attribute, including the attributes of a nested block.
+func slackIntegrationComputedSchema(v *schema.Schema) *schema.Schema {
+	cp := *v
+	cp.Computed = true
+	cp.Optional = false
+	cp.Required = false
+	cp.ValidateFunc = nil
+	cp.ValidateDiagFunc = nil
+	cp.Default = nil
+	cp.DefaultFunc = nil
+	cp.DiffSuppressFunc = nil
+	if elem, ok := v.Elem.(*schema.Resource); ok {
+		nested := make(map[string]*schema.Schema)
+		for k, v := range elem.Schema {
+			nested[k] = slackIntegrationComputedSchema(v)
+		}
+		cp.Elem = &schema.Resource{Schema: nested}
+	}
+	return &cp
 }
 
 type slackIntegrationsPageHTTPResponse struct {

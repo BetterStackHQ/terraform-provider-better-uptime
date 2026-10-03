@@ -123,6 +123,7 @@ func New(opts ...Option) *schema.Provider {
 			"betteruptime_prometheus_integration":        newPrometheusIntegrationResource(),
 			"betteruptime_outgoing_webhook":              newOutgoingWebhookResource(),
 			"betteruptime_jira_integration":              newJiraIntegrationResource(),
+			"betteruptime_slack_integration":             newSlackIntegrationResource(),
 			"betteruptime_catalog_relation":              newCatalogRelationResource(),
 			"betteruptime_catalog_attribute":             newCatalogAttributeResource(),
 			"betteruptime_catalog_record":                newCatalogRecordResource(),

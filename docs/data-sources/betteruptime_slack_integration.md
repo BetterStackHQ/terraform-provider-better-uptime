@@ -33,13 +33,59 @@ output "slack_integration_team_name" {
 
 ### Read-Only
 
+- `ai_sre_on_mention` (Boolean) Whether to start an AI SRE conversation when Better Stack is tagged in Slack.
+- `alert_all_teams_and_policies` (Boolean) Whether anyone in the channel may alert any team or run any escalation policy. When false, only the alert_option entries are offered.
+- `alert_option` (Set of Object) Teams and escalation policies the channel can alert when alert_all_teams_and_policies is false. Removing every block clears the list. (see [below for nested schema](#nestedatt--alert_option))
+- `channel_display_name` (String) Name used for the incident channels a channel-type integration creates. Removing it clears the name.
+- `channel_invitee` (Set of Object) Who to invite to the incident channels a channel-type integration creates. Removing every block clears the list. (see [below for nested schema](#nestedatt--channel_invitee))
+- `direct_message_on_mention` (Boolean) Whether to direct message Slack users when they are tagged in incident comments.
 - `id` (String) The ID of this Slack integration.
-- `integration_type` (String) Type of the Slack integration. Possible values: legacy, verbose, thread, channel
+- `integration_type` (String) Type of the Slack integration. Possible values: legacy, verbose, thread, channel. Only verbose, thread and channel can be set; thread and channel need a paid plan, and legacy is what integrations connected before those types existed still hold.
+- `invite_new_slack_users` (Boolean) Whether to invite new Slack users into your Better Stack team as responders. Invited responders may be billed.
 - `notify_alongside_primary_responder` (Boolean) Whether this integration should be notified alongside the primary responder when no escalation policy is configured.
+- `notify_on_pause` (Boolean) Whether to post a notification when a resource is paused.
+- `notify_on_resolve` (Boolean) Whether to post a notification when an incident is resolved.
 - `on_call_notifications` (Boolean) Whether to post a notification when the current on-call person changes.
+- `post_incident_metadata` (Boolean) Whether to post the incident's metadata.
+- `post_status_page_updates` (Boolean) Whether to post status page updates of the status_page_update_resource entries. Turning it off clears them.
+- `post_timeline_events` (Boolean) Whether to post incident timeline events about e-mails, phone calls, and integrations.
+- `private_channel` (Boolean) Whether a channel-type integration creates private incident channels. Private channels need at least one channel_invitee.
+- `restrict_incident_creation_to_channel` (Boolean) Whether incidents can be created from Slack only in this channel (or, for a channel-type integration, only by its members).
 - `slack_channel_id` (String) Slack ID of the connected channel.
 - `slack_status` (String) Status of the connected Slack account. Possible values: active, account_inactive
 - `slack_team_id` (String) Slack ID of the connected team.
 - `slack_team_name` (String) Name of the connected Slack team.
+- `status_page_update_resource` (Set of Object) Status pages and resources whose status page updates are posted, when post_status_page_updates is true. Removing every block clears the list. (see [below for nested schema](#nestedatt--status_page_update_resource))
+
+<a id="nestedatt--alert_option"></a>
+### Nested Schema for `alert_option`
+
+Read-Only:
+
+- `call` (Boolean)
+- `critical_alert` (Boolean)
+- `email` (Boolean)
+- `id` (Number)
+- `push` (Boolean)
+- `sms` (Boolean)
+- `type` (String)
+
+
+<a id="nestedatt--channel_invitee"></a>
+### Nested Schema for `channel_invitee`
+
+Read-Only:
+
+- `id` (Number)
+- `type` (String)
+
+
+<a id="nestedatt--status_page_update_resource"></a>
+### Nested Schema for `status_page_update_resource`
+
+Read-Only:
+
+- `id` (Number)
+- `type` (String)
 
 
