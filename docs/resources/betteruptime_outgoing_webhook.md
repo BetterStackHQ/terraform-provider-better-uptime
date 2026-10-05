@@ -15,10 +15,9 @@ https://betterstack.com/docs/uptime/api/outgoing-webhook-integrations/
 ```terraform
 # Outgoing webhook fired on incident changes, with a custom request template
 resource "betteruptime_outgoing_webhook" "on_incident" {
-  name                 = "Terraform Outgoing Webhook"
-  url                  = "https://example.com"
-  trigger_type         = "incident_change"
-  metadata_api_version = "v3"
+  name         = "Terraform Outgoing Webhook"
+  url          = "https://example.com"
+  trigger_type = "incident_change"
 
   on_incident_started      = true
   on_incident_acknowledged = false
@@ -79,7 +78,22 @@ resource "betteruptime_outgoing_webhook" "on_monitor_change" {
   trigger_type = "monitor_change"
 
   custom_webhook_template_attributes {
-    body_template = "{\"incident\":{\"id\":\"$INCIDENT_ID\",\"started_at\":\"$STARTED_AT\"}}"
+    # $METADATA_ARRAY sends the monitor's metadata typed, for example [{"key": "Owner", "values": [{"type": "User", "item_id": 42, "name": "Jane Doe", "email": "jane@example.com"}]}]
+    body_template = "{\"monitor\":{\"id\":\"$MONITOR_ID\"},\"metadata\":$METADATA_ARRAY}"
+  }
+}
+
+# Monitor webhook kept on the legacy metadata format, for a receiver built against the old payload shape
+resource "betteruptime_outgoing_webhook" "on_monitor_change_legacy_metadata" {
+  name                 = "Terraform Monitor Webhook (legacy metadata)"
+  url                  = "https://example.com"
+  trigger_type         = "monitor_change"
+  metadata_api_version = "v2"
+
+  custom_webhook_template_attributes {
+    # On v2, $METADATA_ARRAY is [{"key": "Owner", "value": "jane@example.com"}]: plain text only, one entry per value,
+    # and "value": null for team members, teams and other typed values. v3 (the default for new webhooks) sends every value typed.
+    body_template = "{\"monitor\":{\"id\":\"$MONITOR_ID\"},\"metadata\":$METADATA_ARRAY}"
   }
 }
 ```
