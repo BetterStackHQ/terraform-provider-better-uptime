@@ -78,7 +78,22 @@ resource "betteruptime_outgoing_webhook" "on_monitor_change" {
   trigger_type = "monitor_change"
 
   custom_webhook_template_attributes {
-    body_template = "{\"incident\":{\"id\":\"$INCIDENT_ID\",\"started_at\":\"$STARTED_AT\"}}"
+    # $METADATA_ARRAY sends the monitor's metadata typed, for example [{"key": "Owner", "values": [{"type": "User", "item_id": 42, "name": "Jane Doe", "email": "jane@example.com"}]}]
+    body_template = "{\"monitor\":{\"id\":\"$MONITOR_ID\"},\"metadata\":$METADATA_ARRAY}"
+  }
+}
+
+# Monitor webhook kept on the legacy metadata format, for a receiver built against the old payload shape
+resource "betteruptime_outgoing_webhook" "on_monitor_change_legacy_metadata" {
+  name                 = "Terraform Monitor Webhook (legacy metadata)"
+  url                  = "https://example.com"
+  trigger_type         = "monitor_change"
+  metadata_api_version = "v2"
+
+  custom_webhook_template_attributes {
+    # On v2, $METADATA_ARRAY is [{"key": "Owner", "value": "jane@example.com"}]: plain text only, one entry per value,
+    # and "value": null for team members, teams and other typed values. v3 (the default for new webhooks) sends every value typed.
+    body_template = "{\"monitor\":{\"id\":\"$MONITOR_ID\"},\"metadata\":$METADATA_ARRAY}"
   }
 }
 ```
@@ -94,6 +109,7 @@ resource "betteruptime_outgoing_webhook" "on_monitor_change" {
 ### Optional
 
 - `custom_webhook_template_attributes` (Block List, Max: 1) Custom webhook template configuration. (see [below for nested schema](#nestedblock--custom_webhook_template_attributes))
+- `metadata_api_version` (String) Which metadata API's value representation the `$METADATA` variables of the custom template render in. Available values: `v2` (legacy: plain text values only, the last value of a key), `v3` (every value, typed like the metadata API). New webhooks start on `v3`. Only meaningful when `trigger_type` is `incident_change` or `monitor_change`.
 - `name` (String) The name of the outgoing webhook.
 - `notify_alongside_primary_responder` (Boolean) Whether this integration should be notified alongside the primary responder when no escalation policy is configured. Only applies to `incident_change` webhooks. Defaults to `true`.
 - `on_incident_acknowledged` (Boolean) Whether to trigger webhook when incident is acknowledged. Only when `trigger_type=incident_change`.
