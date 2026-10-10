@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestResourceStatusPageResource(t *testing.T) {
@@ -355,6 +356,270 @@ func TestResourceStatusPageResourceValidation(t *testing.T) {
 				}
 				`,
 				ExpectError: regexp.MustCompile(`resource_id is required when resource_type is Monitor`),
+			},
+		},
+	})
+}
+
+func TestResourceStatusPageResourceCatalogReference(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/status-pages/0/resources", "1")
+	defer server.Close()
+
+	// The API finds or creates the CatalogReference and returns its id as resource_id.
+	payment := `{"data":{"id":"1","attributes":{"resource_id":77,"resource_type":"CatalogReference","public_name":"Payments","widget_type":"history","catalog_reference":{"key":"service","value":{"type":"String","value":"payment"}}}}}`
+	platform := `{"data":{"id":"1","attributes":{"resource_id":78,"resource_type":"CatalogReference","public_name":"Payments","widget_type":"history","catalog_reference":{"key":"service","value":{"type":"Team","item_id":5,"name":"Platform"}}}}}`
+	server.ExpectRequest("POST", "/api/v2/status-pages/0/resources", "", 201, payment)
+	server.ExpectRequest("GET", "/api/v2/status-pages/0/resources/1", "", 200, payment)
+	server.ExpectRequest("PATCH", "/api/v2/status-pages/0/resources/1", "", 200, platform)
+
+	stringConfig := `
+	provider "betteruptime" {
+		api_token = "foo"
+	}
+
+	resource "betteruptime_status_page_resource" "this" {
+		status_page_id = "0"
+		resource_type  = "CatalogReference"
+		public_name    = "Payments"
+		catalog_reference {
+			key = "service"
+			metadata_value {
+				value = "payment"
+			}
+		}
+	}
+	`
+	teamConfig := `
+	provider "betteruptime" {
+		api_token = "foo"
+	}
+
+	resource "betteruptime_status_page_resource" "this" {
+		status_page_id = "0"
+		resource_type  = "CatalogReference"
+		public_name    = "Payments"
+		catalog_reference {
+			key = "service"
+			metadata_value {
+				type = "Team"
+				name = "Platform"
+			}
+		}
+	}
+	`
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create from a String catalog value, without resource_id.
+			{
+				Config: stringConfig,
+				Check: resource.ComposeTestCheckFunc(
+					server.TestCheckCalledRequest("POST", "/api/v2/status-pages/0/resources", `{"resource_type":"CatalogReference","public_name":"Payments","fixed_position":true,"catalog_reference":{"key":"service","value":{"type":"String","value":"payment"}}}`),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "resource_id", "77"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "catalog_reference.0.key", "service"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "catalog_reference.0.metadata_value.0.type", "String"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "catalog_reference.0.metadata_value.0.value", "payment"),
+				),
+			},
+			// Step 2 - no drift.
+			{
+				Config:   stringConfig,
+				PlanOnly: true,
+			},
+			// Step 3 - repoint at a Team by name; the update sends no resource_id.
+			{
+				Config: teamConfig,
+				Check: resource.ComposeTestCheckFunc(
+					server.TestCheckCalledRequest("PATCH", "/api/v2/status-pages/0/resources/1", `{"resource_type":"CatalogReference","fixed_position":true,"catalog_reference":{"key":"service","value":{"type":"Team","name":"Platform"}}}`),
+					server.TestCheckCalledRequestWithout("PATCH", "/api/v2/status-pages/0/resources/1", "resource_id"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "resource_id", "78"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "catalog_reference.0.metadata_value.0.type", "Team"),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "catalog_reference.0.metadata_value.0.name", "Platform"),
+					// The API also returns item_id, but the user looked the team up by name.
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "catalog_reference.0.metadata_value.0.item_id", ""),
+					server.ReplaceExpectedResponseAfterApply("GET", "/api/v2/status-pages/0/resources/1", platform),
+				),
+			},
+			// Step 4 - no drift from the item_id the API returns.
+			{
+				Config:   teamConfig,
+				PlanOnly: true,
+			},
+			// Step 5 - import keeps the item_id, as there is no configured lookup field to follow.
+			{
+				ResourceName:            "betteruptime_status_page_resource.this",
+				ImportState:             true,
+				ImportStateId:           "0/1",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"catalog_reference.0.metadata_value.0.name", "catalog_reference.0.metadata_value.0.item_id"},
+				ImportStateCheck: func(states []*terraform.InstanceState) error {
+					if got := states[0].Attributes["catalog_reference.0.metadata_value.0.item_id"]; got != "5" {
+						return fmt.Errorf("expected imported item_id 5, got %q", got)
+					}
+					return nil
+				},
+			},
+		},
+	})
+}
+
+func TestResourceStatusPageResourceCatalogReferenceByResourceID(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/status-pages/0/resources", "1")
+	defer server.Close()
+
+	// A CatalogReference row declared by resource_id still gets catalog_reference back from the API.
+	response := `{"data":{"id":"1","attributes":{"resource_id":77,"resource_type":"CatalogReference","public_name":"Payments","widget_type":"history","catalog_reference":{"key":"service","value":{"type":"String","value":"payment"}}}}}`
+	server.ExpectRequest("POST", "/api/v2/status-pages/0/resources", "", 201, response)
+	server.ExpectRequest("GET", "/api/v2/status-pages/0/resources/1", "", 200, response)
+
+	config := `
+	provider "betteruptime" {
+		api_token = "foo"
+	}
+
+	resource "betteruptime_status_page_resource" "this" {
+		status_page_id = "0"
+		resource_id    = "77"
+		resource_type  = "CatalogReference"
+		public_name    = "Payments"
+	}
+	`
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					server.TestCheckCalledRequest("POST", "/api/v2/status-pages/0/resources", `{"resource_id":77,"resource_type":"CatalogReference","public_name":"Payments","fixed_position":true}`),
+					resource.TestCheckResourceAttr("betteruptime_status_page_resource.this", "catalog_reference.0.metadata_value.0.value", "payment"),
+				),
+			},
+			// The computed catalog_reference must not show as a diff against a config without it.
+			{
+				Config:   config,
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+func TestResourceStatusPageResourceCatalogReferenceValidation(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/status-pages/0/resources", "1")
+	defer server.Close()
+
+	config := func(attributes string) string {
+		return `
+		provider "betteruptime" {
+			api_token = "foo"
+		}
+
+		resource "betteruptime_status_page_resource" "this" {
+			status_page_id = "0"
+			public_name    = "Bad Config"
+			` + attributes + `
+		}
+		`
+	}
+	stringReference := `
+			catalog_reference {
+				key = "service"
+				metadata_value {
+					value = "payment"
+				}
+			}`
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config:      config(`resource_type = "CatalogReference"`),
+				ExpectError: regexp.MustCompile(`resource_id or catalog_reference is required when resource_type is CatalogReference`),
+			},
+			{
+				Config:      config(`resource_type = "Monitor"` + "\n" + `resource_id = "2"` + stringReference),
+				ExpectError: regexp.MustCompile(`conflicts with`),
+			},
+			{
+				Config:      config(`resource_type = "Monitor"` + stringReference),
+				ExpectError: regexp.MustCompile(`catalog_reference can only be used when resource_type is CatalogReference, not Monitor`),
+			},
+			{
+				Config: config(`resource_type = "CatalogReference"
+			catalog_reference {
+				key = "owner"
+				metadata_value {
+					type = "Team"
+				}
+			}`),
+				ExpectError: regexp.MustCompile(`at least one of item_id, email, or name must be set for Team type`),
+			},
+		},
+	})
+}
+
+func TestResourceStatusPageResourceSwitchToCatalogReference(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/status-pages/0/resources", "1")
+	defer server.Close()
+
+	resource.Test(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_status_page_resource" "this" {
+					status_page_id = "0"
+					resource_id    = "2"
+					resource_type  = "Monitor"
+					public_name    = "Payments"
+				}
+				`,
+			},
+			// The monitor's resource_id left in state must not be sent along with catalog_reference.
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_status_page_resource" "this" {
+					status_page_id = "0"
+					resource_type  = "CatalogReference"
+					public_name    = "Payments"
+					catalog_reference {
+						key = "service"
+						metadata_value {
+							value = "payment"
+						}
+					}
+				}
+				`,
+				Check: server.TestCheckCalledRequest("PATCH", "/api/v2/status-pages/0/resources/1", `{"resource_type":"CatalogReference","fixed_position":true,"catalog_reference":{"key":"service","value":{"type":"String","value":"payment"}}}`),
 			},
 		},
 	})

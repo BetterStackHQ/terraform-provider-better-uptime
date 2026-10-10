@@ -93,3 +93,19 @@ resource "betteruptime_status_page_resource" "amazon_sns" {
   public_name            = "Backend alerts"
   mark_as_down_for       = "any_incident"
 }
+
+# A catalog value on the status page, named by its metadata key and value.
+# The catalog reference is found or created from key and value, so no resource_id is needed.
+resource "betteruptime_status_page_resource" "catalog_reference" {
+  status_page_id         = betteruptime_status_page.this.id
+  status_page_section_id = betteruptime_status_page_section.monitors.id
+  resource_type          = "CatalogReference"
+  public_name            = "Payments service"
+
+  catalog_reference {
+    key = "Service"
+    metadata_value {
+      value = "payments"
+    }
+  }
+}
