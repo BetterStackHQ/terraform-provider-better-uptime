@@ -1,6 +1,11 @@
 resource "betteruptime_on_call_calendar" "this" {
   name = "Terraform on-call calendar"
 
+  # Tags whoever is on call as @terraform-example-on-call in each connected Slack workspace; "" stops tagging
+  slack_group_handle = "terraform-example-on-call"
+  # true would use a user group that already exists in Slack under that handle instead of creating one
+  use_existing_slack_group = false
+
   on_call_rotation {
     # Replace with your team members' e-mails
     users             = ["petr@betterstack.com"]

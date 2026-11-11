@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -34,6 +35,43 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    false,
 		Computed:    true,
+	},
+	// Optional and computed, so a calendar tagged in Better Stack plans no change while the configuration leaves it out.
+	"slack_group_handle": {
+		Description: "The handle of the Slack user group that tags whoever is on call in this calendar, without the `@`: lowercase letters, digits, `.`, `_` and `-`. Better Stack keeps the group's members in sync with the rotation. Set it to an empty string to stop tagging; leaving it out keeps the handle the calendar has.",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
+	},
+	"use_existing_slack_group": {
+		Description: "Whether `slack_group_handle` names a user group that already exists in Slack. `true` uses that group: Better Stack adds and removes only the people on call and keeps its other members. `false` creates a new group whose members are exactly the people on call, and a handle an existing group holds is refused. Leaving it out keeps the calendar's current choice (a new group if it has none).",
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Computed:    true,
+	},
+	"slack_groups": {
+		Description: "How each connected Slack workspace took the handle. Groups are set up in the background after a change, so they read `pending` until it answers, usually within seconds.",
+		Type:        schema.TypeList,
+		Computed:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"slack_workspace_id": {
+					Description: "The ID of the Slack workspace.",
+					Type:        schema.TypeString,
+					Computed:    true,
+				},
+				"status": {
+					Description: "`pending`, `active`, or `failed`, with Slack's answer in `error`.",
+					Type:        schema.TypeString,
+					Computed:    true,
+				},
+				"error": {
+					Description: "Why the group couldn't be set up, when `status` is `failed`.",
+					Type:        schema.TypeString,
+					Computed:    true,
+				},
+			},
+		},
 	},
 	"on_call_users": {
 		Description: "Array of on-call persons.",
@@ -178,17 +216,51 @@ func newOnCallCalendarResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CustomizeDiff: validateTeamNameNotChanged,
-		Schema:        onCallCalendarSchema,
-		Description:   "https://betterstack.com/docs/uptime/api/on-call-calendar/",
+		CustomizeDiff: customdiff.All(
+			validateTeamNameNotChanged,
+			// A changed handle or mode is set up again in the background, so how each workspace takes it is only known after the apply.
+			planSlackGroupHandleCleared,
+			customdiff.ComputedIf("slack_groups", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+				return d.HasChange("slack_group_handle") || d.HasChange("use_existing_slack_group")
+			}),
+		),
+		Schema:      onCallCalendarSchema,
+		Description: "https://betterstack.com/docs/uptime/api/on-call-calendar/",
 	}
 }
 
+// An optional and computed string reads an empty one as left out, which keeps the old value. Only the raw configuration
+// tells a configured "" (stop tagging) from an absent attribute (keep the handle).
+func planSlackGroupHandleCleared(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if old, _ := d.GetChange("slack_group_handle"); old.(string) == "" || !slackGroupHandleConfiguredEmpty(d.GetRawConfig()) {
+		return nil
+	}
+	return d.SetNew("slack_group_handle", "")
+}
+
+func slackGroupHandleConfiguredEmpty(raw cty.Value) bool {
+	if raw.IsNull() || !raw.IsKnown() {
+		return false
+	}
+	handle := raw.GetAttr("slack_group_handle")
+	return handle.IsKnown() && !handle.IsNull() && handle.AsString() == ""
+}
+
 type onCallCalendar struct {
-	ID              *string `json:"id,omitempty"`
-	Name            *string `json:"name,omitempty"`
-	DefaultCalendar *bool   `json:"default_calendar,omitempty"`
-	TeamName        *string `json:"team_name,omitempty"`
+	ID                    *string `json:"id,omitempty"`
+	Name                  *string `json:"name,omitempty"`
+	DefaultCalendar       *bool   `json:"default_calendar,omitempty"`
+	TeamName              *string `json:"team_name,omitempty"`
+	SlackGroupHandle      *string `json:"slack_group_handle,omitempty"`
+	UseExistingSlackGroup *bool   `json:"use_existing_slack_group,omitempty"`
+	// Read-only, so never loaded from the configuration.
+	SlackGroups *[]onCallSlackGroup `json:"slack_groups,omitempty"`
+}
+
+type onCallSlackGroup struct {
+	SlackWorkspaceID *string `mapstructure:"slack_workspace_id,omitempty" json:"slack_workspace_id,omitempty"`
+	Status           *string `mapstructure:"status,omitempty" json:"status,omitempty"`
+	Error            *string `mapstructure:"error,omitempty" json:"error,omitempty"`
 }
 
 type onCallWorkingHour struct {
@@ -241,6 +313,8 @@ func onCallCalendarRef(cal *onCallCalendar) []struct {
 	}{
 		{"name", &cal.Name},
 		{"default_calendar", &cal.DefaultCalendar},
+		{"slack_group_handle", &cal.SlackGroupHandle},
+		{"use_existing_slack_group", &cal.UseExistingSlackGroup},
 	}
 }
 
@@ -262,6 +336,19 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 				rel.OnCallUsers.Data[i].PhoneNumbers = e.Attributes.PhoneNumbers
 			}
 		}
+	}
+	slackGroups := []map[string]interface{}{}
+	if cal.SlackGroups != nil {
+		for _, group := range *cal.SlackGroups {
+			slackGroups = append(slackGroups, map[string]interface{}{
+				"slack_workspace_id": stringValue(group.SlackWorkspaceID),
+				"status":             stringValue(group.Status),
+				"error":              stringValue(group.Error),
+			})
+		}
+	}
+	if err := d.Set("slack_groups", slackGroups); err != nil {
+		derr = append(derr, diag.FromErr(err)[0])
 	}
 	if err := d.Set("on_call_users", rel.OnCallUsers.Data); err != nil {
 		derr = append(derr, diag.FromErr(err)[0])
@@ -490,6 +577,11 @@ func resourceOnCallCalendarUpdate(ctx context.Context, d *schema.ResourceData, m
 		if d.HasChange(e.k) {
 			load(d, e.k, e.v)
 		}
+	}
+	// Neither load nor the planned value carries a configured "", which stops tagging.
+	if old, _ := d.GetChange("slack_group_handle"); old.(string) != "" && slackGroupHandleConfiguredEmpty(d.GetRawConfig()) {
+		cleared := ""
+		in.SlackGroupHandle = &cleared
 	}
 
 	var out struct {

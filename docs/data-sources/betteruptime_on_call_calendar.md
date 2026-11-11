@@ -44,6 +44,9 @@ output "existing_on_call_calendar_id" {
 - `id` (String) The ID of the on-call calendar.
 - `on_call_rotation` (List of Object) Configuration block for the on-call rotation schedule. Ignored when omitted - on-call can be controlled in Better Stack. (see [below for nested schema](#nestedatt--on_call_rotation))
 - `on_call_users` (List of Object) Array of on-call persons. (see [below for nested schema](#nestedatt--on_call_users))
+- `slack_group_handle` (String) The handle of the Slack user group that tags whoever is on call in this calendar, without the `@`: lowercase letters, digits, `.`, `_` and `-`. Better Stack keeps the group's members in sync with the rotation. Set it to an empty string to stop tagging; leaving it out keeps the handle the calendar has.
+- `slack_groups` (List of Object) How each connected Slack workspace took the handle. Groups are set up in the background after a change, so they read `pending` until it answers, usually within seconds. (see [below for nested schema](#nestedatt--slack_groups))
+- `use_existing_slack_group` (Boolean) Whether `slack_group_handle` names a user group that already exists in Slack. `true` uses that group: Better Stack adds and removes only the people on call and keeps its other members. `false` creates a new group whose members are exactly the people on call, and a handle an existing group holds is refused. Leaving it out keeps the calendar's current choice (a new group if it has none).
 
 <a id="nestedatt--on_call_rotation"></a>
 ### Nested Schema for `on_call_rotation`
@@ -79,5 +82,15 @@ Read-Only:
 - `id` (String)
 - `last_name` (String)
 - `phone_numbers` (List of String)
+
+
+<a id="nestedatt--slack_groups"></a>
+### Nested Schema for `slack_groups`
+
+Read-Only:
+
+- `error` (String)
+- `slack_workspace_id` (String)
+- `status` (String)
 
 

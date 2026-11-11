@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccResourceOnCallCalendarWithRotation(t *testing.T) {
@@ -620,6 +622,144 @@ func TestAccResourceOnCallCalendarLegacyRotationResponse(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.working_hours.#", "0"),
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "on_call_rotation.0.timezone", ""),
+				),
+			},
+		},
+	})
+}
+
+func TestResourceOnCallCalendarSlackGroupHandle(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/on-calls", "123")
+	server.ExpectRequest("GET", "/api/v2/on-calls/123/rotation", "", http.StatusNotFound, `{"errors":"Not found"}`)
+	defer server.Close()
+
+	config := func(slackAttributes string) string {
+		return fmt.Sprintf(`
+		provider "betteruptime" {
+			api_token = "foo"
+		}
+
+		resource "betteruptime_on_call_calendar" "test" {
+			name = "Payments"
+			%s
+		}
+		`, slackAttributes)
+	}
+	lastBody := func(method string) string {
+		server.mu.Lock()
+		defer server.mu.Unlock()
+		for i := len(server.CalledRequests) - 1; i >= 0; i-- {
+			if request := server.CalledRequests[i]; request.Method == method && strings.HasPrefix(request.URL, "/api/v2/on-calls") && !strings.HasSuffix(request.URL, "/rotation") {
+				return request.Body
+			}
+		}
+		return ""
+	}
+	sent := func(method, fragment string, want bool) resource.TestCheckFunc {
+		return func(*terraform.State) error {
+			if body := lastBody(method); strings.Contains(body, fragment) != want {
+				return fmt.Errorf("expected the last %s body %q to contain %q: %v", method, body, fragment, want)
+			}
+			return nil
+		}
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create with a handle; the mode is left to the API
+			{
+				Config: config(`slack_group_handle = "payments-oncall"`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_group_handle", "payments-oncall"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "use_existing_slack_group", "false"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.#", "0"),
+					sent("POST", `"slack_group_handle":"payments-oncall"`, true),
+					sent("POST", `use_existing_slack_group`, false),
+				),
+			},
+			// Step 2 - switch to a group the customer already has in Slack
+			{
+				Config: config(`
+					slack_group_handle       = "ops.rotation"
+					use_existing_slack_group = true
+				`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_group_handle", "ops.rotation"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "use_existing_slack_group", "true"),
+					sent("PATCH", `"slack_group_handle":"ops.rotation"`, true),
+					sent("PATCH", `"use_existing_slack_group":true`, true),
+				),
+			},
+			// Step 3 - leaving both out keeps what Better Stack has, so a calendar tagged in the dashboard plans no change
+			{
+				Config:   config(""),
+				PlanOnly: true,
+			},
+			// Step 4 - an empty handle stops tagging
+			{
+				Config: config(`slack_group_handle = ""`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_group_handle", ""),
+					sent("PATCH", `"slack_group_handle":""`, true),
+				),
+			},
+		},
+	})
+}
+
+func TestResourceOnCallCalendarSlackGroupsRead(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/on-calls", "123")
+	server.ExpectRequest("GET", "/api/v2/on-calls/123", "", http.StatusOK,
+		`{"data":{"id":"123","attributes":{"name":"Payments","default_calendar":false,"slack_group_handle":"payments-oncall","use_existing_slack_group":false,`+
+			`"slack_groups":[{"slack_workspace_id":"T1","status":"active","error":null},{"slack_workspace_id":"T2","status":"failed","error":"[bad_handle]"}]}}}`)
+	server.ExpectRequest("GET", "/api/v2/on-calls/123/rotation", "", http.StatusNotFound, `{"errors":"Not found"}`)
+	defer server.Close()
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_on_call_calendar" "test" {
+					name               = "Payments"
+					slack_group_handle = "payments-oncall"
+				}
+				`,
+			},
+			// Step 2 - the next refresh reads how each workspace took the handle
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_on_call_calendar" "test" {
+					name               = "Payments"
+					slack_group_handle = "payments-oncall"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.#", "2"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.slack_workspace_id", "T1"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.status", "active"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.error", ""),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.1.status", "failed"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.1.error", "[bad_handle]"),
 				),
 			},
 		},
