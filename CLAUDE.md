@@ -2,9 +2,9 @@
 
 Guidance for Claude Code (claude.ai/code) when working in this repository (the Better Uptime Terraform provider).
 
-## Still maintained alongside the unified provider
+## Frozen: no PRs to this repo
 
-The next provider is one unified `betterstack` provider ([SH-640](https://linear.app/betterstack/issue/SH-640)), but this one stays supported for a while, so changes to it are welcome (Simon, 2026-11-11, on [U-9922](https://linear.app/betterstack/issue/U-9922)). It replaces the freeze of 2026-10-10.
+This provider is frozen (Simon, 2026-10-10): don't open PRs or push branches here, even for a finished change. The next provider is one unified `betterstack` provider ([SH-640](https://linear.app/betterstack/issue/SH-640)), and new Terraform behaviour goes on top of it, not into this repo. File a gap as a Linear issue in Triage (team U): link the API PR, say it is to be built on the unified provider, and @-mention Pawel. Example: [U-9478](https://linear.app/betterstack/issue/U-9478), whose closed PR [#248](https://github.com/BetterStackHQ/terraform-provider-better-uptime/pull/248) is kept only as a reference for the shape.
 
 ## Exercise every new feature in an example
 
