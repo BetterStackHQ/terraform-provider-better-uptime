@@ -60,6 +60,11 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 					Type:        schema.TypeString,
 					Computed:    true,
 				},
+				"slack_workspace_name": {
+					Description: "The name of the Slack workspace.",
+					Type:        schema.TypeString,
+					Computed:    true,
+				},
 				"status": {
 					Description: "`active` once the group tags whoever is on call, `pending` while it is set up. `reinstall_required` when the workspace was connected before Better Stack could manage user groups, and any other status when Slack refused the group, with the reason in `error`.",
 					Type:        schema.TypeString,
@@ -289,9 +294,10 @@ type onCallCalendar struct {
 }
 
 type onCallSlackGroup struct {
-	SlackWorkspaceID *string `json:"slack_workspace_id,omitempty"`
-	Status           *string `json:"status,omitempty"`
-	Error            *string `json:"error,omitempty"`
+	SlackWorkspaceID   *string `json:"slack_workspace_id,omitempty"`
+	SlackWorkspaceName *string `json:"slack_workspace_name,omitempty"`
+	Status             *string `json:"status,omitempty"`
+	Error              *string `json:"error,omitempty"`
 	// Only on the calendar's own GET, not in a write's response.
 	UnconnectedUsers []onCallSlackUser `json:"unconnected_users,omitempty"`
 }
@@ -390,10 +396,11 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 				})
 			}
 			slackGroups = append(slackGroups, map[string]interface{}{
-				"slack_workspace_id": stringValue(group.SlackWorkspaceID),
-				"status":             stringValue(group.Status),
-				"error":              stringValue(group.Error),
-				"unconnected_users":  unconnected,
+				"slack_workspace_id":   stringValue(group.SlackWorkspaceID),
+				"slack_workspace_name": stringValue(group.SlackWorkspaceName),
+				"status":               stringValue(group.Status),
+				"error":                stringValue(group.Error),
+				"unconnected_users":    unconnected,
 			})
 		}
 	}
@@ -690,6 +697,14 @@ func readSlackGroups(ctx context.Context, meta interface{}, id string) (*[]onCal
 	return out.Data.Attributes.SlackGroups, nil
 }
 
+// The workspace by its name, as Better Stack shows it, or by its ID from an API that doesn't name it.
+func slackWorkspaceLabel(group onCallSlackGroup) string {
+	if name := stringValue(group.SlackWorkspaceName); name != "" {
+		return fmt.Sprintf("the %s Slack workspace", name)
+	}
+	return fmt.Sprintf("Slack workspace %s", stringValue(group.SlackWorkspaceID))
+}
+
 func slackGroupsPending(groups *[]onCallSlackGroup) bool {
 	if groups == nil {
 		return false
@@ -710,13 +725,13 @@ func slackGroupWarnings(handle string, groups *[]onCallSlackGroup) diag.Diagnost
 	var warnings diag.Diagnostics
 	path := cty.GetAttrPath("slack_groups")
 	for _, group := range *groups {
-		workspace := stringValue(group.SlackWorkspaceID)
+		workspace := slackWorkspaceLabel(group)
 		switch status := stringValue(group.Status); status {
 		case "active":
 		case "pending":
 			warnings = append(warnings, diag.Diagnostic{
 				Severity:      diag.Warning,
-				Summary:       fmt.Sprintf("Slack user group @%s is still being set up in workspace %s", handle, workspace),
+				Summary:       fmt.Sprintf("Slack user group @%s is still being set up in %s", handle, workspace),
 				Detail:        "Better Stack hadn't finished setting it up when the apply stopped waiting. The next refresh shows how Slack took it in slack_groups.",
 				AttributePath: path,
 			})
@@ -727,7 +742,7 @@ func slackGroupWarnings(handle string, groups *[]onCallSlackGroup) diag.Diagnost
 			}
 			warnings = append(warnings, diag.Diagnostic{
 				Severity:      diag.Warning,
-				Summary:       fmt.Sprintf("Slack user group @%s doesn't work in workspace %s", handle, workspace),
+				Summary:       fmt.Sprintf("Slack user group @%s doesn't work in %s", handle, workspace),
 				Detail:        detail,
 				AttributePath: path,
 			})
@@ -740,9 +755,9 @@ func slackGroupWarnings(handle string, groups *[]onCallSlackGroup) diag.Diagnost
 			name := strings.TrimSpace(stringValue(user.FirstName) + " " + stringValue(user.LastName))
 			names = append(names, fmt.Sprintf("%s (%s)", name, stringValue(user.Email)))
 		}
-		summary := fmt.Sprintf("A responder won't be tagged by @%s in Slack workspace %s", handle, workspace)
+		summary := fmt.Sprintf("A responder won't be tagged by @%s in %s", handle, workspace)
 		if len(names) > 1 {
-			summary = fmt.Sprintf("Some responders won't be tagged by @%s in Slack workspace %s", handle, workspace)
+			summary = fmt.Sprintf("Some responders won't be tagged by @%s in %s", handle, workspace)
 		}
 		warnings = append(warnings, diag.Diagnostic{
 			Severity:      diag.Warning,

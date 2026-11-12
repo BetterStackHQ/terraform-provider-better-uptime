@@ -827,7 +827,7 @@ resource "betteruptime_on_call_calendar" "test" {
 func TestResourceOnCallCalendarAwaitsSlackGroups(t *testing.T) {
 	shortenSlackGroupsSetup(t, time.Minute)
 	server, reads := newSlackGroupsServer(t, 2,
-		`[{"slack_workspace_id":"T1","status":"active","error":null,`+
+		`[{"slack_workspace_id":"T1","slack_workspace_name":"Acme","status":"active","error":null,`+
 			`"unconnected_users":[{"id":"7","first_name":"Petr","last_name":"Heinz","email":"petr@example.com"}]},`+
 			`{"slack_workspace_id":"T2","status":"reinstall_required","error":"Re-install the Slack integration to tag on-call schedules."}]`)
 	defer server.Close()
@@ -852,6 +852,7 @@ func TestResourceOnCallCalendarAwaitsSlackGroups(t *testing.T) {
 					},
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.#", "2"),
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.status", "active"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.slack_workspace_name", "Acme"),
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.unconnected_users.#", "1"),
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.unconnected_users.0.email", "petr@example.com"),
 					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.1.status", "reinstall_required"),
@@ -907,11 +908,11 @@ func TestResourceOnCallCalendarKeepsTheCalendarWhenItsSlackGroupsCantBeRead(t *t
 
 func TestSlackGroupWarnings(t *testing.T) {
 	groups := []onCallSlackGroup{
-		{SlackWorkspaceID: strPtr("T1"), Status: strPtr("active")},
-		{SlackWorkspaceID: strPtr("T2"), Status: strPtr("name_conflict"), Error: strPtr("A Slack user group already uses @payments-oncall.")},
+		{SlackWorkspaceID: strPtr("T1"), SlackWorkspaceName: strPtr("Acme"), Status: strPtr("active")},
+		{SlackWorkspaceID: strPtr("T2"), SlackWorkspaceName: strPtr("Acme EU"), Status: strPtr("name_conflict"), Error: strPtr("This Slack handle is already taken. A Slack user group already uses @payments-oncall.")},
 		{SlackWorkspaceID: strPtr("T3"), Status: strPtr("no_slack_users")},
-		{SlackWorkspaceID: strPtr("T4"), Status: strPtr("pending")},
-		{SlackWorkspaceID: strPtr("T5"), Status: strPtr("active"), UnconnectedUsers: []onCallSlackUser{
+		{SlackWorkspaceID: strPtr("T4"), SlackWorkspaceName: strPtr("Acme US"), Status: strPtr("pending")},
+		{SlackWorkspaceID: strPtr("T5"), SlackWorkspaceName: strPtr("Acme"), Status: strPtr("active"), UnconnectedUsers: []onCallSlackUser{
 			{FirstName: strPtr("Petr"), LastName: strPtr("Heinz"), Email: strPtr("petr@example.com")},
 			{FirstName: strPtr("Kyle"), LastName: strPtr(""), Email: strPtr("kyle@example.com")},
 		}},
@@ -926,10 +927,11 @@ func TestSlackGroupWarnings(t *testing.T) {
 	}
 
 	want := []string{
-		"Slack user group @payments-oncall doesn't work in workspace T2 | A Slack user group already uses @payments-oncall.",
-		"Slack user group @payments-oncall doesn't work in workspace T3 | Its status is no_slack_users.",
-		"Slack user group @payments-oncall is still being set up in workspace T4 | Better Stack hadn't finished setting it up when the apply stopped waiting. The next refresh shows how Slack took it in slack_groups.",
-		"Some responders won't be tagged by @payments-oncall in Slack workspace T5 | They can connect by using the same e-mail in Slack and Better Stack, or in their account settings. Not connected yet: Petr Heinz (petr@example.com), Kyle (kyle@example.com).",
+		"Slack user group @payments-oncall doesn't work in the Acme EU Slack workspace | This Slack handle is already taken. A Slack user group already uses @payments-oncall.",
+		// An API that doesn't name the workspace, nor word the status.
+		"Slack user group @payments-oncall doesn't work in Slack workspace T3 | Its status is no_slack_users.",
+		"Slack user group @payments-oncall is still being set up in the Acme US Slack workspace | Better Stack hadn't finished setting it up when the apply stopped waiting. The next refresh shows how Slack took it in slack_groups.",
+		"Some responders won't be tagged by @payments-oncall in the Acme Slack workspace | They can connect by using the same e-mail in Slack and Better Stack, or in their account settings. Not connected yet: Petr Heinz (petr@example.com), Kyle (kyle@example.com).",
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("warnings:\n got %q\nwant %q", got, want)

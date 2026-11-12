@@ -91,6 +91,7 @@ Read-Only:
 
 - `error` (String)
 - `slack_workspace_id` (String)
+- `slack_workspace_name` (String)
 - `status` (String)
 - `unconnected_users` (List of Object) (see [below for nested schema](#nestedobjatt--slack_groups--unconnected_users))
 
