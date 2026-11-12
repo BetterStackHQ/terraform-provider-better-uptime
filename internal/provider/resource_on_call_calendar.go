@@ -639,12 +639,18 @@ var (
 func onCallCalendarApplied(ctx context.Context, d *schema.ResourceData, meta interface{}, cal *onCallCalendar, rel onCallRelationships, inc []onCallIncluded, rot *onCallRotation) diag.Diagnostics {
 	var warnings diag.Diagnostics
 	if handle := stringValue(cal.SlackGroupHandle); handle != "" {
-		groups, derr := awaitSlackGroups(ctx, meta, d.Id())
-		if derr != nil {
-			return derr
+		if groups, derr := awaitSlackGroups(ctx, meta, d.Id()); derr != nil {
+			// The calendar is saved: an error would taint it, and the next apply replace it along with its Slack groups.
+			warnings = append(warnings, diag.Diagnostic{
+				Severity:      diag.Warning,
+				Summary:       fmt.Sprintf("Couldn't check how Slack took @%s", handle),
+				Detail:        fmt.Sprintf("Reading the calendar failed: %s. The next refresh shows how Slack took it in slack_groups.", derr[0].Summary),
+				AttributePath: cty.GetAttrPath("slack_groups"),
+			})
+		} else {
+			cal.SlackGroups = groups
 		}
-		cal.SlackGroups = groups
-		warnings = slackGroupWarnings(handle, groups)
+		warnings = append(warnings, slackGroupWarnings(handle, cal.SlackGroups)...)
 	}
 	return append(onCallCalendarCopyAttrs(d, cal, rel, inc, rot), warnings...)
 }
@@ -711,7 +717,7 @@ func slackGroupWarnings(handle string, groups *[]onCallSlackGroup) diag.Diagnost
 			warnings = append(warnings, diag.Diagnostic{
 				Severity:      diag.Warning,
 				Summary:       fmt.Sprintf("Slack user group @%s is still being set up in workspace %s", handle, workspace),
-				Detail:        fmt.Sprintf("Better Stack hadn't finished setting it up after %s. The next refresh shows how Slack took it in slack_groups.", slackGroupsSetupWait),
+				Detail:        "Better Stack hadn't finished setting it up when the apply stopped waiting. The next refresh shows how Slack took it in slack_groups.",
 				AttributePath: path,
 			})
 		default:

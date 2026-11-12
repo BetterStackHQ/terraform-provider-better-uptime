@@ -772,7 +772,7 @@ func TestResourceOnCallCalendarSlackGroupsRead(t *testing.T) {
 }
 
 // A calendar whose Slack user groups are set up in the background: its GET answers pending for the first pendingReads
-// reads after the create, then settled.
+// reads after the create, then settled. A negative pendingReads fails the first read instead.
 func newSlackGroupsServer(t *testing.T, pendingReads int, settled string) (*httptest.Server, *int32) {
 	var reads int32
 	calendar := func(groups string) string {
@@ -789,7 +789,11 @@ func newSlackGroupsServer(t *testing.T, pendingReads int, settled string) (*http
 			w.WriteHeader(http.StatusCreated)
 			_, _ = w.Write([]byte(calendar(pending)))
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/on-calls/123":
-			if int(atomic.AddInt32(&reads, 1)) <= pendingReads {
+			read := int(atomic.AddInt32(&reads, 1))
+			if pendingReads < 0 && read == 1 {
+				w.WriteHeader(http.StatusUnprocessableEntity)
+				_, _ = w.Write([]byte(`{"errors":"Try again"}`))
+			} else if read <= pendingReads {
 				_, _ = w.Write([]byte(calendar(pending)))
 			} else {
 				_, _ = w.Write([]byte(calendar(settled)))
@@ -879,6 +883,28 @@ func TestResourceOnCallCalendarStopsAwaitingSlackGroups(t *testing.T) {
 	})
 }
 
+func TestResourceOnCallCalendarKeepsTheCalendarWhenItsSlackGroupsCantBeRead(t *testing.T) {
+	shortenSlackGroupsSetup(t, time.Minute)
+	server, _ := newSlackGroupsServer(t, -1, `[{"slack_workspace_id":"T1","status":"active","error":null}]`)
+	defer server.Close()
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Tainted, it would plan a replacement and fail the step's empty-plan check.
+			{
+				Config: slackGroupsConfig,
+				Check:  resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "id", "123"),
+			},
+		},
+	})
+}
+
 func TestSlackGroupWarnings(t *testing.T) {
 	groups := []onCallSlackGroup{
 		{SlackWorkspaceID: strPtr("T1"), Status: strPtr("active")},
@@ -902,7 +928,7 @@ func TestSlackGroupWarnings(t *testing.T) {
 	want := []string{
 		"Slack user group @payments-oncall doesn't work in workspace T2 | A Slack user group already uses @payments-oncall.",
 		"Slack user group @payments-oncall doesn't work in workspace T3 | Its status is no_slack_users.",
-		"Slack user group @payments-oncall is still being set up in workspace T4 | Better Stack hadn't finished setting it up after 5m0s. The next refresh shows how Slack took it in slack_groups.",
+		"Slack user group @payments-oncall is still being set up in workspace T4 | Better Stack hadn't finished setting it up when the apply stopped waiting. The next refresh shows how Slack took it in slack_groups.",
 		"Some responders won't be tagged by @payments-oncall in Slack workspace T5 | They can connect by using the same e-mail in Slack and Better Stack, or in their account settings. Not connected yet: Petr Heinz (petr@example.com), Kyle (kyle@example.com).",
 	}
 	if !reflect.DeepEqual(got, want) {
