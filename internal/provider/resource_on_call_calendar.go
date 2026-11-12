@@ -50,7 +50,7 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 		Computed:    true,
 	},
 	"slack_groups": {
-		Description: "How each connected Slack workspace took the handle. Groups are set up in the background after a change, so they read `pending` until it answers, usually within seconds.",
+		Description: "How each connected Slack workspace took the handle. Better Stack sets the groups up in the background after a change: an apply that changes the calendar waits for that (up to 5 minutes), then warns about any workspace where the group doesn't work and about responders it can't tag.",
 		Type:        schema.TypeList,
 		Computed:    true,
 		Elem: &schema.Resource{
@@ -61,14 +61,43 @@ var onCallCalendarSchema = map[string]*schema.Schema{
 					Computed:    true,
 				},
 				"status": {
-					Description: "`pending`, `active`, or `failed`, with Slack's answer in `error`.",
+					Description: "`active` once the group tags whoever is on call, `pending` while it is set up. `reinstall_required` when the workspace was connected before Better Stack could manage user groups, and any other status when Slack refused the group, with the reason in `error`.",
 					Type:        schema.TypeString,
 					Computed:    true,
 				},
 				"error": {
-					Description: "Why the group couldn't be set up, when `status` is `failed`.",
+					Description: "Why the group doesn't work in this workspace, and what to do about it.",
 					Type:        schema.TypeString,
 					Computed:    true,
+				},
+				"unconnected_users": {
+					Description: "Responders the group can't tag because they haven't connected Slack in this workspace. They can connect by using the same e-mail in Slack and Better Stack, or in their account settings.",
+					Type:        schema.TypeList,
+					Computed:    true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"id": {
+								Description: "ID of the responder.",
+								Type:        schema.TypeString,
+								Computed:    true,
+							},
+							"first_name": {
+								Description: "First name of the responder.",
+								Type:        schema.TypeString,
+								Computed:    true,
+							},
+							"last_name": {
+								Description: "Last name of the responder.",
+								Type:        schema.TypeString,
+								Computed:    true,
+							},
+							"email": {
+								Description: "E-mail of the responder.",
+								Type:        schema.TypeString,
+								Computed:    true,
+							},
+						},
+					},
 				},
 			},
 		},
@@ -218,10 +247,12 @@ func newOnCallCalendarResource() *schema.Resource {
 		},
 		CustomizeDiff: customdiff.All(
 			validateTeamNameNotChanged,
-			// A changed handle or mode is set up again in the background, so how each workspace takes it is only known after the apply.
 			planSlackGroupHandleCleared,
+			// A changed handle or mode is set up again in the background, so how each workspace takes it is only known after
+			// the apply. Not on_call_rotation, which reads as changed on every plan here; who the group can't tag still
+			// follows the rotation, set by the apply.
 			customdiff.ComputedIf("slack_groups", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
-				return d.HasChange("slack_group_handle") || d.HasChange("use_existing_slack_group")
+				return d.HasChanges("slack_group_handle", "use_existing_slack_group")
 			}),
 		),
 		Schema:      onCallCalendarSchema,
@@ -258,9 +289,18 @@ type onCallCalendar struct {
 }
 
 type onCallSlackGroup struct {
-	SlackWorkspaceID *string `mapstructure:"slack_workspace_id,omitempty" json:"slack_workspace_id,omitempty"`
-	Status           *string `mapstructure:"status,omitempty" json:"status,omitempty"`
-	Error            *string `mapstructure:"error,omitempty" json:"error,omitempty"`
+	SlackWorkspaceID *string `json:"slack_workspace_id,omitempty"`
+	Status           *string `json:"status,omitempty"`
+	Error            *string `json:"error,omitempty"`
+	// Only on the calendar's own GET, not in a write's response.
+	UnconnectedUsers []onCallSlackUser `json:"unconnected_users,omitempty"`
+}
+
+type onCallSlackUser struct {
+	ID        *string `json:"id,omitempty"`
+	FirstName *string `json:"first_name,omitempty"`
+	LastName  *string `json:"last_name,omitempty"`
+	Email     *string `json:"email,omitempty"`
 }
 
 type onCallWorkingHour struct {
@@ -340,10 +380,20 @@ func onCallCalendarCopyAttrs(d *schema.ResourceData, cal *onCallCalendar, rel on
 	slackGroups := []map[string]interface{}{}
 	if cal.SlackGroups != nil {
 		for _, group := range *cal.SlackGroups {
+			unconnected := []map[string]interface{}{}
+			for _, user := range group.UnconnectedUsers {
+				unconnected = append(unconnected, map[string]interface{}{
+					"id":         stringValue(user.ID),
+					"first_name": stringValue(user.FirstName),
+					"last_name":  stringValue(user.LastName),
+					"email":      stringValue(user.Email),
+				})
+			}
 			slackGroups = append(slackGroups, map[string]interface{}{
 				"slack_workspace_id": stringValue(group.SlackWorkspaceID),
 				"status":             stringValue(group.Status),
 				"error":              stringValue(group.Error),
+				"unconnected_users":  unconnected,
 			})
 		}
 	}
@@ -523,22 +573,21 @@ func resourceOnCallCalendarCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 	d.SetId(out.Data.ID)
 
+	var rotation *onCallRotation
 	if inRotations, ok := d.GetOk("on_call_rotation"); ok && len(inRotations.([]interface{})) > 0 {
 		var outRotation onCallRotation
 		if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), onCallRotationRequest(inRotations.([]interface{})[0]), &outRotation); err != nil {
 			return err
 		}
-		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
+		rotation = &outRotation
+	} else {
+		var derr diag.Diagnostics
+		if rotation, derr = readOnCallRotation(ctx, meta, d.Id()); derr != nil {
+			return derr
+		}
 	}
 
-	var outRotation onCallRotation
-	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &outRotation); err != nil {
-		return err
-	} else if !ok {
-		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
-	}
-
-	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
+	return onCallCalendarApplied(ctx, d, meta, &out.Data.Attributes, out.Data.Relationships, out.Included, rotation)
 }
 
 func resourceOnCallCalendarRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -561,14 +610,142 @@ func resourceOnCallCalendarRead(ctx context.Context, d *schema.ResourceData, met
 		return derr
 	}
 
-	var outRotation onCallRotation
-	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &outRotation); err != nil {
-		return err
-	} else if !ok {
-		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
+	rotation, derr := readOnCallRotation(ctx, meta, d.Id())
+	if derr != nil {
+		return derr
 	}
 
-	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
+	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, rotation)
+}
+
+// Nil when the calendar has no rotation.
+func readOnCallRotation(ctx context.Context, meta interface{}, id string) (*onCallRotation, diag.Diagnostics) {
+	var rotation onCallRotation
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(id)), &rotation); err != nil || !ok {
+		return nil, err
+	}
+	return &rotation, nil
+}
+
+// How long an apply waits for Better Stack to set up the calendar's Slack user groups, which usually takes seconds, and
+// how often it checks. Variables so tests can shorten them.
+var (
+	slackGroupsSetupWait         = 5 * time.Minute
+	slackGroupsSetupPollInterval = 3 * time.Second
+)
+
+// Copies a written calendar into the state once its Slack user groups are set up, and warns about what keeps them from
+// tagging whoever is on call, as the editor in Better Stack does. Only an apply waits and warns: a refresh only reads.
+func onCallCalendarApplied(ctx context.Context, d *schema.ResourceData, meta interface{}, cal *onCallCalendar, rel onCallRelationships, inc []onCallIncluded, rot *onCallRotation) diag.Diagnostics {
+	var warnings diag.Diagnostics
+	if handle := stringValue(cal.SlackGroupHandle); handle != "" {
+		groups, derr := awaitSlackGroups(ctx, meta, d.Id())
+		if derr != nil {
+			return derr
+		}
+		cal.SlackGroups = groups
+		warnings = slackGroupWarnings(handle, groups)
+	}
+	return append(onCallCalendarCopyAttrs(d, cal, rel, inc, rot), warnings...)
+}
+
+// Reads the calendar until no workspace is pending, or slackGroupsSetupWait passes. The calendar's own GET, unlike a
+// write's response, also names the responders each group can't tag.
+func awaitSlackGroups(ctx context.Context, meta interface{}, id string) (*[]onCallSlackGroup, diag.Diagnostics) {
+	deadline := time.Now().Add(slackGroupsSetupWait)
+	for {
+		groups, derr := readSlackGroups(ctx, meta, id)
+		if derr != nil {
+			return nil, derr
+		}
+		if !slackGroupsPending(groups) || !time.Now().Add(slackGroupsSetupPollInterval).Before(deadline) {
+			return groups, nil
+		}
+		select {
+		case <-ctx.Done():
+			return groups, nil
+		case <-time.After(slackGroupsSetupPollInterval):
+		}
+	}
+}
+
+// The calendar's slack_groups as its own GET reports them, with the responders each group can't tag, which a list leaves out.
+func readSlackGroups(ctx context.Context, meta interface{}, id string) (*[]onCallSlackGroup, diag.Diagnostics) {
+	var out struct {
+		Data struct {
+			Attributes onCallCalendar `json:"attributes"`
+		} `json:"data"`
+	}
+	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s", url.PathEscape(id)), &out); err != nil {
+		return nil, err
+	} else if !ok {
+		return nil, diag.Errorf("on-call calendar %s was not found", id)
+	}
+	return out.Data.Attributes.SlackGroups, nil
+}
+
+func slackGroupsPending(groups *[]onCallSlackGroup) bool {
+	if groups == nil {
+		return false
+	}
+	for _, group := range *groups {
+		if stringValue(group.Status) == "pending" {
+			return true
+		}
+	}
+	return false
+}
+
+// A warning per workspace where the group doesn't tag whoever is on call, and per workspace naming who it leaves out.
+func slackGroupWarnings(handle string, groups *[]onCallSlackGroup) diag.Diagnostics {
+	if groups == nil {
+		return nil
+	}
+	var warnings diag.Diagnostics
+	path := cty.GetAttrPath("slack_groups")
+	for _, group := range *groups {
+		workspace := stringValue(group.SlackWorkspaceID)
+		switch status := stringValue(group.Status); status {
+		case "active":
+		case "pending":
+			warnings = append(warnings, diag.Diagnostic{
+				Severity:      diag.Warning,
+				Summary:       fmt.Sprintf("Slack user group @%s is still being set up in workspace %s", handle, workspace),
+				Detail:        fmt.Sprintf("Better Stack hadn't finished setting it up after %s. The next refresh shows how Slack took it in slack_groups.", slackGroupsSetupWait),
+				AttributePath: path,
+			})
+		default:
+			detail := stringValue(group.Error)
+			if detail == "" {
+				detail = fmt.Sprintf("Its status is %s.", status)
+			}
+			warnings = append(warnings, diag.Diagnostic{
+				Severity:      diag.Warning,
+				Summary:       fmt.Sprintf("Slack user group @%s doesn't work in workspace %s", handle, workspace),
+				Detail:        detail,
+				AttributePath: path,
+			})
+		}
+		if len(group.UnconnectedUsers) == 0 {
+			continue
+		}
+		names := make([]string, 0, len(group.UnconnectedUsers))
+		for _, user := range group.UnconnectedUsers {
+			name := strings.TrimSpace(stringValue(user.FirstName) + " " + stringValue(user.LastName))
+			names = append(names, fmt.Sprintf("%s (%s)", name, stringValue(user.Email)))
+		}
+		summary := fmt.Sprintf("A responder won't be tagged by @%s in Slack workspace %s", handle, workspace)
+		if len(names) > 1 {
+			summary = fmt.Sprintf("Some responders won't be tagged by @%s in Slack workspace %s", handle, workspace)
+		}
+		warnings = append(warnings, diag.Diagnostic{
+			Severity:      diag.Warning,
+			Summary:       summary,
+			Detail:        fmt.Sprintf("They can connect by using the same e-mail in Slack and Better Stack, or in their account settings. Not connected yet: %s.", strings.Join(names, ", ")),
+			AttributePath: path,
+		})
+	}
+	return warnings
 }
 
 func resourceOnCallCalendarUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -597,24 +774,21 @@ func resourceOnCallCalendarUpdate(ctx context.Context, d *schema.ResourceData, m
 		return err
 	}
 
-	if d.HasChange("on_call_rotation") {
-		if inRotations, ok := d.GetOk("on_call_rotation"); ok && len(inRotations.([]interface{})) > 0 {
-			var outRotation onCallRotation
-			if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), onCallRotationRequest(inRotations.([]interface{})[0]), &outRotation); err != nil {
-				return err
-			}
-			return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
+	var rotation *onCallRotation
+	if inRotations, ok := d.GetOk("on_call_rotation"); ok && len(inRotations.([]interface{})) > 0 && d.HasChange("on_call_rotation") {
+		var outRotation onCallRotation
+		if err := resourceCreate(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), onCallRotationRequest(inRotations.([]interface{})[0]), &outRotation); err != nil {
+			return err
+		}
+		rotation = &outRotation
+	} else {
+		var derr diag.Diagnostics
+		if rotation, derr = readOnCallRotation(ctx, meta, d.Id()); derr != nil {
+			return derr
 		}
 	}
 
-	var outRotation onCallRotation
-	if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(d.Id())), &outRotation); err != nil {
-		return err
-	} else if !ok {
-		return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, nil)
-	}
-
-	return onCallCalendarCopyAttrs(d, &out.Data.Attributes, out.Data.Relationships, out.Included, &outRotation)
+	return onCallCalendarApplied(ctx, d, meta, &out.Data.Attributes, out.Data.Relationships, out.Included, rotation)
 }
 
 func resourceOnCallCalendarDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

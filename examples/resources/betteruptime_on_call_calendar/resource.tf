@@ -41,3 +41,8 @@ resource "betteruptime_on_call_calendar" "this" {
     }
   }
 }
+
+# How each connected Slack workspace took the handle, and who its group can't tag yet
+output "betteruptime_on_call_calendar_slack_groups" {
+  value = betteruptime_on_call_calendar.this.slack_groups
+}

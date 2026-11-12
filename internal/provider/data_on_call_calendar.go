@@ -143,6 +143,13 @@ func onCallCalendarLookup(ctx context.Context, d *schema.ResourceData, meta inte
 					return diag.Errorf("There are multiple on-call calendars with the same name: %s", calendarName)
 				}
 				d.SetId(e.ID)
+				if stringValue(e.Attributes.SlackGroupHandle) != "" {
+					groups, derr := readSlackGroups(ctx, meta, e.ID)
+					if derr != nil {
+						return derr
+					}
+					e.Attributes.SlackGroups = groups
+				}
 
 				var outRotation onCallRotation
 				if err, ok := resourceRead(ctx, meta, fmt.Sprintf("/api/v2/on-calls/%s/rotation", url.PathEscape(e.ID)), &outRotation); err != nil {
