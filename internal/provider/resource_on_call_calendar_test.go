@@ -3,11 +3,18 @@ package provider
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
+	"reflect"
 	"regexp"
+	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccResourceOnCallCalendarWithRotation(t *testing.T) {
@@ -625,3 +632,310 @@ func TestAccResourceOnCallCalendarLegacyRotationResponse(t *testing.T) {
 		},
 	})
 }
+
+func TestResourceOnCallCalendarSlackGroupHandle(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/on-calls", "123")
+	server.ExpectRequest("GET", "/api/v2/on-calls/123/rotation", "", http.StatusNotFound, `{"errors":"Not found"}`)
+	defer server.Close()
+
+	config := func(slackAttributes string) string {
+		return fmt.Sprintf(`
+		provider "betteruptime" {
+			api_token = "foo"
+		}
+
+		resource "betteruptime_on_call_calendar" "test" {
+			name = "Payments"
+			%s
+		}
+		`, slackAttributes)
+	}
+	lastBody := func(method string) string {
+		server.mu.Lock()
+		defer server.mu.Unlock()
+		for i := len(server.CalledRequests) - 1; i >= 0; i-- {
+			if request := server.CalledRequests[i]; request.Method == method && strings.HasPrefix(request.URL, "/api/v2/on-calls") && !strings.HasSuffix(request.URL, "/rotation") {
+				return request.Body
+			}
+		}
+		return ""
+	}
+	sent := func(method, fragment string, want bool) resource.TestCheckFunc {
+		return func(*terraform.State) error {
+			if body := lastBody(method); strings.Contains(body, fragment) != want {
+				return fmt.Errorf("expected the last %s body %q to contain %q: %v", method, body, fragment, want)
+			}
+			return nil
+		}
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Step 1 - create with a handle; the mode is left to the API
+			{
+				Config: config(`slack_group_handle = "payments-oncall"`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_group_handle", "payments-oncall"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "use_existing_slack_group", "false"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.#", "0"),
+					sent("POST", `"slack_group_handle":"payments-oncall"`, true),
+					sent("POST", `use_existing_slack_group`, false),
+				),
+			},
+			// Step 2 - switch to a group the customer already has in Slack
+			{
+				Config: config(`
+					slack_group_handle       = "ops.rotation"
+					use_existing_slack_group = true
+				`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_group_handle", "ops.rotation"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "use_existing_slack_group", "true"),
+					sent("PATCH", `"slack_group_handle":"ops.rotation"`, true),
+					sent("PATCH", `"use_existing_slack_group":true`, true),
+				),
+			},
+			// Step 3 - leaving both out keeps what Better Stack has, so a calendar tagged in the dashboard plans no change
+			{
+				Config:   config(""),
+				PlanOnly: true,
+			},
+			// Step 4 - an empty handle stops tagging
+			{
+				Config: config(`slack_group_handle = ""`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_group_handle", ""),
+					sent("PATCH", `"slack_group_handle":""`, true),
+				),
+			},
+		},
+	})
+}
+
+func TestResourceOnCallCalendarSlackGroupsRead(t *testing.T) {
+	server := newResourceServer(t, "/api/v2/on-calls", "123")
+	server.ExpectRequest("GET", "/api/v2/on-calls/123", "", http.StatusOK,
+		`{"data":{"id":"123","attributes":{"name":"Payments","default_calendar":false,"slack_group_handle":"payments-oncall","use_existing_slack_group":false,`+
+			`"slack_groups":[{"slack_workspace_id":"T1","status":"active","error":null},{"slack_workspace_id":"T2","status":"failed","error":"[bad_handle]"}]}}}`)
+	server.ExpectRequest("GET", "/api/v2/on-calls/123/rotation", "", http.StatusNotFound, `{"errors":"Not found"}`)
+	defer server.Close()
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_on_call_calendar" "test" {
+					name               = "Payments"
+					slack_group_handle = "payments-oncall"
+				}
+				`,
+			},
+			// Step 2 - the next refresh reads how each workspace took the handle
+			{
+				Config: `
+				provider "betteruptime" {
+					api_token = "foo"
+				}
+
+				resource "betteruptime_on_call_calendar" "test" {
+					name               = "Payments"
+					slack_group_handle = "payments-oncall"
+				}
+				`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.#", "2"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.slack_workspace_id", "T1"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.status", "active"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.error", ""),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.1.status", "failed"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.1.error", "[bad_handle]"),
+				),
+			},
+		},
+	})
+}
+
+// A calendar whose Slack user groups are set up in the background: its GET answers pending for the first pendingReads
+// reads after the create, then settled. A negative pendingReads fails the first read instead.
+func newSlackGroupsServer(t *testing.T, pendingReads int, settled string) (*httptest.Server, *int32) {
+	var reads int32
+	calendar := func(groups string) string {
+		return `{"data":{"id":"123","attributes":{"name":"Payments","default_calendar":false,"slack_group_handle":"payments-oncall",` +
+			`"use_existing_slack_group":false,"slack_groups":` + groups + `}}}`
+	}
+	pending := `[{"slack_workspace_id":"T1","status":"pending","error":null}]`
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/v2/on-calls/123/rotation":
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = w.Write([]byte(`{"errors":"Not found"}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v2/on-calls":
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(calendar(pending)))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v2/on-calls/123":
+			read := int(atomic.AddInt32(&reads, 1))
+			if pendingReads < 0 && read == 1 {
+				w.WriteHeader(http.StatusUnprocessableEntity)
+				_, _ = w.Write([]byte(`{"errors":"Try again"}`))
+			} else if read <= pendingReads {
+				_, _ = w.Write([]byte(calendar(pending)))
+			} else {
+				_, _ = w.Write([]byte(calendar(settled)))
+			}
+		case r.Method == http.MethodDelete && r.URL.Path == "/api/v2/on-calls/123":
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			t.Errorf("unexpected %s %s", r.Method, r.URL.Path)
+		}
+	}))
+	return server, &reads
+}
+
+func shortenSlackGroupsSetup(t *testing.T, wait time.Duration) {
+	savedWait, savedInterval := slackGroupsSetupWait, slackGroupsSetupPollInterval
+	slackGroupsSetupWait, slackGroupsSetupPollInterval = wait, 10*time.Millisecond
+	t.Cleanup(func() { slackGroupsSetupWait, slackGroupsSetupPollInterval = savedWait, savedInterval })
+}
+
+const slackGroupsConfig = `
+provider "betteruptime" {
+	api_token = "foo"
+}
+
+resource "betteruptime_on_call_calendar" "test" {
+	name               = "Payments"
+	slack_group_handle = "payments-oncall"
+}
+`
+
+func TestResourceOnCallCalendarAwaitsSlackGroups(t *testing.T) {
+	shortenSlackGroupsSetup(t, time.Minute)
+	server, reads := newSlackGroupsServer(t, 2,
+		`[{"slack_workspace_id":"T1","slack_workspace_name":"Acme","status":"active","error":null,`+
+			`"unconnected_users":[{"id":"7","first_name":"Petr","last_name":"Heinz","email":"petr@example.com"}]},`+
+			`{"slack_workspace_id":"T2","status":"reinstall_required","error":"Re-install the Slack integration to tag on-call schedules."}]`)
+	defer server.Close()
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: slackGroupsConfig,
+				Check: resource.ComposeTestCheckFunc(
+					// The apply's own reads, before the post-apply refresh reads it again.
+					func(*terraform.State) error {
+						if got := atomic.LoadInt32(reads); got < 3 {
+							return fmt.Errorf("expected the apply to read the calendar until nothing was pending, read it %d times", got)
+						}
+						return nil
+					},
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.#", "2"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.status", "active"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.slack_workspace_name", "Acme"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.unconnected_users.#", "1"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.unconnected_users.0.email", "petr@example.com"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.1.status", "reinstall_required"),
+					resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.1.error", "Re-install the Slack integration to tag on-call schedules."),
+				),
+			},
+		},
+	})
+}
+
+func TestResourceOnCallCalendarStopsAwaitingSlackGroups(t *testing.T) {
+	shortenSlackGroupsSetup(t, 50*time.Millisecond)
+	server, _ := newSlackGroupsServer(t, 1000, `[]`)
+	defer server.Close()
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: slackGroupsConfig,
+				Check:  resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "slack_groups.0.status", "pending"),
+			},
+		},
+	})
+}
+
+func TestResourceOnCallCalendarKeepsTheCalendarWhenItsSlackGroupsCantBeRead(t *testing.T) {
+	shortenSlackGroupsSetup(t, time.Minute)
+	server, _ := newSlackGroupsServer(t, -1, `[{"slack_workspace_id":"T1","status":"active","error":null}]`)
+	defer server.Close()
+
+	resource.UnitTest(t, resource.TestCase{
+		IsUnitTest: true,
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"betteruptime": func() (*schema.Provider, error) {
+				return New(WithURL(server.URL)), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			// Tainted, it would plan a replacement and fail the step's empty-plan check.
+			{
+				Config: slackGroupsConfig,
+				Check:  resource.TestCheckResourceAttr("betteruptime_on_call_calendar.test", "id", "123"),
+			},
+		},
+	})
+}
+
+func TestSlackGroupWarnings(t *testing.T) {
+	groups := []onCallSlackGroup{
+		{SlackWorkspaceID: strPtr("T1"), SlackWorkspaceName: strPtr("Acme"), Status: strPtr("active")},
+		{SlackWorkspaceID: strPtr("T2"), SlackWorkspaceName: strPtr("Acme EU"), Status: strPtr("name_conflict"), Error: strPtr("This Slack handle is already taken. A Slack user group already uses @payments-oncall.")},
+		{SlackWorkspaceID: strPtr("T3"), Status: strPtr("no_slack_users")},
+		{SlackWorkspaceID: strPtr("T4"), SlackWorkspaceName: strPtr("Acme US"), Status: strPtr("pending")},
+		{SlackWorkspaceID: strPtr("T5"), SlackWorkspaceName: strPtr("Acme"), Status: strPtr("active"), UnconnectedUsers: []onCallSlackUser{
+			{FirstName: strPtr("Petr"), LastName: strPtr("Heinz"), Email: strPtr("petr@example.com")},
+			{FirstName: strPtr("Kyle"), LastName: strPtr(""), Email: strPtr("kyle@example.com")},
+		}},
+	}
+
+	got := []string{}
+	for _, warning := range slackGroupWarnings("payments-oncall", &groups) {
+		if warning.Severity != diag.Warning {
+			t.Errorf("expected a warning, got %v", warning.Severity)
+		}
+		got = append(got, warning.Summary+" | "+warning.Detail)
+	}
+
+	want := []string{
+		"Slack user group @payments-oncall doesn't work in the Acme EU Slack workspace | This Slack handle is already taken. A Slack user group already uses @payments-oncall.",
+		// An API that doesn't name the workspace, nor word the status.
+		"Slack user group @payments-oncall doesn't work in Slack workspace T3 | Its status is no_slack_users.",
+		"Slack user group @payments-oncall is still being set up in the Acme US Slack workspace | Better Stack hadn't finished setting it up when the apply stopped waiting. The next refresh shows how Slack took it in slack_groups.",
+		"Some responders won't be tagged by @payments-oncall in the Acme Slack workspace | They can connect by using the same e-mail in Slack and Better Stack, or in their account settings. Not connected yet: Petr Heinz (petr@example.com), Kyle (kyle@example.com).",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("warnings:\n got %q\nwant %q", got, want)
+	}
+}
+
+func strPtr(s string) *string { return &s }

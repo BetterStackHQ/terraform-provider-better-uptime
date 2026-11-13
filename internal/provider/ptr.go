@@ -81,3 +81,11 @@ func dropUnknownKeys(in *[]map[string]interface{}, s map[string]*schema.Schema) 
 	}
 	return &out
 }
+
+// stringValue reads an optional API string, a missing one as empty.
+func stringValue(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
